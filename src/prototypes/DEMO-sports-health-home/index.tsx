@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Activity, CalendarDays, CheckCircle2, Clock3, Dumbbell, Flame, Footprints, Moon, Play, Sparkles } from 'lucide-react'
 import { DEMOBadge, DEMOButton, DEMOCard, DEMOEmptyState, DEMOErrorState, DEMOLoadingState, DEMOProgress, DEMOSectionHeader, DEMOThemeFrame, type DEMOPageState } from '@/common/DEMOComponents'
+import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 const sessions = [
   { title: '晨间活力唤醒', type: '瑜伽 · 初级', duration: '12 min', color: '#ffce00', icon: Activity },
@@ -8,8 +9,8 @@ const sessions = [
   { title: '睡前舒缓拉伸', type: '拉伸 · 全等级', duration: '10 min', color: '#3b197f', icon: Moon },
 ]
 
-export default function DEMOSportsHealthHome() {
-  const [state, setState] = useState<DEMOPageState>('normal')
+export default function DEMOSportsHealthHome(props: PrototypePreviewProps<DEMOPageState>) {
+  const [state, setState] = usePrototypeState<DEMOPageState>('normal', props)
   const [tab, setTab] = useState<'today' | 'plans' | 'progress'>('today')
   const [started, setStarted] = useState<string | null>(null)
   const [completed, setCompleted] = useState(2)

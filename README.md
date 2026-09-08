@@ -48,6 +48,7 @@ src/prototypes/style.css   # 多个原型共用的内容层样式
 - **主题切换**: 支持白天/黑夜模式切换，默认黑夜模式，设置自动保存到 localStorage
 - **自定义项目名称**: 点击左上角项目名称即可编辑，支持 Enter 确认、Escape 取消
 - **设备预览切换**: 支持移动端/PC端预览模式切换
+- **页面状态切换**: 通过工具层状态面板切换正常、加载、空数据、异常等页面状态
 - **快捷键配置**: 可自定义快捷键，支持复制到 Figma、查看文档、批注选择元素等操作
 - **复制到 Figma**: 一键将当前页面复制到 Figma（HTML to Design）
 - **主题管理**: 动态读取 `src/themes` 中的设计系统主题，支持预览主题组件和查看设计规范
@@ -91,6 +92,8 @@ src/prototypes/style.css   # 多个原型共用的内容层样式
 1. 创建 `src/prototypes/<name>/index.tsx`，并导出默认组件。
 2. 在 `tools/config/pages.ts` 中增加目录名、路径、中文名称和分类映射。
 3. 如果页面需要 PRD，在同一目录增加 `spec.md`。
+
+页面状态、用户状态和路由的详细工具规则见 [`rules/prototype-state-and-route-guide.md`](./rules/prototype-state-and-route-guide.md)。
 
 只有实际存在 `index.tsx` 的目录才会被注册为路由；空目录或已删除目录不会出现在侧边栏。
 

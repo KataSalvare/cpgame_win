@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Activity, ArrowUpRight, Bell, Check, ChevronRight, CircleHelp, FolderKanban, LayoutDashboard, Plus, Search, Settings, Users, X } from 'lucide-react'
 import { DEMOButton, DEMOCard, DEMOEmptyState, DEMOErrorState, DEMOStat, DEMOLoadingState, DEMOSectionHeader, DEMOThemeFrame, type DEMOPageState } from '@/common/DEMOComponents'
+import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 const projects = [{ name: 'Atlas redesign', type: '产品设计', progress: 82, members: 8, color: '#5e6ad2' }, { name: 'Mobile onboarding', type: '增长实验', progress: 54, members: 5, color: '#27a644' }, { name: 'Q3 research', type: '用户研究', progress: 31, members: 3, color: '#828fff' }]
 
-export default function DEMOAdminSaasHome() {
-  const [state, setState] = useState<DEMOPageState>('normal')
+export default function DEMOAdminSaasHome(props: PrototypePreviewProps<DEMOPageState>) {
+  const [state, setState] = usePrototypeState<DEMOPageState>('normal', props)
   const [active, setActive] = useState('概览')
   const [showNew, setShowNew] = useState(false)
   const [created, setCreated] = useState(false)

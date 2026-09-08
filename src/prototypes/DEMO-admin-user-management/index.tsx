@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Check, ChevronDown, MoreHorizontal, Search, ShieldCheck, UserPlus, Users, X } from 'lucide-react'
 import { DEMOBadge, DEMOButton, DEMOCard, DEMOEmptyState, DEMOErrorState, DEMOLoadingState, DEMOThemeFrame, type DEMOPageState } from '@/common/DEMOComponents'
+import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 const initialUsers = [{ name: 'Mia Liu', email: 'mia@northfield.co', role: '管理员', status: '活跃', last: '刚刚', initials: 'ML' }, { name: 'Lena Park', email: 'lena@northfield.co', role: '编辑者', status: '活跃', last: '12 分钟前', initials: 'LP' }, { name: 'Jon Bell', email: 'jon@northfield.co', role: '查看者', status: '待激活', last: '昨天', initials: 'JB' }, { name: 'Iris Chen', email: 'iris@northfield.co', role: '编辑者', status: '已暂停', last: '3 天前', initials: 'IC' }]
 
-export default function DEMOAdminUserManagement() {
-  const [state, setState] = useState<DEMOPageState>('normal')
+export default function DEMOAdminUserManagement(props: PrototypePreviewProps<DEMOPageState>) {
+  const [state, setState] = usePrototypeState<DEMOPageState>('normal', props)
   const [query, setQuery] = useState('')
   const [role, setRole] = useState('全部角色')
   const [selected, setSelected] = useState<(typeof initialUsers)[number] | null>(null)

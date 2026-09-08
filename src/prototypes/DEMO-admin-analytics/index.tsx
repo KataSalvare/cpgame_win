@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { ArrowDownRight, ArrowUpRight, CalendarDays, ChevronDown, Download, Filter, LineChart, MoreHorizontal, TrendingUp } from 'lucide-react'
 import { DEMOBadge, DEMOButton, DEMOCard, DEMOEmptyState, DEMOErrorState, DEMOLoadingState, DEMOSectionHeader, DEMOStat, DEMOThemeFrame, type DEMOPageState } from '@/common/DEMOComponents'
+import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 const bars = [42, 58, 48, 66, 71, 54, 79, 68, 84, 73, 92, 88, 96]
 
-export default function DEMOAdminAnalytics() {
-  const [state, setState] = useState<DEMOPageState>('normal')
+export default function DEMOAdminAnalytics(props: PrototypePreviewProps<DEMOPageState>) {
+  const [state, setState] = usePrototypeState<DEMOPageState>('normal', props)
   const [range, setRange] = useState('过去 30 天')
   const [metric, setMetric] = useState<'revenue' | 'users'>('revenue')
   return <DEMOThemeFrame theme="stripe">

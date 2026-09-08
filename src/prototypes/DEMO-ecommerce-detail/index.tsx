@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { ArrowLeft, Check, ChevronDown, Heart, Minus, Plus, ShieldCheck, ShoppingBag, Star, Truck } from 'lucide-react'
 import { DEMOBadge, DEMOButton, DEMOCard, DEMOErrorState, DEMOEmptyState, DEMOLoadingState, DEMOThemeFrame, type DEMOPageState } from '@/common/DEMOComponents'
+import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 const sizes = ['36', '37', '38', '39', '40', '41']
 
-export default function DEMOEcommerceDetail() {
-  const [state, setState] = useState<DEMOPageState>('normal')
+export default function DEMOEcommerceDetail(props: PrototypePreviewProps<DEMOPageState>) {
+  const [state, setState] = usePrototypeState<DEMOPageState>('normal', props)
   const [size, setSize] = useState('38')
   const [quantity, setQuantity] = useState(1)
   const [favorite, setFavorite] = useState(false)

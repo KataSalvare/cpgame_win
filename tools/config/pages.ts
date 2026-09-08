@@ -1,13 +1,20 @@
 import type React from 'react'
+import type { PrototypePreviewProps } from '@/prototypes/previewState'
 
 export type PageCategory = 'frontend' | 'admin'
+
+export interface PageStateOption {
+  id: string
+  label: string
+}
 
 export interface PageItem {
   path: string
   label: string
-  component: React.ComponentType
+  component: React.ComponentType<PrototypePreviewProps>
   category: PageCategory
   dirName: string
+  states: readonly PageStateOption[]
 }
 
 const allModules = import.meta.glob('../../src/prototypes/*/index.tsx', { eager: true })
@@ -27,20 +34,27 @@ Object.entries(allModules).forEach(([path, mod]) => {
   }
 })
 
-const frontendPageConfig: Record<string, { path: string; label: string }> = {
-  'DEMO-ecommerce-detail': { path: '/demo/ecommerce-detail', label: 'DEMO 电商详情页' },
-  'DEMO-sports-health-home': { path: '/demo/sports-health', label: 'DEMO 运动健康首页' },
-  'DEMO-blockchain-wallet': { path: '/demo/blockchain-wallet', label: 'DEMO 区块链钱包' },
+const demoPageStates: readonly PageStateOption[] = [
+  { id: 'normal', label: '正常' },
+  { id: 'loading', label: '加载中' },
+  { id: 'empty', label: '空数据' },
+  { id: 'error', label: '异常' },
+]
+
+const frontendPageConfig: Record<string, { path: string; label: string; states: readonly PageStateOption[] }> = {
+  'DEMO-ecommerce-detail': { path: '/demo/ecommerce-detail', label: 'DEMO 电商详情页', states: demoPageStates },
+  'DEMO-sports-health-home': { path: '/demo/sports-health', label: 'DEMO 运动健康首页', states: demoPageStates },
+  'DEMO-blockchain-wallet': { path: '/demo/blockchain-wallet', label: 'DEMO 区块链钱包', states: demoPageStates },
 }
 
-const adminPageConfig: Record<string, { path: string; label: string }> = {
-  'DEMO-admin-saas-home': { path: '/demo/admin/saas-home', label: 'DEMO SaaS 平台首页' },
-  'DEMO-admin-user-management': { path: '/demo/admin/user-management', label: 'DEMO 用户管理' },
-  'DEMO-admin-analytics': { path: '/demo/admin/analytics', label: 'DEMO 运营数据看板' },
+const adminPageConfig: Record<string, { path: string; label: string; states: readonly PageStateOption[] }> = {
+  'DEMO-admin-saas-home': { path: '/demo/admin/saas-home', label: 'DEMO SaaS 平台首页', states: demoPageStates },
+  'DEMO-admin-user-management': { path: '/demo/admin/user-management', label: 'DEMO 用户管理', states: demoPageStates },
+  'DEMO-admin-analytics': { path: '/demo/admin/analytics', label: 'DEMO 运营数据看板', states: demoPageStates },
 }
 
-export const getDefaultComponent = (mod: unknown): React.ComponentType => {
-  const moduleWithDefault = mod as { default?: React.ComponentType }
+export const getDefaultComponent = (mod: unknown): React.ComponentType<PrototypePreviewProps> => {
+  const moduleWithDefault = mod as { default?: React.ComponentType<PrototypePreviewProps> }
   return moduleWithDefault?.default || (() => null)
 }
 
@@ -59,6 +73,7 @@ export const generatePages = (): PageItem[] => {
           component: getDefaultComponent(mod),
           category: 'frontend',
           dirName,
+          states: config.states,
         })
       }
     }
@@ -76,6 +91,7 @@ export const generatePages = (): PageItem[] => {
           component: getDefaultComponent(mod),
           category: 'admin',
           dirName,
+          states: config.states,
         })
       }
     }

@@ -16,6 +16,7 @@ const DEFAULT_PROJECT_NAME = '项目原型预览'
 
 function AppContent() {
   const location = useLocation()
+  const currentPage = useMemo(() => pages.find(p => p.path === location.pathname), [location.pathname])
   const [previewContainer, setPreviewContainer] = useState<HTMLElement | null>(null)
   const previewRef = useCallback((node: HTMLDivElement | null) => {
     setPreviewContainer(node)
@@ -25,6 +26,17 @@ function AppContent() {
     const page = pages.find(p => p.path === location.pathname)
     return page?.category === 'admin' ? 'pc' : 'mobile'
   })
+  const [previewStateByPath, setPreviewStateByPath] = useState<Record<string, string>>({})
+
+  const previewState = currentPage ? previewStateByPath[currentPage.path] : undefined
+  const activePreviewState = currentPage?.states.some((state) => state.id === previewState)
+    ? previewState
+    : currentPage?.states[0]?.id
+
+  const handlePreviewStateChange = useCallback((state: string) => {
+    if (!currentPage) return
+    setPreviewStateByPath((previous) => ({ ...previous, [currentPage.path]: state }))
+  }, [currentPage])
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
@@ -113,8 +125,6 @@ function AppContent() {
     }
   }, [docOpen])
 
-  const currentPage = useMemo(() => pages.find(p => p.path === location.pathname), [location.pathname])
-
   return (
     <div className={`flex h-screen overflow-hidden ${theme === 'dark' ? 'tool-backdrop-dark' : 'tool-backdrop-light'}`}>
       <Sidebar
@@ -132,6 +142,9 @@ function AppContent() {
           shortcuts={shortcuts}
           setShortcuts={setShortcuts}
           theme={theme}
+          previewState={activePreviewState}
+          previewStates={currentPage?.states ?? []}
+          onPreviewStateChange={handlePreviewStateChange}
           toggleTheme={toggleTheme}
           annotationState={annotationState}
           annotationActions={annotationActions}
@@ -176,7 +189,16 @@ function AppContent() {
                     <Routes>
                       <Route path="/" element={<HomePage />} />
                       {pages.map(page => (
-                        <Route key={page.path} path={page.path} element={<page.component />} />
+                        <Route
+                          key={page.path}
+                          path={page.path}
+                          element={
+                            <page.component
+                              previewState={page.path === currentPage?.path ? activePreviewState : undefined}
+                              onPreviewStateChange={page.path === currentPage?.path ? handlePreviewStateChange : undefined}
+                            />
+                          }
+                        />
                       ))}
                       <Route path="/themes" element={<ThemesListPage />} />
                       <Route path="/theme/:themeId" element={<ThemeDetailPage />} />

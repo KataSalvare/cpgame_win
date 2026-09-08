@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { ArrowDownLeft, ArrowUpRight, Check, Copy, Eye, EyeOff, MoreHorizontal, Plus, RefreshCcw, ShieldCheck, WalletCards, X } from 'lucide-react'
 import { DEMOBadge, DEMOButton, DEMOCard, DEMOEmptyState, DEMOErrorState, DEMOIconButton, DEMOLoadingState, DEMOSectionHeader, DEMOThemeFrame, type DEMOPageState } from '@/common/DEMOComponents'
+import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 const assets = [{ symbol: 'ETH', name: 'Ethereum', amount: '1.284', value: '$4,042.18', change: '+3.2%', color: '#627eea' }, { symbol: 'USDC', name: 'USD Coin', amount: '1,820.00', value: '$1,820.00', change: '+0.01%', color: '#2775ca' }, { symbol: 'BTC', name: 'Bitcoin', amount: '0.018', value: '$1,146.62', change: '-0.8%', color: '#f7931a' }]
 
-export default function DEMOBlockchainWallet() {
-  const [state, setState] = useState<DEMOPageState>('normal')
+export default function DEMOBlockchainWallet(props: PrototypePreviewProps<DEMOPageState>) {
+  const [state, setState] = usePrototypeState<DEMOPageState>('normal', props)
   const [visible, setVisible] = useState(true)
   const [copied, setCopied] = useState(false)
   const [panel, setPanel] = useState<'send' | 'receive' | null>(null)

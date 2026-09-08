@@ -59,6 +59,10 @@ function annotationsPlugin() {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), annotationsPlugin()],
+  server: {
+    port: 1025,
+    strictPort: true,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
