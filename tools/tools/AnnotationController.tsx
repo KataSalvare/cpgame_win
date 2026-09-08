@@ -281,7 +281,6 @@ export function useAnnotationController({
           highlightedId={modalAnnotation?.id ?? null}
           selecting={annotationEditMode && annotationSelecting}
           previewContainer={previewContainer}
-          theme={theme}
           onSelect={handleSelectAnnotation}
           onSelectElement={handleSelectElement}
         />

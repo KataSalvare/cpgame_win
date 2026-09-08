@@ -183,11 +183,7 @@ export default function AnnotationModal({
 
   if (!isOpen || !annotation) return null
 
-  const inputBase = `w-full px-3 py-2 text-sm rounded-xl border outline-none transition-all duration-200 focus:ring-2 ${
-    isDark
-      ? 'bg-[#303030] border-[#ffffff]/10 text-[#f5f2ed] placeholder-[#606060] focus:border-[#c49378]/50 focus:ring-[#c49378]/15'
-      : 'bg-white border-[#1c1c1c]/10 text-[#1c1c1c] placeholder-[#a0a0a0] focus:border-[#c4785a]/40 focus:ring-[#c4785a]/12'
-  }`
+  const inputBase = 'w-full px-3 py-2 text-sm rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] text-[var(--tool-text)] placeholder-[var(--tool-text-subtle)] outline-none transition-all duration-200 focus:border-[var(--tool-focus)] focus:ring-2 focus:ring-[var(--tool-focus)]/20'
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
@@ -196,22 +192,22 @@ export default function AnnotationModal({
         style={estimatedStyle}
         className={[
           'absolute pointer-events-auto w-[380px] max-w-[calc(100vw-32px)] max-h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-tool-enter border',
-          isDark ? 'bg-[#262626] border-[#ffffff]/12' : 'bg-[#f7f3ed] border-[#1c1c1c]/8',
+          'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >
         {canEdit ? (
-          <div className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? 'border-[#ffffff]/8' : 'border-[#1c1c1c]/8'}`}>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--tool-border)]">
             <div>
-              <h2 className={`text-sm font-bold ${isDark ? 'text-[#f5f2ed]' : 'text-[#1c1c1c]'}`}>
+              <h2 className="text-sm font-bold text-[var(--tool-text)]">
                 {isNew ? '新增批注' : '编辑批注'}
               </h2>
-              <p className={`text-xs mt-0.5 ${isDark ? 'text-[#808080]' : 'text-[#a0a0a0]'}`}>
+              <p className="text-xs mt-0.5 text-[var(--tool-text-subtle)]">
                 {isNew ? '为选中的元素添加说明' : `标记 #${annotation.number}`}
               </p>
             </div>
             <button
               onClick={onClose}
-              className={`p-2 rounded-xl transition-colors ${isDark ? 'hover:bg-[#252525] text-[#808080]' : 'hover:bg-[#f5f5f3] text-[#6b6b6b]'}`}
+              className="p-2 rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
             >
               <X size={16} />
             </button>
@@ -219,13 +215,13 @@ export default function AnnotationModal({
         ) : (
           <button
             onClick={onClose}
-            className={`absolute top-3 right-3 z-10 p-2 rounded-xl transition-colors ${isDark ? 'hover:bg-[#252525] text-[#808080]' : 'hover:bg-[#f5f5f3] text-[#6b6b6b]'}`}
+            className="absolute top-3 right-3 z-10 p-2 rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
           >
             <X size={16} />
           </button>
         )}
 
-        <div className={`px-5 py-3 border-b ${isDark ? 'border-[#ffffff]/8' : 'border-[#1c1c1c]/8'}`}>
+        <div className="px-5 py-3 border-b border-[var(--tool-border)]">
           <div className="flex flex-wrap gap-1.5">
             {tabAnnotations.map((a) => {
               const cat = categories.find((c) => c.key === a.category)
@@ -252,9 +248,7 @@ export default function AnnotationModal({
                   const cat = unusedCategories[0]
                   if (cat) onAddRelatedAnnotation?.(annotation.selector || '', cat.key)
                 }}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border border-dashed transition-colors ${
-                  isDark ? 'border-[#606060] text-[#808080] hover:bg-[#252525]' : 'border-[#c0c0c0] text-[#808080] hover:bg-[#f5f5f3]'
-                }`}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-dashed border-[var(--tool-border)] text-[var(--tool-text-muted)] text-[11px] font-medium transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
               >
                 <Plus size={10} />
                 新增分类
@@ -267,7 +261,7 @@ export default function AnnotationModal({
           <div>
             {canEdit ? (
               <>
-                <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-[#a0a0a0]' : 'text-[#6b6b6b]'}`}>标题</label>
+                <label className="block text-xs font-semibold mb-1.5 text-[var(--tool-text-muted)]">标题</label>
                 <input
                   type="text"
                   value={form.title}
@@ -277,14 +271,14 @@ export default function AnnotationModal({
                 />
               </>
             ) : (
-              <h3 className={`text-sm font-bold ${isDark ? 'text-[#f5f2ed]' : 'text-[#1c1c1c]'}`}>{annotation.title}</h3>
+              <h3 className="text-sm font-bold text-[var(--tool-text)]">{annotation.title}</h3>
             )}
           </div>
 
           <div>
             {canEdit ? (
               <>
-                <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-[#a0a0a0]' : 'text-[#6b6b6b]'}`}>详细说明</label>
+                <label className="block text-xs font-semibold mb-1.5 text-[var(--tool-text-muted)]">详细说明</label>
                 <textarea
                   value={form.content}
                   onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
@@ -294,13 +288,13 @@ export default function AnnotationModal({
                 />
               </>
             ) : (
-              <p className={`text-sm whitespace-pre-wrap leading-relaxed ${isDark ? 'text-[#c0c0c0]' : 'text-[#4a4a4a]'}`}>{annotation.content}</p>
+              <p className="text-sm whitespace-pre-wrap leading-relaxed text-[var(--tool-text-muted)]">{annotation.content}</p>
             )}
           </div>
 
           {canEdit && (
             <div>
-              <label className={`block text-xs font-semibold mb-2 ${isDark ? 'text-[#a0a0a0]' : 'text-[#6b6b6b]'}`}>标记位置</label>
+              <label className="block text-xs font-semibold mb-2 text-[var(--tool-text-muted)]">标记位置</label>
               <div className="grid grid-cols-4 gap-2">
                 {CORNERS.map((corner) => (
                   <button
@@ -310,9 +304,7 @@ export default function AnnotationModal({
                       'px-2 py-2 text-xs rounded-xl border transition-all duration-200 font-medium',
                       form.position === corner.key
                         ? 'tool-accent-bg text-white border-transparent shadow-sm'
-                        : isDark
-                          ? 'border-[#ffffff]/10 text-[#a0a0a0] hover:bg-[#252525]'
-                          : 'border-[#1c1c1c]/10 text-[#6b6b6b] hover:bg-[#f5f5f3]',
+                        : 'border-[var(--tool-border)] text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]',
                     ].join(' ')}
                   >
                     {corner.label}
@@ -324,7 +316,7 @@ export default function AnnotationModal({
 
           {canEdit && (
             <div>
-              <label className={`block text-xs font-semibold mb-2 ${isDark ? 'text-[#a0a0a0]' : 'text-[#6b6b6b]'}`}>分类</label>
+              <label className="block text-xs font-semibold mb-2 text-[var(--tool-text-muted)]">分类</label>
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {categories.map((cat) => (
                   <button
@@ -383,7 +375,7 @@ export default function AnnotationModal({
                       setShowCategoryInput(false)
                       setNewCategoryName('')
                     }}
-                    className={`p-2 rounded-xl transition-colors ${isDark ? 'text-[#808080] hover:bg-[#252525]' : 'text-[#6b6b6b] hover:bg-[#f5f5f3]'}`}
+                    className="p-2 rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
                   >
                     <X size={16} />
                   </button>
@@ -402,7 +394,7 @@ export default function AnnotationModal({
         </div>
 
         {canEdit && (
-          <div className={`flex items-center justify-between px-5 py-4 border-t ${isDark ? 'border-[#ffffff]/8' : 'border-[#1c1c1c]/8'}`}>
+          <div className="flex items-center justify-between px-5 py-4 border-t border-[var(--tool-border)]">
             {!isNew ? (
               <button
                 onClick={() => {
@@ -420,13 +412,13 @@ export default function AnnotationModal({
             <div className="flex items-center gap-2">
               <button
                 onClick={onClose}
-                className={`px-4 py-2 text-xs font-medium rounded-xl transition-colors ${isDark ? 'text-[#a0a0a0] hover:bg-[#252525]' : 'text-[#6b6b6b] hover:bg-[#f5f5f3]'}`}
+                className="px-4 py-2 text-xs font-medium rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
               >
                 取消
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 tool-accent-bg text-white hover:opacity-90 shadow-sm"
+                className="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 tool-accent-bg text-white hover:bg-[var(--tool-brand-hover)] shadow-sm"
               >
                 保存到草稿
               </button>

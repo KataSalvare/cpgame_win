@@ -2,8 +2,6 @@ import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import type { Annotation, AnnotationCategory } from '../lib/annotations'
 import { findElementBySelector, getElementPosition, getElementSelector, isElementVisible, findActiveOverlay } from '../lib/annotations'
 
-export type Theme = 'light' | 'dark'
-
 interface AnnotationLayerProps {
   annotations: Annotation[]
   categories: AnnotationCategory[]
@@ -11,7 +9,6 @@ interface AnnotationLayerProps {
   highlightedId: string | null
   selecting: boolean
   previewContainer: HTMLElement | null
-  theme: Theme
   onSelect: (id: string, clientX: number, clientY: number) => void
   onSelectElement: (selector: string, clientX: number, clientY: number) => void
 }
@@ -27,7 +24,6 @@ export default function AnnotationLayer({
   highlightedId,
   selecting,
   previewContainer,
-  theme,
   onSelect,
   onSelectElement,
 }: AnnotationLayerProps) {
@@ -37,8 +33,6 @@ export default function AnnotationLayer({
   const [highlightedElement, setHighlightedElement] = useState<HTMLElement | null>(null)
   const [positions, setPositions] = useState<Record<string, { left: number; top: number }>>({})
   const [visibleMap, setVisibleMap] = useState<Record<string, boolean>>({})
-
-  const isDark = theme === 'dark'
 
   const recomputePositions = useCallback(() => {
     if (!previewContainer) return
@@ -167,7 +161,7 @@ export default function AnnotationLayer({
     >
       {selecting && hoveredElement && (
         <div
-          className="absolute pointer-events-none rounded-xl ring-2 ring-[#c4785a] dark:ring-[#c49378] ring-offset-2 ring-offset-transparent bg-[#c4785a]/8 dark:bg-[#c49378]/8 transition-all duration-150"
+          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/10 transition-all duration-150"
           style={(() => {
             const rect = hoveredElement.getBoundingClientRect()
             const containerRect = previewContainer.getBoundingClientRect()
@@ -183,7 +177,7 @@ export default function AnnotationLayer({
 
       {highlightedElement && (
         <div
-          className="absolute pointer-events-none rounded-xl ring-2 ring-[#c4785a] dark:ring-[#c49378] ring-offset-2 ring-offset-transparent bg-[#c4785a]/10 dark:bg-[#c49378]/10 animate-pulse"
+          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/12 animate-pulse"
           style={(() => {
             const rect = highlightedElement.getBoundingClientRect()
             const containerRect = previewContainer.getBoundingClientRect()
@@ -238,12 +232,12 @@ export default function AnnotationLayer({
       })}
 
       {selecting && (
-        <div className={`absolute top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl text-sm font-medium shadow-xl pointer-events-none animate-tool-enter border ${isDark ? 'bg-[#262626] text-[#f5f2ed] border-[#ffffff]/10' : 'bg-[#f7f3ed] text-[#1c1c1c] border-[#1c1c1c]/8'}`}>
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text)] text-sm font-medium shadow-xl pointer-events-none animate-tool-enter">
           点击页面元素添加批注
         </div>
       )}
       {selecting && hoveredSelector && (
-        <div className={`absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[80%] px-4 py-2 rounded-xl text-xs font-mono truncate shadow-xl pointer-events-none animate-tool-enter border ${isDark ? 'bg-[#262626] text-[#a0a0a0] border-[#ffffff]/10' : 'bg-[#f7f3ed] text-[#6b6b6b] border-[#1c1c1c]/8'}`}>
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[80%] px-4 py-2 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text-muted)] text-xs font-mono truncate shadow-xl pointer-events-none animate-tool-enter">
           {hoveredSelector}
         </div>
       )}

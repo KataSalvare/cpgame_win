@@ -83,11 +83,11 @@ export default function DocDrawer({
   if (!isOpen || !currentPage) return null
 
   const panelClass = isDark ? 'tool-panel-dark' : 'tool-panel-light'
-  const borderClass = isDark ? 'border-[#ffffff]/8' : 'border-[#1c1c1c]/8'
-  const textPrimary = isDark ? 'text-[#f5f2ed]' : 'text-[#1c1c1c]'
-  const textSecondary = isDark ? 'text-[#a0a0a0]' : 'text-[#6b6b6b]'
-  const textMuted = isDark ? 'text-[#808080]' : 'text-[#a0a0a0]'
-  const hoverSurface = isDark ? 'hover:bg-[#333333]' : 'hover:bg-[#efe9e0]'
+  const borderClass = 'border-[var(--tool-border)]'
+  const textPrimary = 'text-[var(--tool-text)]'
+  const textSecondary = 'text-[var(--tool-text-muted)]'
+  const textMuted = 'text-[var(--tool-text-subtle)]'
+  const hoverSurface = 'hover:bg-[var(--tool-surface-hover)]'
 
   return (
     <div
@@ -138,7 +138,7 @@ export default function DocDrawer({
         >
           <MapPin size={15} />
           标注说明
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isDark ? 'bg-[#ffffff]/10 text-[#a0a0a0]' : 'bg-[#1c1c1c]/6 text-[#6b6b6b]'}`}>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--tool-surface-muted)] text-[var(--tool-text-muted)]">
             {annotations.length}
           </span>
         </button>

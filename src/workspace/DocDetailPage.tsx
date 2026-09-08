@@ -30,26 +30,26 @@ export const DocDetailPage: React.FC = () => {
   }, [docId])
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="border-b px-6 py-4">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-          <NavLink to="/docs" className="hover:text-gray-900">文档</NavLink>
+    <div className="h-full flex flex-col bg-[var(--tool-surface)] text-[var(--tool-text)]">
+      <div className="border-b border-[var(--tool-border)] px-6 py-4">
+        <div className="flex items-center gap-2 text-sm text-[var(--tool-text-muted)] mb-2">
+          <NavLink to="/docs" className="hover:text-[var(--tool-brand)]">文档</NavLink>
           <ChevronRight size={14} />
-          <span className="text-gray-900">{docId}</span>
+          <span className="text-[var(--tool-text)]">{docId}</span>
         </div>
-        <h1 className="text-xl font-semibold text-gray-900">{docId}</h1>
+        <h1 className="text-xl font-semibold text-[var(--tool-text)]">{docId}</h1>
       </div>
 
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-4xl mx-auto">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full" />
+              <div className="animate-spin w-6 h-6 border-2 border-[var(--tool-brand)] border-t-transparent rounded-full" />
             </div>
           ) : content ? (
             <MarkdownDocument content={content} />
           ) : (
-            <div className="text-gray-400 text-center py-20">文档加载失败</div>
+            <div className="text-[var(--tool-text-subtle)] text-center py-20">文档加载失败</div>
           )}
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import DocDrawer from './components/DocDrawer'
 import { Sidebar } from './shell/Sidebar'
 import { Topbar } from './shell/Topbar'
@@ -128,7 +128,6 @@ function AppContent() {
   return (
     <div className={`flex h-screen overflow-hidden ${theme === 'dark' ? 'tool-backdrop-dark' : 'tool-backdrop-light'}`}>
       <Sidebar
-        theme={theme}
         projectName={projectName || DEFAULT_PROJECT_NAME}
         onProjectNameChange={handleProjectNameChange}
         collapsed={sidebarCollapsed}
@@ -171,7 +170,7 @@ function AppContent() {
           <div className="flex-1 flex overflow-hidden">
             <div className="flex-1 overflow-auto p-5 lg:p-6">
               <div
-                className={`relative z-[100] mx-auto transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                className={`relative z-[100] mx-auto transition-[width,height,margin] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
                   deviceMode === 'mobile'
                     ? 'w-[400px] h-[852px] mt-12'
                     : 'w-full h-full'
@@ -185,26 +184,37 @@ function AppContent() {
                   }`}
                   style={{ transform: 'translateZ(0)' }}
                 >
-                  <div className={`${deviceMode === 'mobile' ? 'h-full overflow-y-auto overscroll-contain' : 'w-full h-full overflow-auto'}`}>
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      {pages.map(page => (
-                        <Route
-                          key={page.path}
-                          path={page.path}
-                          element={
-                            <page.component
-                              previewState={page.path === currentPage?.path ? activePreviewState : undefined}
-                              onPreviewStateChange={page.path === currentPage?.path ? handlePreviewStateChange : undefined}
-                            />
-                          }
-                        />
-                      ))}
-                      <Route path="/themes" element={<ThemesListPage />} />
-                      <Route path="/theme/:themeId" element={<ThemeDetailPage />} />
-                      <Route path="/docs" element={<DocsListPage />} />
-                      <Route path="/doc/:docId" element={<DocDetailPage />} />
-                    </Routes>
+                  <div className={`prototype-content-scroll ${deviceMode === 'mobile' ? 'h-full overflow-y-auto overscroll-contain' : 'w-full h-full overflow-auto'}`}>
+                    <Suspense
+                      fallback={(
+                        <div className="flex h-full w-full items-center justify-center" role="status" aria-live="polite">
+                          <div className="flex items-center gap-2 text-sm text-[var(--tool-text-muted)]">
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
+                            正在加载原型…
+                          </div>
+                        </div>
+                      )}
+                    >
+                      <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        {pages.map(page => (
+                          <Route
+                            key={page.path}
+                            path={page.path}
+                            element={
+                              <page.component
+                                previewState={page.path === currentPage?.path ? activePreviewState : undefined}
+                                onPreviewStateChange={page.path === currentPage?.path ? handlePreviewStateChange : undefined}
+                              />
+                            }
+                          />
+                        ))}
+                        <Route path="/themes" element={<ThemesListPage />} />
+                        <Route path="/theme/:themeId" element={<ThemeDetailPage />} />
+                        <Route path="/docs" element={<DocsListPage />} />
+                        <Route path="/doc/:docId" element={<DocDetailPage />} />
+                      </Routes>
+                    </Suspense>
                   </div>
                 </div>
 

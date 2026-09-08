@@ -97,6 +97,23 @@ src/prototypes/style.css   # 多个原型共用的内容层样式
 - 展示 UI 中只保留语义化 className；不要在交互逻辑模块中写 className、内联视觉样式或 CSS。
 - 工具栏、侧边栏、批注层等原型浏览工具样式继续放在工具层，不得写入原型公共样式。
 
+## 内容层滚动条
+
+原型内容 viewport 默认隐藏滚动条，但必须保留滚动能力。预览工具会在内容层滚动容器上统一应用 `prototype-content-scroll`，使用以下方式隐藏视觉上的拖动条：
+
+```css
+.prototype-content-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.prototype-content-scroll::-webkit-scrollbar {
+  display: none;
+}
+```
+
+这条规则只隐藏滚动条，不得使用 `overflow: hidden` 替代。内容层仍必须支持触控滑动、鼠标滚轮和键盘滚动；工具层侧边栏、文档面板和批注面板的滚动条不受此规则影响。原型页面自身不要覆盖该行为，也不要为了隐藏滚动条禁用页面滚动。
+
 ## 多页面原型
 
 单个原型可以包含多个页面，通过 URL hash 参数 `#page=<pageId>` 在原型内部定位：

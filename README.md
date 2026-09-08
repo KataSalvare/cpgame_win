@@ -2,6 +2,8 @@
 
 基于 React + TypeScript + Vite 构建的产品原型预览工作台，用于产品经理和 UI 设计师快速预览、批注和展示页面原型，同时管理设计系统主题与项目文档。
 
+当前版本：**v2.1**
+
 ## 技术栈
 
 - **框架**: React 19 + TypeScript
@@ -54,6 +56,8 @@ src/prototypes/style.css   # 多个原型共用的内容层样式
 - **主题管理**: 动态读取 `src/themes` 中的设计系统主题，支持预览主题组件和查看设计规范
 - **文档管理**: 动态读取 `src/docs/*.md` 中的根目录 Markdown 文档
 - **侧边栏折叠**: 顶部操作栏可一键折叠/展开左侧菜单栏，折叠后完全隐藏
+
+页面状态面板位于顶部工具栏的「状态」入口中。它只负责预览控制，不属于原型页面主体，也不会被复制到 Figma；页面状态、用户状态和路由的详细工具规则见 [`rules/prototype-state-and-route-guide.md`](./rules/prototype-state-and-route-guide.md)。
 
 ### 页面批注
 

@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import type React from 'react'
 import type { PrototypePreviewProps } from '@/prototypes/previewState'
 
@@ -17,10 +18,13 @@ export interface PageItem {
   states: readonly PageStateOption[]
 }
 
-const allModules = import.meta.glob('../../src/prototypes/*/index.tsx', { eager: true })
+type PrototypeModule = { default?: React.ComponentType<PrototypePreviewProps> }
+type PrototypeLoader = () => Promise<PrototypeModule>
 
-const frontendModules: Record<string, unknown> = {}
-const adminModules: Record<string, unknown> = {}
+const allModules = import.meta.glob<PrototypeModule>('../../src/prototypes/*/index.tsx')
+
+const frontendModules: Record<string, PrototypeLoader> = {}
+const adminModules: Record<string, PrototypeLoader> = {}
 
 Object.entries(allModules).forEach(([path, mod]) => {
   const match = path.match(/\.\.\/\.\.\/src\/prototypes\/([^/]+)\//)
@@ -58,10 +62,15 @@ export const getDefaultComponent = (mod: unknown): React.ComponentType<Prototype
   return moduleWithDefault?.default || (() => null)
 }
 
+const getLazyComponent = (loader: PrototypeLoader): React.ComponentType<PrototypePreviewProps> => lazy(async () => {
+  const mod = await loader()
+  return { default: getDefaultComponent(mod) }
+})
+
 export const generatePages = (): PageItem[] => {
   const pages: PageItem[] = []
 
-  Object.entries(frontendModules).forEach(([filePath, mod]) => {
+  Object.entries(frontendModules).forEach(([filePath, loader]) => {
     const match = filePath.match(/\.\.\/\.\.\/src\/prototypes\/([^/]+)\//)
     if (match) {
       const dirName = match[1]
@@ -70,7 +79,7 @@ export const generatePages = (): PageItem[] => {
         pages.push({
           path: config.path,
           label: config.label,
-          component: getDefaultComponent(mod),
+          component: getLazyComponent(loader),
           category: 'frontend',
           dirName,
           states: config.states,
@@ -79,7 +88,7 @@ export const generatePages = (): PageItem[] => {
     }
   })
 
-  Object.entries(adminModules).forEach(([filePath, mod]) => {
+  Object.entries(adminModules).forEach(([filePath, loader]) => {
     const match = filePath.match(/\.\.\/\.\.\/src\/prototypes\/([^/]+)\//)
     if (match) {
       const dirName = match[1]
@@ -88,7 +97,7 @@ export const generatePages = (): PageItem[] => {
         pages.push({
           path: config.path,
           label: config.label,
-          component: getDefaultComponent(mod),
+          component: getLazyComponent(loader),
           category: 'admin',
           dirName,
           states: config.states,

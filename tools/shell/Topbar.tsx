@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { TooltipButton } from './TooltipButton'
 import { PreviewStateBar } from './PreviewStateBar'
+import { ToolbarMoreMenu } from './ToolbarMoreMenu'
 import { ShortcutsDialog } from '../tools/ShortcutsDialog'
 import {
   formatShortcut,
@@ -91,13 +92,13 @@ export const Topbar = ({
   const hasSpec = currentPage != null
   const isDark = theme === 'dark'
 
-  const baseBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium whitespace-nowrap rounded-xl border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4785a]/40`
-  const ghostBtn = `${baseBtn} ${isDark ? 'border-transparent text-[#a0a0a0] hover:bg-[#333333] hover:text-[#f5f2ed]' : 'border-transparent text-[#6b6b6b] hover:bg-[#efe9e0] hover:text-[#1c1c1c]'}`
-  const activeGhostBtn = `${baseBtn} ${isDark ? 'border-[#d49a7a]/35 bg-[#2a2520] tool-accent shadow-sm' : 'border-[#c4785a]/30 bg-[#f3ece6] tool-accent shadow-sm'}`
-  const segmentBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-8 px-3 text-xs font-medium whitespace-nowrap rounded-lg border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c4785a]/40`
-  const activeSegmentBtn = `${segmentBtn} ${isDark ? 'border-[#d49a7a]/35 bg-[#3b3029] tool-accent shadow-sm' : 'border-[#c4785a]/30 bg-white tool-accent shadow-sm'}`
-  const inactiveSegmentBtn = `${segmentBtn} ${isDark ? 'border-transparent text-[#a0a0a0] hover:bg-[#3a3a3a] hover:text-[#f5f2ed]' : 'border-transparent text-[#6b6b6b] hover:bg-white/70 hover:text-[#1c1c1c]'}`
-  const accentBtn = `${baseBtn} tool-accent-bg text-white hover:opacity-90 shadow-sm`
+  const baseBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium whitespace-nowrap rounded-xl border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`
+  const ghostBtn = `${baseBtn} border-transparent text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]`
+  const activeGhostBtn = `${baseBtn} border-[var(--tool-brand)]/35 bg-[var(--tool-brand-soft)] tool-accent shadow-sm`
+  const segmentBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-8 px-3 text-xs font-medium whitespace-nowrap rounded-lg border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`
+  const activeSegmentBtn = `${segmentBtn} border-[var(--tool-brand)]/35 bg-[var(--tool-surface)] tool-accent shadow-sm`
+  const inactiveSegmentBtn = `${segmentBtn} border-transparent text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]`
+  const accentBtn = `${baseBtn} tool-accent-bg text-white hover:bg-[var(--tool-brand-hover)] shadow-sm`
 
   const copyToFigma = useCallback(async () => {
     setCopying(true)
@@ -150,14 +151,12 @@ export const Topbar = ({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [shortcuts, onToggleDoc, copyToFigma, annotationEditMode, showAnnotations, enableEditMode, toggleSelecting, exitEditMode, showAnnotationsBeforeEdit])
+  }, [shortcuts, onToggleDoc, copyToFigma, annotationEditMode, showAnnotations, enableEditMode, toggleSelecting, exitEditMode, setShowAnnotations, showAnnotationsBeforeEdit])
 
   return (
     <>
       <header
-        className={`h-14 flex items-center gap-2 px-3 flex-shrink-0 z-[1000] border-b overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-          isDark ? 'bg-[#161616]/90 border-[#ffffff]/8 tool-surface-dark' : 'bg-[#ffffff]/80 border-[#1c1c1c]/8 tool-surface-light'
-        }`}
+        className="h-14 flex min-w-0 items-center gap-2 px-3 flex-shrink-0 z-[1000] border-b border-[var(--tool-border)] overflow-visible tool-surface-light dark:tool-surface-dark"
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
@@ -167,29 +166,25 @@ export const Topbar = ({
             e.stopPropagation()
             onToggleSidebarCollapsed()
           }}
-          className={`flex shrink-0 items-center justify-center w-9 h-9 rounded-xl border transition-all duration-200 ${
-            isDark
-              ? 'border-transparent text-[#a0a0a0] hover:bg-[#333333] hover:text-[#f5f2ed]'
-              : 'border-transparent text-[#6b6b6b] hover:bg-[#efe9e0] hover:text-[#1c1c1c]'
-          }`}
+          className="flex shrink-0 items-center justify-center w-9 h-9 rounded-xl border border-transparent text-[var(--tool-text-muted)] transition-all duration-200 hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
         >
           <PanelLeft size={18} />
         </TooltipButton>
 
         <div className="flex items-center gap-2 ml-1 min-w-0 shrink-0">
-          <div className={`flex items-center gap-2 h-9 max-w-[250px] px-3 rounded-xl border ${isDark ? 'border-[#ffffff]/8 bg-[#2a2a2a]' : 'border-[#1c1c1c]/8 bg-[#f3eee7]'}`}>
-            <span className={`text-[11px] font-medium ${isDark ? 'text-[#808080]' : 'text-[#9a9189]'}`}>当前页面</span>
-            <span className={`text-xs font-semibold truncate max-w-[140px] ${isDark ? 'text-[#f5f2ed]' : 'text-[#1c1c1c]'}`}>
+          <div className="flex items-center gap-2 h-9 max-w-[180px] min-[1400px]:max-w-[250px] px-3 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)]">
+            <span className="hidden min-[1400px]:inline text-[11px] font-medium text-[var(--tool-text-subtle)]">当前页面</span>
+            <span className="text-xs font-semibold truncate max-w-[100px] min-[1180px]:max-w-[140px] text-[var(--tool-text)]">
               {currentPage?.label || '首页'}
             </span>
             {currentPage && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${isDark ? 'border-[#ffffff]/10 bg-[#404040] text-[#a0a0a0]' : 'border-[#1c1c1c]/8 bg-white text-[#6b6b6b]'}`}>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text-muted)]">
                 {currentPage.category === 'frontend' ? '前端' : '后台'}
               </span>
             )}
           </div>
 
-          <div className={`flex items-center gap-1 p-1 rounded-2xl border shrink-0 ${isDark ? 'border-[#ffffff]/8 bg-[#2a2a2a]' : 'border-[#1c1c1c]/8 bg-[#f3eee7]'}`}>
+          <div className="flex items-center gap-1 p-1 rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] shrink-0">
           <TooltipButton
             tooltip="切换为移动端预览"
             onClick={(e) => {
@@ -199,7 +194,7 @@ export const Topbar = ({
             className={deviceMode === 'mobile' ? activeSegmentBtn : inactiveSegmentBtn}
           >
             <Smartphone size={14} />
-            <span>移动端</span>
+            <span className="hidden min-[1180px]:inline">移动端</span>
           </TooltipButton>
           <TooltipButton
             tooltip="切换为PC端预览"
@@ -210,7 +205,7 @@ export const Topbar = ({
             className={deviceMode === 'pc' ? activeSegmentBtn : inactiveSegmentBtn}
           >
             <Monitor size={14} />
-            <span>PC端</span>
+            <span className="hidden min-[1180px]:inline">PC端</span>
           </TooltipButton>
           </div>
 
@@ -222,7 +217,7 @@ export const Topbar = ({
           />
         </div>
 
-        <div className="flex-1 flex items-center justify-center gap-1.5 min-w-fit">
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
           {annotationEditMode ? (
             <>
               <TooltipButton
@@ -234,7 +229,7 @@ export const Topbar = ({
                 className={annotationSelecting ? accentBtn : ghostBtn}
               >
                 <MousePointer size={14} />
-                <span>{annotationSelecting ? '选择中' : '选择元素'}</span>
+                <span className="hidden min-[1180px]:inline">{annotationSelecting ? '选择中' : '选择元素'}</span>
               </TooltipButton>
               <TooltipButton
                 tooltip="清空当前未保存的批注改动"
@@ -246,7 +241,7 @@ export const Topbar = ({
                 disabled={!hasDraft}
               >
                 <Trash2 size={14} />
-                <span>清空</span>
+                <span className="hidden min-[1180px]:inline">清空</span>
               </TooltipButton>
               <TooltipButton
                 tooltip="保存到本地文件"
@@ -263,7 +258,7 @@ export const Topbar = ({
                 disabled={!hasDraft}
               >
                 <Save size={14} />
-                <span>保存</span>
+                <span className="hidden min-[1180px]:inline">保存</span>
               </TooltipButton>
               <TooltipButton
                 tooltip="退出编辑模式 (ESC)"
@@ -275,7 +270,7 @@ export const Topbar = ({
                 className={ghostBtn}
               >
                 <XIcon size={14} />
-                <span>退出</span>
+                <span className="hidden min-[1180px]:inline">退出</span>
               </TooltipButton>
             </>
           ) : (
@@ -290,7 +285,7 @@ export const Topbar = ({
                 className={ghostBtn}
               >
                 <Pencil size={14} />
-                <span>批注</span>
+                <span className="hidden min-[1180px]:inline">批注</span>
               </TooltipButton>
               <TooltipButton
                 tooltip={showAnnotations ? '隐藏批注图标' : '显示批注图标'}
@@ -301,13 +296,13 @@ export const Topbar = ({
                 className={showAnnotations ? accentBtn : ghostBtn}
               >
                 {showAnnotations ? <EyeOff size={14} /> : <Eye size={14} />}
-                <span>{showAnnotations ? '隐藏批注' : '显示批注'}</span>
+                <span className="hidden min-[1180px]:inline">{showAnnotations ? '隐藏批注' : '显示批注'}</span>
               </TooltipButton>
             </>
           )}
         </div>
 
-        <div className={`flex items-center gap-1.5 pl-2 border-l shrink-0 ${isDark ? 'border-[#ffffff]/10' : 'border-[#1c1c1c]/10'}`}>
+        <div className="flex items-center gap-1.5 pl-2 border-l border-[var(--tool-border)] shrink-0">
           <TooltipButton
             tooltip={isDark ? '切换到白天模式' : '切换到黑夜模式'}
             onClick={(e) => {
@@ -315,6 +310,7 @@ export const Topbar = ({
               toggleTheme()
             }}
             className={ghostBtn}
+            wrapperClassName="hidden min-[1400px]:inline-flex"
           >
             {isDark ? <Sun size={14} className="text-[#f4a261]" /> : <Moon size={14} />}
             <span>{isDark ? '白天' : '黑夜'}</span>
@@ -334,7 +330,7 @@ export const Topbar = ({
             ) : (
               <FigmaIcon />
             )}
-            <span>{copying ? '复制中...' : '复制到 Figma'}</span>
+            <span className="hidden min-[1000px]:inline">{copying ? '复制中...' : '复制到 Figma'}</span>
           </TooltipButton>
 
           {hasSpec && (
@@ -344,7 +340,7 @@ export const Topbar = ({
               className={docOpen ? activeGhostBtn : ghostBtn}
             >
               <FileText size={14} />
-              <span>查看文档</span>
+              <span className="hidden min-[1180px]:inline">查看文档</span>
             </TooltipButton>
           )}
 
@@ -355,10 +351,17 @@ export const Topbar = ({
               setSettingsOpen(true)
             }}
             className={ghostBtn}
+            wrapperClassName="hidden min-[1400px]:inline-flex"
           >
             <Keyboard size={14} />
             <span>快捷键</span>
           </TooltipButton>
+
+          <ToolbarMoreMenu
+            theme={theme}
+            toggleTheme={toggleTheme}
+            onOpenShortcuts={() => setSettingsOpen(true)}
+          />
         </div>
       </header>
 
@@ -371,7 +374,6 @@ export const Topbar = ({
           setShortcuts(newShortcuts)
           saveShortcuts(newShortcuts)
         }}
-        theme={theme}
       />
     </>
   )

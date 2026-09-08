@@ -7,7 +7,6 @@ import {
   saveShortcuts,
   setShortcutModalOpen,
   type ShortcutConfig,
-  type Theme,
 } from '../lib/shortcuts'
 
 interface ShortcutsDialogProps {
@@ -15,7 +14,6 @@ interface ShortcutsDialogProps {
   onClose: () => void
   shortcuts: ShortcutConfig
   onSave: (shortcuts: ShortcutConfig) => void
-  theme: Theme
 }
 
 export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
@@ -23,9 +21,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
   onClose,
   shortcuts,
   onSave,
-  theme,
 }) => {
-  const isDark = theme === 'dark'
   const [editingShortcuts, setEditingShortcuts] = useState<ShortcutConfig>(() => shortcuts)
   const [recordingKey, setRecordingKey] = useState<keyof ShortcutConfig | null>(null)
   const os = getOS()
@@ -81,12 +77,12 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
     selectElement: '批注选择元素',
   }
 
-  const textPrimary = isDark ? 'text-[#f5f2ed]' : 'text-[#1c1c1c]'
-  const textSecondary = isDark ? 'text-[#a0a0a0]' : 'text-[#6b6b6b]'
-  const textMuted = isDark ? 'text-[#808080]' : 'text-[#a0a0a0]'
-  const borderClass = isDark ? 'border-[#ffffff]/8' : 'border-[#1c1c1c]/8'
-  const surfaceClass = isDark ? 'bg-[#262626]' : 'bg-[#f7f3ed]'
-  const hoverSurface = isDark ? 'hover:bg-[#333333]' : 'hover:bg-[#efe9e0]'
+  const textPrimary = 'text-[var(--tool-text)]'
+  const textSecondary = 'text-[var(--tool-text-muted)]'
+  const textMuted = 'text-[var(--tool-text-subtle)]'
+  const borderClass = 'border-[var(--tool-border)]'
+  const surfaceClass = 'bg-[var(--tool-surface)]'
+  const hoverSurface = 'hover:bg-[var(--tool-surface-hover)]'
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center animate-tool-fade-in">
@@ -94,13 +90,13 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
       <div
         className={[
           'relative rounded-2xl shadow-2xl w-[520px] max-w-[92vw] max-h-[90vh] flex flex-col overflow-hidden animate-tool-enter border',
-          isDark ? 'bg-[#262626] border-[#ffffff]/12' : 'bg-[#f7f3ed] border-[#1c1c1c]/8',
+          'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >
         {/* 头部 */}
         <div className={`flex items-center justify-between px-6 py-5 border-b ${borderClass}`}>
           <div className="flex items-center gap-3.5">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${isDark ? 'bg-[#ffffff]/8' : 'bg-[#1c1c1c]/6'}`}>
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--tool-brand-soft)]">
               <Keyboard className="tool-accent" size={22} />
             </div>
             <div>
@@ -126,11 +122,11 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
               className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
                 recordingKey === key
                   ? 'border-current tool-accent bg-current/[0.04]'
-                  : `${borderClass} ${isDark ? 'bg-[#333333]' : 'bg-white'}`
+                  : `${borderClass} bg-[var(--tool-surface-muted)]`
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold ${isDark ? 'bg-[#ffffff]/8 text-[#f5f2ed]' : 'bg-[#1c1c1c]/6 text-[#1c1c1c]'}`}>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center bg-[var(--tool-brand-soft)] text-[var(--tool-brand)] text-[10px] font-bold">
                   {shortcutLabels[key].charAt(0)}
                 </span>
                 <span className={`text-sm font-semibold ${textPrimary}`}>{shortcutLabels[key]}</span>
@@ -141,7 +137,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
                   'px-4 py-2 rounded-xl font-mono text-xs font-semibold transition-all duration-200 min-w-[140px] text-center',
                   recordingKey === key
                     ? 'tool-accent-bg text-white shadow-sm animate-pulse'
-                    : `${isDark ? 'bg-[#252525] text-[#f5f2ed] border-[#ffffff]/10' : 'bg-white text-[#1c1c1c] border-[#1c1c1c]/10'} border hover:opacity-80`,
+                    : 'bg-[var(--tool-surface)] text-[var(--tool-text)] border border-[var(--tool-border)] hover:bg-[var(--tool-surface-hover)]',
                 ].join(' ')}
               >
                 {recordingKey === key ? '按下快捷键...' : formatShortcut(editingShortcuts[key])}
@@ -150,7 +146,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
           ))}
 
           {/* 提示 */}
-          <div className={`mt-4 p-4 rounded-xl border ${isDark ? 'bg-[#f4a261]/5 border-[#f4a261]/15' : 'bg-[#d65a31]/5 border-[#d65a31]/12'}`}>
+          <div className="mt-4 p-4 rounded-xl border border-[var(--tool-brand)]/20 bg-[var(--tool-brand-soft)]">
             <p className={`text-xs font-bold mb-2 tool-accent`}>提示</p>
             <div className={`text-xs space-y-1 ${textSecondary}`}>
               <p>• 快捷键必须包含 Ctrl (Windows) 或 ⌘ (Mac)</p>

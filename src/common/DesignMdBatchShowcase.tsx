@@ -209,7 +209,13 @@ export const DesignMdBatchShowcase: React.FC<DesignMdBatchShowcaseProps> = ({ co
                   {config.previewImages.map((img, i) => (
                     <div key={i} className="rounded-lg border bg-white overflow-hidden">
                       {img.url ? (
-                        <img src={img.url} alt={`Preview ${i + 1}`} className="w-full h-auto" />
+                        <img
+                          src={img.url}
+                          alt={`Preview ${i + 1}`}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-auto"
+                        />
                       ) : (
                         <div className="h-48 flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
                           预览图不可用

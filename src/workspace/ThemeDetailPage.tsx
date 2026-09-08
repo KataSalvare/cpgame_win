@@ -54,21 +54,21 @@ export const ThemeDetailPage: React.FC = () => {
   const info = themeId ? getThemeInfo(themeId) : { name: '未知主题', description: '' }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <div className="bg-white border-b px-6 py-4">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-          <NavLink to="/themes" className="hover:text-gray-900">主题列表</NavLink>
+    <div className="h-full flex flex-col bg-[var(--tool-background)] text-[var(--tool-text)]">
+      <div className="bg-[var(--tool-surface)] border-b border-[var(--tool-border)] px-6 py-4">
+        <div className="flex items-center gap-2 text-sm text-[var(--tool-text-muted)] mb-2">
+          <NavLink to="/themes" className="hover:text-[var(--tool-brand)]">主题列表</NavLink>
           <ChevronRight size={14} />
-          <span className="text-gray-900">{info.name}</span>
+          <span className="text-[var(--tool-text)]">{info.name}</span>
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">{info.name}</h1>
-            <p className="text-sm text-gray-500 mt-1">{info.description}</p>
+            <h1 className="text-xl font-semibold text-[var(--tool-text)]">{info.name}</h1>
+            <p className="text-sm text-[var(--tool-text-muted)] mt-1">{info.description}</p>
           </div>
           <NavLink
             to="/themes"
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm text-[var(--tool-text-muted)] hover:text-[var(--tool-text)] hover:bg-[var(--tool-surface-hover)] rounded-lg transition-colors"
           >
             返回主题列表
           </NavLink>
@@ -77,26 +77,26 @@ export const ThemeDetailPage: React.FC = () => {
 
       <div className="flex-1 overflow-hidden flex">
         <div className="flex-1 overflow-auto p-6">
-          <div className="bg-white rounded-lg shadow-sm border p-6 min-h-[600px]">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">主题预览</h2>
-            {ThemeComponent ? React.createElement(ThemeComponent) : <div className="text-gray-500">主题组件加载失败</div>}
+          <div className="bg-[var(--tool-surface)] rounded-lg shadow-sm border border-[var(--tool-border)] p-6 min-h-[600px]">
+            <h2 className="text-lg font-medium text-[var(--tool-text)] mb-4">主题预览</h2>
+            {ThemeComponent ? React.createElement(ThemeComponent) : <div className="text-[var(--tool-text-muted)]">主题组件加载失败</div>}
           </div>
         </div>
 
-        <div className="w-[400px] border-l bg-white overflow-auto">
-          <div className="p-4 border-b">
-            <h3 className="font-medium text-gray-900">设计规范</h3>
-            <p className="text-xs text-gray-500 mt-1">{themeId}/DESIGN.md</p>
+        <div className="w-[400px] border-l border-[var(--tool-border)] bg-[var(--tool-surface)] overflow-auto">
+          <div className="p-4 border-b border-[var(--tool-border)]">
+            <h3 className="font-medium text-[var(--tool-text)]">设计规范</h3>
+            <p className="text-xs text-[var(--tool-text-muted)] mt-1">{themeId}/DESIGN.md</p>
           </div>
           <div className="p-4">
             {loading ? (
               <div className="flex items-center justify-center py-10">
-                <div className="animate-spin w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full" />
+                <div className="animate-spin w-5 h-5 border-2 border-[var(--tool-brand)] border-t-transparent rounded-full" />
               </div>
             ) : designDoc ? (
               <MarkdownDocument content={designDoc} />
             ) : (
-              <div className="text-gray-400 text-center py-10">暂无设计文档</div>
+              <div className="text-[var(--tool-text-subtle)] text-center py-10">暂无设计文档</div>
             )}
           </div>
         </div>

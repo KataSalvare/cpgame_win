@@ -45,12 +45,12 @@ export default function AnnotationPanel({
 
   const visibleCategories = categories.filter((c) => selectedCategories.has(c.key))
 
-  const textPrimary = isDark ? 'text-[#f5f2ed]' : 'text-[#1c1c1c]'
-  const textSecondary = isDark ? 'text-[#a0a0a0]' : 'text-[#6b6b6b]'
-  const textMuted = isDark ? 'text-[#808080]' : 'text-[#a0a0a0]'
-  const borderClass = isDark ? 'border-[#ffffff]/8' : 'border-[#1c1c1c]/8'
-  const hoverSurface = isDark ? 'hover:bg-[#333333]' : 'hover:bg-[#efe9e0]'
-  const selectedSurface = isDark ? 'bg-[#c49378]/10 text-[#d49a7a]' : 'bg-[#c4785a]/10 text-[#b86b4f]'
+  const textPrimary = 'text-[var(--tool-text)]'
+  const textSecondary = 'text-[var(--tool-text-muted)]'
+  const textMuted = 'text-[var(--tool-text-subtle)]'
+  const borderClass = 'border-[var(--tool-border)]'
+  const hoverSurface = 'hover:bg-[var(--tool-surface-hover)]'
+  const selectedSurface = 'bg-[var(--tool-brand-soft)] text-[var(--tool-brand)]'
 
   return (
     <div className="h-full flex flex-col">
