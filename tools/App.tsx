@@ -74,6 +74,7 @@ function AppContent() {
     previewContainer,
     currentPath: location.pathname,
     theme,
+    deviceMode,
     onOpenDocAnnotations: useCallback(() => {
       setDocTab('annotations')
       setDocOpen(true)

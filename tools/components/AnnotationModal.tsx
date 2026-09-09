@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react'
+import { useState, useMemo, useEffect, useRef, useLayoutEffect, useCallback } from 'react'
 import { X, Plus, Trash2, Check } from 'lucide-react'
 import { DEFAULT_CATEGORY_KEYS, type Annotation, type AnnotationCategory } from '../lib/annotations'
 
@@ -12,6 +12,8 @@ interface AnnotationModalProps {
   categories: AnnotationCategory[]
   theme: Theme
   anchor: { x: number; y: number }
+  previewContainer: HTMLElement | null
+  constrainToPreview?: boolean
   readOnly?: boolean
   onSave: (annotation: Annotation) => void
   onDelete: (id: string) => void
@@ -45,6 +47,8 @@ export default function AnnotationModal({
   categories,
   theme,
   anchor,
+  previewContainer,
+  constrainToPreview = false,
   readOnly = false,
   onSave,
   onDelete,
@@ -130,56 +134,78 @@ export default function AnnotationModal({
   )
 
   const MODAL_WIDTH = 380
-  const estimatedStyle = useMemo(() => {
+  const getViewportBounds = useCallback(() => {
+    if (constrainToPreview && previewContainer) {
+      const rect = previewContainer.getBoundingClientRect()
+      return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+      }
+    }
+    return {
+      left: 0,
+      top: 0,
+      right: window.innerWidth,
+      bottom: window.innerHeight,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    }
+  }, [constrainToPreview, previewContainer])
+
+  const estimatedStyle = (() => {
     const padding = 16
     const gap = 8
     const markerHalf = 12
-    const vw = window.innerWidth
-    const vh = window.innerHeight
+    const viewport = getViewportBounds()
     const isEdit = !readOnly
-    const width = Math.min(MODAL_WIDTH, vw - 32)
-    const height = Math.min(isEdit ? 520 : 260, vh * 0.85)
+    const width = Math.min(MODAL_WIDTH, viewport.width - padding * 2)
+    const height = Math.min(isEdit ? 520 : 260, viewport.height * 0.85)
 
     let left = anchor.x + markerHalf + gap
-    if (left + width > vw - padding) {
+    if (left + width > viewport.right - padding) {
       left = anchor.x - markerHalf - gap - width
     }
-    left = Math.max(padding, Math.min(left, vw - width - padding))
+    left = Math.max(viewport.left + padding, Math.min(left, viewport.right - width - padding))
 
-    const spaceBelow = vh - padding - (anchor.y + markerHalf + gap)
-    const spaceAbove = anchor.y - markerHalf - gap - padding
+    const spaceBelow = viewport.bottom - padding - (anchor.y + markerHalf + gap)
+    const spaceAbove = anchor.y - markerHalf - gap - viewport.top - padding
     let top: number
     if (spaceBelow >= height) {
       top = anchor.y + markerHalf + gap
     } else if (spaceAbove >= height) {
       top = anchor.y - markerHalf - gap - height
     } else {
-      top = spaceBelow >= spaceAbove ? vh - height - padding : padding
+      top = spaceBelow >= spaceAbove
+        ? viewport.bottom - height - padding
+        : viewport.top + padding
     }
 
     return { left, top }
-  }, [anchor, readOnly])
+  })()
 
   useLayoutEffect(() => {
     if (!isOpen || !modalRef.current) return
     const el = modalRef.current
     const rect = el.getBoundingClientRect()
-    const vw = window.innerWidth
-    const vh = window.innerHeight
+    const viewport = getViewportBounds()
     const padding = 16
     let left = rect.left
     let top = rect.top
-    if (left + rect.width > vw - padding) {
-      left = vw - rect.width - padding
+    if (left + rect.width > viewport.right - padding) {
+      left = viewport.right - rect.width - padding
     }
-    if (left < padding) left = padding
-    if (top + rect.height > vh - padding) {
-      top = vh - rect.height - padding
+    if (left < viewport.left + padding) left = viewport.left + padding
+    if (top + rect.height > viewport.bottom - padding) {
+      top = viewport.bottom - rect.height - padding
     }
-    if (top < padding) top = padding
+    if (top < viewport.top + padding) top = viewport.top + padding
     el.style.left = `${left}px`
     el.style.top = `${top}px`
-  }, [isOpen, estimatedStyle])
+  }, [isOpen, estimatedStyle, getViewportBounds])
 
   if (!isOpen || !annotation) return null
 

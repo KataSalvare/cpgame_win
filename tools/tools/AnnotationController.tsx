@@ -4,7 +4,7 @@ import AnnotationLayer from '../components/AnnotationLayer'
 import AnnotationModal from '../components/AnnotationModal'
 import { useAnnotations } from '../hooks/useAnnotations'
 import type { Annotation, AnnotationCategory } from '../lib/annotations'
-import { findElementBySelector, getElementPosition } from '../lib/annotations'
+import { findElementBySelector, getElementPosition, isElementInViewport } from '../lib/annotations'
 import type { Theme } from '../lib/shortcuts'
 
 export interface AnnotationControllerState {
@@ -28,6 +28,7 @@ interface UseAnnotationControllerOptions {
   previewContainer: HTMLElement | null
   currentPath: string
   theme: Theme
+  deviceMode: 'mobile' | 'pc'
   onOpenDocAnnotations: () => void
 }
 
@@ -35,6 +36,7 @@ export function useAnnotationController({
   previewContainer,
   currentPath,
   theme,
+  deviceMode,
   onOpenDocAnnotations,
 }: UseAnnotationControllerOptions): {
   state: AnnotationControllerState
@@ -136,6 +138,12 @@ export function useAnnotationController({
     (id: string) => {
       const annotation = allAnnotations.find((a) => a.id === id)
       if (annotation && previewContainer) {
+        if (annotation.selector) {
+          const element = findElementBySelector(annotation.selector, previewContainer)
+          if (element && !isElementInViewport(element, previewContainer)) {
+            element.scrollIntoView({ block: 'center', inline: 'nearest' })
+          }
+        }
         setSelectedAnnotationId(id)
         openAnnotationModal(annotation, getAnnotationAnchor(annotation), !annotationEditMode)
         onOpenDocAnnotations()
@@ -296,6 +304,8 @@ export function useAnnotationController({
         categories={annotationCategories}
         theme={theme}
         anchor={modalAnchor}
+        previewContainer={previewContainer}
+        constrainToPreview={deviceMode === 'pc'}
         readOnly={modalReadOnly}
         onSave={handleSaveAnnotationModal}
         onDelete={handleDeleteAnnotationModal}

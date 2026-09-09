@@ -223,6 +223,18 @@ export function isElementVisible(element: HTMLElement, container: HTMLElement): 
   return true
 }
 
+// 判断元素是否位于预览容器当前可视区域内
+export function isElementInViewport(element: HTMLElement, container: HTMLElement): boolean {
+  const elementRect = element.getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect()
+  return (
+    elementRect.bottom > containerRect.top &&
+    elementRect.top < containerRect.bottom &&
+    elementRect.right > containerRect.left &&
+    elementRect.left < containerRect.right
+  )
+}
+
 // 获取元素的有效 z-index 数值（auto 视为 0）
 function getZIndex(element: HTMLElement): number {
   const z = window.getComputedStyle(element).zIndex

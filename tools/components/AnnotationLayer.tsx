@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import type { Annotation, AnnotationCategory } from '../lib/annotations'
-import { findElementBySelector, getElementPosition, getElementSelector, isElementVisible, findActiveOverlay } from '../lib/annotations'
+import { findElementBySelector, getElementPosition, getElementSelector, isElementInViewport, isElementVisible, findActiveOverlay } from '../lib/annotations'
 
 interface AnnotationLayerProps {
   annotations: Annotation[]
@@ -45,10 +45,11 @@ export default function AnnotationLayer({
         if (el) {
           nextPositions[annotation.id] = getElementPosition(el, previewContainer, annotation.position)
           const visible = isElementVisible(el, previewContainer)
+          const inViewport = isElementInViewport(el, previewContainer)
           if (activeOverlay) {
-            nextVisible[annotation.id] = visible && activeOverlay.contains(el)
+            nextVisible[annotation.id] = visible && inViewport && activeOverlay.contains(el)
           } else {
-            nextVisible[annotation.id] = visible && !el.closest('[data-overlay], [data-modal], dialog, [role="dialog"], [role="alertdialog"]')
+            nextVisible[annotation.id] = visible && inViewport && !el.closest('[data-overlay], [data-modal], dialog, [role="dialog"], [role="alertdialog"]')
           }
         }
       } else if (annotation.x != null && annotation.y != null) {
@@ -63,6 +64,28 @@ export default function AnnotationLayer({
   useEffect(() => {
     queueMicrotask(() => recomputePositions())
   }, [recomputePositions])
+
+  useEffect(() => {
+    if (!previewContainer) return
+
+    let frameId: number | null = null
+    const scheduleRecompute = () => {
+      if (frameId !== null) return
+      frameId = requestAnimationFrame(() => {
+        frameId = null
+        recomputePositions()
+      })
+    }
+
+    // 捕获预览内容及其内部可滚动区域的滚动，确保标记跟随目标元素移动。
+    document.addEventListener('scroll', scheduleRecompute, true)
+    window.addEventListener('resize', scheduleRecompute)
+    return () => {
+      document.removeEventListener('scroll', scheduleRecompute, true)
+      window.removeEventListener('resize', scheduleRecompute)
+      if (frameId !== null) cancelAnimationFrame(frameId)
+    }
+  }, [previewContainer, recomputePositions])
 
   useEffect(() => {
     if (!previewContainer) return
