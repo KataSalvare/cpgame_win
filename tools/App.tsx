@@ -193,7 +193,7 @@ function AppContent() {
 
           <div className="flex-1 flex overflow-hidden">
             <div className="flex-1 overflow-auto p-4 lg:p-5 tool-workspace">
-              <div className="min-h-full rounded-[1.75rem] p-3 lg:p-4 tool-stage">
+            <div className="h-full min-h-full rounded-[1.75rem] p-3 lg:p-4 tool-stage">
               <div
                 className={`relative z-[100] mx-auto transition-[width,height,margin] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
                   deviceMode === 'mobile'
