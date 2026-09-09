@@ -171,7 +171,7 @@ npm run build
 npm run preview
 ```
 
-批注保存接口由 Vite 开发服务器提供：开发时通过 `/api/annotations` 读写 `src/resources/annotations.json`；生产部署需要提供等价的后端接口，静态文件预览本身不会提供写入能力。
+批注保存接口由 Vite 开发服务器提供：开发时通过 `/api/annotations` 读写 `src/resources/annotations.json`；生产部署使用根目录 `wrangler.jsonc` 配置的 Worker，通过同一路径读写 Cloudflare KV，其他请求继续由 Static Assets 提供。
 
 ## 配置说明
 

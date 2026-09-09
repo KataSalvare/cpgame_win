@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "product-make",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-09-09",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "ANNOTATIONS_KV",
+      "id": "66e5f21136474d94b87413df97a81ab5"
+    }
+  ]
+}
