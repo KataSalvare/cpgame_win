@@ -26,6 +26,15 @@
 
 `npm run preview` 只检查 Vite 生成的静态页面，不会完整验证 Cloudflare Worker、批注 API 或 KV。修改 Worker 或部署配置时，应使用 Wrangler 做额外验证。
 
+## Git Hooks
+
+执行 `npm install` 后，项目会自动启用版本化的 `.githooks/`：
+
+- `pre-commit`：运行 `npm run lint`。
+- `pre-push`：运行 `npm run verify:push`，检查 lint、build 和文档交接；如果本次推送涉及 Worker 或 `wrangler.jsonc`，还会运行 Wrangler dry-run。
+
+Hook 的详细行为、安全边界和故障处理见 [`rules/git-hooks-guide.md`](rules/git-hooks-guide.md)。Hook 不会自动修改源码、写入批注、访问远程 KV 或发布生产环境。
+
 ## 如何修改原型
 
 ### 新增原型
@@ -75,51 +84,11 @@
 
 运行 `npm run dev` 时，Vite 会通过 `/api/annotations` 读取和写入 `src/resources/annotations.json`。本地修改默认会影响该文件，请在提交前确认数据内容。
 
-### 生产环境 KV 配置
+### Cloudflare 部署
 
-生产环境使用 Cloudflare Worker、Static Assets 和 Workers KV。配置入口是项目根目录的 `wrangler.jsonc`，需要保持以下配置关系：
+生产环境使用 Cloudflare Worker、Static Assets 和 Workers KV。Worker 入口、Assets 路由、`ANNOTATIONS_KV` 绑定、`/api/annotations` 数据行为、本地 KV 验证和生产部署流程统一维护在 [`rules/cloudflare-deployment-guide.md`](rules/cloudflare-deployment-guide.md)。
 
-| 配置项 | 当前值 | 说明 |
-| --- | --- | --- |
-| Worker 名称 | `product-make` | 生产 Worker 名称 |
-| Worker 入口 | `worker/index.ts` | 批注 API 和静态资源转发入口 |
-| 静态资源目录 | `dist` | `npm run build` 生成的前端文件 |
-| 静态资源绑定 | `ASSETS` | Worker 访问静态资源时使用 |
-| KV 绑定名 | `ANNOTATIONS_KV` | Worker 访问批注 KV 时使用 |
-| KV namespace | `pm-annotations` | 生产批注数据所在的 namespace |
-| KV namespace ID | `66e5f21136474d94b87413df97a81ab5` | namespace 的唯一 ID |
-| API 路径 | `/api/annotations` | 批注读取和保存地址 |
-
-修改 KV 配置时，只修改 `wrangler.jsonc` 中的绑定关系，并确保代码使用的绑定名与配置中的绑定名一致。不要只在 Cloudflare Dashboard 中手动添加绑定，否则后续 Wrangler 部署可能覆盖 Dashboard 配置。
-
-首次部署或 KV 为空时，API 会返回 `src/resources/annotations.json` 中的默认批注。第一次保存批注后，完整批注数据会写入 KV 的 `annotations` Key，不需要手动创建 Key。
-
-### 首次配置 Cloudflare
-
-首次接入或更换环境时：
-
-1. 准备有 Workers 和 Workers KV 权限的 Cloudflare 账号。
-2. 使用 `npx wrangler login` 登录 Wrangler。
-3. 在 Cloudflare 中创建或确认 `pm-annotations` namespace，并取得 namespace ID。
-4. 将 namespace ID 写入 `wrangler.jsonc` 的 `ANNOTATIONS_KV` 绑定配置。
-5. 执行 `npx wrangler deploy --dry-run`，确认 Worker、Assets 和 KV 绑定均被识别。
-
-staging 和 production 应使用不同的 KV namespace，避免测试数据覆盖生产批注。
-
-`/api/*` 请求必须优先交给 Worker 处理；其他请求继续由 `dist` 中的静态资源提供。修改 Assets 或 API 路由配置后，应重新执行构建并进行本地验证。
-
-### 生产部署
-
-1. 确认 `wrangler.jsonc` 中的 KV namespace ID 正确。
-2. 执行 `npm run build` 生成最新的 `dist`。
-3. 执行 `npx wrangler deploy` 部署 Worker 和静态资源。
-4. 访问生产地址，检查首页和 `/api/annotations` 是否正常。
-
-本地执行 `npx wrangler dev` 时，Wrangler 默认使用本地 KV 状态，不会修改线上 namespace。除非明确需要操作线上数据，否则不要使用远程 KV 开发模式。
-
-当前批注 API 没有额外的用户身份校验。公开部署后，知道接口地址的访问者理论上可以提交 POST 覆盖整份批注数据；不要在其中存储敏感信息。多人或公开使用前，应在 Cloudflare Access、鉴权网关或其他写入保护层中限制 API 访问。
-
-当前数据模型使用单个 `annotations` Key 保存完整批注 JSON，所有使用者共享同一份数据。多人同时保存时以后写入的数据为准，不提供用户、项目或租户级隔离。
+部署前至少执行 `npm run build` 和 `npx wrangler deploy --dry-run`；只有用户明确授权后才执行正式部署。
 
 ## 修改边界
 
@@ -138,14 +107,14 @@ staging 和 production 应使用不同的 KV namespace，避免测试数据覆�
 
 ## 提交前检查
 
-提交修改前至少执行：
+本地安装依赖后，提交和推送会自动执行版本化 Git Hook。手动检查时执行：
 
 - `npm run lint`
 - `npm run build`
-- 如果修改了 PRD、SPEC 或其他交接文档，执行 `npm run check:docs`。
-- 如果修改了 Worker 或 `wrangler.jsonc`，再执行 `npx wrangler deploy --dry-run`。
+- `npm run check:docs`
+- 如果修改了 Worker 或 `wrangler.jsonc`，执行 `npx wrangler deploy --dry-run`。
 
-确认检查通过、页面预览正常、批注读写正常后，再提交或部署。
+不同修改范围的完整检查矩阵见 [`rules/quality-gates-guide.md`](rules/quality-gates-guide.md)。确认检查通过、页面预览正常、批注读写正常后，再提交或部署。
 
 ## 相关文档
 

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { FileText, MapPin, XIcon } from 'lucide-react'
 import AnnotationPanel from './AnnotationPanel'
 import MarkdownDocument from './MarkdownDocument'
 import type { Annotation, AnnotationCategory } from '../lib/annotations'
+import { useToolEntrance } from '../hooks/useToolEntrance'
 
 export type Theme = 'light' | 'dark'
 
@@ -50,6 +51,9 @@ export default function DocDrawer({
   const isDark = theme === 'dark'
   const [docContent, setDocContent] = useState<string | null>(null)
   const [docLoading, setDocLoading] = useState(false)
+  const drawerRef = useRef<HTMLDivElement>(null)
+
+  useToolEntrance(drawerRef, drawerRef, isOpen, { x: 20, duration: 0.28 })
 
   const loadSpec = useCallback(async () => {
     if (!currentPage) {
@@ -91,8 +95,9 @@ export default function DocDrawer({
 
   return (
     <div
+      ref={drawerRef}
       className={[
-        'flex flex-col border-l z-[1000] animate-tool-slide-right',
+        'flex flex-col border-l z-[1000]',
         // 移动端：从右侧滑出的固定抽屉，无遮罩，方便快速切换
         'fixed inset-y-0 right-0 w-[320px]',
         // PC：作为布局的一部分并排显示，原型完整可见
@@ -150,7 +155,7 @@ export default function DocDrawer({
           <div className="h-full overflow-y-auto px-5 py-5">
             {docLoading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="animate-spin w-6 h-6 border-2 border-current border-t-transparent rounded-full tool-accent" />
+                <div className="animate-spin motion-reduce:animate-none w-6 h-6 border-2 border-current border-t-transparent rounded-full tool-accent" />
               </div>
             ) : docContent ? (
               <MarkdownDocument content={docContent} theme={theme} />

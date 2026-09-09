@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DocDrawer from './components/DocDrawer'
 import { Sidebar } from './shell/Sidebar'
 import { Topbar } from './shell/Topbar'
@@ -11,8 +11,28 @@ import { ThemeDetailPage } from '@/workspace/ThemeDetailPage'
 import { ThemesListPage } from '@/workspace/ThemesListPage'
 import { DocDetailPage } from '@/workspace/DocDetailPage'
 import { DocsListPage } from '@/workspace/DocsListPage'
+import { useToolEntrance } from './hooks/useToolEntrance'
 
 const DEFAULT_PROJECT_NAME = '项目原型预览'
+type Toast = { message: string; type: 'success' | 'error' }
+
+function ToolToast({ toast, theme }: { toast: Toast; theme: Theme }) {
+  const toastRef = useRef<HTMLDivElement>(null)
+  useToolEntrance(toastRef, toastRef, true, { y: 10, scale: 0.98, duration: 0.22 })
+
+  return (
+    <div
+      ref={toastRef}
+      className={`pointer-events-auto px-4 py-2.5 rounded-xl text-sm font-medium shadow-xl border ${
+        toast.type === 'success'
+          ? `${theme === 'dark' ? 'tool-panel-dark' : 'tool-panel-light'} tool-accent border-current/10`
+          : `${theme === 'dark' ? 'bg-red-950/90 text-red-200 border-red-900/50' : 'bg-red-50 text-red-700 border-red-100'} shadow-lg`
+      }`}
+    >
+      {toast.message}
+    </div>
+  )
+}
 
 function AppContent() {
   const location = useLocation()
@@ -53,7 +73,8 @@ function AppContent() {
     }
   }, [sidebarCollapsed])
 
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [toast, setToast] = useState<Toast | null>(null)
+  const toastTimeoutRef = useRef<number | null>(null)
   const [shortcuts, setShortcuts] = useState(loadShortcuts)
   const [theme, setTheme] = useState<Theme>(loadTheme)
   const [projectName, setProjectName] = useState<string>(loadProjectName)
@@ -93,8 +114,16 @@ function AppContent() {
   }, [])
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    if (toastTimeoutRef.current !== null) window.clearTimeout(toastTimeoutRef.current)
     setToast({ message, type })
-    setTimeout(() => setToast(null), 3000)
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToast(null)
+      toastTimeoutRef.current = null
+    }, 3000)
+  }, [])
+
+  useEffect(() => () => {
+    if (toastTimeoutRef.current !== null) window.clearTimeout(toastTimeoutRef.current)
   }, [])
 
   const inferredDeviceMode = useMemo<'mobile' | 'pc'>(() => {
@@ -158,13 +187,7 @@ function AppContent() {
         <main className="flex-1 overflow-hidden flex flex-col relative">
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1100] pointer-events-none">
             {toast && (
-              <div className={`animate-tool-enter pointer-events-auto px-4 py-2.5 rounded-xl text-sm font-medium shadow-xl border ${
-                toast.type === 'success'
-                  ? `${theme === 'dark' ? 'tool-panel-dark' : 'tool-panel-light'} tool-accent border-current/10`
-                  : `${theme === 'dark' ? 'bg-red-950/90 text-red-200 border-red-900/50' : 'bg-red-50 text-red-700 border-red-100'} shadow-lg`
-              }`}>
-                {toast.message}
-              </div>
+              <ToolToast key={`${toast.type}-${toast.message}`} toast={toast} theme={theme} />
             )}
           </div>
 

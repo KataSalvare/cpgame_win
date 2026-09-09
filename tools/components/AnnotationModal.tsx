@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useLayoutEffect, useCallback } from 'react'
 import { X, Plus, Trash2, Check } from 'lucide-react'
 import { DEFAULT_CATEGORY_KEYS, type Annotation, type AnnotationCategory } from '../lib/annotations'
+import { useToolEntrance } from '../hooks/useToolEntrance'
 
 export type Theme = 'light' | 'dark'
 
@@ -207,6 +208,8 @@ export default function AnnotationModal({
     el.style.top = `${top}px`
   }, [isOpen, estimatedStyle, getViewportBounds])
 
+  useToolEntrance(modalRef, modalRef, isOpen, { y: 6, scale: 0.97, duration: 0.22 })
+
   if (!isOpen || !annotation) return null
 
   const inputBase = 'w-full px-3 py-2 text-sm rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] text-[var(--tool-text)] placeholder-[var(--tool-text-subtle)] outline-none transition-all duration-200 focus:border-[var(--tool-focus)] focus:ring-2 focus:ring-[var(--tool-focus)]/20'
@@ -217,7 +220,7 @@ export default function AnnotationModal({
         ref={modalRef}
         style={estimatedStyle}
         className={[
-          'absolute pointer-events-auto w-[380px] max-w-[calc(100vw-32px)] max-h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-tool-enter border',
+          'absolute pointer-events-auto w-[380px] max-w-[calc(100vw-32px)] max-h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border',
           'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >

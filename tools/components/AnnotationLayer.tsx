@@ -184,7 +184,7 @@ export default function AnnotationLayer({
     >
       {selecting && hoveredElement && (
         <div
-          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/10 transition-all duration-150"
+          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/10 transition-[box-shadow,opacity] duration-150"
           style={(() => {
             const rect = hoveredElement.getBoundingClientRect()
             const containerRect = previewContainer.getBoundingClientRect()
@@ -200,7 +200,7 @@ export default function AnnotationLayer({
 
       {highlightedElement && (
         <div
-          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/12 animate-pulse"
+          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/12 animate-pulse motion-reduce:animate-none"
           style={(() => {
             const rect = highlightedElement.getBoundingClientRect()
             const containerRect = previewContainer.getBoundingClientRect()
@@ -243,7 +243,7 @@ export default function AnnotationLayer({
             }}
             className={[
               'absolute flex items-center justify-center w-6 h-6 rounded-full text-white text-[11px] font-bold',
-              'select-none transition-all duration-200 ease-out',
+              'select-none transition-[box-shadow,opacity,transform] duration-200 ease-out',
               selecting ? 'pointer-events-none opacity-50' : 'pointer-events-auto cursor-pointer hover:scale-110',
               isSelected || isHighlighted ? 'ring-[3px] ring-white/70 dark:ring-black/50 scale-110 annotation-glow' : 'shadow-lg hover:shadow-xl',
             ].join(' ')}
@@ -255,12 +255,12 @@ export default function AnnotationLayer({
       })}
 
       {selecting && (
-        <div className="absolute top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text)] text-sm font-medium shadow-xl pointer-events-none animate-tool-enter">
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text)] text-sm font-medium shadow-xl pointer-events-none animate-tool-enter motion-reduce:animate-none">
           点击页面元素添加批注
         </div>
       )}
       {selecting && hoveredSelector && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[80%] px-4 py-2 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text-muted)] text-xs font-mono truncate shadow-xl pointer-events-none animate-tool-enter">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[80%] px-4 py-2 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text-muted)] text-xs font-mono truncate shadow-xl pointer-events-none animate-tool-enter motion-reduce:animate-none">
           {hoveredSelector}
         </div>
       )}

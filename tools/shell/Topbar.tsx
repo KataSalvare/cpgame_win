@@ -326,7 +326,7 @@ export const Topbar = ({
             className={`${baseBtn} ${isDark ? 'text-[#f24e1e] hover:bg-[#f24e1e]/10' : 'text-[#f24e1e] hover:bg-[#f24e1e]/8'} disabled:opacity-40 disabled:cursor-not-allowed`}
           >
             {copying ? (
-              <div className="animate-spin w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full" />
+              <div className="animate-spin motion-reduce:animate-none w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full" />
             ) : (
               <FigmaIcon />
             )}

@@ -3,6 +3,7 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { Keyboard, Moon, MoreHorizontal, Sun } from 'lucide-react'
 import type { Theme } from '../lib/shortcuts'
 import { TooltipButton } from './TooltipButton'
+import { useToolEntrance } from '../hooks/useToolEntrance'
 
 interface ToolbarMoreMenuProps {
   theme: Theme
@@ -16,6 +17,9 @@ export function ToolbarMoreMenu({ theme, toggleTheme, onOpenShortcuts }: Toolbar
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useToolEntrance(rootRef, menuRef, open, { y: -6, scale: 0.98, duration: 0.18 })
 
   useEffect(() => {
     if (!open) return
@@ -82,6 +86,7 @@ export function ToolbarMoreMenu({ theme, toggleTheme, onOpenShortcuts }: Toolbar
 
       {open && (
         <div
+          ref={menuRef}
           role="menu"
           aria-label="更多工具"
           onKeyDown={handleMenuKeyDown}

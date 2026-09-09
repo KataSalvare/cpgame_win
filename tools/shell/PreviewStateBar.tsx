@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 import type { PageStateOption } from '../config/pages'
+import { useToolEntrance } from '../hooks/useToolEntrance'
 
 interface PreviewStateBarProps {
   states: readonly PageStateOption[]
@@ -20,6 +21,8 @@ export function PreviewStateBar({ states, value, onChange, theme }: PreviewState
   const [panelPosition, setPanelPosition] = useState({ top: -9999, left: -9999 })
   const activeState = value ?? states[0]?.id
   const activeOption = states.find((state) => state.id === activeState) ?? states[0]
+
+  useToolEntrance(floatingPanelRef, floatingPanelRef, open, { y: -6, scale: 0.98, duration: 0.18 })
 
   useLayoutEffect(() => {
     if (!open) return

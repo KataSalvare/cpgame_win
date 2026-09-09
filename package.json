@@ -8,12 +8,16 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "check:docs": "node scripts/check-doc-handoff.mjs"
+    "check:docs": "node scripts/check-doc-handoff.mjs",
+    "prepare": "node scripts/install-git-hooks.mjs",
+    "verify:push": "node scripts/verify-push.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
+    "@gsap/react": "^2.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "gsap": "^3.15.0",
     "lucide-react": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -38,6 +42,7 @@
     "tailwindcss": "^4.3.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "wrangler": "^4.130.0"
   }
 }

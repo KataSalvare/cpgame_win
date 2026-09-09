@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Keyboard, XIcon, RotateCcw } from 'lucide-react'
 import {
   DEFAULT_SHORTCUTS,
@@ -8,6 +8,7 @@ import {
   setShortcutModalOpen,
   type ShortcutConfig,
 } from '../lib/shortcuts'
+import { useToolEntrance } from '../hooks/useToolEntrance'
 
 interface ShortcutsDialogProps {
   isOpen: boolean
@@ -24,7 +25,12 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
 }) => {
   const [editingShortcuts, setEditingShortcuts] = useState<ShortcutConfig>(() => shortcuts)
   const [recordingKey, setRecordingKey] = useState<keyof ShortcutConfig | null>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const os = getOS()
+
+  useToolEntrance(overlayRef, overlayRef, isOpen, { scale: 1, y: 0, duration: 0.2 })
+  useToolEntrance(overlayRef, dialogRef, isOpen, { y: 8, scale: 0.97, duration: 0.22 })
 
   useEffect(() => {
     setShortcutModalOpen(isOpen)
@@ -85,11 +91,12 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
   const hoverSurface = 'hover:bg-[var(--tool-surface-hover)]'
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center animate-tool-fade-in">
+    <div ref={overlayRef} className="fixed inset-0 z-[1000] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
+        ref={dialogRef}
         className={[
-          'relative rounded-2xl shadow-2xl w-[520px] max-w-[92vw] max-h-[90vh] flex flex-col overflow-hidden animate-tool-enter border',
+          'relative rounded-2xl shadow-2xl w-[520px] max-w-[92vw] max-h-[90vh] flex flex-col overflow-hidden border',
           'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >
@@ -136,7 +143,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
                 className={[
                   'px-4 py-2 rounded-xl font-mono text-xs font-semibold transition-all duration-200 min-w-[140px] text-center',
                   recordingKey === key
-                    ? 'tool-accent-bg text-white shadow-sm animate-pulse'
+                    ? 'tool-accent-bg text-white shadow-sm animate-pulse motion-reduce:animate-none'
                     : 'bg-[var(--tool-surface)] text-[var(--tool-text)] border border-[var(--tool-border)] hover:bg-[var(--tool-surface-hover)]',
                 ].join(' ')}
               >
