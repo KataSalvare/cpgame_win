@@ -212,7 +212,7 @@ export default function AnnotationModal({
 
   if (!isOpen || !annotation) return null
 
-  const inputBase = 'w-full px-3 py-2 text-sm rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] text-[var(--tool-text)] placeholder-[var(--tool-text-subtle)] outline-none transition-all duration-200 focus:border-[var(--tool-focus)] focus:ring-2 focus:ring-[var(--tool-focus)]/20'
+  const inputBase = 'w-full px-3 py-2.5 text-sm rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] text-[var(--tool-text)] placeholder-[var(--tool-text-subtle)] outline-none tool-control focus:border-[var(--tool-focus)] focus:ring-2 focus:ring-[var(--tool-focus)]/20'
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
@@ -220,12 +220,12 @@ export default function AnnotationModal({
         ref={modalRef}
         style={estimatedStyle}
         className={[
-          'absolute pointer-events-auto w-[380px] max-w-[calc(100vw-32px)] max-h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border',
+          'absolute pointer-events-auto w-[380px] max-w-[calc(100vw-32px)] max-h-[80vh] flex flex-col rounded-2xl overflow-hidden border tool-panel-light dark:tool-panel-dark',
           'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >
         {canEdit ? (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--tool-border)]">
+          <div className="flex items-center justify-between px-5 py-4 bg-[var(--tool-surface-raised)]">
             <div>
               <h2 className="text-sm font-bold text-[var(--tool-text)]">
                 {isNew ? '新增批注' : '编辑批注'}
@@ -236,7 +236,7 @@ export default function AnnotationModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
+              className="flex h-9 w-9 items-center justify-center rounded-xl tool-control text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
             >
               <X size={16} />
             </button>
@@ -244,13 +244,13 @@ export default function AnnotationModal({
         ) : (
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 z-10 p-2 rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
+            className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl tool-control text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
           >
             <X size={16} />
           </button>
         )}
 
-        <div className="px-5 py-3 border-b border-[var(--tool-border)]">
+        <div className="px-5 py-3 bg-[color-mix(in_srgb,var(--tool-background)_24%,transparent)]">
           <div className="flex flex-wrap gap-1.5">
             {tabAnnotations.map((a) => {
               const cat = categories.find((c) => c.key === a.category)
@@ -260,7 +260,7 @@ export default function AnnotationModal({
                 <button
                   key={a.id}
                   onClick={() => onSwitchAnnotation?.(a.id)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 hover:opacity-85"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border tool-control hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
                   style={{
                     borderColor: cat.color,
                     backgroundColor: isActive ? cat.color : isDark ? `${cat.color}25` : `${cat.color}12`,
@@ -277,7 +277,7 @@ export default function AnnotationModal({
                   const cat = unusedCategories[0]
                   if (cat) onAddRelatedAnnotation?.(annotation.selector || '', cat.key)
                 }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-dashed border-[var(--tool-border)] text-[var(--tool-text-muted)] text-[11px] font-medium transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-dashed border-[var(--tool-border)] text-[var(--tool-text-muted)] text-[11px] font-medium tool-control hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
               >
                 <Plus size={10} />
                 新增分类
@@ -330,7 +330,7 @@ export default function AnnotationModal({
                     key={corner.key}
                     onClick={() => setForm((f) => ({ ...f, position: corner.key }))}
                     className={[
-                      'px-2 py-2 text-xs rounded-xl border transition-all duration-200 font-medium',
+                      'px-2 py-2.5 text-xs rounded-xl border tool-control font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]',
                       form.position === corner.key
                         ? 'tool-accent-bg text-white border-transparent shadow-sm'
                         : 'border-[var(--tool-border)] text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]',
@@ -351,7 +351,7 @@ export default function AnnotationModal({
                   <button
                     key={cat.key}
                     onClick={() => setForm((f) => ({ ...f, category: cat.key }))}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 group"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border tool-control group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
                     style={{
                       borderColor: cat.color,
                       backgroundColor: form.category === cat.key ? cat.color : isDark ? `${cat.color}20` : `${cat.color}10`,
@@ -423,7 +423,7 @@ export default function AnnotationModal({
         </div>
 
         {canEdit && (
-          <div className="flex items-center justify-between px-5 py-4 border-t border-[var(--tool-border)]">
+          <div className="flex items-center justify-between px-5 py-4 bg-[var(--tool-surface-raised)]">
             {!isNew ? (
               <button
                 onClick={() => {

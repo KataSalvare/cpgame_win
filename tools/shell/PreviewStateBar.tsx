@@ -141,7 +141,7 @@ export function PreviewStateBar({ states, value, onChange, theme }: PreviewState
   return (
     <div
       data-tool-chrome="preview-state"
-      className="relative flex h-10 items-center rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] p-1 shrink-0"
+      className="relative flex h-10 items-center rounded-2xl bg-[var(--tool-surface-muted)] p-1 shadow-[var(--tool-shadow-sm)] shrink-0"
     >
       <button
         ref={triggerRef}
@@ -154,7 +154,7 @@ export function PreviewStateBar({ states, value, onChange, theme }: PreviewState
           event.stopPropagation()
           setOpen((current) => !current)
         }}
-        className={`flex shrink-0 h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)] ${
+        className={`flex shrink-0 h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium whitespace-nowrap tool-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)] ${
           open
             ? 'border-[var(--tool-brand)]/35 bg-[var(--tool-surface)] text-[var(--tool-text)] shadow-sm'
             : 'border-transparent text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'
@@ -173,7 +173,7 @@ export function PreviewStateBar({ states, value, onChange, theme }: PreviewState
           aria-label="页面状态面板"
           onKeyDown={handleMenuKeyDown}
           style={{ top: panelPosition.top, left: panelPosition.left }}
-          className="fixed z-[2000] min-w-[210px] rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface)] p-2 text-[var(--tool-text)] shadow-2xl"
+          className="fixed z-[2000] min-w-[210px] rounded-2xl border border-[var(--tool-border)] tool-panel-light dark:tool-panel-dark p-2 text-[var(--tool-text)]"
         >
           <div className="px-2.5 pb-2 pt-1 text-[11px] font-semibold text-[var(--tool-text-subtle)]">
             页面状态

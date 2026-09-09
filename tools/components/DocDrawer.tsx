@@ -87,7 +87,6 @@ export default function DocDrawer({
   if (!isOpen || !currentPage) return null
 
   const panelClass = isDark ? 'tool-panel-dark' : 'tool-panel-light'
-  const borderClass = 'border-[var(--tool-border)]'
   const textPrimary = 'text-[var(--tool-text)]'
   const textSecondary = 'text-[var(--tool-text-muted)]'
   const textMuted = 'text-[var(--tool-text-subtle)]'
@@ -97,36 +96,35 @@ export default function DocDrawer({
     <div
       ref={drawerRef}
       className={[
-        'flex flex-col border-l z-[1000]',
+        'flex flex-col z-[1000] tool-panel-light dark:tool-panel-dark shadow-[-14px_0_32px_color-mix(in_srgb,var(--tool-text)_7%,transparent)]',
         // 移动端：从右侧滑出的固定抽屉，无遮罩，方便快速切换
         'fixed inset-y-0 right-0 w-[320px]',
         // PC：作为布局的一部分并排显示，原型完整可见
         'lg:static lg:w-[420px] lg:flex-shrink-0',
         panelClass,
-        borderClass,
       ].join(' ')}
     >
       {/* 头部 */}
-      <div className={`flex items-center justify-between px-5 py-4 border-b ${borderClass}`}>
+      <div className="flex items-center justify-between px-5 py-4 bg-[var(--tool-surface-raised)]">
         <div className="min-w-0">
           <h2 className={`text-sm font-bold truncate ${textPrimary}`}>{currentPage.label}</h2>
           <p className={`text-xs mt-0.5 truncate ${textMuted}`}>{currentPage.dirName}</p>
         </div>
         <button
           onClick={onClose}
-          className={`p-2 rounded-xl transition-all duration-200 ${textSecondary} ${hoverSurface}`}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl tool-control ${textSecondary} ${hoverSurface} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`}
         >
           <XIcon size={18} />
         </button>
       </div>
 
       {/* Tab 切换 */}
-      <div className={`flex border-b ${borderClass}`}>
+      <div className="flex gap-1 px-3 pt-2">
         <button
           onClick={() => setDocTab('spec')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+          className={`flex flex-1 items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold rounded-t-xl tool-control ${
             docTab === 'spec'
-              ? 'tool-accent border-b-2 border-current'
+              ? 'tool-control-active'
               : `${textSecondary} ${hoverSurface}`
           }`}
         >
@@ -135,9 +133,9 @@ export default function DocDrawer({
         </button>
         <button
           onClick={() => setDocTab('annotations')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+          className={`flex flex-1 items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold rounded-t-xl tool-control ${
             docTab === 'annotations'
-              ? 'tool-accent border-b-2 border-current'
+              ? 'tool-control-active'
               : `${textSecondary} ${hoverSurface}`
           }`}
         >
@@ -152,7 +150,7 @@ export default function DocDrawer({
       {/* 内容 */}
       <div className="flex-1 overflow-hidden">
         {docTab === 'spec' ? (
-          <div className="h-full overflow-y-auto px-5 py-5">
+          <div className="h-full overflow-y-auto px-5 py-5 bg-[color-mix(in_srgb,var(--tool-background)_30%,transparent)]">
             {docLoading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin motion-reduce:animate-none w-6 h-6 border-2 border-current border-t-transparent rounded-full tool-accent" />

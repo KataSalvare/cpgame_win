@@ -92,10 +92,10 @@ export const Topbar = ({
   const hasSpec = currentPage != null
   const isDark = theme === 'dark'
 
-  const baseBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium whitespace-nowrap rounded-xl border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`
+  const baseBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium whitespace-nowrap rounded-xl border tool-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`
   const ghostBtn = `${baseBtn} border-transparent text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]`
-  const activeGhostBtn = `${baseBtn} border-[var(--tool-brand)]/35 bg-[var(--tool-brand-soft)] tool-accent shadow-sm`
-  const segmentBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-8 px-3 text-xs font-medium whitespace-nowrap rounded-lg border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`
+  const activeGhostBtn = `${baseBtn} tool-control-active`
+  const segmentBtn = `inline-flex shrink-0 items-center justify-center gap-1.5 h-8 px-3 text-xs font-medium whitespace-nowrap rounded-lg border tool-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`
   const activeSegmentBtn = `${segmentBtn} border-[var(--tool-brand)]/35 bg-[var(--tool-surface)] tool-accent shadow-sm`
   const inactiveSegmentBtn = `${segmentBtn} border-transparent text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]`
   const accentBtn = `${baseBtn} tool-accent-bg text-white hover:bg-[var(--tool-brand-hover)] shadow-sm`
@@ -156,7 +156,7 @@ export const Topbar = ({
   return (
     <>
       <header
-        className="h-14 flex min-w-0 items-center gap-2 px-3 flex-shrink-0 z-[1000] border-b border-[var(--tool-border)] overflow-visible tool-surface-light dark:tool-surface-dark"
+        className="h-14 flex min-w-0 items-center gap-2 px-3 flex-shrink-0 z-[1000] overflow-visible tool-toolbar tool-surface-light dark:tool-surface-dark"
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
@@ -166,25 +166,25 @@ export const Topbar = ({
             e.stopPropagation()
             onToggleSidebarCollapsed()
           }}
-          className="flex shrink-0 items-center justify-center w-9 h-9 rounded-xl border border-transparent text-[var(--tool-text-muted)] transition-all duration-200 hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
+          className="flex shrink-0 items-center justify-center w-9 h-9 rounded-xl border border-transparent text-[var(--tool-text-muted)] tool-control hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
         >
           <PanelLeft size={18} />
         </TooltipButton>
 
         <div className="flex items-center gap-2 ml-1 min-w-0 shrink-0">
-          <div className="flex items-center gap-2 h-9 max-w-[180px] min-[1400px]:max-w-[250px] px-3 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)]">
+          <div className="flex items-center gap-2 h-9 max-w-[180px] min-[1400px]:max-w-[250px] px-3 rounded-xl bg-[var(--tool-surface-muted)] shadow-[var(--tool-shadow-sm)]">
             <span className="hidden min-[1400px]:inline text-[11px] font-medium text-[var(--tool-text-subtle)]">当前页面</span>
             <span className="text-xs font-semibold truncate max-w-[100px] min-[1180px]:max-w-[140px] text-[var(--tool-text)]">
               {currentPage?.label || '首页'}
             </span>
             {currentPage && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text-muted)]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--tool-surface)] text-[var(--tool-text-muted)]">
                 {currentPage.category === 'frontend' ? '前端' : '后台'}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1 p-1 rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] shrink-0">
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-[var(--tool-surface-muted)] shadow-[var(--tool-shadow-sm)] shrink-0">
           <TooltipButton
             tooltip="切换为移动端预览"
             onClick={(e) => {
@@ -302,7 +302,7 @@ export const Topbar = ({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 pl-2 border-l border-[var(--tool-border)] shrink-0">
+        <div className="flex items-center gap-1.5 pl-3 shrink-0 shadow-[-10px_0_18px_-18px_var(--tool-text)]">
           <TooltipButton
             tooltip={isDark ? '切换到白天模式' : '切换到黑夜模式'}
             onClick={(e) => {

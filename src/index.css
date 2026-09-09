@@ -53,6 +53,7 @@
   /* 原型浏览工具品牌色：Blueprint Indigo */
   --tool-background: #f6f7fb;
   --tool-surface: #ffffff;
+  --tool-surface-raised: #ffffff;
   --tool-surface-muted: #eef1f7;
   --tool-surface-hover: #e7eaf3;
   --tool-text: #171a24;
@@ -63,6 +64,9 @@
   --tool-brand-hover: #4652c0;
   --tool-brand-soft: #eef0ff;
   --tool-focus: #6977ea;
+  --tool-shadow-sm: 0 1px 2px rgba(23, 26, 36, 0.04), 0 4px 12px rgba(23, 26, 36, 0.04);
+  --tool-shadow-panel: 0 1px 2px rgba(23, 26, 36, 0.04), 0 16px 36px rgba(23, 26, 36, 0.08);
+  --tool-shadow-float: 0 12px 32px rgba(23, 26, 36, 0.14), 0 2px 6px rgba(23, 26, 36, 0.08);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -100,6 +104,7 @@
 .dark {
   --tool-background: #0f1117;
   --tool-surface: #171a22;
+  --tool-surface-raised: #1c202a;
   --tool-surface-muted: #20242f;
   --tool-surface-hover: #282d39;
   --tool-text: #f4f6fa;
@@ -110,6 +115,9 @@
   --tool-brand-hover: #a2aaff;
   --tool-brand-soft: #252a48;
   --tool-focus: #8993ff;
+  --tool-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24), 0 4px 12px rgba(0, 0, 0, 0.16);
+  --tool-shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.28), 0 18px 42px rgba(0, 0, 0, 0.28);
+  --tool-shadow-float: 0 16px 42px rgba(0, 0, 0, 0.42), 0 3px 8px rgba(0, 0, 0, 0.25);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -182,6 +190,16 @@
     radial-gradient(at 100% 100%, rgba(105, 119, 234, 0.04) 0px, transparent 50%);
 }
 
+@utility tool-workspace {
+  background-color: color-mix(in srgb, var(--tool-background) 88%, var(--tool-brand) 12%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--tool-surface) 70%, transparent);
+}
+
+@utility tool-stage {
+  background-color: color-mix(in srgb, var(--tool-background) 72%, var(--tool-surface) 28%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--tool-surface) 80%, transparent), 0 16px 36px color-mix(in srgb, var(--tool-text) 7%, transparent);
+}
+
 @utility tool-backdrop-dark {
   background-color: var(--tool-background);
   background-image:
@@ -204,13 +222,52 @@
 @utility tool-panel-light {
   background-color: var(--tool-surface);
   border-color: var(--tool-border);
-  box-shadow: 0 1px 2px rgba(23, 26, 36, 0.03), 0 12px 32px rgba(23, 26, 36, 0.08);
+  box-shadow: var(--tool-shadow-panel);
 }
 
 @utility tool-panel-dark {
   background-color: var(--tool-surface);
   border-color: var(--tool-border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 16px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--tool-shadow-panel);
+}
+
+@utility tool-surface-raised {
+  background-color: var(--tool-surface-raised);
+  border-color: var(--tool-border);
+  box-shadow: var(--tool-shadow-sm);
+}
+
+@utility tool-toolbar {
+  background-color: color-mix(in srgb, var(--tool-surface) 94%, transparent);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--tool-text) 5%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+@utility tool-control {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: ease-out;
+}
+
+@utility tool-control-active {
+  background-color: var(--tool-brand-soft);
+  border-color: color-mix(in srgb, var(--tool-brand) 35%, var(--tool-border));
+  color: var(--tool-brand);
+  box-shadow: var(--tool-shadow-sm);
+}
+
+@utility tool-section-label {
+  color: var(--tool-text-subtle);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+@utility tool-focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tool-focus) 22%, transparent);
 }
 
 @utility tool-text-primary-light {
@@ -246,13 +303,13 @@
 @utility tool-menu-active-light {
   background-color: var(--tool-brand-soft);
   color: var(--tool-brand);
-  box-shadow: inset -3px 0 0 0 var(--tool-brand);
+  box-shadow: inset 3px 0 0 0 var(--tool-brand), var(--tool-shadow-sm);
 }
 
 @utility tool-menu-active-dark {
   background-color: var(--tool-brand-soft);
   color: var(--tool-brand);
-  box-shadow: inset -3px 0 0 0 var(--tool-brand);
+  box-shadow: inset 3px 0 0 0 var(--tool-brand), var(--tool-shadow-sm);
 }
 
 /* 弹窗/抽屉动画 */

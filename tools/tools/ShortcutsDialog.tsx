@@ -96,12 +96,12 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
       <div
         ref={dialogRef}
         className={[
-          'relative rounded-2xl shadow-2xl w-[520px] max-w-[92vw] max-h-[90vh] flex flex-col overflow-hidden border',
+          'relative w-[520px] max-w-[92vw] max-h-[90vh] flex flex-col overflow-hidden rounded-2xl border tool-panel-light dark:tool-panel-dark',
           'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >
         {/* 头部 */}
-        <div className={`flex items-center justify-between px-6 py-5 border-b ${borderClass}`}>
+        <div className="flex items-center justify-between px-6 py-5 bg-[var(--tool-surface-raised)]">
           <div className="flex items-center gap-3.5">
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--tool-brand-soft)]">
               <Keyboard className="tool-accent" size={22} />
@@ -115,7 +115,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
           </div>
           <button
             onClick={onClose}
-            className={`p-2 rounded-xl transition-all duration-200 ${textSecondary} ${hoverSurface}`}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl tool-control ${textSecondary} ${hoverSurface} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`}
           >
             <XIcon size={18} />
           </button>
@@ -126,7 +126,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
           {(Object.keys(shortcutLabels) as Array<keyof ShortcutConfig>).map((key) => (
             <div
               key={key}
-              className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
+              className={`flex items-center justify-between p-4 rounded-xl border tool-control ${
                 recordingKey === key
                   ? 'border-current tool-accent bg-current/[0.04]'
                   : `${borderClass} bg-[var(--tool-surface-muted)]`
@@ -164,7 +164,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
         </div>
 
         {/* 底部操作 */}
-        <div className={`flex items-center justify-between px-6 py-4 border-t ${borderClass} ${surfaceClass}`}>
+        <div className={`flex items-center justify-between px-6 py-4 bg-[var(--tool-surface-raised)] ${surfaceClass}`}>
           <button
             onClick={() => setEditingShortcuts(DEFAULT_SHORTCUTS)}
             className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl transition-all duration-200 ${textSecondary} ${hoverSurface}`}

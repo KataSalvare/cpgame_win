@@ -242,10 +242,10 @@ export default function AnnotationLayer({
               transform: 'translate(-50%, -50%)',
             }}
             className={[
-              'absolute flex items-center justify-center w-6 h-6 rounded-full text-white text-[11px] font-bold',
-              'select-none transition-[box-shadow,opacity,transform] duration-200 ease-out',
+              'absolute flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-bold ring-2 ring-white/80 dark:ring-black/30',
+              'select-none tool-control transition-[box-shadow,opacity,transform] duration-200 ease-out',
               selecting ? 'pointer-events-none opacity-50' : 'pointer-events-auto cursor-pointer hover:scale-110',
-              isSelected || isHighlighted ? 'ring-[3px] ring-white/70 dark:ring-black/50 scale-110 annotation-glow' : 'shadow-lg hover:shadow-xl',
+              isSelected || isHighlighted ? 'ring-[3px] ring-white/90 dark:ring-black/50 scale-110 annotation-glow' : 'shadow-[var(--tool-shadow-float)] hover:scale-110',
             ].join(' ')}
             title={group.length > 1 ? `${group.length} 条批注` : annotation.title}
           >
@@ -255,12 +255,12 @@ export default function AnnotationLayer({
       })}
 
       {selecting && (
-        <div className="absolute top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text)] text-sm font-medium shadow-xl pointer-events-none animate-tool-enter motion-reduce:animate-none">
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl border border-[var(--tool-border)] tool-surface-raised text-[var(--tool-text)] text-sm font-medium pointer-events-none animate-tool-enter motion-reduce:animate-none">
           点击页面元素添加批注
         </div>
       )}
       {selecting && hoveredSelector && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[80%] px-4 py-2 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface)] text-[var(--tool-text-muted)] text-xs font-mono truncate shadow-xl pointer-events-none animate-tool-enter motion-reduce:animate-none">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[80%] px-4 py-2 rounded-xl border border-[var(--tool-border)] tool-surface-raised text-[var(--tool-text-muted)] text-xs font-mono truncate pointer-events-none animate-tool-enter motion-reduce:animate-none">
           {hoveredSelector}
         </div>
       )}

@@ -48,14 +48,13 @@ export default function AnnotationPanel({
   const textPrimary = 'text-[var(--tool-text)]'
   const textSecondary = 'text-[var(--tool-text-muted)]'
   const textMuted = 'text-[var(--tool-text-subtle)]'
-  const borderClass = 'border-[var(--tool-border)]'
   const hoverSurface = 'hover:bg-[var(--tool-surface-hover)]'
-  const selectedSurface = 'bg-[var(--tool-brand-soft)] text-[var(--tool-brand)]'
+  const selectedSurface = 'tool-control-active text-[var(--tool-brand)] border-[var(--tool-brand)]/20'
 
   return (
     <div className="h-full flex flex-col">
       {/* 分类筛选 */}
-      <div className={`px-4 py-3 border-b ${borderClass}`}>
+      <div className="px-4 py-3.5 bg-[var(--tool-surface-raised)]">
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => {
             const isSelected = selectedCategories.has(cat.key)
@@ -64,7 +63,7 @@ export default function AnnotationPanel({
               <button
                 key={cat.key}
                 onClick={() => onToggleCategory(cat.key)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 hover:opacity-85"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border tool-control hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
                 style={{
                   borderColor: cat.color,
                   backgroundColor: isSelected
@@ -92,7 +91,7 @@ export default function AnnotationPanel({
       </div>
 
       {/* Annotation list */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {visibleCategories.length === 0 && (
           <div className={`px-3 py-8 text-center text-sm ${textMuted}`}>
             请选择分类以查看批注
@@ -103,10 +102,10 @@ export default function AnnotationPanel({
           const isExpanded = expandedCategories.has(cat.key)
 
           return (
-            <div key={cat.key} className="rounded-xl overflow-hidden">
+            <div key={cat.key} className="rounded-2xl overflow-hidden border border-transparent">
               <button
                 onClick={() => toggleExpand(cat.key)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold transition-all duration-200 rounded-xl ${hoverSurface}`}
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold tool-control rounded-xl ${hoverSurface} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]`}
               >
                 <div className="flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
@@ -130,10 +129,10 @@ export default function AnnotationPanel({
                         key={item.id}
                         onClick={(e) => onSelect(item.id, e.clientX, e.clientY)}
                         className={[
-                          'w-full text-left px-3 py-2.5 rounded-xl mx-1 mb-1 text-sm transition-all duration-200',
+                          'w-[calc(100%-0.5rem)] text-left px-3 py-3 rounded-xl mx-1 mb-1 text-sm tool-control border',
                           selectedId === item.id
                             ? selectedSurface
-                            : `${textSecondary} ${hoverSurface}`,
+                            : `${textSecondary} border-transparent ${hoverSurface}`,
                         ].join(' ')}
                       >
                         <div className="flex items-start gap-2.5">

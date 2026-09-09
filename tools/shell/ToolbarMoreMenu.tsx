@@ -59,7 +59,7 @@ export function ToolbarMoreMenu({ theme, toggleTheme, onOpenShortcuts }: Toolbar
     }
   }
 
-  const buttonClass = 'flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]'
+  const buttonClass = 'flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-[var(--tool-text-muted)] tool-control hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]'
 
   return (
     <div ref={rootRef} className="relative min-[1400px]:hidden">
@@ -90,7 +90,7 @@ export function ToolbarMoreMenu({ theme, toggleTheme, onOpenShortcuts }: Toolbar
           role="menu"
           aria-label="更多工具"
           onKeyDown={handleMenuKeyDown}
-          className="absolute right-0 top-full z-[1200] mt-2 min-w-[176px] rounded-2xl border border-[var(--tool-border)] bg-[var(--tool-surface)] p-2 shadow-2xl"
+        className="absolute right-0 top-full z-[1200] mt-2 min-w-[176px] rounded-2xl border border-[var(--tool-border)] tool-panel-light dark:tool-panel-dark p-2"
         >
           <button
             ref={(node) => { itemRefs.current[0] = node }}

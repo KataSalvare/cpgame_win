@@ -25,9 +25,9 @@ const PageList = ({ filteredPages, icon: Icon }: PageListProps) => {
           to={page.path}
           title={page.label}
           className={({ isActive }) =>
-            `group flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs leading-5 transition-all duration-200 ${
+            `group flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs leading-5 tool-control ${
               isActive
-                ? 'tool-menu-active-light dark:tool-menu-active-dark shadow-sm'
+                ? 'tool-menu-active-light dark:tool-menu-active-dark'
                 : 'text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'
             }`
           }
@@ -65,7 +65,7 @@ const ThemeNav = ({ searchQuery }: ThemeNavProps) => {
 
   return (
     <div className="space-y-0.5">
-      <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--tool-text-subtle)]">
+      <div className="px-3 py-2 tool-section-label">
         设计系统主题
       </div>
       {filteredThemes.map((theme) => (
@@ -74,9 +74,9 @@ const ThemeNav = ({ searchQuery }: ThemeNavProps) => {
           to={`/theme/${theme.id}`}
           title={theme.name}
           className={({ isActive }) =>
-            `group flex items-center gap-3 px-3 py-2 rounded-xl text-xs leading-5 transition-all duration-200 ${
+            `group flex items-center gap-3 px-3 py-2 rounded-xl text-xs leading-5 tool-control ${
               isActive
-                ? 'tool-menu-active-light dark:tool-menu-active-dark shadow-sm'
+                ? 'tool-menu-active-light dark:tool-menu-active-dark'
                 : 'text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'
             }`
           }
@@ -119,7 +119,7 @@ const DocNav = ({ searchQuery }: DocNavProps) => {
 
   return (
     <div className="space-y-0.5">
-      <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--tool-text-subtle)]">
+      <div className="px-3 py-2 tool-section-label">
         项目文档
       </div>
       {filteredDocs.map((doc) => (
@@ -128,9 +128,9 @@ const DocNav = ({ searchQuery }: DocNavProps) => {
           to={doc.path}
           title={doc.name}
           className={({ isActive }) =>
-            `group flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs leading-5 transition-all duration-200 ${
+            `group flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs leading-5 tool-control ${
               isActive
-                ? 'tool-menu-active-light dark:tool-menu-active-dark shadow-sm'
+                ? 'tool-menu-active-light dark:tool-menu-active-dark'
                 : 'text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'
             }`
           }
@@ -187,13 +187,13 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
 
   return (
     <aside
-      className={`flex flex-col h-screen z-[1000] transition-[width,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none border-r ${
-        collapsed ? 'w-0 opacity-0 overflow-hidden border-r-0' : 'w-[260px] opacity-100'
-      } border-[var(--tool-border)] tool-surface-light dark:tool-surface-dark`}
+      className={`flex flex-col h-screen z-[1000] transition-[width,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+        collapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-[260px] opacity-100'
+      } tool-surface-light dark:tool-surface-dark shadow-[8px_0_24px_color-mix(in_srgb,var(--tool-text)_4%,transparent)]`}
     >
       {!collapsed && (
         <>
-          <div className="flex items-center px-4 py-3.5 border-b border-[var(--tool-border)]">
+          <div className="flex items-center px-4 py-4 bg-[color-mix(in_srgb,var(--tool-surface)_72%,transparent)]">
             <div className="flex-1 min-w-0">
               {isEditingName ? (
                 <input
@@ -221,13 +221,13 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
                   </button>
                 </h1>
               )}
-              <p className="text-[10px] mt-0.5 uppercase tracking-wider text-[var(--tool-text-subtle)]">
+              <p className="text-[10px] mt-1 uppercase tracking-[0.16em] text-[var(--tool-text-subtle)]">
                 Prototype Workspace
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 p-2" role="tablist" aria-label="内容分类">
+          <div className="flex items-center gap-1.5 p-2.5" role="tablist" aria-label="内容分类">
             {tabs.map(tab => {
               const TabIcon = tab.icon
               const isActive = activeTab === tab.key
@@ -238,9 +238,9 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex-1 flex flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] font-medium rounded-xl transition-all duration-200 ${
+                  className={`flex-1 flex flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] font-medium rounded-xl tool-control ${
                     isActive
-                      ? 'tool-menu-active-light dark:tool-menu-active-dark shadow-sm'
+                      ? 'tool-menu-active-light dark:tool-menu-active-dark'
                       : 'text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'
                   }`}
                 >
@@ -252,7 +252,7 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
           </div>
 
           <div className="px-3 pb-2">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface)] transition-all duration-200 focus-within:border-[var(--tool-focus)] focus-within:ring-2 focus-within:ring-[var(--tool-focus)]/20">
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-raised)] tool-control focus-within:border-[var(--tool-focus)] focus-within:tool-focus-ring">
               <Search size={14} className="text-[var(--tool-text-subtle)]" />
               <input
                 type="text"
