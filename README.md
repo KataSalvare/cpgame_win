@@ -1,187 +1,157 @@
 # 产品原型预览系统
 
-基于 React + TypeScript + Vite 构建的产品原型预览工作台，用于产品经理和 UI 设计师快速预览、批注和展示页面原型，同时管理设计系统主题与项目文档。
+产品原型预览工作台，用于集中预览、切换、批注和展示前端原型与后台原型，同时管理主题和项目文档。
 
-当前版本：**v2.1**
+## 适用范围
 
-## 技术栈
+项目包含三类内容：
 
-- **框架**: React 19 + TypeScript
-- **构建工具**: Vite
-- **路由**: React Router 7
-- **样式**: Tailwind CSS 4
-- **图标**: Lucide React
-- **组件**: Ant Design、Radix UI、shadcn/ui 基础组件
+| 内容类型 | 用途 | 修改位置 |
+| --- | --- | --- |
+| 原型浏览工具 | 预览外壳、侧边栏、顶部栏、批注、快捷键和 Figma 复制 | `tools/` |
+| 前端原型 | 面向终端用户的业务页面 | `src/prototypes/` |
+| 后台原型 | 面向运营、管理员或内部员工的业务页面 | `src/prototypes/` |
 
-## 功能特性
+后台原型仍属于业务内容，不能放入 `tools/`。只有服务于原型预览工作台本身的功能才放入 `tools/`。
 
-## 三类对象
+## 快速开始
 
-项目中有三类对象，必须先区分再开始实现：
+需要 Node.js 和 npm。
 
-| 对象 | 定义 | 代码位置 |
-|------|------|----------|
-| 原型浏览工具 | 承载和评审原型的工作台，包括侧边栏、顶部栏、路由、批注、快捷键和 Figma 复制 | `tools/` |
-| 前端原型 | 面向终端用户的业务页面 | `src/prototypes/<name>/` |
-| 后台原型 | 面向运营、管理员或内部员工的业务页面 | `src/prototypes/<name>/` |
+1. 在项目根目录安装依赖：`npm install`。
+2. 启动本地开发服务：`npm run dev`。
+3. 打开 `http://localhost:1025` 预览项目。
+4. 构建生产版本：`npm run build`。
+5. 预览生产构建：`npm run preview`。
 
-后台原型仍然属于业务内容，不是工具层。只有实现原型浏览工作台本身的代码才放在 `tools/`。
+`npm run preview` 只检查 Vite 生成的静态页面，不会完整验证 Cloudflare Worker、批注 API 或 KV。修改 Worker 或部署配置时，应使用 Wrangler 做额外验证。
 
-完整术语定义见根目录 [`CONTEXT.md`](./CONTEXT.md)。
+## 如何修改原型
 
-原型内部默认拆分展示和逻辑：
+### 新增原型
 
-```text
-src/prototypes/<name>/
-├── index.tsx              # 入口和页面组装
-├── <Name>View.tsx         # 展示 UI
-├── use<Name>Logic.ts      # 交互逻辑、状态和事件
-├── components/            # 原型内部展示模块
-├── pages/                 # 可选：内部多页面
-└── assets/                # 原型专属素材
+1. 在 `src/prototypes/` 下创建原型目录。
+2. 在该目录中创建入口文件 `index.tsx`。
+3. 在 `tools/config/pages.ts` 中登记原型目录、访问路径、显示名称和分类。
+4. 如果原型需要产品说明，在同一目录增加 `spec.md`。
+5. 启动开发服务，确认页面可以通过登记的路径访问。
 
-src/prototypes/style.css   # 多个原型共用的内容层样式
-```
+前端原型和后台原型都按照真实产品页面维护。页面主体放在 `src/prototypes/`，预览控制、批注和调试能力放在 `tools/`。
 
-`index.tsx` 不应集中承载复杂状态和全部事件处理；展示模块通过 props 接收数据与回调，逻辑模块不返回 JSX、不写 CSS。原型公共样式必须使用 `prototype-` 命名空间，页面独有样式才放入对应原型目录。
+### 修改已有原型
 
-### 全局功能
+直接修改对应的 `src/prototypes/<name>/` 目录。页面入口负责组装页面，展示内容和交互逻辑应尽量分开维护。
 
-- **主题切换**: 支持白天/黑夜模式切换，默认黑夜模式，设置自动保存到 localStorage
-- **自定义项目名称**: 点击左上角项目名称即可编辑，支持 Enter 确认、Escape 取消
-- **设备预览切换**: 支持移动端/PC端预览模式切换
-- **页面状态切换**: 通过工具层状态面板切换正常、加载、空数据、异常等页面状态
-- **快捷键配置**: 可自定义快捷键，支持复制到 Figma、查看文档、批注选择元素等操作
-- **复制到 Figma**: 一键将当前页面复制到 Figma（HTML to Design）
-- **主题管理**: 动态读取 `src/themes` 中的设计系统主题，支持预览主题组件和查看设计规范
-- **文档管理**: 动态读取 `src/docs/*.md` 中的根目录 Markdown 文档
-- **侧边栏折叠**: 顶部操作栏可一键折叠/展开左侧菜单栏，折叠后完全隐藏
+原型专属素材放在原型目录的 `assets/` 中。多个原型共用的内容层样式放在 `src/prototypes/` 下的公共样式文件中，样式选择器使用 `prototype-` 命名空间。
 
-页面状态面板位于顶部工具栏的「状态」入口中。它只负责预览控制，不属于原型页面主体，也不会被复制到 Figma；页面状态、用户状态和路由的详细工具规则见 [`rules/prototype-state-and-route-guide.md`](./rules/prototype-state-and-route-guide.md)。
+### 修改原型路由
 
-### 页面批注
+原型路由统一在 `tools/config/pages.ts` 配置。修改路由时同步检查目录名、访问路径、中文名称和分类是否一致。
 
-- **批注编辑模式**: 点击顶部「批注」按钮进入编辑模式，可对当前页面添加、编辑、删除批注
-- **元素选择**: 进入编辑模式后点击「选择元素」，再点击页面元素即可添加批注；支持快捷键触发
-- **分类管理**: 默认分类为「交互说明」、「业务逻辑」、「状态说明」，支持新增自定义分类（默认分类不可删除）
-- **批注展示**: 支持显示/隐藏页面上的批注标记，可点击标记或右侧文档面板查看详情
-- **草稿机制**: 新建、编辑、删除批注后先保存到本地草稿，点击「保存」后才会写入本地文件
-- **多分类批注**: 同一元素可添加多个分类的批注，批注弹窗以标签页形式切换查看
+## 如何修改主题
 
-### 快捷键
+主题位于 `src/themes/<theme-key>/`。修改主题时，按以下入口处理：
 
-| 功能 | 默认快捷键 (Mac) | 默认快捷键 (Windows) |
-|------|-----------------|---------------------|
-| 复制到 Figma | Ctrl+Cmd+C | Ctrl+Alt+C |
-| 查看文档 | Ctrl+Cmd+E | Ctrl+Alt+E |
-| 批注选择元素 | Ctrl+Cmd+S | Ctrl+Alt+S |
+- `theme.json`：主题名称、标识和基础配置。
+- `DESIGN.md`：设计规范和主题说明。
+- `style.css`、`tw.css`：主题样式。
+- `assets/`：主题预览图和其他素材。
 
-## 原型路由
+主题列表会根据 `src/themes/` 中的内容自动读取。新增主题后，确认目录中包含必要的主题配置和预览入口。
 
-前端原型和后台原型的入口统一放在 `src/prototypes/<name>/index.tsx`。原型浏览工具通过 Vite `import.meta.glob` 自动发现这些入口，再由 `tools/config/pages.ts` 为每个目录配置 URL、名称和分类。
+## 如何修改项目文档
 
-当前已注册的 DEMO 原型路由：
+项目文档放在 `src/docs/`，使用 Markdown 编写。新增或修改文档后，刷新文档页面即可检查结果。
 
-| 分类 | 页面 | 路径 | 目录 |
-|------|------|------|------|
-| 前端 | DEMO 电商详情页 | `/demo/ecommerce-detail` | `DEMO-ecommerce-detail` |
-| 前端 | DEMO 运动健康首页 | `/demo/sports-health` | `DEMO-sports-health-home` |
-| 前端 | DEMO 区块链钱包 | `/demo/blockchain-wallet` | `DEMO-blockchain-wallet` |
-| 后台 | DEMO SaaS 平台首页 | `/demo/admin/saas-home` | `DEMO-admin-saas-home` |
-| 后台 | DEMO 用户管理 | `/demo/admin/user-management` | `DEMO-admin-user-management` |
-| 后台 | DEMO 运营数据看板 | `/demo/admin/analytics` | `DEMO-admin-analytics` |
+可复用的文档模板位于 `src/docs/templates/`。文档内容应记录产品目标、页面说明、业务规则或交互约束，不要把临时调试信息写入正式文档。
 
-新增原型时，需要同时完成以下事项：
+## 批注配置与使用
 
-1. 创建 `src/prototypes/<name>/index.tsx`，并导出默认组件。
-2. 在 `tools/config/pages.ts` 中增加目录名、路径、中文名称和分类映射。
-3. 如果页面需要 PRD，在同一目录增加 `spec.md`。
+批注属于原型浏览工具能力，相关代码位于 `tools/`，默认批注数据位于 `src/resources/annotations.json`。
 
-页面状态、用户状态和路由的详细工具规则见 [`rules/prototype-state-and-route-guide.md`](./rules/prototype-state-and-route-guide.md)。
+在页面中新增、修改或删除批注后，内容会先保存在浏览器草稿中；点击工具栏的保存操作后，才会写入持久化数据。
 
-只有实际存在 `index.tsx` 的目录才会被注册为路由；空目录或已删除目录不会出现在侧边栏。
+### 本地开发
 
-## 项目结构
+运行 `npm run dev` 时，Vite 会通过 `/api/annotations` 读取和写入 `src/resources/annotations.json`。本地修改默认会影响该文件，请在提交前确认数据内容。
 
-```
-src/                        # 内容层：只放业务/原型相关内容
-├── main.tsx                # 应用入口
-├── index.css               # 全局样式
-├── prototypes/             # 前端原型和后台原型，以及公共 style.css
-├── themes/                 # 主题设计系统
-├── docs/                   # 项目文档（Markdown）
-├── workspace/              # 首页、主题和文档工作区页面
-│   ├── HomePage.tsx        # 默认首页/引导页
-│   ├── ThemeDetailPage.tsx # 主题详情
-│   ├── ThemesListPage.tsx  # 主题列表
-│   ├── DocDetailPage.tsx   # 文档详情
-│   └── DocsListPage.tsx    # 文档列表
-├── content/                # 项目内容配置
-│   └── annotations/        # 批注默认分类与示例数据
-│       ├── categories.ts
-│       └── defaults.ts
-├── common/                 # 内容层共享组件（如 DesignMdBatchShowcase、DEMO 组件）
-└── lib/                    # 通用工具函数
-    └── utils.ts            # cn 等 UI 工具函数
+### 生产环境 KV 配置
 
-tools/                      # 原型浏览工具实现
-├── App.tsx                 # 主应用组件，负责路由、全局状态和布局编排
-├── shell/                  # 界面外壳
-│   ├── Sidebar.tsx         # 左侧边栏（4 个 Tab 导航）
-│   ├── Topbar.tsx          # 顶部工具栏
-│   └── TooltipButton.tsx   # 工具提示按钮
-├── tools/                  # 工具功能实现
-│   ├── AnnotationController.tsx   # 批注状态、渲染与交互
-│   └── ShortcutsDialog.tsx        # 快捷键设置弹窗
-├── components/             # 工具组件
-│   ├── DocDrawer.tsx
-│   ├── AnnotationLayer.tsx
-│   ├── AnnotationModal.tsx
-│   └── AnnotationPanel.tsx
-├── hooks/                  # 工具层 Hooks
-│   └── useAnnotations.ts
-├── config/                 # 工具层配置与动态导入
-│   ├── pages.ts
-│   ├── themes.ts
-│   └── docs.ts
-└── lib/                    # 工具函数
-    ├── shortcuts.ts        # 主题、快捷键、项目名称 localStorage 读写
-    └── annotations.ts      # 批注类型与工具函数
-```
+生产环境使用 Cloudflare Worker、Static Assets 和 Workers KV。配置入口是项目根目录的 `wrangler.jsonc`，需要保持以下配置关系：
 
-> **架构说明**：
-> - `src/` 只放**内容层**（原型、主题、文档、页面、内容配置、通用 UI）
-> - `tools/` 只放**工具层**（预览外壳、批注、快捷键、复制到 Figma、配置读取等）
-> - 两层通过 alias 隔离：`@/...` 指向 `src/`，`@tools/...` 指向 `tools/`
-> - 迭代功能时，一看 import 路径就知道改动发生在内容层还是工具层
+| 配置项 | 当前值 | 说明 |
+| --- | --- | --- |
+| Worker 名称 | `product-make` | 生产 Worker 名称 |
+| Worker 入口 | `worker/index.ts` | 批注 API 和静态资源转发入口 |
+| 静态资源目录 | `dist` | `npm run build` 生成的前端文件 |
+| 静态资源绑定 | `ASSETS` | Worker 访问静态资源时使用 |
+| KV 绑定名 | `ANNOTATIONS_KV` | Worker 访问批注 KV 时使用 |
+| KV namespace | `pm-annotations` | 生产批注数据所在的 namespace |
+| KV namespace ID | `66e5f21136474d94b87413df97a81ab5` | namespace 的唯一 ID |
+| API 路径 | `/api/annotations` | 批注读取和保存地址 |
 
-## 本地开发
+修改 KV 配置时，只修改 `wrangler.jsonc` 中的绑定关系，并确保代码使用的绑定名与配置中的绑定名一致。不要只在 Cloudflare Dashboard 中手动添加绑定，否则后续 Wrangler 部署可能覆盖 Dashboard 配置。
 
-```bash
-# 安装依赖
-npm install
+首次部署或 KV 为空时，API 会返回 `src/resources/annotations.json` 中的默认批注。第一次保存批注后，完整批注数据会写入 KV 的 `annotations` Key，不需要手动创建 Key。
 
-# 启动开发服务器
-npm run dev
+### 首次配置 Cloudflare
 
-# 构建生产版本
-npm run build
+首次接入或更换环境时：
 
-# 预览生产构建
-npm run preview
-```
+1. 准备有 Workers 和 Workers KV 权限的 Cloudflare 账号。
+2. 使用 `npx wrangler login` 登录 Wrangler。
+3. 在 Cloudflare 中创建或确认 `pm-annotations` namespace，并取得 namespace ID。
+4. 将 namespace ID 写入 `wrangler.jsonc` 的 `ANNOTATIONS_KV` 绑定配置。
+5. 执行 `npx wrangler deploy --dry-run`，确认 Worker、Assets 和 KV 绑定均被识别。
 
-批注保存接口由 Vite 开发服务器提供：开发时通过 `/api/annotations` 读写 `src/resources/annotations.json`；生产部署使用根目录 `wrangler.jsonc` 配置的 Worker，通过同一路径读写 Cloudflare KV，其他请求继续由 Static Assets 提供。
+staging 和 production 应使用不同的 KV namespace，避免测试数据覆盖生产批注。
 
-## 配置说明
+`/api/*` 请求必须优先交给 Worker 处理；其他请求继续由 `dist` 中的静态资源提供。修改 Assets 或 API 路由配置后，应重新执行构建并进行本地验证。
 
-### 本地存储键名
+### 生产部署
 
-- `prototype-theme`: 主题设置（light/dark）
-- `prototype-project-name`: 自定义项目名称
-- `prototype-shortcuts`: 快捷键配置
-- `prototype-sidebar-collapsed`: 侧边栏折叠状态
-- `prototype-annotations-draft`: 尚未保存到文件的批注草稿
+1. 确认 `wrangler.jsonc` 中的 KV namespace ID 正确。
+2. 执行 `npm run build` 生成最新的 `dist`。
+3. 执行 `npx wrangler deploy` 部署 Worker 和静态资源。
+4. 访问生产地址，检查首页和 `/api/annotations` 是否正常。
+
+本地执行 `npx wrangler dev` 时，Wrangler 默认使用本地 KV 状态，不会修改线上 namespace。除非明确需要操作线上数据，否则不要使用远程 KV 开发模式。
+
+当前批注 API 没有额外的用户身份校验。公开部署后，知道接口地址的访问者理论上可以提交 POST 覆盖整份批注数据；不要在其中存储敏感信息。多人或公开使用前，应在 Cloudflare Access、鉴权网关或其他写入保护层中限制 API 访问。
+
+当前数据模型使用单个 `annotations` Key 保存完整批注 JSON，所有使用者共享同一份数据。多人同时保存时以后写入的数据为准，不提供用户、项目或租户级隔离。
+
+## 修改边界
+
+修改前先根据内容类型选择目录：
+
+| 需要修改的内容 | 修改位置 |
+| --- | --- |
+| 页面、业务内容和原型素材 | `src/` |
+| 预览外壳、批注、快捷键和工具栏 | `tools/` |
+| 原型访问路径和分类 | `tools/config/pages.ts` |
+| 默认批注数据 | `src/resources/annotations.json` |
+| Worker、KV 和 Static Assets 部署配置 | `worker/`、`wrangler.jsonc` |
+| 项目说明和维护文档 | `README.md`、`src/docs/` |
+
+不要把业务页面放入 `tools/`，也不要把预览工具逻辑直接放入业务原型目录。
+
+## 提交前检查
+
+提交修改前至少执行：
+
+- `npm run lint`
+- `npm run build`
+- 如果修改了 PRD、SPEC 或其他交接文档，执行 `npm run check:docs`。
+- 如果修改了 Worker 或 `wrangler.jsonc`，再执行 `npx wrangler deploy --dry-run`。
+
+确认检查通过、页面预览正常、批注读写正常后，再提交或部署。
+
+## 相关文档
+
+- 项目术语：`CONTEXT.md`
+- 页面状态和路由规则：`rules/prototype-state-and-route-guide.md`
+- 文档模板：`src/docs/templates/`
 
 ## License
 
