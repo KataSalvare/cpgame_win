@@ -7,6 +7,64 @@ import path from 'path'
 import fs from 'fs'
 
 const ANNOTATIONS_FILE = path.resolve(__dirname, 'src/resources/annotations.json')
+const PROTOTYPES_DIR = path.resolve(__dirname, 'src/prototypes')
+
+function specApiPlugin() {
+  return {
+    name: 'spec-api',
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use('/api/spec', (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+        const dirName = decodeURIComponent((req.url ?? '').split('?')[0].replace(/^\//, ''))
+        if (!/^[a-zA-Z0-9_-]+$/.test(dirName)) {
+          res.statusCode = 400
+          res.end(JSON.stringify({ error: 'Invalid prototype name' }))
+          return
+        }
+        const filePath = path.resolve(PROTOTYPES_DIR, dirName, 'spec.md')
+        if (!filePath.startsWith(`${PROTOTYPES_DIR}${path.sep}`) || !fs.existsSync(filePath)) {
+          res.statusCode = 404
+          res.end(JSON.stringify({ error: 'Spec not found' }))
+          return
+        }
+
+        if (req.method === 'GET') {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(JSON.stringify({ content: fs.readFileSync(filePath, 'utf8') }))
+          return
+        }
+
+        if (req.method === 'POST') {
+          let body = ''
+          req.on('data', (chunk: Buffer) => { body += chunk.toString() })
+          req.on('end', () => {
+            try {
+              const data = JSON.parse(body) as { content?: unknown }
+              if (typeof data.content !== 'string') {
+                res.statusCode = 400
+                res.end(JSON.stringify({ error: 'content must be a string' }))
+                return
+              }
+              fs.writeFileSync(filePath, data.content, 'utf8')
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify({ success: true }))
+            } catch (error) {
+              res.statusCode = 400
+              res.end(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }))
+            }
+          })
+          return
+        }
+
+        if (req.method !== 'GET') {
+          res.statusCode = 405
+          res.end(JSON.stringify({ error: 'Method not allowed' }))
+          return
+        }
+        next()
+      })
+    },
+  }
+}
 
 // 提供标注数据的本地文件读写接口，替代 localStorage
 function annotationsPlugin() {
@@ -58,7 +116,7 @@ function annotationsPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), annotationsPlugin()],
+  plugins: [react(), tailwindcss(), annotationsPlugin(), specApiPlugin()],
   server: {
     port: 1025,
     strictPort: true,

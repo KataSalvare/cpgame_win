@@ -1,6 +1,15 @@
 import defaultAnnotations from '../src/resources/annotations.json'
 
 const ANNOTATIONS_KEY = 'annotations'
+const SPEC_KEY_PREFIX = 'spec:'
+const EDITABLE_SPECS = new Set([
+  'DEMO-ecommerce-detail',
+  'DEMO-sports-health-home',
+  'DEMO-blockchain-wallet',
+  'DEMO-admin-saas-home',
+  'DEMO-admin-user-management',
+  'DEMO-admin-analytics',
+])
 
 interface AnnotationsData {
   annotations: unknown[]
@@ -78,6 +87,36 @@ async function handleAnnotations(request: Request, env: WorkerEnv): Promise<Resp
   return jsonResponse({ error: 'Method not allowed' }, 405)
 }
 
+async function handleSpec(request: Request, env: WorkerEnv, dirName: string): Promise<Response> {
+  if (!EDITABLE_SPECS.has(dirName)) return jsonResponse({ error: 'Spec not found' }, 404)
+  const key = `${SPEC_KEY_PREFIX}${dirName}`
+
+  if (request.method === 'GET') {
+    const stored = await env.ANNOTATIONS_KV.get(key, 'json')
+    if (stored === null) return jsonResponse({ content: null })
+    if (!isRecord(stored) || typeof stored.content !== 'string') {
+      return jsonResponse({ error: 'Stored spec is invalid' }, 500)
+    }
+    return jsonResponse({ content: stored.content })
+  }
+
+  if (request.method === 'POST') {
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch {
+      return jsonResponse({ error: 'Request body must be valid JSON' }, 400)
+    }
+    if (!isRecord(body) || typeof body.content !== 'string') {
+      return jsonResponse({ error: 'Request body must contain a content string' }, 400)
+    }
+    await env.ANNOTATIONS_KV.put(key, JSON.stringify({ content: body.content }))
+    return jsonResponse({ success: true })
+  }
+
+  return jsonResponse({ error: 'Method not allowed' }, 405)
+}
+
 export default {
   async fetch(request: Request, env: WorkerEnv): Promise<Response> {
     const pathname = new URL(request.url).pathname
@@ -88,6 +127,16 @@ export default {
       } catch (error) {
         console.error('Annotations API error:', error)
         return jsonResponse({ error: 'Annotations service unavailable' }, 500)
+      }
+    }
+
+    const specMatch = pathname.match(/^\/api\/spec\/([^/]+)\/?$/)
+    if (specMatch) {
+      try {
+        return await handleSpec(request, env, decodeURIComponent(specMatch[1]))
+      } catch (error) {
+        console.error('Spec API error:', error)
+        return jsonResponse({ error: 'Spec service unavailable' }, 500)
       }
     }
 
