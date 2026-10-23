@@ -47,6 +47,7 @@ const demoPageStates: readonly PageStateOption[] = [
 
 const frontendPageConfig: Record<string, { path: string; label: string; states: readonly PageStateOption[] }> = {
   'DEMO-ecommerce-detail': { path: '/demo/ecommerce-detail', label: 'DEMO 电商详情页', states: demoPageStates },
+  'DEMO-game-companion-home': { path: '/demo/game-companion-home', label: 'DEMO 陪玩平台主页', states: demoPageStates },
   'DEMO-sports-health-home': { path: '/demo/sports-health', label: 'DEMO 运动健康首页', states: demoPageStates },
   'DEMO-blockchain-wallet': { path: '/demo/blockchain-wallet', label: 'DEMO 区块链钱包', states: demoPageStates },
 }

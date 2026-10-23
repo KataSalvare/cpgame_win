@@ -239,11 +239,11 @@ export default function AnnotationLayer({
               left: `${pos.left}%`,
               top: `${pos.top}%`,
               backgroundColor: color,
-              transform: 'translate(-50%, -50%)',
+              translate: '-50% -50%',
             }}
             className={[
               'absolute flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-bold ring-2 ring-white/80 dark:ring-black/30',
-              'select-none tool-control transition-[box-shadow,opacity,transform] duration-200 ease-out',
+              'select-none tool-control transition-[box-shadow,opacity,scale] duration-200 ease-out',
               selecting ? 'pointer-events-none opacity-50' : 'pointer-events-auto cursor-pointer hover:scale-110',
               isSelected || isHighlighted ? 'ring-[3px] ring-white/90 dark:ring-black/50 scale-110 annotation-glow' : 'shadow-[var(--tool-shadow-float)] hover:scale-110',
             ].join(' ')}

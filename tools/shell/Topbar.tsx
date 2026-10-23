@@ -187,6 +187,7 @@ export const Topbar = ({
           <div className="flex items-center gap-1 p-1 rounded-2xl bg-[var(--tool-surface-muted)] shadow-[var(--tool-shadow-sm)] shrink-0">
           <TooltipButton
             tooltip="切换为移动端预览"
+            aria-pressed={deviceMode === 'mobile'}
             onClick={(e) => {
               e.stopPropagation()
               setDeviceMode('mobile')
@@ -197,7 +198,8 @@ export const Topbar = ({
             <span className="hidden min-[1180px]:inline">移动端</span>
           </TooltipButton>
           <TooltipButton
-            tooltip="切换为PC端预览"
+            tooltip={currentPage ? '切换为PC端预览（1920×1080）' : '切换为PC端预览'}
+            aria-pressed={deviceMode === 'pc'}
             onClick={(e) => {
               e.stopPropagation()
               setDeviceMode('pc')

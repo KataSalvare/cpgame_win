@@ -163,8 +163,9 @@ export default function AnnotationModal({
     const markerHalf = 12
     const viewport = getViewportBounds()
     const isEdit = !readOnly
-    const width = Math.min(MODAL_WIDTH, viewport.width - padding * 2)
-    const height = Math.min(isEdit ? 520 : 260, viewport.height * 0.85)
+    const width = Math.max(1, Math.min(MODAL_WIDTH, viewport.width - padding * 2))
+    const maxHeight = Math.max(1, Math.min(window.innerHeight * 0.8, viewport.height - padding * 2))
+    const height = Math.min(isEdit ? 520 : 260, maxHeight)
 
     let left = anchor.x + markerHalf + gap
     if (left + width > viewport.right - padding) {
@@ -185,7 +186,7 @@ export default function AnnotationModal({
         : viewport.top + padding
     }
 
-    return { left, top }
+    return { left, top, width, maxHeight }
   })()
 
   useLayoutEffect(() => {
@@ -220,7 +221,7 @@ export default function AnnotationModal({
         ref={modalRef}
         style={estimatedStyle}
         className={[
-          'absolute pointer-events-auto w-[380px] max-w-[calc(100vw-32px)] max-h-[80vh] flex flex-col rounded-2xl overflow-hidden border tool-panel-light dark:tool-panel-dark',
+          'absolute pointer-events-auto flex flex-col rounded-2xl overflow-hidden border tool-panel-light dark:tool-panel-dark',
           'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >

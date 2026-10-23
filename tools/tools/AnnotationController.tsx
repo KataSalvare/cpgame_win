@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type React from 'react'
 import AnnotationLayer from '../components/AnnotationLayer'
 import AnnotationModal from '../components/AnnotationModal'
@@ -133,6 +133,29 @@ export function useAnnotationController({
     },
     []
   )
+
+  // 批注面板在未缩放的工具层中，画布缩放或内容滚动后重新锚定显示坐标。
+  useEffect(() => {
+    if (!annotationModalOpen || !modalAnnotation || !previewContainer) return
+    let frameId: number | null = null
+    const scheduleAnchor = () => {
+      if (frameId !== null) return
+      frameId = requestAnimationFrame(() => {
+        frameId = null
+        setModalAnchor(getAnnotationAnchor(modalAnnotation))
+      })
+    }
+    const observer = new ResizeObserver(scheduleAnchor)
+    observer.observe(previewContainer.parentElement ?? previewContainer)
+    document.addEventListener('scroll', scheduleAnchor, true)
+    window.addEventListener('resize', scheduleAnchor)
+    return () => {
+      observer.disconnect()
+      document.removeEventListener('scroll', scheduleAnchor, true)
+      window.removeEventListener('resize', scheduleAnchor)
+      if (frameId !== null) cancelAnimationFrame(frameId)
+    }
+  }, [annotationModalOpen, modalAnnotation, previewContainer, getAnnotationAnchor])
 
   const handleSelectAnnotation = useCallback(
     (id: string) => {

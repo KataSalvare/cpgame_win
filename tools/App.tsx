@@ -12,6 +12,7 @@ import { ThemesListPage } from '@/workspace/ThemesListPage'
 import { DocDetailPage } from '@/workspace/DocDetailPage'
 import { DocsListPage } from '@/workspace/DocsListPage'
 import { useToolEntrance } from './hooks/useToolEntrance'
+import { DESKTOP_PREVIEW_HEIGHT, DESKTOP_PREVIEW_WIDTH, usePreviewScale } from './hooks/usePreviewScale'
 
 const DEFAULT_PROJECT_NAME = '项目原型预览'
 type Toast = { message: string; type: 'success' | 'error' }
@@ -42,10 +43,9 @@ function AppContent() {
     setPreviewContainer(node)
   }, [])
 
-  const [deviceMode, setDeviceMode] = useState<'mobile' | 'pc'>(() => {
-    const page = pages.find(p => p.path === location.pathname)
-    return page?.category === 'admin' ? 'pc' : 'mobile'
-  })
+  const [deviceMode, setDeviceMode] = useState<'mobile' | 'pc'>('pc')
+  const { stageRef, scale: previewScale } = usePreviewScale()
+  const fixedDesktopPreview = deviceMode === 'pc' && currentPage != null
   const [previewStateByPath, setPreviewStateByPath] = useState<Record<string, string>>({})
 
   const previewState = currentPage ? previewStateByPath[currentPage.path] : undefined
@@ -126,21 +126,6 @@ function AppContent() {
     if (toastTimeoutRef.current !== null) window.clearTimeout(toastTimeoutRef.current)
   }, [])
 
-  const inferredDeviceMode = useMemo<'mobile' | 'pc'>(() => {
-    const page = pages.find((p) => p.path === location.pathname)
-    const isThemeOrDoc =
-      location.pathname === '/' ||
-      location.pathname.startsWith('/theme') ||
-      location.pathname.startsWith('/doc') ||
-      location.pathname === '/themes' ||
-      location.pathname === '/docs'
-    return page?.category === 'admin' || isThemeOrDoc ? 'pc' : 'mobile'
-  }, [location.pathname])
-
-  useEffect(() => {
-    queueMicrotask(() => setDeviceMode(inferredDeviceMode))
-  }, [inferredDeviceMode])
-
   const handleOpenDoc = useCallback(() => {
     setDocTab('spec')
     setDocOpen(true)
@@ -193,58 +178,71 @@ function AppContent() {
 
           <div className="flex-1 flex overflow-hidden">
             <div className="flex-1 overflow-auto p-4 lg:p-5 tool-workspace">
-            <div className="h-full min-h-full rounded-[1.75rem] p-3 lg:p-4 tool-stage">
-              <div
-                className={`relative z-[100] mx-auto transition-[width,height,margin] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
-                  deviceMode === 'mobile'
-                    ? 'w-[400px] h-[852px] mt-12'
-                    : 'w-full h-full'
-                }`}
-              >
-                <div
-                  ref={previewRef}
-                  id="preview-container"
-                  className={`w-full h-full bg-white shadow-2xl ${
-                    deviceMode === 'mobile' ? 'rounded-[2.5rem] overflow-hidden ring-8 ring-black/5' : 'rounded-2xl'
-                  }`}
-                  style={{ transform: 'translateZ(0)' }}
-                >
-                  <div className={`prototype-content-scroll ${deviceMode === 'mobile' ? 'h-full overflow-y-auto overscroll-contain' : 'w-full h-full overflow-auto'}`}>
-                    <Suspense
-                      fallback={(
-                        <div className="flex h-full w-full items-center justify-center" role="status" aria-live="polite">
-                          <div className="flex items-center gap-2 text-sm text-[var(--tool-text-muted)]">
-                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
-                            正在加载原型…
-                          </div>
+              <div className="h-full min-h-full rounded-[1.75rem] p-3 lg:p-4 tool-stage">
+                <div ref={stageRef} className={`h-full w-full ${fixedDesktopPreview ? 'flex items-center justify-center' : ''}`}>
+                  <div
+                    className={`relative z-[100] mx-auto shrink-0 ${
+                      deviceMode === 'mobile'
+                        ? 'w-[400px] h-[852px] mt-12'
+                        : fixedDesktopPreview ? '' : 'w-full h-full'
+                    }`}
+                    style={fixedDesktopPreview ? {
+                      width: DESKTOP_PREVIEW_WIDTH * previewScale,
+                      height: DESKTOP_PREVIEW_HEIGHT * previewScale,
+                    } : undefined}
+                  >
+                    <div className={`absolute inset-0 overflow-hidden shadow-2xl ${deviceMode === 'mobile' ? 'rounded-[2.5rem] ring-8 ring-black/5' : 'rounded-2xl'}`}>
+                      <div
+                        ref={previewRef}
+                        id="preview-container"
+                        className={`w-full h-full bg-white ${
+                          deviceMode === 'mobile' ? 'rounded-[2.5rem]' : 'rounded-2xl'
+                        }`}
+                        style={fixedDesktopPreview ? {
+                          width: DESKTOP_PREVIEW_WIDTH,
+                          height: DESKTOP_PREVIEW_HEIGHT,
+                          transform: `scale(${previewScale}) translateZ(0)`,
+                          transformOrigin: 'top left',
+                        } : { transform: 'translateZ(0)' }}
+                      >
+                        <div className={`prototype-content-scroll ${deviceMode === 'mobile' ? 'h-full overflow-y-auto overscroll-contain' : 'w-full h-full overflow-auto'}`}>
+                          <Suspense
+                            fallback={(
+                              <div className="flex h-full w-full items-center justify-center" role="status" aria-live="polite">
+                                <div className="flex items-center gap-2 text-sm text-[var(--tool-text-muted)]">
+                                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
+                                  正在加载原型…
+                                </div>
+                              </div>
+                            )}
+                          >
+                            <Routes>
+                              <Route path="/" element={<HomePage />} />
+                              {pages.map(page => (
+                                <Route
+                                  key={page.path}
+                                  path={page.path}
+                                  element={
+                                    <page.component
+                                      previewState={page.path === currentPage?.path ? activePreviewState : undefined}
+                                      onPreviewStateChange={page.path === currentPage?.path ? handlePreviewStateChange : undefined}
+                                    />
+                                  }
+                                />
+                              ))}
+                              <Route path="/themes" element={<ThemesListPage />} />
+                              <Route path="/theme/:themeId" element={<ThemeDetailPage />} />
+                              <Route path="/docs" element={<DocsListPage />} />
+                              <Route path="/doc/:docId" element={<DocDetailPage />} />
+                            </Routes>
+                          </Suspense>
                         </div>
-                      )}
-                    >
-                      <Routes>
-                        <Route path="/" element={<HomePage />} />
-                        {pages.map(page => (
-                          <Route
-                            key={page.path}
-                            path={page.path}
-                            element={
-                              <page.component
-                                previewState={page.path === currentPage?.path ? activePreviewState : undefined}
-                                onPreviewStateChange={page.path === currentPage?.path ? handlePreviewStateChange : undefined}
-                              />
-                            }
-                          />
-                        ))}
-                        <Route path="/themes" element={<ThemesListPage />} />
-                        <Route path="/theme/:themeId" element={<ThemeDetailPage />} />
-                        <Route path="/docs" element={<DocsListPage />} />
-                        <Route path="/doc/:docId" element={<DocDetailPage />} />
-                      </Routes>
-                    </Suspense>
+                      </div>
+                    </div>
+
+                    {annotationUI}
                   </div>
                 </div>
-
-                {annotationUI}
-              </div>
               </div>
             </div>
 

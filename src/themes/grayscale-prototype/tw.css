@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-prototype-canvas: #F3F4F6;
+  --color-prototype-surface: #FFFFFF;
+  --color-prototype-border: #E5E7EB;
+  --color-prototype-ink: #1F2937;
+  --color-prototype-ink-muted: #6B7280;
+  --color-prototype-action: #374151;
+  --font-sans: "Segoe UI", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --radius-control: 6px;
+  --radius-card: 8px;
+  --shadow-card: 0 1px 3px rgb(17 24 39 / 6%);
+}

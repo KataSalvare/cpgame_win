@@ -174,8 +174,11 @@ export function getElementSelector(element: HTMLElement, root: HTMLElement): str
       break
     }
     if (current.className && typeof current.className === 'string') {
-      const classes = current.className
-        .split(' ')
+      // 工具滚动层的设备样式会切换，选择器只保留其稳定标识。
+      const classNames = current.classList.contains('prototype-content-scroll')
+        ? ['prototype-content-scroll']
+        : current.className.split(' ')
+      const classes = classNames
         .map((c) => c.trim())
         .filter((c) => c && !c.startsWith('hover:') && !c.startsWith('focus:') && !c.startsWith('active:'))
         .map(escapeSelector)

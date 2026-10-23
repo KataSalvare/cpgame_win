@@ -6,6 +6,8 @@
 
 本项目是原型浏览工具，承载原型、主题、文档的预览、切换、批注和评审。
 
+默认设计场景为 **Windows 游戏陪玩平台客户端**，业务原型默认使用 PC 模式和 **1920×1080 CSS 像素**画布。工作台只等比缩小显示画布，不改变原型布局尺寸；用户明确指定移动端或 Web 时按指定平台设计，原有双端预览能力保留。窗口标题栏等客户端元素属于业务原型，是否需要由页面需求决定。
+
 | 对象 | 判定标准 | 代码位置 |
 | --- | --- | --- |
 | 原型浏览工具 | 预览外壳、路由、侧边栏、批注、快捷键、Figma 复制 | `tools/` |
@@ -34,7 +36,7 @@
    | 修改内容 | 必读规则 |
    | --- | --- |
    | 目录归属、跨层引用、动态导入 | `rules/architecture-guide.md` |
-   | 原型页面、状态、路由、组件、主题 | `rules/prototype-development-guide.md`、对应专题规则 |
+   | 原型页面、状态、路由、组件、主题 | `rules/prototype-development-guide.md`、`skills/prototype-design/SKILL.md`、对应专题规则 |
    | 调试、视觉或交互问题 | `rules/debugging-guide.md`、`rules/design-guide.md` |
    | PRD、SPEC 和文档交接 | `rules/requirements-alignment-guide.md`、`rules/documentation-guide.md` |
    | Worker、KV、Cloudflare 或批注 API | `rules/cloudflare-deployment-guide.md` |
@@ -51,7 +53,7 @@
 - 代码变更：`npm run lint`、`npm run build`。
 - 业务原型和交接文档：额外运行 `npm run check:docs`，并对目标页面做预览验收。
 - Worker 或 `wrangler.jsonc`：额外执行 Wrangler dry-run；涉及批注读写时使用本地 KV 验证回退、GET 和 POST。
-- 工具层交互：必须验证核心路径、弹层定位、滚动、响应式和 Console；浏览器验收不能被 Git Hook 替代。
+- 工具层交互：必须验证核心路径、弹层定位、滚动、响应式和 Console；涉及画布时还要检查 1920×1080 布局尺寸、等比缩放、批注标记和选中框定位。浏览器验收不能被 Git Hook 替代。
 
 Hook 只执行确定性的命令，不自动格式化、修改源文件、写入批注、访问远程 KV 或发布生产环境。Git Hook 失败时先修复问题；`--no-verify` 只用于明确记录原因的紧急情况。
 
