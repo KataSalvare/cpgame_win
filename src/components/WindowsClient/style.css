@@ -1,0 +1,80 @@
+.windows-client-frame {
+  --wc-canvas: #f3f4f6;
+  --wc-surface: #fff;
+  --wc-border: #e5e7eb;
+  --wc-text: #1f2937;
+  --wc-muted: #6b7280;
+  --wc-primary: #374151;
+  --wc-shadow: 0 1px 3px rgba(17, 24, 39, .06);
+  position: relative;
+  display: grid;
+  grid-template-rows: 40px minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--wc-text);
+  background: var(--wc-canvas);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.windows-client-frame *, .windows-client-frame *::before, .windows-client-frame *::after { box-sizing: border-box; }
+.windows-client-frame__titlebar { min-width: 0; border-bottom: 1px solid var(--wc-border); background: var(--wc-surface); }
+.windows-client-frame__body { display: flex; min-width: 0; min-height: 0; }
+.windows-client-frame__sidebar { width: 240px; min-width: 240px; min-height: 0; flex: 0 0 240px; overflow: auto; border-right: 1px solid var(--wc-border); background: var(--wc-surface); }
+.windows-client-frame__navigation-panel { min-width: 0; min-height: 0; flex: 0 0 auto; overflow: auto; border-right: 1px solid var(--wc-border); background: var(--wc-surface); }
+.windows-client-frame__workspace { display: flex; flex: 1 1 0; min-width: 0; min-height: 0; }
+.windows-client-frame__main { position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; overflow: auto; padding: 24px; }
+.windows-client-frame__content { width: 100%; min-height: 100%; margin-inline: auto; }
+.windows-client-frame__right-panel { min-width: 0; min-height: 0; flex: 0 0 auto; overflow: auto; border-left: 1px solid var(--wc-border); background: var(--wc-surface); }
+.windows-titlebar { display: flex; align-items: center; height: 40px; padding-left: 16px; color: var(--wc-text); }
+.windows-titlebar__identity { display: flex; min-width: 0; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.windows-titlebar__identity > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.windows-titlebar__actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.windows-control-buttons { display: flex; align-self: stretch; margin-left: auto; }
+.windows-control-buttons__button { display: grid; width: 46px; place-items: center; color: var(--wc-text); }
+.windows-control-buttons__button--close { width: 48px; }
+.windows-control-buttons__button--close:last-child { color: var(--wc-text); }
+.windows-sidebar { display: flex; min-height: 100%; flex-direction: column; padding: 16px 12px; }
+.windows-sidebar__heading { padding: 4px 8px 16px; font-size: 12px; font-weight: 600; color: var(--wc-muted); }
+.windows-sidebar__items { display: grid; align-content: start; gap: 16px; }
+.windows-sidebar__group { display: grid; align-content: start; gap: 4px; }
+.windows-sidebar__group-title { margin: 0 8px 4px; color: var(--wc-muted); font-size: 11px; font-weight: 600; }
+.windows-sidebar__item { display: flex; min-height: 36px; align-items: center; gap: 10px; border: 0; border-radius: 6px; padding: 0 10px; background: transparent; color: var(--wc-muted); font: inherit; text-align: left; cursor: pointer; }
+.windows-sidebar__item:hover, .windows-sidebar__item.is-active { background: #f3f4f6; color: var(--wc-text); }
+.windows-sidebar__item.is-active { font-weight: 600; box-shadow: inset 2px 0 var(--wc-primary); }
+.windows-sidebar__icon { display: inline-flex; width: 16px; align-items: center; justify-content: center; }
+.windows-sidebar__footer { margin-top: auto; padding: 16px 8px 0; border-top: 1px solid var(--wc-border); color: var(--wc-muted); font-size: 12px; }
+.windows-floating-panel { position: absolute; z-index: 20; border: 1px solid var(--wc-border); border-radius: 8px; padding: 16px; background: var(--wc-surface); box-shadow: 0 8px 24px rgba(17, 24, 39, .12); }
+.windows-floating-panel--bottom-start { top: calc(100% + 8px); left: 0; }
+.windows-floating-panel--bottom-end { top: calc(100% + 8px); right: 0; }
+.windows-floating-panel--top-start { bottom: calc(100% + 8px); left: 0; }
+.windows-floating-panel--top-end { right: 0; bottom: calc(100% + 8px); }
+.windows-dialog-overlay { position: absolute; z-index: 40; inset: 40px 0 0; display: grid; place-items: center; padding: 24px; background: rgba(31, 41, 55, .24); }
+.windows-dialog-panel { max-width: 100%; overflow: auto; border: 1px solid var(--wc-border); border-radius: 8px; background: var(--wc-surface); box-shadow: 0 12px 32px rgba(17, 24, 39, .16); }
+.windows-dialog-panel__header, .windows-right-drawer__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--wc-border); padding: 20px 24px 16px; }
+.windows-dialog-panel__header h2, .windows-right-drawer__header h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.windows-dialog-panel__header p, .windows-right-drawer__header p { margin: 4px 0 0; color: var(--wc-muted); font-size: 12px; }
+.windows-dialog-panel__content { padding: 20px 24px; }
+.windows-dialog-panel__footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--wc-border); padding: 12px 24px; }
+.windows-right-drawer--inline { width: 100%; min-width: 0; height: 100%; background: var(--wc-surface); }
+.windows-right-drawer--overlay { position: absolute; z-index: 30; inset: 40px 0 0; display: flex; justify-content: flex-end; }
+.windows-right-drawer__scrim { position: absolute; inset: 0; background: rgba(31, 41, 55, .16); }
+.windows-right-drawer__panel { position: relative; z-index: 1; display: flex; height: 100%; max-width: 100%; flex-direction: column; overflow: hidden; border-left: 1px solid var(--wc-border); background: var(--wc-surface); box-shadow: -4px 0 16px rgba(17, 24, 39, .08); }
+.windows-right-drawer__panel.is-inline { height: 100%; border: 0; box-shadow: none; }
+.windows-right-drawer__header { position: sticky; top: 0; z-index: 2; flex: 0 0 auto; background: var(--wc-surface); }
+.windows-right-drawer__content { min-height: 0; flex: 1; overflow: auto; padding: 20px 24px; }
+.windows-notification-toast { position: absolute; z-index: 50; top: 56px; right: 24px; display: flex; width: 360px; max-width: calc(100% - 48px); align-items: flex-start; gap: 12px; border: 1px solid var(--wc-border); border-radius: 8px; padding: 14px 12px 14px 16px; background: var(--wc-surface); box-shadow: 0 8px 24px rgba(17, 24, 39, .12); }
+.windows-notification-toast__marker { width: 3px; min-height: 32px; flex: 0 0 auto; border-radius: 2px; background: #9ca3af; }
+.windows-notification-toast--success .windows-notification-toast__marker { background: #6b7280; }
+.windows-notification-toast--warning .windows-notification-toast__marker { background: #4b5563; }
+.windows-notification-toast--error .windows-notification-toast__marker { background: #1f2937; }
+.windows-notification-toast__body { min-width: 0; flex: 1; }
+.windows-notification-toast__label { font-size: 13px; font-weight: 600; }
+.windows-notification-toast__body p { margin: 3px 0 0; color: var(--wc-muted); font-size: 12px; }
+.windows-icon-button { display: inline-grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--wc-muted); cursor: pointer; }
+.windows-icon-button:hover { background: #f3f4f6; color: var(--wc-text); }
+.windows-client-frame button:focus-visible { outline: 2px solid #6b7280; outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { .windows-client-frame button { transition: background-color 140ms ease, color 140ms ease; } }

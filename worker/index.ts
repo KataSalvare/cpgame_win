@@ -2,14 +2,7 @@ import defaultAnnotations from '../src/resources/annotations.json'
 
 const ANNOTATIONS_KEY = 'annotations'
 const SPEC_KEY_PREFIX = 'spec:'
-const EDITABLE_SPECS = new Set([
-  'DEMO-ecommerce-detail',
-  'DEMO-sports-health-home',
-  'DEMO-blockchain-wallet',
-  'DEMO-admin-saas-home',
-  'DEMO-admin-user-management',
-  'DEMO-admin-analytics',
-])
+const EDITABLE_SPECS = new Set<string>()
 
 interface AnnotationsData {
   annotations: unknown[]

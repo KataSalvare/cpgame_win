@@ -224,8 +224,10 @@ function AppContent() {
                                   path={page.path}
                                   element={
                                     <page.component
+                                      key={page.path}
                                       previewState={page.path === currentPage?.path ? activePreviewState : undefined}
                                       onPreviewStateChange={page.path === currentPage?.path ? handlePreviewStateChange : undefined}
+                                      entryView={page.entryView}
                                     />
                                   }
                                 />

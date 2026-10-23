@@ -44,8 +44,9 @@ node scripts/check-app-ready.mjs /prototypes/[原型目录]
 
 ### 2.2 自动化复现与定位
 
-- **优先使用 Chrome DevTools MCP**；没有时使用 **Playwright MCP**
-- 如果当前环境没有可用 MCP：直接提示用户安装并完成配置，再继续自动化验收
+- 默认使用 Codex 内置浏览器打开验收脚本返回的 `targetUrl`，完成页面验收和截图。
+- 只有内置浏览器无法完成所需操作时，才改用 Chrome DevTools MCP 或 Playwright MCP。
+- 不因缺少这些备用工具而中断；先使用当前可用的 Codex 内置浏览器能力继续验收。
 - 自动化过程中必须完成：
   - 打开验收脚本返回的 `targetUrl`
   - 检查 Console、Network、页面报错与资源加载状态

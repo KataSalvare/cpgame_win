@@ -118,7 +118,7 @@ function annotationsPlugin() {
 export default defineConfig({
   plugins: [react(), tailwindcss(), annotationsPlugin(), specApiPlugin()],
   server: {
-    port: 1025,
+    port: 1045,
     strictPort: true,
   },
   resolve: {

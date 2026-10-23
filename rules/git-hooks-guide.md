@@ -29,7 +29,7 @@ Hook 文件必须提交到仓库并保持可执行。脚本不可依赖某个开
 
 - Hook 不自动格式化、不写回源码、不修改 `src/resources/annotations.json`。
 - 不使用远程 KV，不执行 `wrangler deploy`，不发送生产 API 写请求。
-- 不把 `check-app-ready.mjs` 放入 Hook，避免启动 Vite 与现有 1025 端口冲突。
+- 不把 `check-app-ready.mjs` 放入 Hook，避免启动 Vite 与现有 1045 端口冲突。
 - `git commit --no-verify` 和 `git push --no-verify` 只能用于紧急情况；完成后应补跑失败检查并说明原因。
 - Hook 是开发者体验层的门禁，未来如需团队强制执行，应在 CI 重复运行核心检查。
 

@@ -26,7 +26,7 @@
 
 1. 在项目根目录安装依赖：`npm install`。
 2. 启动本地开发服务：`npm run dev`。
-3. 打开 `http://localhost:1025` 预览项目。
+3. 打开 `http://localhost:1045` 预览项目。
 4. 构建生产版本：`npm run build`。
 5. 预览生产构建：`npm run preview`。
 

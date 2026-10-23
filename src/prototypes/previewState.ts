@@ -3,6 +3,7 @@ import { useState } from 'react'
 export interface PrototypePreviewProps<TState extends string = string> {
   previewState?: TState
   onPreviewStateChange?: (state: TState) => void
+  entryView?: string
 }
 
 export function usePrototypeState<TState extends string>(

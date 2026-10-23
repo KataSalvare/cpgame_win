@@ -1,24 +1,5 @@
 {
-  "annotations": [
-    { "id": "DEMO-ecommerce-detail-product", "pagePath": "/demo/ecommerce-detail", "number": 1, "title": "商品核心卖点", "content": "首屏集中呈现商品视觉、价格、优惠与卖点，服务用户快速判断是否值得购买。", "category": "business", "selector": "h1", "position": "top-left", "createdAt": 1 },
-    { "id": "DEMO-ecommerce-detail-size", "pagePath": "/demo/ecommerce-detail", "number": 2, "title": "尺码选择", "content": "选中尺码后才能形成完整 SKU；正式开发需要结合库存服务校验可售状态。", "category": "interaction", "selector": "button[aria-pressed=\"true\"]", "position": "top-right", "createdAt": 2 },
-    { "id": "DEMO-ecommerce-detail-cart", "pagePath": "/demo/ecommerce-detail", "number": 3, "title": "加入购物袋", "content": "点击后仅模拟成功反馈，正式产品应校验 SKU、库存和会话，并持久化到购物袋。", "category": "state", "selector": "button[type=\"button\"]", "position": "bottom-left", "createdAt": 3 },
-    { "id": "DEMO-sports-health-home-recommend", "pagePath": "/demo/sports-health", "number": 1, "title": "今日训练推荐", "content": "根据用户训练计划生成今日建议；当前内容为静态 mock，不代表健康诊断。", "category": "business", "selector": "h1", "position": "top-left", "createdAt": 4 },
-    { "id": "DEMO-sports-health-home-start", "pagePath": "/demo/sports-health", "number": 2, "title": "开始训练", "content": "开始按钮模拟加入今日计划，正式开发需创建训练会话并记录开始时间。", "category": "interaction", "selector": "button[aria-label^=\"开始\"]", "position": "top-right", "createdAt": 5 },
-    { "id": "DEMO-sports-health-home-progress", "pagePath": "/demo/sports-health", "number": 3, "title": "周进度", "content": "进度环用于帮助用户建立习惯；正式数据应来自运动记录和目标服务。", "category": "state", "selector": ".prototype-demo-card", "position": "bottom-left", "createdAt": 6 },
-    { "id": "DEMO-blockchain-wallet-balance", "pagePath": "/demo/blockchain-wallet", "number": 1, "title": "总资产与显隐", "content": "用户可隐藏余额保护隐私；当前金额是静态 mock，不可用于真实交易决策。", "category": "business", "selector": "h1", "position": "top-left", "createdAt": 7 },
-    { "id": "DEMO-blockchain-wallet-assets", "pagePath": "/demo/blockchain-wallet", "number": 2, "title": "资产组合", "content": "点击资产切换走势图；正式开发应从链上索引和行情服务读取数据。", "category": "interaction", "selector": "button", "position": "top-right", "createdAt": 8 },
-    { "id": "DEMO-blockchain-wallet-address", "pagePath": "/demo/blockchain-wallet", "number": 3, "title": "钱包地址", "content": "复制地址只模拟本地反馈，正式开发需绑定当前网络和连接钱包。", "category": "state", "selector": "button[aria-label=\"复制钱包地址\"]", "position": "bottom-left", "createdAt": 9 },
-    { "id": "DEMO-admin-saas-home-overview", "pagePath": "/demo/admin/saas-home", "number": 1, "title": "工作区概览", "content": "指标卡帮助团队负责人快速判断工作区健康度；正式数据需按工作区权限聚合。", "category": "business", "selector": "h1", "position": "top-left", "createdAt": 10 },
-    { "id": "DEMO-admin-saas-home-project", "pagePath": "/demo/admin/saas-home", "number": 2, "title": "项目进度", "content": "项目卡展示进度和成员数，当前为静态 mock，不代表真实协作状态。", "category": "state", "selector": ".prototype-demo-card", "position": "top-right", "createdAt": 11 },
-    { "id": "DEMO-admin-saas-home-create", "pagePath": "/demo/admin/saas-home", "number": 3, "title": "新建项目", "content": "弹窗提交只显示本地成功反馈；正式开发需校验权限并写入项目和审计日志。", "category": "interaction", "selector": "button", "position": "bottom-left", "createdAt": 12 },
-    { "id": "DEMO-admin-user-management-list", "pagePath": "/demo/admin/user-management", "number": 1, "title": "成员列表", "content": "列表展示成员、角色、状态和活跃时间，正式开发需支持服务端分页。", "category": "business", "selector": "table", "position": "top-left", "createdAt": 13 },
-    { "id": "DEMO-admin-user-management-filter", "pagePath": "/demo/admin/user-management", "number": 2, "title": "成员筛选", "content": "搜索和角色筛选用于缩小管理范围；正式开发需按工作区权限过滤数据。", "category": "interaction", "selector": "input[aria-label=\"搜索成员\"]", "position": "top-right", "createdAt": 14 },
-    { "id": "DEMO-admin-user-management-invite", "pagePath": "/demo/admin/user-management", "number": 3, "title": "邀请成员", "content": "邀请按钮打开表单，当前只模拟成功消息；正式开发应验证邮箱、角色和域策略。", "category": "state", "selector": "button", "position": "bottom-left", "createdAt": 15 },
-    { "id": "DEMO-admin-analytics-kpis", "pagePath": "/demo/admin/analytics", "number": 1, "title": "核心指标", "content": "收入、客户、转化率和退款率是运营总览指标，正式开发需标注更新时间与口径。", "category": "business", "selector": "h1", "position": "top-left", "createdAt": 16 },
-    { "id": "DEMO-admin-analytics-trend", "pagePath": "/demo/admin/analytics", "number": 2, "title": "趋势指标切换", "content": "收入和用户趋势可切换，当前柱状图为 mock；正式开发需由指标服务按时间范围返回。", "category": "interaction", "selector": "button[aria-label=\"更多图表操作\"]", "position": "top-right", "createdAt": 17 },
-    { "id": "DEMO-admin-analytics-alerts", "pagePath": "/demo/admin/analytics", "number": 3, "title": "需要关注", "content": "异常事项用于引导运营进一步调查，正式开发应来自告警规则并提供数据钻取。", "category": "state", "selector": ".prototype-demo-card", "position": "bottom-left", "createdAt": 18 }
-  ],
+  "annotations": [],
   "categories": [
     {
       "key": "interaction",

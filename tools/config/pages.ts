@@ -12,6 +12,7 @@ export interface PageStateOption {
 export interface PageItem {
   path: string
   label: string
+  entryView?: string
   component: React.ComponentType<PrototypePreviewProps>
   category: PageCategory
   dirName: string
@@ -45,17 +46,24 @@ const demoPageStates: readonly PageStateOption[] = [
   { id: 'error', label: '异常' },
 ]
 
-const frontendPageConfig: Record<string, { path: string; label: string; states: readonly PageStateOption[] }> = {
-  'DEMO-ecommerce-detail': { path: '/demo/ecommerce-detail', label: 'DEMO 电商详情页', states: demoPageStates },
-  'DEMO-game-companion-home': { path: '/demo/game-companion-home', label: 'DEMO 陪玩平台主页', states: demoPageStates },
-  'DEMO-sports-health-home': { path: '/demo/sports-health', label: 'DEMO 运动健康首页', states: demoPageStates },
-  'DEMO-blockchain-wallet': { path: '/demo/blockchain-wallet', label: 'DEMO 区块链钱包', states: demoPageStates },
+type PageConfig = { path: string; label: string; states: readonly PageStateOption[]; entryView?: string }
+
+const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
+  'game-companion-client': [
+    { path: '/game-companion-client', label: '陪玩平台首页', entryView: 'home', states: demoPageStates },
+    { path: '/game-companion-club-detail', label: '俱乐部详情', entryView: 'club-detail', states: demoPageStates },
+    { path: '/game-companion-companion-detail', label: '陪玩详情', entryView: 'companion-detail', states: demoPageStates },
+    { path: '/game-companion-checkout', label: '下单结算', entryView: 'checkout', states: demoPageStates },
+    { path: '/game-companion-profile', label: '个人中心', entryView: 'profile', states: demoPageStates },
+    { path: '/game-companion-wallet', label: '我的钱包', entryView: 'wallet', states: demoPageStates },
+    { path: '/game-companion-orders', label: '我的订单', entryView: 'orders', states: demoPageStates },
+    { path: '/game-companion-messages', label: '消息', entryView: 'messages', states: demoPageStates },
+    { path: '/game-companion-voice-room', label: '语音房', entryView: 'voice-room', states: demoPageStates },
+  ],
 }
 
 const adminPageConfig: Record<string, { path: string; label: string; states: readonly PageStateOption[] }> = {
-  'DEMO-admin-saas-home': { path: '/demo/admin/saas-home', label: 'DEMO SaaS 平台首页', states: demoPageStates },
-  'DEMO-admin-user-management': { path: '/demo/admin/user-management', label: 'DEMO 用户管理', states: demoPageStates },
-  'DEMO-admin-analytics': { path: '/demo/admin/analytics', label: 'DEMO 运营数据看板', states: demoPageStates },
+  'DEMO-admin-windows-client-components': { path: '/demo/admin/windows-client-components', label: 'DEMO Windows 客户端组件', states: demoPageStates },
 }
 
 export const getDefaultComponent = (mod: unknown): React.ComponentType<PrototypePreviewProps> => {
@@ -76,16 +84,16 @@ export const generatePages = (): PageItem[] => {
     if (match) {
       const dirName = match[1]
       const config = frontendPageConfig[dirName]
-      if (config) {
-        pages.push({
-          path: config.path,
-          label: config.label,
-          component: getLazyComponent(loader),
-          category: 'frontend',
-          dirName,
-          states: config.states,
-        })
-      }
+      const pageConfigs = config ? Array.isArray(config) ? config : [config] : []
+      pageConfigs.forEach((pageConfig) => pages.push({
+        path: pageConfig.path,
+        label: pageConfig.label,
+        entryView: pageConfig.entryView,
+        component: getLazyComponent(loader),
+        category: 'frontend',
+        dirName,
+        states: pageConfig.states,
+      }))
     }
   })
 

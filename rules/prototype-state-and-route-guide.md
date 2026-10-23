@@ -44,9 +44,9 @@ const demoPageStates: readonly PageStateOption[] = [
 ]
 
 const frontendPageConfig = {
-  'DEMO-blockchain-wallet': {
-    path: '/demo/blockchain-wallet',
-    label: 'DEMO 区块链钱包',
+  'wallet-prototype': {
+    path: '/wallet',
+    label: '钱包原型',
     states: demoPageStates,
   },
 }
