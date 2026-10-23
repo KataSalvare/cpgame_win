@@ -84,9 +84,10 @@ export default function DemoAdminWindowsClientComponents() {
       <section className="gallery-section">
         <div className="gallery-section__heading"><div><h2>浮层与抽屉</h2><p>状态由展示页控制；锚定浮层宽 320px，抽屉宽 360px。</p></div><span className="gallery-tag">Popover · Drawer</span></div>
         <div className="gallery-grid gallery-grid--2">
-          <article className="gallery-card gallery-demo-card"><div className="gallery-demo-card__heading"><div><h3>锚定浮层</h3><p>默认宽度 320px，可选择四个锚定方向。</p></div></div>
-            <div className="gallery-popover-anchor"><button type="button" className="gallery-button" aria-expanded={popoverOpen} onClick={() => setPopoverOpen(!popoverOpen)}><SlidersHorizontal size={15} />筛选条件<ChevronDown size={14} /></button>
-              {popoverOpen && <FloatingPanel placement="bottom-start"><strong className="gallery-panel-title">筛选条件</strong><label className="gallery-check"><input type="checkbox" defaultChecked />显示已启用项目</label><label className="gallery-check"><input type="checkbox" />只看最近更新</label><button type="button" className="gallery-button gallery-button--primary gallery-panel-action" onClick={() => setPopoverOpen(false)}>应用筛选</button></FloatingPanel>}
+          <article className="gallery-card gallery-demo-card"><div className="gallery-demo-card__heading"><div><h3>锚定浮层</h3><p>按钮悬停或聚焦时打开；移入浮层后保持显示。</p></div></div>
+            <div className="gallery-popover-anchor" onMouseEnter={() => setPopoverOpen(true)} onMouseLeave={(event) => { if (!event.currentTarget.contains(document.activeElement)) setPopoverOpen(false) }} onFocusCapture={() => setPopoverOpen(true)} onBlurCapture={(event) => { const nextTarget = event.relatedTarget; if ((!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) && !event.currentTarget.matches(':hover')) setPopoverOpen(false) }}>
+              <button type="button" className="gallery-button" aria-expanded={popoverOpen} onClick={() => setPopoverOpen(true)}><SlidersHorizontal size={15} />筛选条件<ChevronDown size={14} /></button>
+              {popoverOpen && <><span className="gallery-popover-hover-bridge" aria-hidden="true" /><FloatingPanel placement="bottom-start"><strong className="gallery-panel-title">筛选条件</strong><label className="gallery-check"><input type="checkbox" defaultChecked />显示已启用项目</label><label className="gallery-check"><input type="checkbox" />只看最近更新</label><button type="button" className="gallery-button gallery-button--primary gallery-panel-action" onClick={() => setPopoverOpen(false)}>应用筛选</button></FloatingPanel></>}
             </div>
           </article>
           <article className="gallery-card gallery-demo-card"><div className="gallery-demo-card__heading"><div><h3>右侧抽屉</h3><p>可覆盖页面，或替换右侧详情栏。</p></div></div>

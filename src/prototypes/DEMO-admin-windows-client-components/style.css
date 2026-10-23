@@ -28,6 +28,7 @@
 .gallery-button--primary { border-color: #374151; background: #374151; color: #fff; }
 .gallery-button--primary:hover { background: #1f2937; }
 .gallery-popover-anchor { position: relative; display: inline-flex; }
+.gallery-popover-hover-bridge { position: absolute; z-index: 19; top: 100%; left: 0; width: 320px; height: 8px; }
 .gallery-panel-title { display: block; margin-bottom: 12px; font-size: 13px; }
 .gallery-check { display: flex; align-items: center; gap: 8px; margin: 9px 0; font-size: 12px; }
 .gallery-check input { accent-color: #374151; }

@@ -16,6 +16,7 @@ type Props = {
   onChatWithCompanion: (companionId: string) => void
   onOrderWithCompanion: (companionId: string) => void
   onOpenVoiceRoom: () => void
+  onOpenClubGroups: () => void
   onOpenPremiumCards: () => void
   onRetry: () => void
 }
@@ -29,7 +30,7 @@ const sortLabels: Record<string, string> = {
   'orders-desc': '单数从高到低',
 }
 
-export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenPremiumCards, onRetry }: Props) {
+export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenPremiumCards, onRetry }: Props) {
   const logic = useClubDetailLogic(club.id)
 
   if (pageState !== 'normal') {
@@ -65,7 +66,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
         <DisplayAction icon={<Headphones size={15} />} label="客服" />
         <DisplayAction icon={<UsersRound size={15} />} label="自助下单" disabled />
         <DisplayAction icon={<Star size={15} />} label="优惠券" />
-        <DisplayAction icon={<MessageCircle size={15} />} label="群聊" />
+        <DisplayAction icon={<MessageCircle size={15} />} label="群聊" onClick={onOpenClubGroups} />
       </div>
     </section>
 

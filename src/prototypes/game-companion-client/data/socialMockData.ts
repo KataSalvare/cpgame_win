@@ -25,6 +25,7 @@ export interface SocialMessage {
   kind: ChatMessageKind
   content: string
   duration?: number
+  replyTo?: { senderName: string; content: string; kind: ChatMessageKind }
 }
 
 export interface SocialConversation {
@@ -35,9 +36,11 @@ export interface SocialConversation {
   members: string[]
   unread: number
   messages: SocialMessage[]
+  clubGroupId?: string
 }
 
 export type VoiceRole = 'owner' | 'admin' | 'member'
+export const MAX_VOICE_CHANNEL_MEMBERS = 8
 
 export interface VoiceMember {
   id: string
@@ -51,6 +54,9 @@ export interface VoiceMember {
 export interface VoiceSubchannel {
   id: string
   name: string
+  capacity: number
+  privacy: '公开' | '私密'
+  password: string
   members: VoiceMember[]
 }
 
@@ -107,17 +113,17 @@ export const initialVoiceRooms: VoiceRoom[] = [
   {
     id: 'room-ranked', name: '今晚冲分', privacy: '公开', currentRole: 'owner',
     channels: [
-      { id: 'channel-main', name: '主频道', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), voiceMember(socialFriends[4])] },
-      { id: 'channel-warmup', name: '热身区', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
+      { id: 'channel-main', name: '主频道', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), voiceMember(socialFriends[4])] },
+      { id: 'channel-warmup', name: '热身区', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
     ],
   },
   {
     id: 'room-weekend', name: '周末五排', privacy: '公开', currentRole: 'admin',
-    channels: [{ id: 'channel-weekend', name: '五排集合', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
+    channels: [{ id: 'channel-weekend', name: '五排集合', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
   },
   {
     id: 'room-friends', name: '好友闲聊', privacy: '私密', currentRole: 'member',
-    channels: [{ id: 'channel-friends', name: '主频道', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
+    channels: [{ id: 'channel-friends', name: '主频道', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
   },
 ]
 

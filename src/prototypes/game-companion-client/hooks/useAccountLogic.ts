@@ -32,9 +32,9 @@ export function useAccountLogic() {
     setOrders((current) => current.map((order) => order.id === orderId ? { ...order, status } : order))
   }, [])
 
-  const completePayment = useCallback((service: Service, companion: Companion, gameName: string, quantity: number, amount: number, remark: string): ClientOrder | null => {
+  const completePayment = useCallback((service: Service, companion: Companion, gameName: string, quantity: number, amount: number, remark: string, selectedCompanions: Companion[] = []): ClientOrder | null => {
     if (amount > diamondBalance) return null
-    const order = makeClientOrder(service, companion, gameName, quantity, amount, remark)
+    const order = makeClientOrder(service, companion, gameName, quantity, amount, remark, selectedCompanions.filter((item) => item.id !== companion.id))
     setDiamondBalance((balance) => balance - amount)
     setOrders((current) => [order, ...current])
     setDiamondTransactions((current) => [{ id: order.id, title: `订单消费 · ${service.playName}`, date: order.createdAt, amount: -amount }, ...current])

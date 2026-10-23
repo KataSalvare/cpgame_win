@@ -27,7 +27,7 @@ import {
 | `WindowsTitleBar` | `title`、`leading`、`actions`、`showWindowControls` | 高 40px；默认显示控制按钮 |
 | `WindowsSidebar` | `items`、`activeId`、`onSelect`、`heading`、`footer` | 选中项由调用方控制；项目可提供 `id`、`label`、`icon`、`group` |
 | `WindowsControlButtons` | `className` | 只绘制最小化、最大化和关闭图标，不绑定系统窗口操作 |
-| `FloatingPanel` | `children`、`placement`、`width`、`className`、`style` | 默认宽 320px；绝对定位在调用方提供的相对定位锚点内 |
+| `FloatingPanel` | `children`、`placement`、`width`、`className`、`style` | 默认宽 320px；绝对定位在调用方提供的相对定位锚点内；显示状态由调用方控制，可由按钮 hover / focus 或点击触发 |
 | `DialogPanel` | `overlayId`、`children`、`title`、`description`、`footer`、`onClose`、`width` | 默认宽 560px；overlayId 必填；调用方条件渲染以控制显隐 |
 | `RightDrawer` | `mode`、`overlayId`、`children`、`title`、`description`、`onClose`、`width` | 默认宽 360px；overlay 模式必须提供 overlayId；inline 模式作为内容区第三栏；标题和关闭操作固定，内容区独立滚动 |
 | `NotificationToast` | `variant`、`title`、`message`、`onDismiss` | 默认宽 360px、应用画布右上角；状态为 neutral/success/warning/error；不自动消失 |
@@ -60,6 +60,7 @@ function Example() {
 - 框架尺寸跟随传入的画布容器；项目原型画布保持 1920×1080 CSS 像素，由工作台等比缩放。
 - `WindowsClientFrame.rightPanel` 放置 inline 抽屉；overlay 抽屉、弹窗和 toast 放入 `overlayLayer`。
 - `RightDrawer` 的标题栏与关闭按钮始终固定在抽屉顶部；长内容只在抽屉内容区滚动，保证用户随时可以关闭。
+- 锚定浮层可在触发按钮 hover 或键盘 focus 时打开；指针从按钮移动到浮层时保持打开，指针和键盘焦点都离开按钮与面板组成的交互区域后关闭。点击可作为触屏或显式操作的打开方式。
 - 三栏组合为左导航、主内容、右侧面板；提供 `navigationPanel` 后，在左导航和主内容之间增加一栏，形成四栏。宽度分别由 `navigationPanelWidth` 和 `rightPanelWidth` 控制。
 - 两栏组合为左导航和主内容；设置 `contentMaxWidth` 后，内容在主滚动区域内居中并保留两侧留白，适用于 Telegram 式聚焦内容布局。未设置时，内容保持原有自然宽度行为。
 - `rightPanel` 的关闭 / 折叠由调用方控制：在右侧内容提供关闭操作，回调中移除 `rightPanel`；四栏会自然退为保留列表栏的三栏，三栏会退为两栏。调用方可在主内容中提供恢复操作，重新挂载右侧插槽。

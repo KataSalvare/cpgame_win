@@ -78,6 +78,7 @@ export interface WindowsSidebarItem {
   label: string
   icon?: ReactNode
   group?: string
+  variant?: 'default' | 'primary'
 }
 
 export interface WindowsSidebarProps {
@@ -99,7 +100,7 @@ export function WindowsSidebar({ items, activeId, onSelect, heading, footer, cla
         {items.filter((item) => (item.group ?? '') === group).map((item) => <button
           type="button"
           key={item.id}
-          className={`windows-sidebar__item${activeId === item.id ? ' is-active' : ''}`}
+          className={`windows-sidebar__item${item.variant === 'primary' ? ' windows-sidebar__item--primary' : ''}${activeId === item.id ? ' is-active' : ''}`}
           aria-current={activeId === item.id ? 'page' : undefined}
           onClick={() => onSelect(item.id)}
         >{item.icon && <span className="windows-sidebar__icon" aria-hidden="true">{item.icon}</span>}<span>{item.label}</span></button>)}
