@@ -18,12 +18,16 @@ type Props = {
   presentation?: 'page' | 'panel'
   profileOverride?: ProfileCardData
   onChat?: () => void
+  followed?: boolean
+  blocked?: boolean
+  onToggleFollow?: () => void
+  onBlock?: () => void
 }
 
 type DetailTab = 'services' | 'reviews' | 'gifts'
 const tabNames: Record<DetailTab, string> = { services: '服务', reviews: '评价', gifts: '礼物' }
 
-export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat }: Props) {
+export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, followed, blocked, onToggleFollow, onBlock }: Props) {
   const [activeTab, setActiveTab] = useState<DetailTab>('services')
   const logic = useCompanionDetailLogic(companion.id)
   const totalServiceCount = servicesByCompanion[companion.id]?.length ?? 0
@@ -43,7 +47,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
 
   return <div className={`client-content companion-detail-page${presentation === 'panel' ? ' companion-detail-page--panel' : ''}`}>
     {presentation !== 'panel' && <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={16} /> 俱乐部详情 <span>/</span> 陪玩详情</button>}
-    <CompanionProfileCard profile={profileOverride ?? companionToProfileCard(companion)} onChat={onChat} />
+    <CompanionProfileCard profile={{ ...companionToProfileCard(companion), ...profileOverride }} onChat={onChat} followed={followed} blocked={blocked} onToggleFollow={onToggleFollow} onBlock={onBlock} />
 
     <section className="companion-detail-content">
       <div className="companion-tabs" role="tablist" aria-label="陪玩详情内容">

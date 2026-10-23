@@ -2,9 +2,9 @@ import { Compass, Star } from 'lucide-react'
 import type { Club, Game } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
 
-type ClubCardProps = { club: Club; gamesById: Map<string, Game>; onOpen: () => void; onBrowse: () => void }
+type ClubCardProps = { club: Club; gamesById: Map<string, Game>; onOpen: () => void; onBrowse: () => void; onSelfOrder: () => void }
 
-export function ClubCard({ club, gamesById, onOpen, onBrowse }: ClubCardProps) {
+export function ClubCard({ club, gamesById, onOpen, onBrowse, onSelfOrder }: ClubCardProps) {
   return <article
     className="client-card club-card"
     tabIndex={0}
@@ -32,7 +32,7 @@ export function ClubCard({ club, gamesById, onOpen, onBrowse }: ClubCardProps) {
     </div>
     <div className="club-card__actions">
       <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onBrowse() }}><Compass size={15} />逛一逛</button>
-      <button type="button" className="client-button client-button--secondary" disabled>自助下单</button>
+      <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onSelfOrder() }}>自助下单</button>
     </div>
   </article>
 }

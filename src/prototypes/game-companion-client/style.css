@@ -124,6 +124,9 @@
 .companion-profile-card__body { min-width: 0; }
 .companion-profile-card__name h1 { font-size: 20px; }
 .companion-profile-card__facts { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 8px; color: var(--client-muted); font-size: 12px; }
+.companion-profile-card__stats { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 10px; color: var(--client-muted); font-size: 12px; }
+.companion-profile-card__stats span { display: inline-flex; align-items: baseline; gap: 5px; }
+.companion-profile-card__stats strong { color: var(--client-text); font-size: 13px; font-weight: 600; }
 .companion-profile-card__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--client-border); padding-top: 16px; }
 .companion-tabs { position: sticky; z-index: 10; top: -24px; display: flex; gap: 8px; margin: 0 -24px; border-bottom: 1px solid var(--client-border); padding: 10px 24px 0; background: var(--client-canvas); }
 .companion-tabs__tab { display: inline-flex; min-width: 88px; align-items: center; justify-content: center; gap: 8px; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px 11px; background: transparent; color: #6b7280; font: inherit; font-size: 13px; cursor: pointer; }

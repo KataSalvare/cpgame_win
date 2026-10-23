@@ -50,7 +50,11 @@ export function useMatchLogic() {
     setServiceId(nextServices[0]?.id ?? '')
   }
   const chooseClub = (nextClubId: string) => {
-    const nextServices = companions.filter((companion) => companion.clubId === nextClubId && companion.gameIds.includes(gameId)).flatMap((companion) => servicesByCompanion[companion.id] ?? []).filter((service) => service.gameId === gameId)
+    const nextClub = clubs.find((club) => club.id === nextClubId)
+    if (!nextClub) return
+    const nextGameId = nextClub.gameIds.includes(gameId) ? gameId : nextClub.gameIds[0] ?? firstGameId
+    const nextServices = companions.filter((companion) => companion.clubId === nextClubId && companion.gameIds.includes(nextGameId)).flatMap((companion) => servicesByCompanion[companion.id] ?? []).filter((service) => service.gameId === nextGameId)
+    setGameId(nextGameId)
     setClubId(nextClubId)
     setPlayName(nextServices[0]?.playName ?? '')
     setLevelName(nextServices[0]?.levelName ?? '')

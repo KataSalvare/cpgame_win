@@ -10,10 +10,11 @@ type Props = {
   pageState: 'normal' | 'loading' | 'empty' | 'error'
   onOpenClub: (clubId: string) => void
   onBrowseClub: () => void
+  onSelfOrderClub: (clubId: string) => void
   onRetry: () => void
 }
 
-export function HomePage({ pageState, onOpenClub, onBrowseClub, onRetry }: Props) {
+export function HomePage({ pageState, onOpenClub, onBrowseClub, onSelfOrderClub, onRetry }: Props) {
   const logic = useHomeLogic()
   const gameMap = useMemo(() => new Map(games.map((game) => [game.id, game])), [])
 
@@ -57,7 +58,7 @@ export function HomePage({ pageState, onOpenClub, onBrowseClub, onRetry }: Props
       </div>
 
       {logic.visibleClubs.length > 0 ? <div className="client-card-grid client-card-grid--clubs">
-        {logic.visibleClubs.map((club) => <ClubCard key={club.id} club={club} gamesById={gameMap} onOpen={() => onOpenClub(club.id)} onBrowse={onBrowseClub} />)}
+        {logic.visibleClubs.map((club) => <ClubCard key={club.id} club={club} gamesById={gameMap} onOpen={() => onOpenClub(club.id)} onBrowse={onBrowseClub} onSelfOrder={() => onSelfOrderClub(club.id)} />)}
       </div> : <div className="client-inline-empty"><p>没有符合条件的俱乐部</p><button type="button" className="client-button client-button--secondary" onClick={logic.resetFilters}>恢复默认筛选</button></div>}
     </section>
   </div>

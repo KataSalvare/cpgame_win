@@ -161,7 +161,6 @@
 .voice-room-chevron{flex:0 0 auto;color:#9ca3af;transition:transform .15s ease}
 .voice-room-chevron.is-expanded{transform:rotate(90deg)}
 .voice-room-heading strong{overflow:hidden;flex:1;font-size:12px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
-.voice-room-heading small{color:var(--client-muted);font-size:10px}
 .voice-create-child-channel{display:none;width:26px;height:26px;flex:0 0 26px;place-items:center;border:0;border-radius:5px;background:transparent;color:var(--client-muted);cursor:pointer}
 .voice-room-group:hover .voice-create-child-channel,.voice-room-group:focus-within .voice-create-child-channel{display:grid}
 .voice-create-child-channel:hover{background:#fff;color:var(--client-text)}

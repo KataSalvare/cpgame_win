@@ -74,6 +74,10 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         onBack={navigation.closeCompanion}
         onRetry={() => setPageState('normal')}
         onOrder={navigation.beginOrder}
+        followed={social.followedProfileIds.includes(navigation.companion.id)}
+        blocked={social.blockedProfileIds.includes(navigation.companion.id)}
+        onToggleFollow={() => social.toggleProfileFollow(navigation.companion!.id)}
+        onBlock={() => social.blockProfile(navigation.companion!.id)}
         onChat={() => {
           social.startDirectMessageWithCompanion(navigation.companion!.id)
           navigation.goToPage('messages')
@@ -213,12 +217,14 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       }}
       onOpenVoiceRoom={() => navigation.goToPage('voice-room')}
       onOpenClubGroups={navigation.openClubGroups}
+      onOpenMatch={() => { match.chooseClub(navigation.clubId); setMatchPanelOpen(true) }}
       onOpenPremiumCards={() => navigation.goToPage('club-cards')}
       onRetry={() => setPageState('normal')}
     /> : <HomePage
       pageState={pageState}
       onOpenClub={navigation.openClub}
       onBrowseClub={() => navigation.goToPage('voice-room')}
+      onSelfOrderClub={(clubId) => { match.chooseClub(clubId); setMatchPanelOpen(true) }}
       onRetry={() => setPageState('normal')}
     />}
   </WindowsClientFrame>

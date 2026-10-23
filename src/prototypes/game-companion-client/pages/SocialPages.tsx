@@ -179,6 +179,10 @@ export function MessagesPage({ logic, pageState, onRetry, onOrder }: PageStatePr
           onRetry={onRetry}
           onOrder={onOrder}
           profileOverride={selectedProfileCard}
+          followed={logic.followedProfileIds.includes(linkedCompanion.id)}
+          blocked={logic.blockedProfileIds.includes(linkedCompanion.id)}
+          onToggleFollow={() => logic.toggleProfileFollow(linkedCompanion.id)}
+          onBlock={() => logic.blockProfile(linkedCompanion.id)}
           onChat={selectedProfile.id === currentSocialUser.id ? undefined : () => logic.startDirectMessage(selectedProfile.id)}
         /> : selectedProfileCard ? <CompanionProfileCard profile={selectedProfileCard} /> : null}
       </aside>}
@@ -554,8 +558,8 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
         <div className="voice-tree-section-title"><span>语音分组</span><button type="button" className="voice-create-group-entry" onClick={openCreateRoom}><Plus size={14} />创建分组</button></div>
         <div className="voice-room-list">{logic.visibleVoiceRooms.map((item) => <section className={`voice-room-group${room?.id === item.id ? ' is-active' : ''}`} key={item.id}>
           <div className="voice-room-heading-row">
-            <button type="button" className="voice-room-heading" aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => { logic.selectVoiceRoom(item.id); setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id]) }}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span>{item.privacy === '私密' ? <LockKeyhole size={15} /> : <Globe2 size={15} />}</span><strong>{item.name}</strong><small>{item.channels.reduce((sum, sub) => sum + sub.members.length, 0)}</small></button>
-            {item.currentRole === 'owner' && <button type="button" className="voice-create-child-channel" aria-label={`在${item.name}创建子频道`} title="新增频道" onClick={() => openChannelDialog('create', undefined, item.id)}><Plus size={13} /></button>}
+            <button type="button" className="voice-room-heading" aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => { logic.selectVoiceRoom(item.id); setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id]) }}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span>{item.privacy === '私密' ? <LockKeyhole size={15} /> : <Globe2 size={15} />}</span><strong>{item.name}</strong></button>
+            {item.currentRole !== 'member' && <button type="button" className="voice-create-child-channel" aria-label={`在${item.name}创建子频道`} title="新增频道" onClick={() => openChannelDialog('create', undefined, item.id)}><Plus size={13} /></button>}
             {item.currentRole !== 'member' && <button type="button" className="windows-icon-button voice-tree-manage" aria-label={`编辑${item.name}分组`} title="编辑分组" onClick={() => openEditRoom(item)}><Pencil size={13} /></button>}
           </div>
           {!collapsedRoomIds.includes(item.id) && <div className="voice-subchannel-list">{item.channels.map((subchannel) => <div className={`voice-subchannel${channel?.id === subchannel.id && room?.id === item.id ? ' is-active' : ''}${logic.draggedMemberId && room?.id === item.id && logic.draggedMemberId !== currentSocialUser.id ? ' is-drop-target' : ''}`} key={subchannel.id} onContextMenu={(event) => openChannelContextMenu(event, item.id, subchannel.id)} onDragOver={(event) => { if (room?.id === item.id && canManage) event.preventDefault() }} onDrop={(event) => { event.preventDefault(); if (room?.id === item.id) onDropMember(subchannel.id) }}>
@@ -639,6 +643,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
           onRetry={onRetry}
           onOrder={onOrder}
           profileOverride={selectedProfileCard}
+          followed={logic.followedProfileIds.includes(linkedCompanion.id)}
+          blocked={logic.blockedProfileIds.includes(linkedCompanion.id)}
+          onToggleFollow={() => logic.toggleProfileFollow(linkedCompanion.id)}
+          onBlock={() => logic.blockProfile(linkedCompanion.id)}
           onChat={() => logic.startDirectMessage(selectedProfile.id)}
         /> : selectedProfileCard ? <CompanionProfileCard profile={selectedProfileCard} /> : null}
       </aside>}

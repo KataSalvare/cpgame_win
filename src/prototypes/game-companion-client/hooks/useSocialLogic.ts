@@ -31,6 +31,8 @@ export function useSocialLogic() {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [voiceRooms, setVoiceRooms] = useState(initialVoiceRooms)
   const [blockedVoiceMemberIds, setBlockedVoiceMemberIds] = useState<string[]>([])
+  const [followedProfileIds, setFollowedProfileIds] = useState<string[]>([])
+  const [blockedProfileIds, setBlockedProfileIds] = useState<string[]>([])
   const [activeVoiceRoomId, setActiveVoiceRoomId] = useState(initialVoiceRooms[0].id)
   const [activeSubchannelId, setActiveSubchannelId] = useState(initialVoiceRooms[0].channels[0].id)
   const [roomMessagesByRoom, setRoomMessagesByRoom] = useState(initialRoomMessagesByRoom)
@@ -383,9 +385,12 @@ export function useSocialLogic() {
   }
 
   const ignoreVoiceInvitation = (invitationId: string) => setVoiceInvitations((items) => items.filter((item) => item.id !== invitationId))
+  const toggleProfileFollow = (profileId: string) => setFollowedProfileIds((items) => items.includes(profileId) ? items.filter((id) => id !== profileId) : [...items, profileId])
+  const blockProfile = (profileId: string) => setBlockedProfileIds((items) => items.includes(profileId) ? items : [...items, profileId])
 
   return {
     conversations, selectedConversation, selectedFriend, selectedProfile, visibleConversations, visibleFriends, clubGroups,
+    followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
     selectedProfileId, setSelectedProfileId, openConversation, startDirectMessage, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, sendChatMessage, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms,
