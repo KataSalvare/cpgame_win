@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="240" viewBox="0 0 640 240" fill="none">
+  <rect width="640" height="240" rx="12" fill="#E5E7EB"/>
+  <path d="M430 0h210v240H350L430 0Z" fill="#D1D5DB"/>
+  <path d="M504 0h136v240H424L504 0Z" fill="#F3F4F6"/>
+  <circle cx="536" cy="120" r="67" stroke="#9CA3AF" stroke-width="2"/>
+  <circle cx="536" cy="120" r="48" stroke="#9CA3AF" stroke-width="2"/>
+  <path d="m536 77 12 25 28 4-20 19 5 28-25-13-25 13 5-28-20-19 28-4 12-25Z" fill="#9CA3AF"/>
+  <path d="M40 52h212M40 69h146" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
+  <text x="40" y="130" fill="#1F2937" font-family="Segoe UI,Arial,sans-serif" font-size="28" font-weight="600">CLUB PRIVILEGE</text>
+  <text x="40" y="160" fill="#6B7280" font-family="Segoe UI,Arial,sans-serif" font-size="14">俱乐部尊享卡 · 权益以演示内容为准</text>
+</svg>

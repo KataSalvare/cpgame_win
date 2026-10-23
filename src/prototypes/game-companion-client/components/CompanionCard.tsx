@@ -1,9 +1,26 @@
-import { ArrowUpRight, Star } from 'lucide-react'
+import { MessageCircle, ShoppingCart, Star } from 'lucide-react'
 import type { Companion } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
 
-export function CompanionCard({ companion, onOpen }: { companion: Companion; onOpen: () => void }) {
-  return <article className="client-card companion-card">
+type CompanionCardProps = {
+  companion: Companion
+  onOpen: () => void
+  onChat: () => void
+  onOrder: () => void
+}
+
+export function CompanionCard({ companion, onOpen, onChat, onOrder }: CompanionCardProps) {
+  return <article
+    className="client-card companion-card"
+    tabIndex={0}
+    aria-label={`查看${companion.name}详情`}
+    onClick={onOpen}
+    onKeyDown={(event) => {
+      if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return
+      event.preventDefault()
+      onOpen()
+    }}
+  >
     <div className="companion-card__heading">
       <AvatarMark initials={companion.initials} size="lg" />
       <div className="companion-card__identity">
@@ -18,8 +35,13 @@ export function CompanionCard({ companion, onOpen }: { companion: Companion; onO
       <span className="rating-mark"><Star size={14} />{companion.rating.toFixed(2)}</span>
       <span>{companion.orderCount.toLocaleString()} 单</span>
     </div>
-    <button type="button" className="client-button client-button--secondary companion-card__open" onClick={onOpen}>
-      查看资料 <ArrowUpRight size={15} />
-    </button>
+    <div className="companion-card__actions">
+      <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onChat() }}>
+        <MessageCircle size={15} />聊一聊
+      </button>
+      <button type="button" className="client-button client-button--primary" onClick={(event) => { event.stopPropagation(); onOrder() }}>
+        <ShoppingCart size={15} />去下单
+      </button>
+    </div>
   </article>
 }

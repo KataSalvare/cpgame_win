@@ -14,6 +14,7 @@ import {
   type VoiceRole,
   type VoiceRoom,
 } from '../data/socialMockData'
+import { companions } from '../data/mockData'
 
 const createId = (prefix: string) => `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`
 
@@ -83,6 +84,25 @@ export function useSocialLogic() {
     if (existing) openConversation(existing)
     else {
       const conversation: SocialConversation = { id: createId('direct'), kind: 'direct', title: friend.name, initials: friend.initials, members: [friendId], unread: 0, messages: [] }
+      setConversations((items) => [conversation, ...items])
+      setSelectedConversationId(conversation.id)
+    }
+    setActiveMessagesTab('messages')
+    setSelectedFriendId(null)
+  }
+
+  const startDirectMessageWithCompanion = (companionId: string) => {
+    const friend = socialFriends.find((item) => item.companionId === companionId)
+    if (friend) {
+      startDirectMessage(friend.id)
+      return
+    }
+    const companion = companions.find((item) => item.id === companionId)
+    if (!companion) return
+    const existing = conversations.find((item) => item.kind === 'direct' && item.members[0] === companionId)
+    if (existing) openConversation(existing)
+    else {
+      const conversation: SocialConversation = { id: createId('direct'), kind: 'direct', title: companion.name, initials: companion.initials, members: [companionId], unread: 0, messages: [] }
       setConversations((items) => [conversation, ...items])
       setSelectedConversationId(conversation.id)
     }
@@ -289,7 +309,7 @@ export function useSocialLogic() {
   return {
     conversations, selectedConversation, selectedFriend, selectedProfile, visibleConversations, visibleFriends,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
-    selectedProfileId, setSelectedProfileId, openConversation, startDirectMessage, createGroup, inviteFriendsToGroup, renameGroup, sendChatMessage,
+    selectedProfileId, setSelectedProfileId, openConversation, startDirectMessage, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, sendChatMessage,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms,
     roomSearch, setRoomSearch, roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
     setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, moveMember, setDraggedMemberId, draggedMemberId,

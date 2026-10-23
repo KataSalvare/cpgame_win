@@ -1,6 +1,12 @@
 import type { Companion, Service } from './mockData'
 
-export type OrderStatus = '待接单' | '待服务' | '服务中' | '已完成' | '退款'
+export type OrderStatus = '待接单' | '待服务' | '服务中' | '已完成' | '已取消' | '退款'
+
+export type OrderTimeSegment = {
+  id: string
+  startAt: string | null
+  endAt: string | null
+}
 
 export type ClientOrder = {
   id: string
@@ -9,10 +15,14 @@ export type ClientOrder = {
   companionInitials: string
   serviceName: string
   gameName: string
-  durationHours: number
+  duration: number
+  durationUnit: '小时' | '局'
   amount: number
+  remark: string
   status: OrderStatus
   createdAt: string
+  serviceSegments: OrderTimeSegment[]
+  afterSalesSegments: OrderTimeSegment[]
 }
 
 export const playerProfile = {
@@ -41,22 +51,26 @@ export const walletEntries = {
 }
 
 export const initialOrders: ClientOrder[] = [
-  { id: 'GC-20261022-0182', companionId: 'companion-001', companionName: '林间晚风', companionInitials: '晚风', serviceName: '默契排位', gameName: '无畏契约', durationHours: 2, amount: 320, status: '待接单', createdAt: '2026-10-22 20:16' },
-  { id: 'GC-20261021-0127', companionId: 'companion-002', companionName: '北纬三十度', companionInitials: '北纬', serviceName: '团队上分', gameName: '无畏契约', durationHours: 1, amount: 140, status: '待服务', createdAt: '2026-10-21 19:25' },
-  { id: 'GC-20261020-0084', companionId: 'companion-004', companionName: '莓莓汽水', companionInitials: '莓莓', serviceName: '轻松娱乐', gameName: '英雄联盟', durationHours: 2, amount: 260, status: '服务中', createdAt: '2026-10-20 21:08' },
-  { id: 'GC-20261018-0051', companionId: 'companion-006', companionName: '折光', companionInitials: '折光', serviceName: '战术陪练', gameName: '无畏契约', durationHours: 1, amount: 190, status: '已完成', createdAt: '2026-10-18 17:32' },
-  { id: 'GC-20261016-0029', companionId: 'companion-003', companionName: '云端指挥官', companionInitials: '云端', serviceName: '基础教学', gameName: '绝地求生', durationHours: 1, amount: 120, status: '退款', createdAt: '2026-10-16 13:40' },
+  { id: 'GC-20261022-0182', companionId: 'companion-001', companionName: '林间晚风', companionInitials: '晚风', serviceName: '默契排位', gameName: '无畏契约', duration: 2, durationUnit: '小时', amount: 320, remark: '', status: '待接单', createdAt: '2026-10-22 20:16', serviceSegments: [{ id: 'service-1', startAt: null, endAt: null }], afterSalesSegments: [] },
+  { id: 'GC-20261021-0127', companionId: 'companion-002', companionName: '北纬三十度', companionInitials: '北纬', serviceName: '团队上分', gameName: '无畏契约', duration: 1, durationUnit: '小时', amount: 140, remark: '', status: '待服务', createdAt: '2026-10-21 19:25', serviceSegments: [{ id: 'service-1', startAt: null, endAt: null }], afterSalesSegments: [] },
+  { id: 'GC-20261020-0084', companionId: 'companion-004', companionName: '莓莓汽水', companionInitials: '莓莓', serviceName: '轻松娱乐', gameName: '英雄联盟', duration: 2, durationUnit: '小时', amount: 260, remark: '', status: '服务中', createdAt: '2026-10-20 21:08', serviceSegments: [{ id: 'service-1', startAt: '2026-10-20 21:20', endAt: null }], afterSalesSegments: [] },
+  { id: 'GC-20261018-0051', companionId: 'companion-006', companionName: '折光', companionInitials: '折光', serviceName: '战术陪练', gameName: '无畏契约', duration: 1, durationUnit: '小时', amount: 190, remark: '', status: '已完成', createdAt: '2026-10-18 17:32', serviceSegments: [{ id: 'service-1', startAt: '2026-10-18 17:45', endAt: '2026-10-18 18:15' }, { id: 'service-2', startAt: '2026-10-18 18:20', endAt: '2026-10-18 18:50' }], afterSalesSegments: [] },
+  { id: 'GC-20261016-0029', companionId: 'companion-003', companionName: '云端指挥官', companionInitials: '云端', serviceName: '基础教学', gameName: '绝地求生', duration: 1, durationUnit: '小时', amount: 120, remark: '', status: '退款', createdAt: '2026-10-16 13:40', serviceSegments: [{ id: 'service-1', startAt: '2026-10-16 14:00', endAt: '2026-10-16 14:30' }], afterSalesSegments: [{ id: 'after-sales-1', startAt: '2026-10-16 15:10', endAt: '2026-10-17 09:25' }] },
 ]
 
-export const makeClientOrder = (service: Service, companion: Companion, gameName: string, durationHours: number, amount: number): ClientOrder => ({
+export const makeClientOrder = (service: Service, companion: Companion, gameName: string, duration: number, amount: number, remark: string): ClientOrder => ({
   id: `GC-${Date.now()}`,
   companionId: companion.id,
   companionName: companion.name,
   companionInitials: companion.initials,
   serviceName: service.playName,
   gameName,
-  durationHours,
+  duration,
+  durationUnit: service.unit,
   amount,
+  remark,
   status: '待接单',
   createdAt: new Date().toLocaleString('zh-CN', { hour12: false }),
+  serviceSegments: [{ id: 'service-1', startAt: null, endAt: null }],
+  afterSalesSegments: [],
 })

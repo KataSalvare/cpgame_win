@@ -1,9 +1,21 @@
-import { ArrowUpRight, Star } from 'lucide-react'
+import { Compass, Star } from 'lucide-react'
 import type { Club, Game } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
 
-export function ClubCard({ club, gamesById, onOpen }: { club: Club; gamesById: Map<string, Game>; onOpen: () => void }) {
-  return <article className="client-card club-card">
+type ClubCardProps = { club: Club; gamesById: Map<string, Game>; onOpen: () => void; onBrowse: () => void }
+
+export function ClubCard({ club, gamesById, onOpen, onBrowse }: ClubCardProps) {
+  return <article
+    className="client-card club-card"
+    tabIndex={0}
+    aria-label={`查看${club.name}详情`}
+    onClick={onOpen}
+    onKeyDown={(event) => {
+      if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return
+      event.preventDefault()
+      onOpen()
+    }}
+  >
     <div className="club-card__heading">
       <AvatarMark initials={club.initials} size="lg" />
       <div className="club-card__identity">
@@ -18,8 +30,9 @@ export function ClubCard({ club, gamesById, onOpen }: { club: Club; gamesById: M
       <div><span className="client-muted">主营游戏</span><span>{club.gameIds.map((id) => gamesById.get(id)?.name).filter(Boolean).join(' · ')}</span></div>
       <span>{club.companionCount} 位陪玩</span>
     </div>
-    <button type="button" className="client-button client-button--secondary club-card__open" onClick={onOpen}>
-      进入详情 <ArrowUpRight size={15} />
-    </button>
+    <div className="club-card__actions">
+      <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onBrowse() }}><Compass size={15} />逛一逛</button>
+      <button type="button" className="client-button client-button--secondary" disabled>自助下单</button>
+    </div>
   </article>
 }

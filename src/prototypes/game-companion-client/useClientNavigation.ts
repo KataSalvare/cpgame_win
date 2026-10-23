@@ -1,19 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import { clubs, companions, servicesByCompanion } from './data/mockData'
 
-export type ClientPage = 'home' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room'
+export type ClientPage = 'home' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards'
 
-type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; serviceId: string | null }
+type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | null
+type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; serviceId: string | null; returnTo: ClientPage | null; panel: StorePanel }
 
 const DEFAULT_CLUB_ID = 'club-001'
 const DEFAULT_COMPANION_ID = 'companion-001'
-const clientPages: ClientPage[] = ['home', 'club-detail', 'checkout', 'profile', 'wallet', 'orders', 'messages', 'voice-room']
+const clientPages: ClientPage[] = ['home', 'club-detail', 'checkout', 'profile', 'wallet', 'orders', 'messages', 'voice-room', 'recharge', 'coupons', 'club-cards', 'my-cards']
 
 const readRoute = (entryView: string | undefined): RouteSnapshot => {
   const params = new URLSearchParams(window.location.hash.slice(1))
   const requestedPage = params.get('page')
   const initialView = requestedPage ?? entryView ?? 'home'
-  const page: ClientPage = clientPages.includes(initialView as ClientPage)
+  let page: ClientPage = clientPages.includes(initialView as ClientPage)
     ? initialView as ClientPage
     : initialView === 'companion-detail' ? 'club-detail' : 'home'
   const defaultCompanion = companions.find((companion) => companion.id === DEFAULT_COMPANION_ID) ?? companions[0]
@@ -24,13 +25,23 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   const initialCompanionId = initialView === 'companion-detail' || initialView === 'checkout' ? DEFAULT_COMPANION_ID : null
   const companionId = requestedCompanion?.id ?? initialCompanionId
   const defaultServiceId = servicesByCompanion[DEFAULT_COMPANION_ID]?.[0]?.id ?? null
-  return { page, clubId, companionId, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null) }
+  const requestedReturnTo = params.get('returnTo')
+  const returnTo = requestedReturnTo && clientPages.includes(requestedReturnTo as ClientPage) ? requestedReturnTo as ClientPage : null
+  let panel: StorePanel = null
+  if (page === 'club-cards') { page = 'club-detail'; panel = 'club-cards' }
+  if (page === 'coupons' || page === 'my-cards') { panel = page; page = 'wallet' }
+  const requestedPanel = params.get('panel')
+  if (page === 'club-detail' && requestedPanel === 'club-cards') panel = 'club-cards'
+  if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger')) panel = requestedPanel
+  return { page, clubId, companionId, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null), returnTo, panel }
 }
 
-const writeRoute = (page: ClientPage, clubId: string, companionId: string | null, serviceId?: string | null) => {
+const writeRoute = (page: ClientPage, clubId: string, companionId: string | null, serviceId?: string | null, returnTo?: ClientPage | null, panel?: StorePanel) => {
   const params = new URLSearchParams({ page, club: clubId })
   if (companionId) params.set('companion', companionId)
   if (serviceId) params.set('service', serviceId)
+  if (returnTo) params.set('returnTo', returnTo)
+  if (panel) params.set('panel', panel)
   window.location.hash = params.toString()
 }
 
@@ -48,8 +59,20 @@ export function useClientNavigation(entryView?: string) {
   const openCompanion = useCallback((companionId: string) => writeRoute('club-detail', route.clubId, companionId), [route.clubId])
   const closeCompanion = useCallback(() => writeRoute('club-detail', route.clubId, null), [route.clubId])
   const backToClub = closeCompanion
-  const goToPage = useCallback((page: ClientPage) => writeRoute(page, route.clubId, route.companionId), [route.clubId, route.companionId])
-  const beginOrder = useCallback((serviceId: string, companionId: string) => writeRoute('checkout', route.clubId, companionId, serviceId), [route.clubId])
+  const goToPage = useCallback((requestedPage: ClientPage, returnTo?: ClientPage) => {
+    const page: ClientPage = requestedPage === 'club-cards' ? 'club-detail' : requestedPage === 'coupons' || requestedPage === 'my-cards' ? 'wallet' : requestedPage
+    const panel: StorePanel = requestedPage === 'club-cards' || requestedPage === 'coupons' || requestedPage === 'my-cards' ? requestedPage : null
+    const serviceId = requestedPage === 'recharge' && returnTo === 'checkout' ? route.serviceId : null
+    writeRoute(page, route.clubId, route.companionId, serviceId, returnTo, panel)
+  }, [route.clubId, route.companionId, route.serviceId])
+  const closePanel = useCallback(() => writeRoute(route.page, route.clubId, route.companionId), [route.page, route.clubId, route.companionId])
+  const openWalletLedger = useCallback((wallet: 'diamond' | 'bean') => {
+    writeRoute('wallet', route.clubId, route.companionId, null, null, wallet === 'diamond' ? 'diamond-ledger' : 'bean-ledger')
+  }, [route.clubId, route.companionId])
+  const beginOrder = useCallback((serviceId: string, companionId: string) => {
+    const companionClubId = companions.find((item) => item.id === companionId)?.clubId ?? route.clubId
+    writeRoute('checkout', companionClubId, companionId, serviceId)
+  }, [route.clubId])
 
   return {
     ...route,
@@ -61,6 +84,8 @@ export function useClientNavigation(entryView?: string) {
     backToClub,
     closeCompanion,
     goToPage,
+    closePanel,
+    openWalletLedger,
     beginOrder,
   }
 }

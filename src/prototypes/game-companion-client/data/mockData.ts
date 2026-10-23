@@ -46,6 +46,8 @@ export type Service = {
   orderCount: number
   rating: number
   price: number
+  unit: '小时' | '局'
+  canAcceptOrders: boolean
 }
 
 export type Review = {
@@ -109,6 +111,8 @@ const createServices = (companionId: string, gameIds: string[]): Service[] => {
     orderCount: 96 + index * 11,
     rating: Number((4.82 + (index % 7) * 0.02).toFixed(2)),
     price: 80 + (index % 15) * 10,
+    unit: index % 3 === 1 ? '局' : '小时',
+    canAcceptOrders: index % 9 !== 8,
   }))
 }
 

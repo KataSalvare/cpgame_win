@@ -13,6 +13,10 @@ type Props = {
   pageState: 'normal' | 'loading' | 'empty' | 'error'
   onBack: () => void
   onOpenCompanion: (companionId: string) => void
+  onChatWithCompanion: (companionId: string) => void
+  onOrderWithCompanion: (companionId: string) => void
+  onOpenVoiceRoom: () => void
+  onOpenPremiumCards: () => void
   onRetry: () => void
 }
 
@@ -25,7 +29,7 @@ const sortLabels: Record<string, string> = {
   'orders-desc': '单数从高到低',
 }
 
-export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onRetry }: Props) {
+export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenPremiumCards, onRetry }: Props) {
   const logic = useClubDetailLogic(club.id)
 
   if (pageState !== 'normal') {
@@ -55,11 +59,11 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onRet
         </div>
       </div>
       <div className="club-profile-card__actions" aria-label="俱乐部操作入口">
-        <DisplayAction icon={<UsersRound size={15} />} label="接待大厅" />
+        <DisplayAction icon={<UsersRound size={15} />} label="接待大厅" onClick={onOpenVoiceRoom} />
         <DisplayAction icon={<Star size={15} />} label="价目表" />
-        <DisplayAction icon={<ShieldCheck size={15} />} label="尊享卡" />
+        <DisplayAction icon={<ShieldCheck size={15} />} label="尊享卡" onClick={onOpenPremiumCards} />
         <DisplayAction icon={<Headphones size={15} />} label="客服" />
-        <DisplayAction icon={<UsersRound size={15} />} label="自助下单" />
+        <DisplayAction icon={<UsersRound size={15} />} label="自助下单" disabled />
         <DisplayAction icon={<Star size={15} />} label="优惠券" />
         <DisplayAction icon={<MessageCircle size={15} />} label="群聊" />
       </div>
@@ -84,7 +88,13 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onRet
       </div>
 
       {logic.visibleCompanions.length > 0 ? <div className="client-card-grid client-card-grid--companions">
-        {logic.visibleCompanions.map((person) => <CompanionCard key={person.id} companion={person} onOpen={() => onOpenCompanion(person.id)} />)}
+        {logic.visibleCompanions.map((person) => <CompanionCard
+          key={person.id}
+          companion={person}
+          onOpen={() => onOpenCompanion(person.id)}
+          onChat={() => onChatWithCompanion(person.id)}
+          onOrder={() => onOrderWithCompanion(person.id)}
+        />)}
       </div> : <div className="client-inline-empty"><p>没有符合筛选条件的成员</p><button type="button" className="client-button client-button--secondary" onClick={logic.resetFilters}>清除筛选</button></div>}
     </section>
   </div>
@@ -94,6 +104,6 @@ function FilterSelect({ label, value, options, onChange }: { label: string; valu
   return <label className="client-filter-select"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>
 }
 
-function DisplayAction({ icon, label }: { icon: ReactNode; label: string }) {
-  return <button type="button" className="client-button client-button--secondary client-display-action">{icon}{label}</button>
+function DisplayAction({ icon, label, onClick, disabled = false }: { icon: ReactNode; label: string; onClick?: () => void; disabled?: boolean }) {
+  return <button type="button" className="client-button client-button--secondary client-display-action" onClick={onClick} disabled={disabled}>{icon}{label}</button>
 }
