@@ -120,7 +120,7 @@ export function useSocialLogic() {
   const createGroup = (name: string, friendIds: string[]) => {
     const members = [...new Set(friendIds)]
     const conversation: SocialConversation = {
-      id: createId('group'), kind: 'group', title: name.trim(), initials: name.trim().slice(0, 1) || '群', members, unread: 0,
+      id: createId('group'), kind: 'group', title: name.trim(), initials: name.trim().slice(0, 1) || '群', members, unread: 0, ownerId: currentSocialUser.id, adminIds: [], joinApprovalRequired: false,
       messages: [{ id: createId('message'), senderId: 'system', senderName: '系统', initials: '系', time: '现在', kind: 'text', content: `你创建了群聊，并邀请 ${members.length} 位好友加入。` }],
     }
     setConversations((items) => [conversation, ...items])
@@ -148,6 +148,48 @@ export function useSocialLogic() {
       : conversation))
   }
 
+  const setGroupAdmin = (conversationId: string, memberId: string, isAdmin: boolean) => {
+    setConversations((items) => items.map((conversation) => {
+      if (conversation.id !== conversationId || conversation.kind !== 'group' || conversation.ownerId !== currentSocialUser.id || !conversation.members.includes(memberId)) return conversation
+      const adminIds = new Set(conversation.adminIds ?? [])
+      if (isAdmin) adminIds.add(memberId)
+      else adminIds.delete(memberId)
+      return { ...conversation, adminIds: [...adminIds] }
+    }))
+  }
+
+  const removeGroupMember = (conversationId: string, memberId: string) => {
+    const friend = socialFriends.find((item) => item.id === memberId)
+    if (!friend) return
+    setConversations((items) => items.map((conversation) => {
+      if (conversation.id !== conversationId || conversation.kind !== 'group' || conversation.ownerId !== currentSocialUser.id || !conversation.members.includes(memberId)) return conversation
+      return {
+        ...conversation,
+        members: conversation.members.filter((id) => id !== memberId),
+        adminIds: (conversation.adminIds ?? []).filter((id) => id !== memberId),
+        messages: [...conversation.messages, { id: createId('message'), senderId: 'system', senderName: '系统', initials: '系', time: '现在', kind: 'text', content: `已将 ${friend.name} 移出群聊。` }],
+      }
+    }))
+  }
+
+  const setGroupJoinApproval = (conversationId: string, required: boolean) => {
+    setConversations((items) => items.map((conversation) => conversation.id === conversationId && conversation.kind === 'group' && conversation.ownerId === currentSocialUser.id
+      ? { ...conversation, joinApprovalRequired: required }
+      : conversation))
+  }
+
+  const dissolveGroup = (conversationId: string) => {
+    const target = conversations.find((conversation) => conversation.id === conversationId)
+    if (!target || target.kind !== 'group' || target.ownerId !== currentSocialUser.id) return
+    const remaining = conversations.filter((conversation) => conversation.id !== conversationId)
+    setConversations(remaining)
+    if (selectedConversationId === conversationId) {
+      setSelectedConversationId(remaining[0]?.id ?? '')
+      setSelectedFriendId(null)
+      setSelectedProfileId(null)
+    }
+  }
+
   const applyToClubGroup = (groupId: string, reason: string) => {
     if (!reason.trim()) return
     setClubGroups((items) => items.map((group) => group.id === groupId && group.membership === 'not-joined' ? { ...group, membership: 'pending', applicationReason: reason.trim() } : group))
@@ -160,7 +202,7 @@ export function useSocialLogic() {
     if (existing) {
       openConversation(existing)
     } else {
-      const conversation: SocialConversation = { id: `club-group-${groupId}`, kind: 'group', clubGroupId: groupId, title: group.name, initials: group.initials, members: [], unread: 0, messages: [] }
+      const conversation: SocialConversation = { id: `club-group-${groupId}`, kind: 'group', clubGroupId: groupId, title: group.name, initials: group.initials, members: [], unread: 0, messages: [], ownerId: currentSocialUser.id, adminIds: [], joinApprovalRequired: false }
       setConversations((items) => [conversation, ...items])
       setSelectedConversationId(conversation.id)
       setSelectedFriendId(null)
@@ -392,7 +434,7 @@ export function useSocialLogic() {
     conversations, selectedConversation, selectedFriend, selectedProfile, visibleConversations, visibleFriends, clubGroups,
     followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
-    selectedProfileId, setSelectedProfileId, openConversation, startDirectMessage, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, sendChatMessage, applyToClubGroup, openClubGroupChat,
+    selectedProfileId, setSelectedProfileId, openConversation, startDirectMessage, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, setGroupAdmin, removeGroupMember, setGroupJoinApproval, dissolveGroup, sendChatMessage, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms,
     roomSearch, setRoomSearch, roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
     setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,

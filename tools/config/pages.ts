@@ -56,7 +56,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-checkout', label: '下单结算', entryView: 'checkout', states: demoPageStates },
     { path: '/game-companion-profile', label: '个人中心', entryView: 'profile', states: demoPageStates },
     { path: '/game-companion-wallet', label: '我的钱包', entryView: 'wallet', states: demoPageStates },
-    { path: '/game-companion-recharge', label: '钻石充值', entryView: 'recharge', states: demoPageStates },
+    { path: '/game-companion-recharge', label: '钻石充值', entryView: 'wallet-recharge', states: demoPageStates },
     { path: '/game-companion-coupons', label: '优惠券', entryView: 'coupons', states: demoPageStates },
     { path: '/game-companion-club-cards', label: '俱乐部尊享卡', entryView: 'club-cards', states: demoPageStates },
     { path: '/game-companion-my-cards', label: '我的尊享卡', entryView: 'my-cards', states: demoPageStates },

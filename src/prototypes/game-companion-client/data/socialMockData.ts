@@ -37,6 +37,9 @@ export interface SocialConversation {
   unread: number
   messages: SocialMessage[]
   clubGroupId?: string
+  ownerId?: string
+  adminIds?: string[]
+  joinApprovalRequired?: boolean
 }
 
 export type VoiceRole = 'owner' | 'admin' | 'member'
@@ -97,7 +100,7 @@ const seedMessages: SocialMessage[] = [
 export const initialConversations: SocialConversation[] = [
   { id: 'direct-friend-1', kind: 'direct', title: '晚风', initials: '风', members: ['friend-1'], unread: 2, messages: seedMessages },
   {
-    id: 'group-squad', kind: 'group', title: '周末五排小队', initials: '五', members: ['friend-1', 'friend-2', 'friend-3', 'friend-5'], unread: 1,
+    id: 'group-squad', kind: 'group', title: '周末五排小队', initials: '五', members: ['friend-1', 'friend-2', 'friend-3', 'friend-5'], unread: 1, ownerId: 'player', adminIds: ['friend-1'], joinApprovalRequired: true,
     messages: [
       { id: 'gmsg-1', senderId: 'friend-2', senderName: '青柠汽水', initials: '柠', time: '18:26', kind: 'text', content: '我拉了一个新房间，大家到了说一声。' },
       { id: 'gmsg-2', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '18:31', kind: 'image', content: '战绩截图' },

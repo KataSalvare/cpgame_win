@@ -8,16 +8,18 @@ import {
   walletEntries,
   type ClientOrder,
 } from '../data/accountMockData'
-import { initialCoupons, initialOwnedPremiumCardIds, initialPremiumCardBalances, premiumCards } from '../data/storeMockData'
+import { initialCoupons, initialOwnedPremiumCardIds, initialPremiumCardBalances, initialPremiumCardTransactions, premiumCards, type PremiumCardTransaction } from '../data/storeMockData'
 
 export function useAccountLogic() {
   const [diamondBalance, setDiamondBalance] = useState(initialDiamondBalance)
-  const [beanBalance] = useState(initialBeanBalance)
+  const [beanBalance, setBeanBalance] = useState(initialBeanBalance)
   const [orders, setOrders] = useState(initialOrders)
   const [diamondTransactions, setDiamondTransactions] = useState(walletEntries.diamonds)
+  const [beanTransactions, setBeanTransactions] = useState(walletEntries.beans)
   const [coupons, setCoupons] = useState(initialCoupons)
   const [ownedPremiumCardIds, setOwnedPremiumCardIds] = useState(initialOwnedPremiumCardIds)
   const [premiumCardBalances, setPremiumCardBalances] = useState(initialPremiumCardBalances)
+  const [premiumCardTransactions, setPremiumCardTransactions] = useState<PremiumCardTransaction[]>(initialPremiumCardTransactions)
 
   const findOrderService = useCallback((companionId: string | null, serviceId: string | null): { companion: Companion; service: Service } | null => {
     if (!companionId || !serviceId) return null
@@ -53,6 +55,7 @@ export function useAccountLogic() {
     setDiamondBalance((balance) => balance - card.price)
     setDiamondTransactions((current) => [{ id: `premium-${Date.now()}`, title: `尊享卡购买 · ${card.name}`, date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -card.price }, ...current])
     setOwnedPremiumCardIds((current) => [...current, cardId])
+    setPremiumCardTransactions((current) => [{ id: `premium-tx-${Date.now()}`, cardId, title: '尊享卡购买', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -card.price }, ...current])
     return true
   }, [diamondBalance, ownedPremiumCardIds])
 
@@ -62,6 +65,7 @@ export function useAccountLogic() {
     setDiamondBalance((balance) => balance - amount)
     setPremiumCardBalances((current) => ({ ...current, [cardId]: (current[cardId] ?? 0) + amount }))
     setDiamondTransactions((current) => [{ id: `premium-topup-${Date.now()}`, title: `尊享卡续充 · ${card.name}`, date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -amount }, ...current])
+    setPremiumCardTransactions((current) => [{ id: `premium-topup-tx-${Date.now()}`, cardId, title: '卡内余额续充', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount }, ...current])
     return true
   }, [diamondBalance, ownedPremiumCardIds])
 
@@ -73,7 +77,14 @@ export function useAccountLogic() {
     coupons,
     ownedPremiumCardIds,
     premiumCardBalances,
-    beanTransactions: walletEntries.beans,
+    premiumCardTransactions,
+    withdrawBeans: (amount: number) => {
+      if (!Number.isInteger(amount) || amount <= 0 || amount > beanBalance) return false
+      setBeanBalance((balance) => balance - amount)
+      setBeanTransactions((current) => [{ id: `bean-withdraw-${Date.now()}`, title: '糖豆提现申请', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -amount }, ...current])
+      return true
+    },
+    beanTransactions,
     findOrderService,
     getGameName,
     completePayment,

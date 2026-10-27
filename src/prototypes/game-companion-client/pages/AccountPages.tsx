@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, CreditCard, Gift, History, LockKeyhole, LogOut, MessageCircle, Settings2, ShieldCheck, Ticket, UserRound, WalletCards, X } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, CreditCard, Gift, History, LockKeyhole, LogOut, MessageCircle, Settings2, ShieldCheck, Ticket, UserRound, WalletCards, X, Plus, Pencil, Landmark, BadgeCheck } from 'lucide-react'
 import { AvatarMark } from '../components/AvatarMark'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { playerProfile, type ClientOrder, type OrderStatus } from '../data/accountMockData'
@@ -75,14 +75,15 @@ type WalletPageProps = StateProps & {
   onOpenRecharge: () => void
   onOpenDiamondDetails: () => void
   onOpenBeanDetails: () => void
+  onWithdrawBeans: () => void
   onOpenCoupons: () => void
   onOpenPremiumCards: () => void
 }
 
-export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, availableCouponCount, ownedPremiumCardCount, onOpenRecharge, onOpenDiamondDetails, onOpenBeanDetails, onOpenCoupons, onOpenPremiumCards }: WalletPageProps) {
+export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, availableCouponCount, ownedPremiumCardCount, onOpenRecharge, onOpenDiamondDetails, onOpenBeanDetails, onWithdrawBeans, onOpenCoupons, onOpenPremiumCards }: WalletPageProps) {
   if (pageState !== 'normal') return <div className="client-content account-page"><PageState pageState={pageState} onRetry={onRetry} /></div>
 
-  return <div className="client-content account-page">
+  return <div className="client-content account-page wallet-page">
     <PageHeading eyebrow="账户资产" title="我的钱包" description="查看钻石与糖豆余额及收支明细。" />
     <div className="wallet-card-grid">
       <WalletBalanceCard
@@ -102,6 +103,7 @@ export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, av
         unit="糖豆"
         icon={<WalletCards size={20} />}
         onToggle={onOpenBeanDetails}
+        onWithdraw={onWithdrawBeans}
         actionLabel="查看明细"
       />
       <WalletBalanceCard title="优惠券" description="查看可用与历史优惠券" amount={availableCouponCount} unit="张可用" icon={<Ticket size={20} />} onToggle={onOpenCoupons} actionLabel="查看优惠券" />
@@ -110,20 +112,90 @@ export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, av
   </div>
 }
 
-function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, onRecharge, actionLabel = '收支明细' }: {
-  title: string; description: string; amount: number; unit: string; icon: React.ReactNode; expanded?: boolean; onToggle: () => void; onRecharge?: () => void; actionLabel?: string
+function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, onRecharge, onWithdraw, actionLabel = '收支明细' }: {
+  title: string; description: string; amount: number; unit: string; icon: React.ReactNode; expanded?: boolean; onToggle: () => void; onRecharge?: () => void; onWithdraw?: () => void; actionLabel?: string
 }) {
   return <section className="client-card wallet-balance-card">
     <div className="wallet-balance-card__heading"><span className="wallet-balance-card__icon">{icon}</span><div><h2>{title}</h2><p>{description}</p></div></div>
     <span className="client-eyebrow">{title === '优惠券' || title === '我的尊享卡' ? '当前数量' : '当前余额'}</span><strong className="wallet-balance-card__amount">{amount.toLocaleString()} <small>{unit}</small></strong>
-    <div className="wallet-balance-card__actions">{onRecharge && <button type="button" className="client-button client-button--primary" onClick={onRecharge}><CreditCard size={15} />充值</button>}<button type="button" className={`client-button ${onRecharge ? 'client-button--secondary' : 'client-button--primary'}`} onClick={onToggle}>{onRecharge && <History size={15} />}{actionLabel}</button></div>
+    <div className="wallet-balance-card__actions">{onRecharge && <button type="button" className="client-button client-button--primary" onClick={onRecharge}><CreditCard size={15} />充值</button>}{onWithdraw && <button type="button" className="client-button client-button--primary" onClick={onWithdraw}>提现</button>}<button type="button" className={`client-button ${onRecharge || onWithdraw ? 'client-button--secondary' : 'client-button--primary'}`} onClick={onToggle}>{(onRecharge || onWithdraw) && <History size={15} />}{actionLabel}</button></div>
   </section>
 }
 
+type PayoutAccount = { id: string; type: '支付宝' | '银行卡'; holder: string; account: string; bankName?: string }
+const initialPayoutAccounts: PayoutAccount[] = [
+  { id: 'alipay-001', type: '支付宝', holder: '林晚', account: 'wanfeng***@alipay.com' },
+  { id: 'bank-001', type: '银行卡', holder: '林晚', account: '**** **** **** 3628', bankName: '招商银行' },
+]
+
+export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: number; onWithdraw: (amount: number) => boolean; onClose: () => void }) {
+  const [accounts, setAccounts] = useState(initialPayoutAccounts)
+  const [selectedId, setSelectedId] = useState(initialPayoutAccounts[0].id)
+  const [amount, setAmount] = useState('')
+  const [manageAccounts, setManageAccounts] = useState(false)
+  const [view, setView] = useState<'withdraw' | 'accounts' | 'account-form' | 'result'>('withdraw')
+  const [editingAccount, setEditingAccount] = useState<PayoutAccount | null>(null)
+  const [formType, setFormType] = useState<PayoutAccount['type']>('支付宝')
+  const [holder, setHolder] = useState('')
+  const [accountValue, setAccountValue] = useState('')
+  const [bankName, setBankName] = useState('')
+  const [feedback, setFeedback] = useState('')
+  const [result, setResult] = useState<{ amount: number; account: PayoutAccount; applicationNo: string } | null>(null)
+  const parsedAmount = Number(amount)
+  const selectedAccount = accounts.find((account) => account.id === selectedId)
+
+  const openAccountForm = (account?: PayoutAccount) => {
+    setEditingAccount(account ?? null)
+    setFormType(account?.type ?? '支付宝')
+    setHolder(account?.holder ?? '')
+    setAccountValue('')
+    setBankName(account?.bankName ?? '')
+    setView('account-form')
+  }
+  const saveAccount = () => {
+    if (!holder.trim() || !accountValue.trim() || (formType === '银行卡' && !bankName.trim())) return
+    const saved: PayoutAccount = { id: editingAccount?.id ?? `${formType}-${Date.now()}`, type: formType, holder: holder.trim(), account: accountValue.trim(), ...(formType === '银行卡' ? { bankName: bankName.trim() } : {}) }
+    setAccounts((current) => editingAccount ? current.map((item) => item.id === editingAccount.id ? saved : item) : [...current, saved])
+    if (!editingAccount) setSelectedId(saved.id)
+    setEditingAccount(null)
+    setView('accounts')
+    setFeedback(editingAccount ? '账户信息已更新。' : '新账户已绑定。')
+  }
+
+  const activeView = view === 'withdraw' && manageAccounts ? 'accounts' : view
+  const closeForm = () => { setEditingAccount(null); setView('accounts') }
+
+  return <div className="store-overlay bean-withdraw-overlay" data-overlay="bean-withdraw-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-withdraw-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-withdraw-title">
+    <header><div><span className="client-eyebrow">糖豆钱包</span><h2 id="bean-withdraw-title">{activeView === 'withdraw' ? '提现糖豆' : activeView === 'accounts' ? '提现账户管理' : activeView === 'account-form' ? (editingAccount ? '换绑提现账户' : '绑定提现账户') : '提现结果'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭提现弹窗" onClick={onClose}><X size={17} /></button></header>
+    {activeView === 'accounts' ? <>
+      <div className="client-section-heading bean-withdraw-panel__subheading"><div><span className="client-eyebrow">收款方式</span><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
+      <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><div className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{account.holder} · {account.account}</span></div><button type="button" className="client-button client-button--secondary" onClick={() => openAccountForm(account)}><Pencil size={14} />换绑</button></article>)}</div>
+      <footer><button type="button" className="client-button client-button--secondary" onClick={() => { setManageAccounts(false); setView('withdraw') }}>返回提现</button></footer>
+    </> : activeView === 'account-form' ? <>
+      <p>{editingAccount ? '请填写新的收款账号；已绑定的账号不会完整显示。' : '选择账户类型并填写收款资料。'}</p><div className="bean-account-type" role="group" aria-label="提现账户类型">{(['支付宝', '银行卡'] as const).map((type) => <button type="button" className={`orders-filter-chip${formType === type ? ' is-active' : ''}`} aria-pressed={formType === type} key={type} onClick={() => setFormType(type)}>{type}</button>)}</div><label className="bean-account-field"><span>账户姓名</span><input value={holder} onChange={(event) => setHolder(event.target.value)} placeholder="请输入实名姓名" /></label>{formType === '银行卡' && <label className="bean-account-field"><span>开户银行</span><input value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="请输入银行名称" /></label>}<label className="bean-account-field"><span>{formType === '支付宝' ? '支付宝账号' : '银行卡号'}</span><input value={accountValue} onChange={(event) => setAccountValue(event.target.value)} placeholder={formType === '支付宝' ? `请输入${editingAccount ? '新的' : ''}手机号或支付宝账号` : `请输入${editingAccount ? '新的' : ''}银行卡号`} /></label><footer><button type="button" className="client-button client-button--secondary" onClick={closeForm}>取消</button><button type="button" className="client-button client-button--primary" disabled={!holder.trim() || !accountValue.trim() || (formType === '银行卡' && !bankName.trim())} onClick={saveAccount}>保存账户</button></footer>
+    </> : activeView === 'result' && result ? <>
+      <div className="bean-withdraw-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><span className="client-eyebrow">本地演示结果</span><h3>提现申请已提交</h3><strong className="bean-withdraw-result__amount">{result.amount.toLocaleString()} <small>糖豆</small></strong><dl><div><dt>收款方式</dt><dd>{result.account.type}{result.account.bankName ? ` · ${result.account.bankName}` : ''}</dd></div><div><dt>收款账户</dt><dd>{result.account.account}</dd></div><div><dt>申请编号</dt><dd>{result.applicationNo}</dd></div></dl><p>申请结果仅用于原型演示，不代表真实提现状态。</p></div><footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
+    </> : <>
+      <section className="client-card bean-withdraw-balance"><span className="client-eyebrow">可用糖豆</span><strong>{balance.toLocaleString()} <small>糖豆</small></strong></section>
+      <section className="client-card bean-withdraw-form">
+        <div className="client-section-heading"><div><span className="client-eyebrow">提现信息</span><h2>收款账户</h2></div><button type="button" className="client-text-button" onClick={() => { setManageAccounts(true); setView('accounts'); setFeedback('') }}>管理账户 <ChevronRight size={15} /></button></div>
+        {accounts.length ? <div className="bean-payout-choices" role="group" aria-label="选择收款账户">{accounts.map((account) => <button type="button" key={account.id} className={`bean-payout-choice${selectedId === account.id ? ' is-active' : ''}`} aria-pressed={selectedId === account.id} onClick={() => setSelectedId(account.id)}><span className="bean-payout-choice__radio" /><span><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><small>{account.account}</small></span></button>)}</div> : <div className="account-empty-inline"><strong>还没有提现账户</strong><span>请先绑定支付宝或银行卡。</span></div>}
+        <label className="bean-withdraw-amount"><span>提现糖豆数</span><div><input aria-label="提现糖豆数" inputMode="numeric" type="number" min="1" max={balance} step="1" value={amount} onChange={(event) => { setAmount(event.target.value); setFeedback('') }} placeholder="请输入糖豆数" /></div><button type="button" className="client-text-button" onClick={() => setAmount(String(balance))}>全部提现</button></label>
+        <p className="bean-withdraw-note">提现规则以正式业务配置为准；当前仅演示输入糖豆数量和提交反馈。</p>
+        <button type="button" className="client-button client-button--primary bean-withdraw-submit" disabled={!selectedAccount || !Number.isInteger(parsedAmount) || parsedAmount <= 0 || parsedAmount > balance} onClick={() => { if (selectedAccount && onWithdraw(parsedAmount)) { setResult({ amount: parsedAmount, account: selectedAccount, applicationNo: `WD${Date.now().toString().slice(-10)}` }); setAmount(''); setView('result') } else setFeedback('请检查提现糖豆数后重试。') }}>提交提现申请</button>
+      </section>
+    </>}
+    {feedback && <p className="account-inline-feedback" role="status">{feedback}</p>}
+  </section></div>
+}
+
 export function WalletLedgerPanel({ entries }: { entries: readonly { id: string; title: string; date: string; amount: number }[] }) {
+  const [filter, setFilter] = useState<'全部' | '收入' | '支出'>('全部')
+  const filteredEntries = entries.filter((entry) => filter === '全部' || (filter === '收入' ? entry.amount > 0 : entry.amount < 0))
   return <div className="client-content account-page wallet-ledger-panel">
-    <div className="client-section-heading"><div><span className="client-eyebrow">账户记录</span><h2>{entries.length ? '收支明细' : '暂无明细'}</h2></div><span className="client-count">最近记录</span></div>
-    {entries.length ? <TransactionList entries={entries} /> : <div className="account-empty-inline"><History size={22} /><strong>暂无收支记录</strong><span>有新的收支记录时会显示在这里。</span></div>}
+    <div className="client-section-heading"><div><span className="client-eyebrow">账户记录</span><h2>{filteredEntries.length ? '收支明细' : '暂无明细'}</h2></div><span className="client-count">{filteredEntries.length} 条</span></div>
+    <div className="transaction-filter-tabs" role="group" aria-label="收支类型筛选">{(['全部', '收入', '支出'] as const).map((item) => <button type="button" key={item} className={filter === item ? 'is-active' : ''} aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</button>)}</div>
+    {filteredEntries.length ? <TransactionList entries={filteredEntries} /> : <div className="account-empty-inline"><History size={22} /><strong>{entries.length ? `暂无${filter}记录` : '暂无收支记录'}</strong><span>{entries.length ? '切换其他类型查看明细。' : '有新的收支记录时会显示在这里。'}</span></div>}
   </div>
 }
 

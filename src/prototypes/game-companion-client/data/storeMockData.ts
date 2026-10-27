@@ -33,6 +33,14 @@ export type PremiumCard = {
   benefits: string[]
 }
 
+export type PremiumCardTransaction = {
+  id: string
+  cardId: string
+  title: string
+  date: string
+  amount: number
+}
+
 export const premiumCards: PremiumCard[] = [
   { id: 'premium-001-a', clubId: 'club-001', name: '北境月度尊享卡', price: 300, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '每月专属组队活动名额', '俱乐部服务下单专属优惠'] },
   { id: 'premium-001-b', clubId: 'club-001', name: '北境季度尊享卡', price: 800, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '优先参与俱乐部活动', '俱乐部服务下单专属优惠', '专属客服通道'] },
@@ -47,3 +55,10 @@ export const initialPremiumCardBalances: Record<string, number> = {
   'premium-001-a': 120,
   'premium-002-b': 360,
 }
+
+export const initialPremiumCardTransactions: PremiumCardTransaction[] = [
+  { id: 'premium-tx-001', cardId: 'premium-001-a', title: '尊享卡购买', date: '2026-10-10 14:20', amount: -300 },
+  { id: 'premium-tx-002', cardId: 'premium-001-a', title: '卡内余额续充', date: '2026-10-18 19:35', amount: 120 },
+  { id: 'premium-tx-003', cardId: 'premium-002-b', title: '尊享卡购买', date: '2026-10-12 16:08', amount: -720 },
+  { id: 'premium-tx-004', cardId: 'premium-002-b', title: '卡内余额续充', date: '2026-10-21 20:12', amount: 360 },
+]

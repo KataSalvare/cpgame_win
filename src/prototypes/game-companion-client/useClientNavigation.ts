@@ -3,7 +3,7 @@ import { clubs, companions, servicesByCompanion } from './data/mockData'
 
 export type ClientPage = 'home' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards'
 
-type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'club-groups' | null
+type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | null
 type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; returnTo: ClientPage | null; panel: StorePanel }
 
 const DEFAULT_CLUB_ID = 'club-001'
@@ -35,7 +35,7 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   const requestedPanel = params.get('panel')
   if (page === 'club-detail' && requestedPanel === 'club-cards') panel = 'club-cards'
   if (page === 'club-detail' && requestedPanel === 'club-groups') panel = 'club-groups'
-  if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger')) panel = requestedPanel
+  if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger' || requestedPanel === 'bean-withdraw' || requestedPanel === 'diamond-recharge')) panel = requestedPanel
   return { page, clubId, companionId, companionIds, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null), returnTo, panel }
 }
 
@@ -73,6 +73,12 @@ export function useClientNavigation(entryView?: string) {
   const openWalletLedger = useCallback((wallet: 'diamond' | 'bean') => {
     writeRoute('wallet', route.clubId, route.companionId, null, null, wallet === 'diamond' ? 'diamond-ledger' : 'bean-ledger')
   }, [route.clubId, route.companionId])
+  const openBeanWithdraw = useCallback(() => {
+    writeRoute('wallet', route.clubId, route.companionId, null, null, 'bean-withdraw')
+  }, [route.clubId, route.companionId])
+  const openDiamondRecharge = useCallback(() => {
+    writeRoute('wallet', route.clubId, route.companionId, null, null, 'diamond-recharge')
+  }, [route.clubId, route.companionId])
   const openClubGroups = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-groups'), [route.clubId])
   const beginOrder = useCallback((serviceId: string, companionId: string) => {
     const companionClubId = companions.find((item) => item.id === companionId)?.clubId ?? route.clubId
@@ -97,6 +103,8 @@ export function useClientNavigation(entryView?: string) {
     goToPage,
     closePanel,
     openWalletLedger,
+    openBeanWithdraw,
+    openDiamondRecharge,
     openClubGroups,
     beginOrder,
     beginMatchOrder,

@@ -18,6 +18,7 @@ import '../social.css'
 
 type SocialLogic = ReturnType<typeof useSocialLogic>
 type VoiceMemberAction = 'mute' | 'remove' | 'block' | 'role'
+type GroupManagementAction = { type: 'admin'; memberId: string; memberName: string; makeAdmin: boolean } | { type: 'remove'; memberId: string; memberName: string } | { type: 'admin-batch'; members: { id: string; name: string }[]; makeAdmin: boolean } | { type: 'remove-batch'; members: { id: string; name: string }[] } | { type: 'dissolve' }
 type VoiceMode = '自由模式' | '主持人模式' | '麦序模式'
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 type PageStateProps = { pageState: PageState; onRetry: () => void }
@@ -45,6 +46,8 @@ export function MessagesPage({ logic, pageState, onRetry, onOrder }: PageStatePr
   const [playingMessage, setPlayingMessage] = useState<string | null>(null)
   const [feedback, setFeedback] = useState('')
   const [groupSettingsOpen, setGroupSettingsOpen] = useState(false)
+  const [groupManagementAction, setGroupManagementAction] = useState<GroupManagementAction | null>(null)
+  const [groupMemberDialog, setGroupMemberDialog] = useState<'admin' | 'remove' | null>(null)
   const [replyTarget, setReplyTarget] = useState<SocialMessage | null>(null)
   const [contextMessage, setContextMessage] = useState<SocialMessage | null>(null)
   const [contextPoint, setContextPoint] = useState({ x: 0, y: 0 })
@@ -69,6 +72,7 @@ export function MessagesPage({ logic, pageState, onRetry, onOrder }: PageStatePr
     intro: selectedProfile.intro,
   } : undefined
   const filteredConversations = logic.visibleConversations.filter((item) => kindFilter === 'all' || item.kind === kindFilter)
+  const groupMemberCandidates = conversation?.kind === 'group' ? conversation.members.map((id) => socialFriends.find((friend) => friend.id === id)).filter((friend): friend is (typeof socialFriends)[number] => Boolean(friend)) : []
   const sendText = () => {
     if (!draft.trim()) return
     logic.sendChatMessage('text', draft.trim(), undefined, replyTarget ? replySnapshot(replyTarget) : undefined)
@@ -96,6 +100,26 @@ export function MessagesPage({ logic, pageState, onRetry, onOrder }: PageStatePr
     setGroupInviteOpen(false)
     setGroupInvitees([])
   }
+  const confirmGroupManagementAction = () => {
+    if (!conversation || conversation.kind !== 'group' || !groupManagementAction) return
+    if (groupManagementAction.type === 'admin') logic.setGroupAdmin(conversation.id, groupManagementAction.memberId, groupManagementAction.makeAdmin)
+    if (groupManagementAction.type === 'remove') logic.removeGroupMember(conversation.id, groupManagementAction.memberId)
+    if (groupManagementAction.type === 'admin-batch') groupManagementAction.members.forEach((member) => logic.setGroupAdmin(conversation.id, member.id, groupManagementAction.makeAdmin))
+    if (groupManagementAction.type === 'remove-batch') groupManagementAction.members.forEach((member) => logic.removeGroupMember(conversation.id, member.id))
+    if (groupManagementAction.type === 'dissolve') {
+      logic.dissolveGroup(conversation.id)
+      setGroupSettingsOpen(false)
+    }
+    const names = groupManagementAction.type === 'admin-batch' || groupManagementAction.type === 'remove-batch' ? groupManagementAction.members.map((member) => member.name).join('、') : ''
+    setFeedback(groupManagementAction.type === 'dissolve' ? `已解散群聊「${conversation.title}」。` : groupManagementAction.type === 'admin' ? groupManagementAction.makeAdmin ? `已将「${groupManagementAction.memberName}」设为管理员。` : `已撤销「${groupManagementAction.memberName}」的管理员身份。` : groupManagementAction.type === 'remove' ? `已将「${groupManagementAction.memberName}」移出群聊。` : groupManagementAction.type === 'admin-batch' ? `${groupManagementAction.makeAdmin ? '已设置' : '已撤销'}「${names}」的管理员身份。` : `已将「${names}」移出群聊。`)
+    setGroupManagementAction(null)
+  }
+  const isRemoveAction = groupManagementAction?.type === 'remove' || groupManagementAction?.type === 'remove-batch'
+  const isRevokingGroupAdmin = (groupManagementAction?.type === 'admin' || groupManagementAction?.type === 'admin-batch') && !groupManagementAction.makeAdmin
+  const actionNames = groupManagementAction?.type === 'admin-batch' || groupManagementAction?.type === 'remove-batch' ? groupManagementAction.members.map((member) => member.name).join('、') : groupManagementAction?.type === 'admin' || groupManagementAction?.type === 'remove' ? groupManagementAction.memberName : ''
+  const groupManagementTitle = groupManagementAction?.type === 'dissolve' ? '确认解散群聊' : isRemoveAction ? '确认移除成员' : isRevokingGroupAdmin ? '确认撤销管理员' : '确认设置管理员'
+  const groupManagementDescription = groupManagementAction?.type === 'dissolve' ? `解散后，「${conversation?.title}」将从会话列表移除，群成员也无法继续在此群聊。` : isRemoveAction ? `确定将「${actionNames}」移出群聊吗？` : isRevokingGroupAdmin ? `确定撤销「${actionNames}」的管理员身份吗？` : `确定将「${actionNames}」设为管理员吗？`
+  const groupManagementConfirmLabel = groupManagementAction?.type === 'dissolve' ? '确认解散' : isRemoveAction ? '确认移除' : isRevokingGroupAdmin ? '确认撤销' : '确认设置'
 
   return <div className="social-page messages-page">
     <div className={`messages-layout${logic.selectedProfile || (groupSettingsOpen && conversation?.kind === 'group') ? ' messages-layout--profile-open' : ''}`}>
@@ -193,6 +217,9 @@ export function MessagesPage({ logic, pageState, onRetry, onOrder }: PageStatePr
         onInvite={() => { setGroupInviteOpen(true); setFeedback('') }}
         onRename={(name) => logic.renameGroup(conversation.id, name)}
         onOpenProfile={showFriendProfile}
+        onSetJoinApproval={(required) => logic.setGroupJoinApproval(conversation.id, required)}
+        onOpenMemberDialog={setGroupMemberDialog}
+        onDissolve={() => setGroupManagementAction({ type: 'dissolve' })}
       />}
     </div>
 
@@ -211,6 +238,9 @@ export function MessagesPage({ logic, pageState, onRetry, onOrder }: PageStatePr
       onClose={() => setGroupInviteOpen(false)}
       onSubmit={submitGroupInvite}
     />}
+    {groupMemberDialog === 'admin' && conversation?.kind === 'group' && <GroupMemberAdminDialog friends={groupMemberCandidates} adminIds={conversation.adminIds ?? []} onClose={() => setGroupMemberDialog(null)} onSubmit={(action) => { setGroupMemberDialog(null); setGroupManagementAction(action) }} />}
+    {groupMemberDialog === 'remove' && conversation?.kind === 'group' && <GroupMemberRemoveDialog friends={groupMemberCandidates} onClose={() => setGroupMemberDialog(null)} onSubmit={(action) => { setGroupMemberDialog(null); setGroupManagementAction(action) }} />}
+    {groupManagementAction && <DialogPanel overlayId="group-management-confirm" title={groupManagementTitle} description={groupManagementDescription} onClose={() => setGroupManagementAction(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setGroupManagementAction(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmGroupManagementAction}>{groupManagementConfirmLabel}</button></>}><p className="social-dialog-copy">此操作会立即更新群聊设置（仅演示）。</p></DialogPanel>}
     {contextMessage && <MessageContextMenu point={contextPoint} onClose={() => setContextMessage(null)} onReply={() => { setReplyTarget(contextMessage); setContextMessage(null) }} onCopy={() => copyMessage(contextMessage, setFeedback, () => setContextMessage(null))} onReport={() => { setReportTarget(contextMessage); setReportReason('骚扰或辱骂'); setContextMessage(null) }} />}
     {reportTarget && <DialogPanel overlayId="report-chat-message" title="举报消息" description={`举报来自「${reportTarget.senderName}」的消息。请选择举报原因。`} onClose={() => setReportTarget(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setReportTarget(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { setFeedback('举报已提交（仅演示）'); setReportTarget(null) }}>提交举报</button></>}><ReportReasons value={reportReason} onChange={setReportReason} /></DialogPanel>}
   </div>
@@ -220,15 +250,19 @@ function FriendPreview({ friend, onMessage, onOpenProfile }: { friend: (typeof s
   return <section className="friend-preview"><button type="button" className="friend-preview__avatar" onClick={onOpenProfile} aria-label={`查看${friend.name}资料`}><AvatarMark initials={friend.initials} size="lg" /></button><h2>{friend.name}</h2><span>{friend.status}</span><div className="friend-preview__actions"><button type="button" className="client-button client-button--primary" onClick={onMessage}><MessageCircle size={15} />发起私聊</button><button type="button" className="client-button client-button--secondary" onClick={onOpenProfile}>查看资料</button></div></section>
 }
 
-function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onOpenProfile }: {
+function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onOpenProfile, onSetJoinApproval, onOpenMemberDialog, onDissolve }: {
   conversation: NonNullable<SocialLogic['selectedConversation']>
   onClose: () => void
   onInvite: () => void
   onRename: (name: string) => void
   onOpenProfile: (id: string) => void
+  onSetJoinApproval: (required: boolean) => void
+  onOpenMemberDialog: (mode: 'admin' | 'remove') => void
+  onDissolve: () => void
 }) {
   const [name, setName] = useState(conversation.title)
   const [isEditingName, setIsEditingName] = useState(false)
+  const isOwner = conversation.ownerId === currentSocialUser.id
   const members = conversation.members.map((id) => socialFriends.find((friend) => friend.id === id)).filter((friend): friend is (typeof socialFriends)[number] => Boolean(friend))
 
   return <aside className="group-settings-panel" aria-label="群聊设置">
@@ -242,12 +276,28 @@ function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onOpenP
       </form> : <div><h3>{conversation.title}</h3><button type="button" className="group-settings-edit-name" onClick={() => setIsEditingName(true)}><Pencil size={13} />修改群名称</button></div>}
     </section>
     <section className="group-settings-members" aria-label="群成员列表">
-      <div className="group-settings-section-heading"><strong>群成员</strong><span>{conversation.members.length + 1}</span></div>
-      <button type="button" className="group-settings-member" onClick={() => onOpenProfile(currentSocialUser.id)}><AvatarMark initials={currentSocialUser.initials} size="sm" /><span><strong>{currentSocialUser.name}（我）</strong><small>当前账号</small></span></button>
-      {members.map((friend) => <button type="button" className="group-settings-member" key={friend.id} onClick={() => onOpenProfile(friend.id)}><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{friend.status}</small></span></button>)}
-      <button type="button" className="group-settings-invite" onClick={onInvite}><UserPlus size={15} />邀请好友入群</button>
+      <div className="group-settings-section-heading"><strong>群聊成员</strong><div><span>{conversation.members.length + 1} 人</span></div></div>
+      <div className="group-settings-member-grid">
+        <GroupMemberTile initials={currentSocialUser.initials} name={`${currentSocialUser.name}（我）`} role="群主" onClick={() => onOpenProfile(currentSocialUser.id)} />
+        {members.map((friend) => {
+          const isAdmin = conversation.adminIds?.includes(friend.id) ?? false
+          return <GroupMemberTile key={friend.id} initials={friend.initials} name={friend.name} role={isAdmin ? '管理员' : '成员'} onClick={() => onOpenProfile(friend.id)} />
+        })}
+        <button type="button" className="group-settings-member-tile group-settings-member-add" onClick={onInvite}><span className="group-settings-member-avatar"><UserPlus size={19} /></span><strong>添加</strong></button>
+        {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('remove')}><span className="group-settings-member-avatar"><X size={19} /></span><strong>移除</strong></button>}
+        {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('admin')}><span className="group-settings-member-avatar"><Users size={19} /></span><strong>管理</strong></button>}
+      </div>
     </section>
+    <section className="group-settings-options" aria-label="群聊选项">
+      <div><strong>加入群聊验证</strong><small>{conversation.joinApprovalRequired ? '新成员申请加入后，需要群主确认' : '好友可直接加入群聊'}</small></div>
+      <div className="group-settings-switch"><span>{conversation.joinApprovalRequired ? '已开启' : '已关闭'}</span><button type="button" role="switch" aria-checked={conversation.joinApprovalRequired ?? false} aria-label="加入群聊需要验证" disabled={!isOwner} className={`group-settings-toggle${conversation.joinApprovalRequired ? ' is-on' : ''}`} onClick={() => onSetJoinApproval(!(conversation.joinApprovalRequired ?? false))}><span /></button></div>
+    </section>
+    {isOwner && <section className="group-settings-danger-zone"><div><strong>解散群聊</strong><small>群聊将从会话列表中移除。</small></div><button type="button" className="client-button client-button--secondary client-button--small" onClick={onDissolve}>解散群聊</button></section>}
   </aside>
+}
+
+function GroupMemberTile({ initials, name, role, onClick }: { initials: string; name: string; role: string; onClick: () => void }) {
+  return <div className="group-settings-member-tile"><button type="button" className="group-settings-member-profile" onClick={onClick} aria-label={`查看${name}资料`}><span className="group-settings-member-avatar"><AvatarMark initials={initials} size="sm" /></span><strong title={name}>{name}</strong><small>{role}</small></button></div>
 }
 
 function GroupCreateDialog({ name, members, onNameChange, onToggle, onClose, onSubmit }: { name: string; members: string[]; onNameChange: (value: string) => void; onToggle: (id: string) => void; onClose: () => void; onSubmit: () => void }) {
@@ -261,6 +311,27 @@ function GroupCreateDialog({ name, members, onNameChange, onToggle, onClose, onS
 function GroupInviteDialog({ friends, selected, onToggle, onClose, onSubmit }: { friends: typeof socialFriends; selected: string[]; onToggle: (id: string) => void; onClose: () => void; onSubmit: () => void }) {
   return <DialogPanel overlayId="invite-group-members" title="邀请好友入群" description="选择要加入当前群聊的好友。" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={onSubmit} disabled={!selected.length}>邀请（{selected.length}）</button></>}>
     {friends.length ? <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{friend.status}</small></span></label>)}</div> : <p className="social-dialog-copy">所有好友都已在群聊中。</p>}
+  </DialogPanel>
+}
+
+function GroupMemberAdminDialog({ friends, adminIds, onClose, onSubmit }: { friends: typeof socialFriends; adminIds: string[]; onClose: () => void; onSubmit: (action: Extract<GroupManagementAction, { type: 'admin-batch' }>) => void }) {
+  const [selected, setSelected] = useState<string[]>([])
+  const selectedMembers = friends.filter((friend) => selected.includes(friend.id))
+  const regularMembers = selectedMembers.filter((friend) => !adminIds.includes(friend.id))
+  const admins = selectedMembers.filter((friend) => adminIds.includes(friend.id))
+  const toActionMembers = (items: typeof friends) => items.map(({ id, name }) => ({ id, name }))
+  return <DialogPanel overlayId="group-member-admin-select" title="设置群管理员" description="选择成员后，设置或取消其管理员身份。" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--secondary" disabled={!admins.length} onClick={() => onSubmit({ type: 'admin-batch', members: toActionMembers(admins), makeAdmin: false })}>取消管理员（{admins.length}）</button><button type="button" className="client-button client-button--primary" disabled={!regularMembers.length} onClick={() => onSubmit({ type: 'admin-batch', members: toActionMembers(regularMembers), makeAdmin: true })}>设为管理员（{regularMembers.length}）</button></>}>
+    <div className="social-dialog-section-title">群成员 <span>已选 {selected.length} 位</span></div>
+    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{adminIds.includes(friend.id) ? '管理员' : friend.status}</small></span></label>)}</div>
+  </DialogPanel>
+}
+
+function GroupMemberRemoveDialog({ friends, onClose, onSubmit }: { friends: typeof socialFriends; onClose: () => void; onSubmit: (action: Extract<GroupManagementAction, { type: 'remove-batch' }>) => void }) {
+  const [selected, setSelected] = useState<string[]>([])
+  const selectedMembers = friends.filter((friend) => selected.includes(friend.id))
+  return <DialogPanel overlayId="group-member-remove-select" title="移除群成员" description="选择要移出当前群聊的成员。" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!selectedMembers.length} onClick={() => onSubmit({ type: 'remove-batch', members: selectedMembers.map(({ id, name }) => ({ id, name })) })}>移除（{selected.length}）</button></>}>
+    <div className="social-dialog-section-title">群成员 <span>已选 {selected.length} 位</span></div>
+    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{friend.status}</small></span></label>)}</div>
   </DialogPanel>
 }
 
