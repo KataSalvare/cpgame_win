@@ -31,9 +31,9 @@ export const profileVisitors: PersonalVisitRecord[] = [
 ]
 
 export const profileRoomVisits: PersonalVisitRecord[] = [
-  { id: 'room-visit-01', name: '今晚冲分', initials: '冲', detail: '主频道 · 无畏契约', time: '今天 20:40' },
-  { id: 'room-visit-02', name: '周末五排', initials: '五', detail: '五排集合 · 英雄联盟', time: '昨天 21:18' },
-  { id: 'room-visit-03', name: '好友闲聊', initials: '友', detail: '主频道', time: '昨天 16:50' },
+  { id: 'room-visit-01', name: '分组A', initials: 'A', detail: '房间A · 无畏契约', time: '今天 20:40' },
+  { id: 'room-visit-02', name: '分组B', initials: 'B', detail: '房间A · 英雄联盟', time: '昨天 21:18' },
+  { id: 'room-visit-03', name: '分组C', initials: 'C', detail: '房间A', time: '昨天 16:50' },
 ]
 
 export const receivedGiftRecords: ReceivedGiftRecord[] = [

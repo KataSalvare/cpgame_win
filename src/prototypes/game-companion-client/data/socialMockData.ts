@@ -114,24 +114,24 @@ const voiceMember = (friend: SocialFriend, role: VoiceRole = 'member'): VoiceMem
 
 export const initialVoiceRooms: VoiceRoom[] = [
   {
-    id: 'room-ranked', name: '今晚冲分', privacy: '公开', currentRole: 'owner',
+    id: 'room-ranked', name: '分组A', privacy: '公开', currentRole: 'owner',
     channels: [
-      { id: 'channel-main', name: '主频道', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), voiceMember(socialFriends[4])] },
-      { id: 'channel-warmup', name: '热身区', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
+      { id: 'channel-main', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), voiceMember(socialFriends[4])] },
+      { id: 'channel-warmup', name: '房间B', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
     ],
   },
   {
-    id: 'room-weekend', name: '周末五排', privacy: '公开', currentRole: 'admin',
-    channels: [{ id: 'channel-weekend', name: '五排集合', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
+    id: 'room-weekend', name: '分组B', privacy: '公开', currentRole: 'admin',
+    channels: [{ id: 'channel-weekend', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
   },
   {
-    id: 'room-friends', name: '好友闲聊', privacy: '私密', currentRole: 'member',
-    channels: [{ id: 'channel-friends', name: '主频道', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
+    id: 'room-friends', name: '分组C', privacy: '私密', currentRole: 'member',
+    channels: [{ id: 'channel-friends', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
   },
 ]
 
 export const initialRoomMessages: SocialMessage[] = [
-  { id: 'room-msg-1', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '20:06', kind: 'text', content: '我先去热身区调一下灵敏度。' },
+  { id: 'room-msg-1', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '20:06', kind: 'text', content: '我先去房间B调一下灵敏度。' },
   { id: 'room-msg-2', senderId: 'player', senderName: '林小满', initials: '满', time: '20:07', kind: 'text', content: '好，等大家齐了就开。' },
   { id: 'room-msg-3', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '20:08', kind: 'text', content: '收到，等我整理一下装备。' },
 ]
@@ -139,9 +139,9 @@ export const initialRoomMessages: SocialMessage[] = [
 export const initialRoomMessagesByRoom: Record<string, SocialMessage[]> = {
   'room-ranked': initialRoomMessages,
   'room-weekend': [{ id: 'weekend-msg-1', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '19:58', kind: 'text', content: '先在这里等两位队友。' }],
-  'room-friends': [{ id: 'friends-msg-1', senderId: 'friend-2', senderName: '青柠汽水', initials: '柠', time: '20:02', kind: 'text', content: '进来后去休闲频道吧。' }],
+  'room-friends': [{ id: 'friends-msg-1', senderId: 'friend-2', senderName: '青柠汽水', initials: '柠', time: '20:02', kind: 'text', content: '进来后去房间A吧。' }],
 }
 
 export const initialVoiceInvitations: VoiceInvitation[] = [
-  { id: 'invite-1', roomId: 'room-friends', roomName: '好友闲聊', inviter: '青柠汽水', time: '刚刚' },
+  { id: 'invite-1', roomId: 'room-friends', roomName: '分组C', inviter: '青柠汽水', time: '刚刚' },
 ]

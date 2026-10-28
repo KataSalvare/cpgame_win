@@ -331,7 +331,7 @@ export function useSocialLogic() {
   const createVoiceRoom = (name: string) => {
     const roomId = createId('room')
     const channelId = createId('channel')
-    const room: VoiceRoom = { id: roomId, name: name.trim(), privacy: '公开', currentRole: 'owner', channels: [{ id: channelId, name: '主频道', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ ...currentSocialUser, role: 'owner', micOn: true, muted: false }] }] }
+    const room: VoiceRoom = { id: roomId, name: name.trim(), privacy: '公开', currentRole: 'owner', channels: [{ id: channelId, name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ ...currentSocialUser, role: 'owner', micOn: true, muted: false }] }] }
     setVoiceRooms((items) => [room, ...items])
     setActiveVoiceRoomId(roomId)
     setActiveSubchannelId(channelId)

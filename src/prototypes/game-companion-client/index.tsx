@@ -34,6 +34,7 @@ import { PlatformSupportDialog } from './components/PlatformSupportDialog'
 import { companionToProfileCard } from './components/profileCardData'
 import { initialNotificationPreferences, type BlockedProfile, type NotificationPreferences } from './data/personalSettingsMockData'
 import { clubAnnouncementCategories, clubAnnouncements, platformAnnouncementCategories, platformAnnouncements } from './data/announcementMockData'
+import { WorkbenchNotifications } from './components/WorkbenchNotifications'
 import { WorkbenchPage } from './pages/WorkbenchPage'
 import { useWorkbenchLogic } from './hooks/useWorkbenchLogic'
 import './workbench.css'
@@ -65,6 +66,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const navigation = useClientNavigation(props.entryView)
   const account = useAccountLogic()
   const workbench = useWorkbenchLogic()
+  const [noticesOpen, setNoticesOpen] = useState(false)
   const social = useSocialLogic()
   const blockedProfiles = useMemo<BlockedProfile[]>(() => social.blockedProfileIds.map((id) => {
     const companion = companions.find((item) => item.id === id)
@@ -125,7 +127,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
 
   return <WindowsClientFrame
     className="game-companion-client"
-    titleBar={<WindowsTitleBar title="游戏陪玩平台" leading={<Gamepad2 size={16} />} actions={<><button type="button" className="client-titlebar-search" onClick={() => setGlobalSearchOpen(true)} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><button type="button" className="workbench-notice-button" aria-label="陪玩工作台提醒" onClick={() => workbench.setNoticeOpen(!workbench.noticeOpen)}><Bell size={15} />{workbench.pending}</button><ProfileQuickPanel profile={profile} diamondBalance={account.diamondBalance} beanBalance={account.beanBalance} orderCount={account.orders.length} onNavigate={(action) => navigation.goToPage(action)}>{profile.avatarDataUrl ? <img src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="sm" />}</ProfileQuickPanel></>} />}
+    titleBar={<WindowsTitleBar title="游戏陪玩平台" leading={<Gamepad2 size={16} />} actions={<><button type="button" className="client-titlebar-search" onClick={() => setGlobalSearchOpen(true)} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><button type="button" className="workbench-notice-button" aria-label="陪玩工作台提醒" aria-expanded={noticesOpen} aria-controls="workbench-notifications" onClick={() => setNoticesOpen(value => !value)}><Bell size={15} />{workbench.pending}</button><ProfileQuickPanel profile={profile} diamondBalance={account.diamondBalance} beanBalance={account.beanBalance} orderCount={account.orders.length} onNavigate={(action) => navigation.goToPage(action)}>{profile.avatarDataUrl ? <img src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="sm" />}</ProfileQuickPanel></>} />}
     sidebar={<WindowsSidebar
       heading="陪玩平台"
       items={[
@@ -224,7 +226,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
           else navigation.goToPage('profile')
         }}
       />}
-      {workbench.noticeOpen && workbench.pending > 0 && <aside className="workbench-global-notice" role="status"><button aria-label="关闭工作台提醒" onClick={() => workbench.setNoticeOpen(false)}>×</button><strong>陪玩工作台</strong><p>{workbench.requests.filter(r => r.status === '待响应').length} 条匹配请求 · {workbench.orders.filter(o => o.status === '待接单').length} 笔待接订单</p><button className="client-button client-button--primary" onClick={() => { navigation.goToPage('workbench'); workbench.setNoticeOpen(false) }}>去处理</button></aside>}
+      <WorkbenchNotifications logic={workbench} open={noticesOpen} />
       {props.entryView === 'identity-verification' && <IdentityVerificationFlow />}
     </>}
   >

@@ -280,17 +280,17 @@
 .voice-members-entry:hover{background:#f3f4f6}
 .voice-members-entry>span{color:var(--client-muted);font-size:10px;font-weight:400}
 .voice-members-backdrop{position:absolute;z-index:20;inset:0;border:0;background:rgba(31,41,55,.12);cursor:default}
-.voice-members-drawer{position:absolute;z-index:21;top:0;right:0;bottom:0;display:flex;width:360px;max-width:100%;flex-direction:column;border-left:1px solid var(--client-border);background:#fff;box-shadow:-2px 0 8px rgba(17,24,39,.08)}
-.voice-members-drawer__header{display:flex;min-height:62px;flex:0 0 auto;align-items:center;justify-content:space-between;border-bottom:1px solid var(--client-border);padding:0 16px}
+.voice-members-drawer{position:absolute;z-index:21;right:0;bottom:0;left:0;display:flex;height:min(48%,520px);min-height:240px;flex-direction:column;border-top:1px solid var(--client-border);border-radius:8px 8px 0 0;background:#fff;box-shadow:0 -3px 12px rgba(17,24,39,.12)}
+.voice-members-drawer__header{display:flex;min-height:54px;flex:0 0 auto;align-items:center;justify-content:space-between;border-bottom:1px solid var(--client-border);padding:0 18px}
 .voice-members-drawer__header>div{display:flex;align-items:baseline;gap:8px}
 .voice-members-drawer__header h2{display:flex;align-items:center;gap:7px;margin:0;font-size:14px;font-weight:600}
 .voice-members-drawer__header>div>span{color:var(--client-muted);font-size:11px}
-.voice-members-drawer__search{display:flex;min-height:36px;flex:0 0 auto;align-items:center;gap:7px;border:1px solid var(--client-border);border-radius:6px;margin:12px 14px 4px;padding:0 9px;color:var(--client-muted)}
+.voice-members-drawer__search{display:flex;width:min(340px,calc(100% - 36px));min-height:34px;flex:0 0 auto;align-items:center;gap:7px;border:1px solid var(--client-border);border-radius:6px;margin:9px 18px 3px auto;padding:0 9px;color:var(--client-muted)}
 .voice-members-drawer__search:focus-within{border-color:#9ca3af;outline:2px solid #e5e7eb;outline-offset:1px}
 .voice-members-drawer__search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--client-text);font:inherit;font-size:11px}
 .voice-members-drawer__search input::placeholder{color:#9ca3af}
-.voice-members-drawer__list{min-height:0;flex:1 1 auto;overflow:auto;padding:8px 14px 16px}
-.voice-members-row{display:flex;min-height:46px;align-items:center;gap:9px;border-radius:6px;padding:5px 8px}
+.voice-members-drawer__list{display:grid;min-height:0;flex:1 1 auto;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));align-content:start;gap:4px;overflow:auto;padding:8px 18px 16px}
+.voice-members-row{display:flex;min-height:46px;align-items:center;gap:9px;border:1px solid #f0f1f2;border-radius:6px;padding:5px 8px}
 .voice-members-row:hover{background:#f3f4f6}
 .voice-members-row__avatar,.voice-members-row__name{border:0;padding:0;background:transparent;color:inherit;cursor:pointer}
 .voice-members-row__avatar{display:grid;flex:0 0 auto;place-items:center;border-radius:50%}
@@ -323,10 +323,13 @@
 .voice-control-bar__actions .is-pressed{background:#e5e7eb}
 .room-chat-panel{display:flex;width:330px;min-width:300px;flex:0 0 330px;flex-direction:column;overflow:hidden;border-left:1px solid var(--client-border);background:#fff}
 .room-chat-panel[hidden]{display:none}
+.room-chat-panel.is-collapsed{width:46px;min-width:46px;flex-basis:46px}
 .room-chat-panel>header{display:flex;min-height:62px;flex:0 0 auto;align-items:center;justify-content:space-between;border-bottom:1px solid var(--client-border);padding:0 14px}
 .room-chat-panel>header>div{display:grid;gap:3px}
 .room-chat-panel>header h2{display:flex;align-items:center;gap:6px;margin:0;font-size:13px}
-.room-chat-panel>header small{color:var(--client-muted);font-size:9px}
+.room-chat-panel.is-collapsed>header{min-height:46px;justify-content:center;border-bottom:0;padding:0}
+.room-chat-panel.is-collapsed>header>div{display:none}
+.room-chat-panel.is-collapsed>:not(header){display:none}
 .room-chat-panel__messages{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;gap:14px;overflow:auto;padding:15px 12px}
 .room-chat-panel__messages .social-message{max-width:100%;gap:6px}
 .room-chat-panel__messages .social-message__meta{gap:5px}

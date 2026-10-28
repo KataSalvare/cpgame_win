@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as Rea
 import {
   Check, ChevronDown, ChevronRight, Circle, Clipboard, Flag, Globe2, Headphones,
   ImagePlus, LockKeyhole, MessageCircle, Mic, MicOff, MonitorUp, MoreHorizontal, Music2, Pencil,
-  PhoneOff, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, UserPlus, Users,
+  PhoneOff, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, UserPlus, Users, PanelRightClose, PanelRightOpen,
   Volume2, VolumeX, X,
 } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
@@ -356,6 +356,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
   const [memberContextMenu, setMemberContextMenu] = useState<{ member: VoiceMember; x: number; y: number; moveOpen: boolean } | null>(null)
   const [voiceProfileId, setVoiceProfileId] = useState<string | null>(null)
   const [membersDrawerOpen, setMembersDrawerOpen] = useState(false)
+  const [roomChatCollapsed, setRoomChatCollapsed] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
   const [voiceModes, setVoiceModes] = useState<Record<string, VoiceMode>>({})
   const [voiceModeOpen, setVoiceModeOpen] = useState(false)
@@ -526,7 +527,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
   const onDropMember = (targetChannelId: string) => {
     if (!logic.draggedMemberId) return
     logic.moveMember(logic.draggedMemberId, targetChannelId)
-    setFeedback('已将成员移动到目标子频道。')
+    setFeedback('已将成员移动到目标房间。')
     logic.setDraggedMemberId(null)
   }
   const toggleRole = (member: VoiceMember) => setMemberAction({ type: 'role', member })
@@ -569,7 +570,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
     const moved = logic.moveVoiceMember(member.id, targetRoomId, targetChannelId)
     setFeedback(moved && targetRoom && targetChannel
       ? `已将「${member.name}」移动到「${targetRoom.name} · ${targetChannel.name}」。`
-      : '目标频道剩余人数不足，无法移动成员。')
+      : '目标房间剩余人数不足，无法移动成员。')
     setMemberContextMenu(null)
   }
 
@@ -612,24 +613,24 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
     const movingIds = contextChannel.members.map((member) => member.id)
     const movedCount = logic.moveMembers(contextRoom.id, movingIds, targetChannelId)
     if (movingIds.includes(currentSocialUser.id)) logic.selectVoiceSubchannel(contextRoom.id, targetChannelId)
-    setFeedback(movedCount ? `已将 ${movedCount} 位成员移动到其他子频道。` : '目标频道剩余人数不足。')
+    setFeedback(movedCount ? `已将 ${movedCount} 位成员移动到其他房间。` : '目标房间剩余人数不足。')
     setChannelContextMenu(null)
   }
 
   return <div className="social-page voice-page" ref={voicePageRef}>
     <div className="voice-workspace">
-      <aside className="voice-room-tree" aria-label="语音房与子频道">
+      <aside className="voice-room-tree" aria-label="语音分组与房间">
         <label className="social-search"><Search size={16} /><input value={logic.roomSearch} onChange={(event) => logic.setRoomSearch(event.target.value)} placeholder="搜索语音房" aria-label="搜索语音房" /></label>
-        <button type="button" className="voice-invite-entry" onClick={() => room && openInviteForChannel(room.name, channel?.name ?? '主频道')} disabled={!room}><UserPlus size={15} />邀请好友{logic.voiceInvitations.length > 0 && <span className="social-unread-count">{logic.voiceInvitations.length}</span>}</button>
+        <button type="button" className="voice-invite-entry" onClick={() => room && openInviteForChannel(room.name, channel?.name ?? '房间A')} disabled={!room}><UserPlus size={15} />邀请好友{logic.voiceInvitations.length > 0 && <span className="social-unread-count">{logic.voiceInvitations.length}</span>}</button>
         {logic.voiceInvitations.length > 0 && <section className="voice-invites-section">
-          <div className="voice-tree-section-title"><span>房间邀请</span><span className="social-unread-count">{logic.voiceInvitations.length}</span></div>
+          <div className="voice-tree-section-title"><span>分组邀请</span><span className="social-unread-count">{logic.voiceInvitations.length}</span></div>
           {logic.voiceInvitations.map((invite) => <div className="voice-invite-card" key={invite.id}><div><strong>{invite.roomName}</strong><small>{invite.inviter} 邀请你 · {invite.time}</small></div><div className="voice-invite-card__actions"><button type="button" onClick={() => logic.ignoreVoiceInvitation(invite.id)}>忽略</button><button type="button" onClick={() => logic.acceptVoiceInvitation(invite)} aria-label={`接受加入${invite.roomName}`}><Check size={15} />加入</button></div></div>)}
         </section>}
         <div className="voice-tree-section-title"><span>语音分组</span><button type="button" className="voice-create-group-entry" onClick={openCreateRoom}><Plus size={14} />创建分组</button></div>
         <div className="voice-room-list">{logic.visibleVoiceRooms.map((item) => <section className={`voice-room-group${room?.id === item.id ? ' is-active' : ''}`} key={item.id}>
           <div className="voice-room-heading-row">
             <button type="button" className="voice-room-heading" aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => { logic.selectVoiceRoom(item.id); setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id]) }}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span>{item.privacy === '私密' ? <LockKeyhole size={15} /> : <Globe2 size={15} />}</span><strong>{item.name}</strong></button>
-            {item.currentRole !== 'member' && <button type="button" className="voice-create-child-channel" aria-label={`在${item.name}创建子频道`} title="新增频道" onClick={() => openChannelDialog('create', undefined, item.id)}><Plus size={13} /></button>}
+            {item.currentRole !== 'member' && <button type="button" className="voice-create-child-channel" aria-label={`在${item.name}创建房间`} title="新增房间" onClick={() => openChannelDialog('create', undefined, item.id)}><Plus size={13} /></button>}
             {item.currentRole !== 'member' && <button type="button" className="windows-icon-button voice-tree-manage" aria-label={`编辑${item.name}分组`} title="编辑分组" onClick={() => openEditRoom(item)}><Pencil size={13} /></button>}
           </div>
           {!collapsedRoomIds.includes(item.id) && <div className="voice-subchannel-list">{item.channels.map((subchannel) => <div className={`voice-subchannel${channel?.id === subchannel.id && room?.id === item.id ? ' is-active' : ''}${logic.draggedMemberId && room?.id === item.id && logic.draggedMemberId !== currentSocialUser.id ? ' is-drop-target' : ''}`} key={subchannel.id} onContextMenu={(event) => openChannelContextMenu(event, item.id, subchannel.id)} onDragOver={(event) => { if (room?.id === item.id && canManage) event.preventDefault() }} onDrop={(event) => { event.preventDefault(); if (room?.id === item.id) onDropMember(subchannel.id) }}>
@@ -637,11 +638,11 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
               <button type="button" className="voice-subchannel__heading" onClick={() => logic.selectVoiceSubchannel(item.id, subchannel.id)}>{subchannel.privacy === '私密' ? <LockKeyhole size={14} /> : <Volume2 size={14} />}<span>{subchannel.name}</span><small>{subchannel.members.length}/{subchannel.capacity}</small></button>
               <div className="voice-subchannel__tools">
                 <button type="button" className="voice-subchannel__action" aria-label={`邀请好友加入${item.name}的${subchannel.name}`} title="邀请好友" onClick={() => openInviteForChannel(item.name, subchannel.name)}><UserPlus size={13} /></button>
-                {item.currentRole === 'owner' && <button type="button" className="voice-subchannel__action" aria-label={`编辑${subchannel.name}`} title="编辑频道" onClick={() => openChannelDialog('edit', subchannel.id, item.id)}><Pencil size={13} /></button>}
+                {item.currentRole === 'owner' && <button type="button" className="voice-subchannel__action" aria-label={`编辑${subchannel.name}`} title="编辑房间" onClick={() => openChannelDialog('edit', subchannel.id, item.id)}><Pencil size={13} /></button>}
                 <button type="button" className="voice-subchannel__collapse" aria-label={`${collapsedChannelIds.includes(subchannel.id) ? '展开' : '折叠'}${subchannel.name}成员`} aria-expanded={!collapsedChannelIds.includes(subchannel.id)} onClick={() => setCollapsedChannelIds((ids) => ids.includes(subchannel.id) ? ids.filter((id) => id !== subchannel.id) : [...ids, subchannel.id])}><ChevronRight size={13} className={`voice-room-chevron${collapsedChannelIds.includes(subchannel.id) ? '' : ' is-expanded'}`} /></button>
               </div>
             </div>
-            {!collapsedChannelIds.includes(subchannel.id) && <div className="voice-channel-members">{subchannel.members.map((member) => <span className={`voice-channel-member${member.id === currentSocialUser.id ? ' is-self' : ''}`} data-voice-member-id={member.id} tabIndex={member.id === currentSocialUser.id ? -1 : undefined} key={member.id} draggable={room?.id === item.id && canManage && member.id !== currentSocialUser.id} onDragStart={() => logic.setDraggedMemberId(member.id)} onDragEnd={() => logic.setDraggedMemberId(null)} title={canManage ? '拖动到其他子频道' : member.name}><AvatarMark initials={member.initials} size="sm" /><span>{member.name}</span>{member.muted && <MicOff size={12} />}</span>)}</div>}
+            {!collapsedChannelIds.includes(subchannel.id) && <div className="voice-channel-members">{subchannel.members.map((member) => <span className={`voice-channel-member${member.id === currentSocialUser.id ? ' is-self' : ''}`} data-voice-member-id={member.id} tabIndex={member.id === currentSocialUser.id ? -1 : undefined} key={member.id} draggable={room?.id === item.id && canManage && member.id !== currentSocialUser.id} onDragStart={() => logic.setDraggedMemberId(member.id)} onDragEnd={() => logic.setDraggedMemberId(null)} title={canManage ? '拖动到其他房间' : member.name}><AvatarMark initials={member.initials} size="sm" /><span>{member.name}</span>{member.muted && <MicOff size={12} />}</span>)}</div>}
           </div>)}
         </div>}
         </section>)}
@@ -665,10 +666,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
 
       <section className="voice-stage" aria-label="语音房麦位">
         <header className="voice-stage__header">
-          <div><div className="voice-stage__breadcrumbs"><span>{room?.name}</span><ChevronRight size={14} /><strong>{channel?.name}</strong></div><small>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人 · {channel?.privacy ?? room?.privacy}频道</small></div>
+          <div><div className="voice-stage__breadcrumbs"><span>{room?.name}</span><ChevronRight size={14} /><strong>{channel?.name}</strong></div><small>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人 · {channel?.privacy ?? room?.privacy}房间</small></div>
           <div className="voice-mode-control" ref={voiceModeMenuRef}>
             <button type="button" className="voice-mode-trigger" aria-haspopup="menu" aria-expanded={voiceModeOpen} onClick={() => setVoiceModeOpen((open) => !open)}><span>{voiceMode}</span><ChevronDown size={14} /></button>
-            {voiceModeOpen && <div className="voice-mode-menu" role="menu" aria-label="选择频道模式">{(['自由模式', '主持人模式', '麦序模式'] as const).map((mode) => <button type="button" role="menuitemradio" aria-checked={voiceMode === mode} className={voiceMode === mode ? 'is-selected' : ''} key={mode} onClick={() => { if (channel) setVoiceModes((current) => ({ ...current, [channel.id]: mode })); setVoiceModeOpen(false) }}>{mode}{voiceMode === mode && <Check size={14} />}</button>)}</div>}
+            {voiceModeOpen && <div className="voice-mode-menu" role="menu" aria-label="选择房间模式">{(['自由模式', '主持人模式', '麦序模式'] as const).map((mode) => <button type="button" role="menuitemradio" aria-checked={voiceMode === mode} className={voiceMode === mode ? 'is-selected' : ''} key={mode} onClick={() => { if (channel) setVoiceModes((current) => ({ ...current, [channel.id]: mode })); setVoiceModeOpen(false) }}>{mode}{voiceMode === mode && <Check size={14} />}</button>)}</div>}
           </div>
         </header>
         <div className="voice-member-grid">{Array.from({ length: channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS }, (_, index) => {
@@ -685,9 +686,9 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
         <footer className="voice-stage__footer"><button type="button" className="voice-members-entry" onClick={() => { setMemberSearch(''); setMembersDrawerOpen(true) }} aria-expanded={membersDrawerOpen} aria-controls="voice-members-drawer"><Users size={14} />全部成员<span>{members.length}</span></button></footer>
         {membersDrawerOpen && <>
           <button type="button" className="voice-members-backdrop" onClick={() => setMembersDrawerOpen(false)} aria-label="关闭全部成员面板" />
-          <aside id="voice-members-drawer" className="voice-members-drawer" aria-label="频道全部成员">
-            <header className="voice-members-drawer__header"><div><h2><Users size={16} />频道全部成员</h2><span>{members.length} 人</span></div><button type="button" className="windows-icon-button" onClick={() => setMembersDrawerOpen(false)} aria-label="关闭全部成员面板"><X size={17} /></button></header>
-            <label className="voice-members-drawer__search"><Search size={15} /><input type="search" value={memberSearch} onChange={(event) => setMemberSearch(event.target.value)} placeholder="搜索当前频道成员" aria-label="搜索当前频道成员" /></label>
+          <aside id="voice-members-drawer" className="voice-members-drawer" aria-label="房间成员">
+            <header className="voice-members-drawer__header"><div><h2><Users size={16} />房间成员</h2><span>{members.length} 人</span></div><button type="button" className="windows-icon-button" onClick={() => setMembersDrawerOpen(false)} aria-label="关闭全部成员面板"><X size={17} /></button></header>
+            <label className="voice-members-drawer__search"><Search size={15} /><input type="search" value={memberSearch} onChange={(event) => setMemberSearch(event.target.value)} placeholder="搜索当前房间成员" aria-label="搜索当前房间成员" /></label>
             <div className="voice-members-drawer__list">
               {filteredMembers.map((member) => <div className="voice-members-row" key={member.id} onContextMenu={(event) => openMemberContextMenu(event, member)}>
                 <button type="button" className="voice-members-row__avatar" onClick={() => openMemberProfile(member.id)} onContextMenu={(event) => openMemberContextMenu(event, member)} aria-label={`查看${member.name}陪玩详情`}><AvatarMark initials={member.initials} size="sm" /></button>
@@ -695,13 +696,13 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
                 {member.role !== 'member' && <span className={`voice-members-row__role is-${member.role}`}>{roleLabel(member.role)}</span>}
                 <span className="voice-members-row__mic" role="img" aria-label={member.muted || !member.micOn ? '麦克风已关闭' : '麦克风已开启'} title={member.muted || !member.micOn ? '麦克风已关闭' : '麦克风已开启'}>{member.muted || !member.micOn ? <MicOff size={14} /> : <Mic size={14} />}</span>
               </div>)}
-              {!filteredMembers.length && <p className="voice-members-empty">{members.length ? '没有匹配的成员' : '当前频道暂无成员'}</p>}
+              {!filteredMembers.length && <p className="voice-members-empty">{members.length ? '没有匹配的成员' : '当前房间暂无成员'}</p>}
             </div>
           </aside>
         </>}
       </section>
 
-      <RoomChatPanel hidden={Boolean(selectedProfile)} messages={logic.roomMessages} onSend={(kind, text, duration, replyTo) => logic.sendRoomMessage(kind, text, duration, replyTo)} onOpenProfile={openMemberProfile} onAvatarContextMenu={openMemberContextMenu} members={room?.channels.flatMap((subchannel) => subchannel.members) ?? []} />
+      <RoomChatPanel hidden={Boolean(selectedProfile)} collapsed={roomChatCollapsed} onToggleCollapsed={() => setRoomChatCollapsed((value) => !value)} messages={logic.roomMessages} onSend={(kind, text, duration, replyTo) => logic.sendRoomMessage(kind, text, duration, replyTo)} onOpenProfile={openMemberProfile} onAvatarContextMenu={openMemberContextMenu} members={room?.channels.flatMap((subchannel) => subchannel.members) ?? []} />
       {selectedProfile && <aside className="social-profile-panel voice-profile-panel" aria-label={`${selectedProfile.name}陪玩详情`}>
         <header><h2>{selectedProfile.name}</h2><button type="button" className="windows-icon-button" aria-label="关闭陪玩详情" onClick={() => setVoiceProfileId(null)}><X size={17} /></button></header>
         {linkedCompanion && selectedProfileCard ? <CompanionDetailPage
@@ -723,31 +724,31 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
     </div>
     {feedback && <div className="social-toast" role="status">{feedback}<button type="button" className="windows-icon-button" onClick={() => setFeedback('')} aria-label="关闭通知"><X size={15} /></button></div>}
 
-    {channelContextMenu && contextRoom && contextChannel && <div ref={channelMenuRef} className="voice-channel-context-menu" role="menu" aria-label={`${contextChannel.name}频道操作`} style={{ left: channelContextMenu.x, top: channelContextMenu.y }} onContextMenu={(event) => event.preventDefault()}>
+    {channelContextMenu && contextRoom && contextChannel && <div ref={channelMenuRef} className="voice-channel-context-menu" role="menu" aria-label={`${contextChannel.name}房间操作`} style={{ left: channelContextMenu.x, top: channelContextMenu.y }} onContextMenu={(event) => event.preventDefault()}>
       <button type="button" role="menuitem" onClick={() => { openInviteForChannel(contextRoom.name, contextChannel.name); setChannelContextMenu(null) }}><UserPlus size={15} />邀请</button>
       {contextRoom.currentRole !== 'member' && <>
         <button type="button" role="menuitem" className="has-submenu" aria-expanded={channelContextMenu.moveOpen} disabled={!contextChannel.members.length || !contextRoom.channels.some((item) => item.id !== contextChannel.id)} onClick={() => setChannelContextMenu((current) => current ? { ...current, moveOpen: !current.moveOpen } : null)}>批量移动用户至<ChevronRight size={14} /></button>
-        {channelContextMenu.moveOpen && <div className="voice-channel-context-submenu" role="group" aria-label="选择目标子频道">{contextRoom.channels.filter((item) => item.id !== contextChannel.id).map((target) => {
+        {channelContextMenu.moveOpen && <div className="voice-channel-context-submenu" role="group" aria-label="选择目标房间">{contextRoom.channels.filter((item) => item.id !== contextChannel.id).map((target) => {
           const fitsMembers = target.capacity - target.members.length >= contextChannel.members.length
-          return <button type="button" key={target.id} disabled={!fitsMembers} title={fitsMembers ? `移动到${target.name}` : '目标频道剩余人数不足'} onClick={() => moveChannelMembers(target.id)}>{target.name}<small>{target.members.length}/{target.capacity}</small></button>
+          return <button type="button" key={target.id} disabled={!fitsMembers} title={fitsMembers ? `移动到${target.name}` : '目标房间剩余人数不足'} onClick={() => moveChannelMembers(target.id)}>{target.name}<small>{target.members.length}/{target.capacity}</small></button>
         })}</div>}
       </>}
-      <button type="button" role="menuitemcheckbox" aria-checked={collapsedChannelIds.includes(contextChannel.id)} onClick={() => { setCollapsedChannelIds((ids) => ids.includes(contextChannel.id) ? ids.filter((id) => id !== contextChannel.id) : [...ids, contextChannel.id]); setChannelContextMenu(null) }}><span>收起该语音频道</span><i className={collapsedChannelIds.includes(contextChannel.id) ? 'is-checked' : ''} /></button>
-      <button type="button" role="menuitem" onClick={collapseAllVoiceChannels}>收起所有频道</button>
+      <button type="button" role="menuitemcheckbox" aria-checked={collapsedChannelIds.includes(contextChannel.id)} onClick={() => { setCollapsedChannelIds((ids) => ids.includes(contextChannel.id) ? ids.filter((id) => id !== contextChannel.id) : [...ids, contextChannel.id]); setChannelContextMenu(null) }}><span>收起该房间</span><i className={collapsedChannelIds.includes(contextChannel.id) ? 'is-checked' : ''} /></button>
+      <button type="button" role="menuitem" onClick={collapseAllVoiceChannels}>收起所有房间</button>
       {contextRoom.currentRole === 'owner' && <>
         <div className="voice-channel-context-separator" />
         <button type="button" role="menuitem" onClick={() => { openChannelDialog('edit', contextChannel.id, contextRoom.id); setChannelPrivacy('私密'); setChannelContextMenu(null) }}><LockKeyhole size={15} />设置密码</button>
-        <button type="button" role="menuitem" onClick={() => { openChannelDialog('edit', contextChannel.id, contextRoom.id); setChannelContextMenu(null) }}><Pencil size={15} />编辑频道</button>
+        <button type="button" role="menuitem" onClick={() => { openChannelDialog('edit', contextChannel.id, contextRoom.id); setChannelContextMenu(null) }}><Pencil size={15} />编辑房间</button>
         <div className="voice-channel-context-separator" />
-        <button type="button" role="menuitem" className="is-danger" disabled={contextRoom.channels.length <= 1} onClick={() => { logic.selectVoiceRoom(contextRoom.id); setDeleteChannelId(contextChannel.id); setChannelContextMenu(null) }}><Trash2 size={15} />删除频道</button>
+        <button type="button" role="menuitem" className="is-danger" disabled={contextRoom.channels.length <= 1} onClick={() => { logic.selectVoiceRoom(contextRoom.id); setDeleteChannelId(contextChannel.id); setChannelContextMenu(null) }}><Trash2 size={15} />删除房间</button>
       </>}
       <div className="voice-channel-context-separator" />
       <button type="button" role="menuitem" onClick={locateMyVoicePosition}>定位我的位置</button>
     </div>}
 
-    {roomDialog && <DialogPanel overlayId="voice-room-dialog" title={roomDialog === 'create' ? '创建语音分组' : '编辑房间设置'} description={roomDialog === 'create' ? '创建后默认为公开，并自动添加主频道。' : '设置房间名称与可见范围。'} onClose={() => setRoomDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setRoomDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveRoom} disabled={!roomName.trim()}>{roomDialog === 'create' ? '创建分组' : '保存设置'}</button></>}>
-      <label className="social-form-field">房间名称<input value={roomName} onChange={(event) => setRoomName(event.target.value)} maxLength={24} placeholder="输入房间名称" /></label>
-      {roomDialog === 'edit' && <fieldset className="voice-privacy-choice"><legend>房间权限</legend><label><input type="radio" name="roomPrivacy" checked={roomPrivacy === '公开'} onChange={() => setRoomPrivacy('公开')} /><Globe2 size={17} /><span><strong>公开房间</strong><small>好友和玩家都可以浏览并加入</small></span></label><label><input type="radio" name="roomPrivacy" checked={roomPrivacy === '私密'} onChange={() => setRoomPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密房间</strong><small>仅通过邀请加入</small></span></label></fieldset>}
+    {roomDialog && <DialogPanel overlayId="voice-room-dialog" title={roomDialog === 'create' ? '创建分组' : '编辑分组设置'} description={roomDialog === 'create' ? '创建后默认为公开，并自动添加房间A。' : undefined} onClose={() => setRoomDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setRoomDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveRoom} disabled={!roomName.trim()}>{roomDialog === 'create' ? '创建分组' : '保存设置'}</button></>}>
+      <label className="social-form-field">分组名称<input value={roomName} onChange={(event) => setRoomName(event.target.value)} maxLength={24} placeholder="输入分组名称" /></label>
+      {roomDialog === 'edit' && <fieldset className="voice-privacy-choice"><legend>分组权限</legend><label><input type="radio" name="roomPrivacy" checked={roomPrivacy === '公开'} onChange={() => setRoomPrivacy('公开')} /><Globe2 size={17} /><span><strong>公开分组</strong><small>好友和玩家都可以浏览并加入</small></span></label><label><input type="radio" name="roomPrivacy" checked={roomPrivacy === '私密'} onChange={() => setRoomPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密分组</strong><small>仅通过邀请加入</small></span></label></fieldset>}
     </DialogPanel>}
 
     {memberContextMenu && <div ref={memberMenuRef} className="voice-channel-context-menu voice-member-context-menu" role="menu" aria-label={`${memberContextMenu.member.name}成员操作`} style={{ left: memberContextMenu.x, top: memberContextMenu.y }} onContextMenu={(event) => event.preventDefault()}>
@@ -758,25 +759,25 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
       {isOwner && memberContextMenu.member.id !== currentSocialUser.id && <button type="button" role="menuitem" onClick={() => { setMemberAction({ type: 'role', member: memberContextMenu.member }); setMemberContextMenu(null) }}><Users size={15} />{memberContextMenu.member.role === 'admin' ? '撤销管理员' : '设为管理员'}</button>}
       <div className="voice-channel-context-separator" />
       <button type="button" role="menuitem" className="has-submenu" aria-expanded={memberContextMenu.moveOpen} disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id || !logic.voiceRooms.some((voiceRoom) => voiceRoom.id !== room?.id && voiceRoom.channels.length > 0)} onClick={() => setMemberContextMenu((current) => current ? { ...current, moveOpen: !current.moveOpen } : null)}>移动至其他房间<ChevronRight size={14} /></button>
-      {memberContextMenu.moveOpen && <div className="voice-channel-context-submenu voice-member-context-submenu" role="group" aria-label="选择其他房间和频道">{logic.voiceRooms.filter((voiceRoom) => voiceRoom.id !== room?.id).flatMap((voiceRoom) => voiceRoom.channels.map((target) => {
+      {memberContextMenu.moveOpen && <div className="voice-channel-context-submenu voice-member-context-submenu" role="group" aria-label="选择其他分组和房间">{logic.voiceRooms.filter((voiceRoom) => voiceRoom.id !== room?.id).flatMap((voiceRoom) => voiceRoom.channels.map((target) => {
         const alreadyJoined = target.members.some((member) => member.id === memberContextMenu.member.id)
         const alreadyInRoom = voiceRoom.channels.some((subchannel) => subchannel.members.some((member) => member.id === memberContextMenu.member.id))
         const alreadyInAnotherChannel = alreadyInRoom && !alreadyJoined
         const isFull = target.members.length >= target.capacity && !alreadyJoined
-        return <button type="button" key={`${voiceRoom.id}-${target.id}`} disabled={isFull || alreadyInAnotherChannel} title={isFull ? '目标频道已满' : alreadyInAnotherChannel ? `成员已在${voiceRoom.name}的其他频道` : alreadyJoined ? `成员已在${voiceRoom.name} · ${target.name}，移动后将离开当前房间` : `移动至${voiceRoom.name} · ${target.name}`} onClick={() => moveMemberToRoom(voiceRoom.id, target.id)}><span>{voiceRoom.name} · {target.name}</span><small>{target.members.length}/{target.capacity}</small></button>
+        return <button type="button" key={`${voiceRoom.id}-${target.id}`} disabled={isFull || alreadyInAnotherChannel} title={isFull ? '目标房间已满' : alreadyInAnotherChannel ? `成员已在${voiceRoom.name}的其他房间` : alreadyJoined ? `成员已在${voiceRoom.name} · ${target.name}，移动后将离开当前房间` : `移动至${voiceRoom.name} · ${target.name}`} onClick={() => moveMemberToRoom(voiceRoom.id, target.id)}><span>{voiceRoom.name} · {target.name}</span><small>{target.members.length}/{target.capacity}</small></button>
       }))}</div>}
     </div>}
 
-    {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建子频道' : '编辑子频道'} description={channelDialog.mode === 'create' ? `创建于「${logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > MAX_VOICE_CHANNEL_MEMBERS}>{channelDialog.mode === 'create' ? '创建子频道' : '保存'}</button></>}>
+    {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' ? `添加到「${logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > MAX_VOICE_CHANNEL_MEMBERS}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>
       <div className="voice-channel-form">
-        <label className="social-form-field">频道名称<input value={channelName} onChange={(event) => setChannelName(event.target.value)} maxLength={20} placeholder="例如：战术讨论" /></label>
-        <label className="social-form-field">人数上限<input type="number" min={1} max={MAX_VOICE_CHANNEL_MEMBERS} value={channelCapacity} onChange={(event) => setChannelCapacity(event.target.value === '' ? 0 : Number(event.target.value))} aria-label="人数上限" /><small>可设置 1–{MAX_VOICE_CHANNEL_MEMBERS} 人；不能低于当前频道人数。</small></label>
-        <fieldset className="voice-privacy-choice"><legend>频道权限</legend><div className="voice-privacy-choice__options"><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '公开'} onChange={() => { setChannelPrivacy('公开'); setChannelPassword('') }} /><Globe2 size={17} /><span><strong>公开频道</strong><small>可在房间频道列表中浏览</small></span></label><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '私密'} onChange={() => setChannelPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密频道</strong><small>可选设置进入密码</small></span></label></div></fieldset>
-        {channelPrivacy === '私密' && <label className="social-form-field">频道密码<input type="password" value={channelPassword} onChange={(event) => setChannelPassword(event.target.value)} maxLength={32} placeholder="设置频道密码（可选）" autoComplete="new-password" /></label>}
+        <label className="social-form-field">房间名称<input value={channelName} onChange={(event) => setChannelName(event.target.value)} maxLength={20} placeholder="例如：战术讨论" /></label>
+        <label className="social-form-field">人数上限<input type="number" min={1} max={MAX_VOICE_CHANNEL_MEMBERS} value={channelCapacity} onChange={(event) => setChannelCapacity(event.target.value === '' ? 0 : Number(event.target.value))} aria-label="人数上限" /><small>可设置 1–{MAX_VOICE_CHANNEL_MEMBERS} 人；不能低于当前房间人数。</small></label>
+        <fieldset className="voice-privacy-choice"><legend>房间权限</legend><div className="voice-privacy-choice__options"><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '公开'} onChange={() => { setChannelPrivacy('公开'); setChannelPassword('') }} /><Globe2 size={17} /><span><strong>公开房间</strong><small>可在房间列表中浏览</small></span></label><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '私密'} onChange={() => setChannelPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密房间</strong><small>可选设置进入密码</small></span></label></div></fieldset>
+        {channelPrivacy === '私密' && <label className="social-form-field">房间密码<input type="password" value={channelPassword} onChange={(event) => setChannelPassword(event.target.value)} maxLength={32} placeholder="设置房间密码（可选）" autoComplete="new-password" /></label>}
       </div>
     </DialogPanel>}
 
-    {deleteChannelId && <DialogPanel overlayId="delete-channel-dialog" title={`删除「${deletingChannel?.name ?? '子频道'}」`} description="频道成员将返回其他子频道。" onClose={() => setDeleteChannelId(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setDeleteChannelId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { logic.deleteSubchannel(deleteChannelId); setDeleteChannelId(null) }} disabled={!canDeleteChannel}>删除子频道</button></>}>{!canDeleteChannel && <p className="social-dialog-copy">其他子频道剩余人数不足，无法删除。请先调整人数上限或移出成员。</p>}</DialogPanel>}
+    {deleteChannelId && <DialogPanel overlayId="delete-channel-dialog" title={`删除「${deletingChannel?.name ?? '房间'}」`} description="房间成员将返回其他房间。" onClose={() => setDeleteChannelId(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setDeleteChannelId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { logic.deleteSubchannel(deleteChannelId); setDeleteChannelId(null) }} disabled={!canDeleteChannel}>删除房间</button></>}>{!canDeleteChannel && <p className="social-dialog-copy">其他房间剩余人数不足，无法删除。请先调整人数上限或移出成员。</p>}</DialogPanel>}
 
     {memberAction && <DialogPanel overlayId="voice-member-action-dialog" children={null} title={`确认${memberActionLabel}`} description={memberAction.type === 'block' ? `拉黑「${memberAction.member.name}」后，对方会从语音房成员中移除。` : memberAction.type === 'remove' ? `确定将「${memberAction.member.name}」移出当前语音房吗？` : memberAction.type === 'role' ? memberAction.member.role === 'admin' ? `确定撤销「${memberAction.member.name}」的管理员身份吗？` : `确定将「${memberAction.member.name}」设为管理员吗？` : `确定${memberActionLabel}「${memberAction.member.name}」吗？`} onClose={() => setMemberAction(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setMemberAction(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmMemberAction}>{`确认${memberActionLabel}`}</button></>} /> }
 
@@ -786,7 +787,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder }: PageState
   </div>
 }
 
-function RoomChatPanel({ messages, onSend, hidden = false, onOpenProfile, onAvatarContextMenu, members = [] }: { messages: SocialMessage[]; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => void; hidden?: boolean; onOpenProfile?: (memberId: string) => void; onAvatarContextMenu?: (event: ReactMouseEvent, member: VoiceMember) => void; members?: VoiceMember[] }) {
+function RoomChatPanel({ messages, onSend, hidden = false, collapsed = false, onToggleCollapsed, onOpenProfile, onAvatarContextMenu, members = [] }: { messages: SocialMessage[]; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => void; hidden?: boolean; collapsed?: boolean; onToggleCollapsed?: () => void; onOpenProfile?: (memberId: string) => void; onAvatarContextMenu?: (event: ReactMouseEvent, member: VoiceMember) => void; members?: VoiceMember[] }) {
   const [draft, setDraft] = useState('')
   const [playingMessage, setPlayingMessage] = useState<string | null>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
@@ -798,8 +799,8 @@ function RoomChatPanel({ messages, onSend, hidden = false, onOpenProfile, onAvat
   const [feedback, setFeedback] = useState('')
   const send = () => { if (draft.trim()) { onSend('text', draft.trim(), undefined, replyTarget ? replySnapshot(replyTarget) : undefined); setDraft(''); setReplyTarget(null) } }
   const enter = (event: KeyboardEvent<HTMLTextAreaElement>) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); send() } }
-  return <section className="room-chat-panel" aria-label="房间聊天" hidden={hidden}>
-    <header><div><h2><MessageCircle size={16} />房间聊天</h2></div><button type="button" className="windows-icon-button" aria-label="更多房间聊天选项"><MoreHorizontal size={18} /></button></header>
+  return <section className={`room-chat-panel${collapsed ? ' is-collapsed' : ''}`} aria-label="房间聊天" hidden={hidden}>
+    <header><div><h2><MessageCircle size={16} />房间聊天</h2></div><button type="button" className="windows-icon-button" onClick={onToggleCollapsed} aria-label={collapsed ? "展开聊天面板" : "折叠聊天面板"} title={collapsed ? "展开聊天面板" : "折叠聊天面板"}>{collapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}</button></header>
     <div className="room-chat-panel__messages">{messages.map((message) => {
       const member = members.find((item) => item.id === message.senderId) ?? (message.senderId === currentSocialUser.id ? { ...currentSocialUser, role: 'member' as const, micOn: false, muted: false } : socialFriends.find((friend) => friend.id === message.senderId) ? { ...socialFriends.find((friend) => friend.id === message.senderId)!, role: 'member' as const, micOn: false, muted: false } : undefined)
       return <ChatMessage key={message.id} message={message} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onAvatarClick={() => onOpenProfile?.(message.senderId)} onAvatarContextMenu={member ? (event) => onAvatarContextMenu?.(event, member) : undefined} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />
