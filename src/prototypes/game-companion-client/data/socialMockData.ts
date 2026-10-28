@@ -68,6 +68,9 @@ export interface VoiceRoom {
   name: string
   privacy: '公开' | '私密'
   currentRole: VoiceRole
+  ownerType?: 'club' | 'personal'
+  clubId?: string
+  ownerId?: string
   channels: VoiceSubchannel[]
 }
 
@@ -114,18 +117,18 @@ const voiceMember = (friend: SocialFriend, role: VoiceRole = 'member'): VoiceMem
 
 export const initialVoiceRooms: VoiceRoom[] = [
   {
-    id: 'room-ranked', name: '分组A', privacy: '公开', currentRole: 'owner',
+    id: 'room-ranked', name: '分组A', privacy: '公开', currentRole: 'owner', ownerType: 'club', clubId: 'club-001',
     channels: [
       { id: 'channel-main', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), voiceMember(socialFriends[4])] },
       { id: 'channel-warmup', name: '房间B', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
     ],
   },
   {
-    id: 'room-weekend', name: '分组B', privacy: '公开', currentRole: 'admin',
+    id: 'room-weekend', name: '分组B', privacy: '公开', currentRole: 'admin', ownerType: 'personal', ownerId: 'friend-1',
     channels: [{ id: 'channel-weekend', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
   },
   {
-    id: 'room-friends', name: '分组C', privacy: '私密', currentRole: 'member',
+    id: 'room-friends', name: '分组C', privacy: '私密', currentRole: 'member', ownerType: 'personal', ownerId: 'friend-2',
     channels: [{ id: 'channel-friends', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
   },
 ]
@@ -144,4 +147,26 @@ export const initialRoomMessagesByRoom: Record<string, SocialMessage[]> = {
 
 export const initialVoiceInvitations: VoiceInvitation[] = [
   { id: 'invite-1', roomId: 'room-friends', roomName: '分组C', inviter: '青柠汽水', time: '刚刚' },
+]
+
+export type VoiceCallNotification = {
+  id: string
+  callerName: string
+  callerInitials: string
+  roomId: string
+  channelId: string
+  roomName: string
+  channelName: string
+}
+
+export const initialVoiceCallNotifications: VoiceCallNotification[] = [
+  { id: 'voice-call-001', callerName: '晚风', callerInitials: '风', roomId: 'room-ranked', channelId: 'channel-main', roomName: '分组A', channelName: '房间A' },
+  { id: 'voice-call-002', callerName: '青柠汽水', callerInitials: '柠', roomId: 'room-ranked', channelId: 'channel-warmup', roomName: '分组A', channelName: '房间B' },
+  { id: 'voice-call-003', callerName: '北岸', callerInitials: '北', roomId: 'room-weekend', channelId: 'channel-weekend', roomName: '分组B', channelName: '房间A' },
+]
+
+export const initialSupportQueue = [
+  { id: 'support-user-1', name: '青柠汽水', initials: '柠' },
+  { id: 'support-user-2', name: '北岸', initials: '北' },
+  { id: 'support-user-3', name: '小熊饼干', initials: '熊' },
 ]

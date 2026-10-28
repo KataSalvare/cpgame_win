@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Bell, CalendarDays } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
@@ -10,15 +11,17 @@ type Props = {
   announcements: Announcement[]
   categories: AnnouncementCategory[]
   pageState: 'normal' | 'loading' | 'empty' | 'error'
+  presentation?: 'page' | 'panel'
   readIds: string[]
   onRead: (id: string) => void
   onRetry: () => void
   onBack?: () => void
 }
 
-export function AnnouncementsPage({ kind, clubName, announcements, categories, pageState, readIds, onRead, onRetry, onBack }: Props) {
+export function AnnouncementsPage({ kind, clubName, announcements, categories, pageState, readIds, onRead, onRetry, onBack, presentation = 'page' }: Props) {
   const [activeCategory, setActiveCategory] = useState<AnnouncementCategory | '全部'>('全部')
   const [selected, setSelected] = useState<Announcement | null>(null)
+  const dialogHost = document.querySelector('.windows-client-frame.game-companion-client')
   const title = kind === 'platform' ? '平台公告' : '俱乐部公告'
   const visibleAnnouncements = useMemo(() => {
     const filtered = activeCategory === '全部' ? announcements : announcements.filter((item) => item.category === activeCategory)
@@ -27,9 +30,9 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
 
   if (pageState !== 'normal') return <div className="client-content announcement-state"><PageStatePanel state={pageState} title={pageState === 'empty' ? '暂无公告' : '公告暂不可用'} description={pageState === 'error' ? '公告暂时无法加载，请重试。' : pageState === 'loading' ? '正在加载公告…' : '当前分类下暂时没有公告。'} actionLabel={pageState === 'error' ? '重新加载' : '查看全部'} onAction={pageState === 'error' ? onRetry : () => setActiveCategory('全部')} /></div>
 
-  return <div className="client-content announcement-page">
-    {onBack && <button type="button" className="client-back-link" onClick={onBack}>返回俱乐部</button>}
-    <header className="client-page-heading"><div><span className="client-eyebrow">{kind === 'platform' ? '平台消息' : clubName}</span><h1>{title}</h1></div><span className="client-heading-mark"><Bell size={15} />{announcements.length} 条公告</span></header>
+  return <div className={`client-content announcement-page${presentation === 'panel' ? ' announcement-page--panel' : ''}`}>
+    {presentation === 'page' && onBack && <button type="button" className="client-back-link" onClick={onBack}>返回俱乐部</button>}
+    {presentation === 'page' && <header className="client-page-heading"><div><span className="client-eyebrow">{kind === 'platform' ? '平台消息' : clubName}</span><h1>{title}</h1></div><span className="client-heading-mark"><Bell size={15} />{announcements.length} 条公告</span></header>}
     <section className="announcement-card client-card" aria-label={`${title}列表`}>
       <div className="announcement-filters" role="tablist" aria-label="公告分类">
         {(['全部', ...categories] as const).map((category) => <button key={category} type="button" role="tab" aria-selected={activeCategory === category} className={`announcement-filter${activeCategory === category ? ' is-active' : ''}`} onClick={() => setActiveCategory(category)}>{category}</button>)}
@@ -48,9 +51,9 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
         })}
       </ul> : <div className="announcement-empty"><Bell size={24} /><strong>暂无{activeCategory}公告</strong><span>选择其他分类查看公告</span></div>}
     </section>
-    {selected && <DialogPanel overlayId={`${kind}-announcement-detail`} title={selected.title} description={`${selected.category} · ${selected.publishedAt}`} onClose={() => setSelected(null)} width={620} footer={<button type="button" className="client-button client-button--primary" onClick={() => setSelected(null)}>关闭</button>}>
+    {selected && createPortal(<DialogPanel overlayId={`${kind}-announcement-detail`} title={selected.title} description={`${selected.category} · ${selected.publishedAt}`} onClose={() => setSelected(null)} width={620} footer={<button type="button" className="client-button client-button--primary" onClick={() => setSelected(null)}>关闭</button>}>
       {selected.coverImage && <img className="announcement-detail__cover" src={selected.coverImage} alt={selected.coverAlt ?? ''} />}
       <article className="announcement-detail">{selected.content.map((paragraph, index) => <p key={`${selected.id}-${index}`}>{paragraph}</p>)}</article>
-    </DialogPanel>}
+    </DialogPanel>, dialogHost ?? document.body)}
   </div>
 }

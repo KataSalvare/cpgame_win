@@ -3,7 +3,7 @@ import { clubs, companions, servicesByCompanion } from './data/mockData'
 
 export type ClientPage = 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements'
 
-type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | null
+type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | null
 type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; returnTo: ClientPage | null; panel: StorePanel }
 
 const DEFAULT_CLUB_ID = 'club-001'
@@ -35,6 +35,7 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   const requestedPanel = params.get('panel')
   if (page === 'club-detail' && requestedPanel === 'club-cards') panel = 'club-cards'
   if (page === 'club-detail' && requestedPanel === 'club-groups') panel = 'club-groups'
+  if (page === 'club-detail' && requestedPanel === 'club-announcements') panel = 'club-announcements'
   if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger' || requestedPanel === 'bean-withdraw' || requestedPanel === 'diamond-recharge')) panel = requestedPanel
   return { page, clubId, companionId, companionIds, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null), returnTo, panel }
 }
@@ -85,7 +86,7 @@ export function useClientNavigation(entryView?: string) {
     writeRoute('wallet', route.clubId, route.companionId, null, null, 'diamond-recharge')
   }, [route.clubId, route.companionId])
   const openClubGroups = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-groups'), [route.clubId])
-  const openClubAnnouncements = useCallback(() => writeRoute('club-announcements', route.clubId, null), [route.clubId])
+  const openClubAnnouncements = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-announcements'), [route.clubId])
   const beginOrder = useCallback((serviceId: string, companionId: string) => {
     const companionClubId = companions.find((item) => item.id === companionId)?.clubId ?? route.clubId
     const companionIds = route.page === 'checkout' && route.companionIds.includes(companionId) ? route.companionIds : undefined

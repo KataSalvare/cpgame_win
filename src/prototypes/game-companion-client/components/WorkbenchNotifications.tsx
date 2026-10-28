@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
-import { X } from 'lucide-react'
+import { ChevronRight, PhoneCall, X } from 'lucide-react'
 import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
+import type { VoiceCallNotification } from '../data/socialMockData'
 import { AvatarMark } from './AvatarMark'
 
 function NotificationCard({ label, children }: { label: string; children: ReactNode }) {
@@ -12,7 +13,7 @@ function NotificationCard({ label, children }: { label: string; children: ReactN
   </aside>
 }
 
-export function WorkbenchNotifications({ logic: w, open }: { logic: WorkbenchLogic; open: boolean }) {
+export function WorkbenchNotifications({ logic: w, open, voiceCallNotifications, onOpenVoiceCall }: { logic: WorkbenchLogic; open: boolean; voiceCallNotifications: VoiceCallNotification[]; onOpenVoiceCall: () => void }) {
   const [handled, setHandled] = useState<string[]>([])
   const matches = w.requests.filter(r => r.status === '待响应').map(r => ({ ...r, kind: 'match' as const }))
   const orders = w.orders.filter(o => o.status === '待接单').map(o => ({ ...o, kind: 'order' as const }))
@@ -40,5 +41,12 @@ export function WorkbenchNotifications({ logic: w, open }: { logic: WorkbenchLog
         </footer>
       </NotificationCard>
     })}
+    {voiceCallNotifications.length > 0 && <NotificationCard label="呼叫通知">
+      <button type="button" className="workbench-support-notice" onClick={onOpenVoiceCall}>
+        <header className="workbench-notice-heading"><PhoneCall size={17} /><strong>呼叫通知</strong><span className="workbench-notice-type">{voiceCallNotifications.length} 条</span></header>
+        <p className="workbench-notice-service">{voiceCallNotifications.length === 1 ? `${voiceCallNotifications[0].callerName} 邀请你加入「${voiceCallNotifications[0].roomName} · ${voiceCallNotifications[0].channelName}」` : `${voiceCallNotifications[0].callerName} 等 ${voiceCallNotifications.length} 位好友邀请你加入语音房`}</p>
+        <span className="workbench-support-notice__action">查看呼叫 <ChevronRight size={14} /></span>
+      </button>
+    </NotificationCard>}
   </div>
 }

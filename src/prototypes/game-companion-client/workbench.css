@@ -67,6 +67,9 @@
 .workbench-notice-actions { display:flex; flex:none; gap:6px; }
 .workbench-notice-actions .client-button { min-height:30px; padding:0 10px; }
 .workbench-global-notice button:focus-visible { outline:2px solid #6b7280; outline-offset:2px; }
+.workbench-support-notice{display:block;width:100%;border:0;border-radius:5px;padding:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.workbench-support-notice:hover .workbench-support-notice__action{color:var(--client-text)}
+.workbench-support-notice__action{display:flex;align-items:center;justify-content:flex-end;gap:3px;color:var(--client-muted);font-size:12px}
 
 .workbench-orders-table .order-list-header,
 .workbench-orders-table .order-item {
