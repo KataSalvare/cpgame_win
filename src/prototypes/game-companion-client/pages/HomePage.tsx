@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { Gamepad2 } from 'lucide-react'
 import { clubTags, games } from '../data/mockData'
 import { useHomeLogic } from '../hooks/useHomeLogic'
 import { ClubCard } from '../components/ClubCard'
@@ -31,15 +30,12 @@ export function HomePage({ pageState, onOpenClub, onBrowseClub, onSelfOrderClub,
   }
 
   return <div className="client-content home-page">
-    <div className="client-page-heading">
-      <div><span className="client-eyebrow">发现游戏伙伴</span><h1>发现</h1><p>浏览游戏与俱乐部，找到合拍的队友。</p></div>
-      <span className="client-heading-mark"><Gamepad2 size={18} /> 玩家端</span>
-    </div>
+    <h1 className="client-visually-hidden">首页</h1>
 
     <PromotionBanner />
 
     <section className="home-games" aria-labelledby="home-games-title">
-      <div className="client-section-heading"><div><span className="client-eyebrow">按游戏浏览</span><h2 id="home-games-title">选择游戏</h2></div><span className="client-muted">单选游戏，组合筛选俱乐部</span></div>
+      <div className="client-section-heading"><h2 id="home-games-title">游戏</h2></div>
       <div className="home-game-list" role="group" aria-label="游戏筛选">
         {games.map((game) => <button key={game.id} type="button" className={`game-choice${logic.gameId === game.id ? ' is-active' : ''}`} aria-pressed={logic.gameId === game.id} onClick={() => logic.setGameId(game.id)}>
           <span className="game-choice__mark">{game.shortName}</span><span>{game.name}</span>
@@ -48,7 +44,7 @@ export function HomePage({ pageState, onOpenClub, onBrowseClub, onSelfOrderClub,
     </section>
 
     <section className="home-clubs" aria-labelledby="home-clubs-title">
-      <div className="client-section-heading"><div><span className="client-eyebrow">俱乐部探索</span><h2 id="home-clubs-title">俱乐部</h2></div><span className="client-count">{logic.visibleClubs.length} 个俱乐部</span></div>
+      <div className="client-section-heading"><h2 id="home-clubs-title">俱乐部</h2><span className="client-count">{logic.visibleClubs.length} 个</span></div>
       <div className="club-scope-row" role="group" aria-label="俱乐部范围筛选">
         <button type="button" className={`client-filter-pill${logic.scope === 'featured' ? ' is-active' : ''}`} aria-pressed={logic.scope === 'featured'} onClick={() => logic.setScope('featured')}>推荐俱乐部</button>
         <button type="button" className={`client-filter-pill${logic.scope === 'followed' ? ' is-active' : ''}`} aria-pressed={logic.scope === 'followed'} onClick={() => logic.setScope('followed')}>我关注的俱乐部</button>

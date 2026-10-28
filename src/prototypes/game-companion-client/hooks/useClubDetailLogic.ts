@@ -50,6 +50,6 @@ function matchesAge(value: number, option: string) {
   if (option === '26-30岁') return value >= 26 && value <= 30
   if (option === '31-35岁') return value >= 31 && value <= 35
   if (option === '36-40岁') return value >= 36 && value <= 40
-  if (option === '41岁及以上') return value >= 41
+  if (option === '40岁以上') return value >= 40
   return true
 }

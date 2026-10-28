@@ -3,7 +3,7 @@
  * 玩家端 Windows 客户端原型，包含发现、下单、个人中心、钱包和订单页面。
  */
 import { useState } from 'react'
-import { Building2, Gamepad2, Headphones, History, MessageCircle, Swords, UserRound, WalletCards } from 'lucide-react'
+import { Building2, Gamepad2, Headphones, History, MessageCircle, Search, Swords, UserRound, WalletCards } from 'lucide-react'
 import { RightDrawer, WindowsClientFrame, WindowsSidebar, WindowsTitleBar } from '@/components/WindowsClient'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 import { playerProfile } from './data/accountMockData'
@@ -16,12 +16,16 @@ import { AvatarMark } from './components/AvatarMark'
 import { MessagesPage, VoiceRoomsPage } from './pages/SocialPages'
 import { useSocialLogic } from './hooks/useSocialLogic'
 import { useClientNavigation } from './useClientNavigation'
-import { companions, servicesByCompanion, type Companion } from './data/mockData'
+import { clubs, companions, servicesByCompanion, type Companion } from './data/mockData'
 import { CouponsPage, PremiumCardDetailPage, PremiumCardsPage, RechargePage } from './pages/StorePages'
 import { premiumCards } from './data/storeMockData'
 import { ClubGroupsPanel } from './pages/ClubGroupsPanel'
 import { MatchPanel } from './pages/MatchPanel'
 import { useMatchLogic } from './hooks/useMatchLogic'
+import { GlobalSearchPanel, type GlobalSearchUser } from './components/GlobalSearchPanel'
+import { currentSocialUser, socialFriends } from './data/socialMockData'
+import { LoginPage } from './pages/LoginPage'
+import { IdentityVerificationFlow } from './pages/IdentityVerificationFlow'
 import './style.css'
 
 type ClientPageState = 'normal' | 'loading' | 'empty' | 'error'
@@ -31,7 +35,10 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [selectedPremiumCardId, setSelectedPremiumCardId] = useState<string | null>(null)
   const [matchPanelOpen, setMatchPanelOpen] = useState(false)
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
   const [isMatching, setIsMatching] = useState(false)
+  const [checkoutRechargeOpen, setCheckoutRechargeOpen] = useState(false)
+  const [checkoutRechargePromptDismissed, setCheckoutRechargePromptDismissed] = useState(false)
   const [rechargeMenuState, setRechargeMenuState] = useState({ entryView: props.entryView, open: props.entryView === 'wallet-recharge' })
   if (rechargeMenuState.entryView !== props.entryView) setRechargeMenuState({ entryView: props.entryView, open: props.entryView === 'wallet-recharge' })
   const rechargeMenuOpen = rechargeMenuState.open
@@ -44,24 +51,49 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const selectedPremiumCard = premiumCards.find((card) => card.id === selectedPremiumCardId && account.ownedPremiumCardIds.includes(card.id)) ?? null
   const showPremiumCardDetail = Boolean(selectedPremiumCard && (navigation.panel === 'club-cards' || navigation.panel === 'my-cards'))
   const premiumCardsDrawer = navigation.panel === 'club-cards' || navigation.panel === 'my-cards'
-    ? <RightDrawer mode="inline" title={showPremiumCardDetail ? '尊享卡明细' : navigation.panel === 'club-cards' ? `${navigation.club.name} · 尊享卡` : '我的尊享卡'} description={showPremiumCardDetail ? selectedPremiumCard?.name : undefined} onClose={() => { setSelectedPremiumCardId(null); navigation.closePanel() }} className="game-companion-drawer" width="100%">{showPremiumCardDetail && selectedPremiumCard ? <PremiumCardDetailPage card={selectedPremiumCard} transactions={account.premiumCardTransactions.filter((entry) => entry.cardId === selectedPremiumCard.id)} onBack={() => setSelectedPremiumCardId(null)} /> : <PremiumCardsPage pageState={pageState} onRetry={() => setPageState('normal')} clubId={navigation.clubId} ownedOnly={navigation.panel === 'my-cards'} balance={account.diamondBalance} ownedIds={account.ownedPremiumCardIds} cardBalances={account.premiumCardBalances} onBack={navigation.closePanel} onRecharge={() => navigation.goToPage('recharge', navigation.panel === 'my-cards' ? 'my-cards' : 'club-cards')} onPurchase={account.purchasePremiumCard} onTopUp={account.rechargePremiumCard} onOpenDetails={setSelectedPremiumCardId} />}</RightDrawer>
+    ? <RightDrawer mode="inline" title={showPremiumCardDetail ? '尊享卡明细' : navigation.panel === 'club-cards' ? `${navigation.club.name} · 尊享卡` : '我的尊享卡'} description={showPremiumCardDetail ? selectedPremiumCard?.name : undefined} onClose={() => { setSelectedPremiumCardId(null); navigation.closePanel() }} className="game-companion-drawer" width="100%">{showPremiumCardDetail && selectedPremiumCard ? <PremiumCardDetailPage transactions={account.premiumCardTransactions.filter((entry) => entry.cardId === selectedPremiumCard.id)} onBack={() => setSelectedPremiumCardId(null)} /> : <PremiumCardsPage pageState={pageState} onRetry={() => setPageState('normal')} clubId={navigation.clubId} ownedOnly={navigation.panel === 'my-cards'} balance={account.diamondBalance} ownedIds={account.ownedPremiumCardIds} cardBalances={account.premiumCardBalances} onBack={navigation.closePanel} onRecharge={() => navigation.goToPage('recharge', navigation.panel === 'my-cards' ? 'my-cards' : 'club-cards')} onPurchase={account.purchasePremiumCard} onTopUp={account.rechargePremiumCard} onOpenDetails={setSelectedPremiumCardId} />}</RightDrawer>
     : null
   const checkoutCompanions = navigation.companionIds.map((id) => companions.find((companion) => companion.id === id)).filter((companion): companion is Companion => Boolean(companion))
   const isWalletPage = navigation.page === 'wallet' || props.entryView === 'wallet-recharge'
-  const isRechargeModalOpen = navigation.panel === 'diamond-recharge' || rechargeMenuOpen
+  const isRechargeModalOpen = navigation.panel === 'diamond-recharge' || rechargeMenuOpen || checkoutRechargeOpen
   const closeRechargeModal = () => {
     setRechargeMenuState({ entryView: props.entryView, open: false })
+    setCheckoutRechargeOpen(false)
     if (navigation.panel === 'diamond-recharge') navigation.closePanel()
   }
+  const globalSearchUsers: GlobalSearchUser[] = [
+    ...companions.map((companion) => ({
+        id: companion.id,
+        name: companion.name,
+        initials: companion.initials,
+        profileId: companion.id.replace('companion-', 'P-'),
+        kind: '陪玩' as const,
+        companionId: companion.id,
+    })),
+    ...socialFriends.map((friend) => ({
+      id: friend.id,
+      name: friend.name,
+      initials: friend.initials,
+      profileId: friend.profileId,
+      kind: '玩家' as const,
+      friendId: friend.id,
+    })),
+    { id: currentSocialUser.id, name: currentSocialUser.name, initials: currentSocialUser.initials, profileId: currentSocialUser.profileId, kind: '玩家' as const },
+  ]
+  const searchableVoiceRooms = social.voiceRooms.filter((room) => room.privacy === '公开'
+    || room.channels.some((channel) => channel.members.some((member) => member.id === currentSocialUser.id))
+    || social.voiceInvitations.some((invitation) => invitation.roomId === room.id))
   const activeNavId = navigation.page === 'profile' || navigation.page === 'wallet' || navigation.page === 'orders' || props.entryView === 'wallet-recharge'
     ? navigation.page
     : navigation.page === 'messages' || navigation.page === 'voice-room'
       ? navigation.page
     : 'home'
 
+  if (props.entryView === 'login') return <LoginPage {...props} />
+
   return <WindowsClientFrame
     className="game-companion-client"
-    titleBar={<WindowsTitleBar title="游戏陪玩平台" leading={<Gamepad2 size={16} />} actions={<button type="button" className="client-titlebar-account" onClick={() => navigation.goToPage('profile')} aria-label="打开个人中心" title="个人中心"><AvatarMark initials={playerProfile.initials} size="sm" /></button>} />}
+    titleBar={<WindowsTitleBar title="游戏陪玩平台" leading={<Gamepad2 size={16} />} actions={<><button type="button" className="client-titlebar-search" onClick={() => setGlobalSearchOpen(true)} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><button type="button" className="client-titlebar-account" onClick={() => navigation.goToPage('profile')} aria-label="打开个人中心" title="个人中心"><AvatarMark initials={playerProfile.initials} size="sm" /></button></>} />}
     sidebar={<WindowsSidebar
       heading="陪玩平台"
       items={[
@@ -142,7 +174,21 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       }}
       />
       {navigation.page === 'wallet' && navigation.panel === 'bean-withdraw' && <BeanWithdrawPanel balance={account.beanBalance} onWithdraw={account.withdrawBeans} onClose={navigation.closePanel} />}
-      {isRechargeModalOpen && <RechargePage presentation="modal" pageState={pageState} onRetry={() => setPageState('normal')} diamondBalance={account.diamondBalance} coupons={account.coupons} onBack={closeRechargeModal} backLabel="返回钱包" onComplete={account.completeRecharge} />}
+      {isRechargeModalOpen && <RechargePage presentation="modal" pageState={pageState} onRetry={() => setPageState('normal')} diamondBalance={account.diamondBalance} coupons={account.coupons} onBack={closeRechargeModal} backLabel={checkoutRechargeOpen ? '返回下单结算' : '返回钱包'} onComplete={account.completeRecharge} />}
+      {globalSearchOpen && <GlobalSearchPanel
+        clubs={clubs}
+        rooms={searchableVoiceRooms}
+        users={globalSearchUsers}
+        onClose={() => setGlobalSearchOpen(false)}
+        onOpenClub={navigation.openClub}
+        onOpenRoom={(roomId) => { social.selectVoiceRoom(roomId); navigation.goToPage('voice-room') }}
+        onOpenUser={(user) => {
+          if (user.companionId) navigation.openCompanion(user.companionId)
+          else if (user.friendId) { social.setSelectedProfileId(user.friendId); navigation.goToPage('messages') }
+          else navigation.goToPage('profile')
+        }}
+      />}
+      {props.entryView === 'identity-verification' && <IdentityVerificationFlow />}
     </>}
   >
     {navigation.page === 'messages' ? <MessagesPage logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} /> : navigation.page === 'voice-room' ? <VoiceRoomsPage logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} /> : navigation.page === 'profile' ? <PersonalCenterPage
@@ -217,7 +263,9 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       selectedCompanions={checkoutCompanions}
       diamondBalance={account.diamondBalance}
       onBack={() => navigation.goToPage('club-detail')}
-      onOpenWallet={() => navigation.goToPage('recharge', 'checkout')}
+      hideRechargePrompt={checkoutRechargePromptDismissed}
+      onResetRechargePrompt={() => setCheckoutRechargePromptDismissed(false)}
+      onOpenWallet={() => { setCheckoutRechargePromptDismissed(true); setCheckoutRechargeOpen(true) }}
       onSelectService={(serviceId) => navigation.beginOrder(serviceId, navigation.companionId ?? '')}
       onComplete={(quantity, amount, remark) => {
         if (!orderService) return null

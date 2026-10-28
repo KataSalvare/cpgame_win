@@ -22,7 +22,7 @@ type Props = {
   onRetry: () => void
 }
 
-const ages = ['全部年龄', '18-25岁', '26-30岁', '31-35岁', '36-40岁', '41岁及以上']
+const ages = ['全部年龄', '18-25岁', '26-30岁', '31-35岁', '36-40岁', '40岁以上']
 const sortLabels: Record<string, string> = {
   recommended: '综合排序',
   'price-asc': '价格从低到高',
@@ -36,7 +36,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
 
   if (pageState !== 'normal') {
     return <div className="client-content client-content--narrow-state">
-      <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={16} /> 返回俱乐部</button>
+      <button type="button" className="client-back-link" onClick={onBack} aria-label="返回首页"><ArrowLeft size={16} /> 首页</button>
       <PageStatePanel
         state={pageState}
         title={pageState === 'empty' ? '暂时没有陪玩成员' : '俱乐部内容暂不可用'}
@@ -48,7 +48,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
   }
 
   return <div className="client-content club-detail-page">
-    <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={16} /> 首页 <span>/</span> 俱乐部详情</button>
+    <button type="button" className="client-back-link" onClick={onBack} aria-label="返回首页"><ArrowLeft size={16} /> 首页</button>
     <PromotionBanner />
     <section className="client-card club-profile-card">
       <div className="club-profile-card__main">
@@ -60,19 +60,18 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
           <p>{club.intro}</p>
         </div>
       </div>
-      <div className="club-profile-card__actions" aria-label="俱乐部操作入口">
+      <div className="club-profile-card__actions" role="group" aria-label="俱乐部操作">
         <DisplayAction icon={<UsersRound size={15} />} label="接待大厅" onClick={onOpenVoiceRoom} />
         <DisplayAction icon={<Star size={15} />} label="价目表" />
         <DisplayAction icon={<ShieldCheck size={15} />} label="尊享卡" onClick={onOpenPremiumCards} />
         <DisplayAction icon={<Headphones size={15} />} label="客服" />
-        <DisplayAction icon={<UsersRound size={15} />} label="自助下单" onClick={onOpenMatch} />
+        <DisplayAction icon={<UsersRound size={15} />} label="自助下单" onClick={onOpenMatch} variant="primary" />
         <DisplayAction icon={<Star size={15} />} label="优惠券" />
         <DisplayAction icon={<MessageCircle size={15} />} label="群聊" onClick={onOpenClubGroups} />
       </div>
     </section>
 
-    <section className="club-members-section" aria-labelledby="club-members-title">
-      <div className="client-section-heading club-members-section__heading"><div><span className="client-eyebrow">认识俱乐部成员</span><h2 id="club-members-title">陪玩成员</h2></div><span className="client-count">{logic.visibleCompanions.length} 位成员</span></div>
+    <section className="club-members-section" aria-label="陪玩列表">
       <div className="club-game-filter" role="group" aria-label="游戏筛选">
         <span className="client-eyebrow">游戏</span>
         <div className="home-game-list club-game-list">
@@ -106,6 +105,6 @@ function FilterSelect({ label, value, options, onChange }: { label: string; valu
   return <label className="client-filter-select"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>
 }
 
-function DisplayAction({ icon, label, onClick, disabled = false }: { icon: ReactNode; label: string; onClick?: () => void; disabled?: boolean }) {
-  return <button type="button" className="client-button client-button--secondary client-display-action" onClick={onClick} disabled={disabled}>{icon}{label}</button>
+function DisplayAction({ icon, label, onClick, disabled = false, variant = 'secondary' }: { icon: ReactNode; label: string; onClick?: () => void; disabled?: boolean; variant?: 'primary' | 'secondary' }) {
+  return <button type="button" className={`client-button client-button--${variant} client-display-action`} onClick={onClick} disabled={disabled}>{icon}{label}</button>
 }

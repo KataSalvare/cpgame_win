@@ -46,7 +46,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
   }
 
   return <div className={`client-content companion-detail-page${presentation === 'panel' ? ' companion-detail-page--panel' : ''}`}>
-    {presentation !== 'panel' && <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={16} /> 俱乐部详情 <span>/</span> 陪玩详情</button>}
+    {presentation !== 'panel' && <button type="button" className="client-back-link" onClick={onBack} aria-label="返回俱乐部详情"><ArrowLeft size={16} /> 俱乐部</button>}
     <CompanionProfileCard profile={{ ...companionToProfileCard(companion), ...profileOverride }} onChat={onChat} followed={followed} blocked={blocked} onToggleFollow={onToggleFollow} onBlock={onBlock} />
 
     <section className="companion-detail-content">
@@ -58,7 +58,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
 
       <div className="companion-tab-panel" role="tabpanel">
         {activeTab === 'services' && <section className="service-section" aria-labelledby="service-title">
-          <div className="client-section-heading service-section__heading"><div><span className="client-eyebrow">服务内容</span><h2 id="service-title">价目服务</h2></div><label className="client-filter-select client-filter-select--inline"><span>游戏筛选</span><select value={logic.gameId} onChange={(event) => logic.selectGame(event.target.value)}>{games.map((game) => <option value={game.id} key={game.id}>{game.name}</option>)}</select></label></div>
+          <div className="client-section-heading service-section__heading"><h2 id="service-title">服务</h2><label className="client-filter-select client-filter-select--inline"><span>游戏</span><select value={logic.gameId} onChange={(event) => logic.selectGame(event.target.value)}>{games.map((game) => <option value={game.id} key={game.id}>{game.name}</option>)}</select></label></div>
           {logic.totalServices === 0 ? <div className="client-inline-empty"><p>该游戏暂时没有服务项目</p><button type="button" className="client-button client-button--secondary" onClick={() => logic.selectGame('all')}>查看全部服务</button></div> : <>
             {presentation === 'panel' ? <div className="service-offer-list">{logic.pageServices.map((service) => {
               const game = games.find((item) => item.id === service.gameId)
@@ -86,7 +86,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
         </section>}
 
         {activeTab === 'reviews' && <section className="detail-list-section" aria-labelledby="reviews-title">
-          <div className="client-section-heading"><div><span className="client-eyebrow">玩家反馈</span><h2 id="reviews-title">评价</h2></div><span className="client-count">{reviews.length} 条评价</span></div>
+          <div className="client-section-heading"><h2 id="reviews-title">评价</h2><span className="client-count">{reviews.length} 条</span></div>
           <div className="review-list">{reviews.map((review) => <article className="review-item" key={review.id}>
             <AvatarMark initials={review.initials} size="sm" />
             <div className="review-item__body"><div className="review-item__heading"><strong>{review.author}</strong><span className="client-muted">{review.date}</span></div><div className="review-item__meta"><span className="rating-mark"><Star size={13} />{review.rating.toFixed(1)}</span><span>{review.game}</span></div><p>{review.content}</p></div>
@@ -94,7 +94,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
         </section>}
 
         {activeTab === 'gifts' && <section className="detail-list-section" aria-labelledby="gifts-title">
-          <div className="client-section-heading"><div><span className="client-eyebrow">收到的礼物</span><h2 id="gifts-title">礼物</h2></div><span className="client-count">{gifts.length} 种礼物</span></div>
+          <div className="client-section-heading"><h2 id="gifts-title">礼物</h2><span className="client-count">{gifts.length} 种</span></div>
           <div className="gift-grid">{gifts.map((gift) => <article className="client-card gift-card" key={gift.id}><span className="gift-card__mark">{gift.initials}</span><div><h3>{gift.name}</h3><p>{gift.description}</p><span className="client-muted">收到 {gift.count} 次</span></div></article>)}</div>
         </section>}
       </div>

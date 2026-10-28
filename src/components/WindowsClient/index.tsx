@@ -142,7 +142,7 @@ export function DialogPanel({ overlayId, children, title, description, footer, o
         <div>{title && <h2 id={`${overlayId}-title`}>{title}</h2>}{description && <p>{description}</p>}</div>
         {onClose && <button type="button" className="windows-icon-button" aria-label="关闭弹窗" onClick={onClose}><X size={16} /></button>}
       </header>}
-      <div className="windows-dialog-panel__content">{children}</div>
+      {children != null && <div className="windows-dialog-panel__content">{children}</div>}
       {footer && <footer className="windows-dialog-panel__footer">{footer}</footer>}
     </section>
   </div>

@@ -147,13 +147,13 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
       onKeyDown={handleMiniKeyDown}
     >
       <span className="match-mini-card__icon"><Swords size={16} /></span>
-      <span className="match-mini-card__content"><strong>{hasCandidateList ? '等待选人' : '匹配中'}</strong><small>{hasCandidateList ? `已匹配到 ${candidates.length} 位陪玩 · 已选 ${selectedIds.length}/${expectedCount}` : '正在为你寻找合适的陪玩'}</small></span>
+      <span className="match-mini-card__content"><strong>{hasCandidateList ? '等待选人' : '匹配中'}</strong>{hasCandidateList && <small>已匹配 {candidates.length} 位 · 已选 {selectedIds.length}/{expectedCount}</small>}</span>
       <Maximize2 className="match-mini-card__restore" size={15} aria-hidden="true" />
     </div>}
     {open && <section className="match-panel" aria-label={matching ? '匹配中' : '一键匹配'}>
       <header className="match-panel__header">
         <div className="match-panel__title-icon"><Swords size={18} /></div>
-        <div className="match-panel__heading"><h2>{matching ? '匹配中' : '一键匹配'}</h2><p>{matching ? '正在为你寻找合适的陪玩' : '选择游戏和服务条件，快速找到陪玩'}</p></div>
+        <div className="match-panel__heading"><h2>{matching ? '匹配中' : '一键匹配'}</h2></div>
         <button type="button" className="windows-icon-button" aria-label="最小化匹配面板" title="最小化" onClick={onMinimize}><Minimize2 size={16} /></button>
       </header>
 
@@ -161,7 +161,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <div className={`match-progress${candidatesReady ? ' match-progress--ready' : ''}`} role="status" aria-live="polite"><span className="match-progress__orbit"><span /><span /><span /></span><strong>{candidatesReady ? '已为你匹配到陪玩' : '正在匹配合适的陪玩'}</strong><small>{selectedGame?.name} · {club?.name} · {logic.people}</small></div>
         <div className="match-bid-card"><div><span>推荐单价</span><strong>{logic.recommendedUnitPrice.toLocaleString()} <small>钻石 / {logic.selectedService?.unit ?? '小时'}</small></strong></div><button type="button" className="client-button client-button--secondary" onClick={() => { setPriceInput(String(logic.addedPrice || '')); setDialog('price') }}><Plus size={15} />加价</button>{logic.addedPrice > 0 && <small className="match-bid-card__added">已加价 {logic.addedPrice} 钻石</small>}</div>
         {candidatesReady && <section className="match-found-list" aria-label="匹配到的陪玩">
-          <header><strong><UsersRound size={15} />选择陪玩</strong><span>请选择 {expectedCount} 位</span></header>
+          <header><strong><UsersRound size={15} />选择陪玩</strong><span>已选 {selectedIds.length}/{expectedCount}</span></header>
           <div className="match-candidate-list">
             {candidates.map((companion) => <button type="button" key={companion.id} className={`match-candidate${selectedIds.includes(companion.id) ? ' is-selected' : ''}`} aria-pressed={selectedIds.includes(companion.id)} onClick={() => toggleCandidate(companion.id)}><AvatarMark initials={companion.initials} size="md" /><span className="match-candidate__info"><strong>{companion.name}<small>{companion.gender} · {companion.region}</small></strong><small>{companion.status} · {companion.tags.slice(0, 2).join(' · ')}</small></span><span className="match-candidate__check">{selectedIds.includes(companion.id) && <Check size={14} />}</span></button>)}
             {candidates.length === 0 && <div className="match-candidate-empty"><UserRound size={20} /><span>当前条件下没有可选陪玩</span></div>}
@@ -170,7 +170,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <div className="match-panel__matching-actions"><button type="button" className="client-button client-button--secondary" onClick={() => setDialog('cancel')}>取消匹配</button><button type="button" className="client-button client-button--primary" disabled={!candidatesReady || selectedIds.length !== expectedCount} onClick={() => onChooseCompanions(selectedIds)}>确认下单</button></div>
       </div> : <div className="match-panel__form">
         <section className="match-field match-field--wide" aria-label="选择游戏">
-          <div className="match-game-heading"><span>游戏</span><div className="match-game-scroll-controls"><small>左右滑动浏览</small><button type="button" aria-label="向左滚动游戏列表" disabled={!canScrollGamesLeft} onClick={() => gameListRef.current?.scrollBy({ left: -180, behavior: 'smooth' })}><ChevronLeft size={14} /></button><button type="button" aria-label="向右滚动游戏列表" disabled={!canScrollGamesRight} onClick={() => gameListRef.current?.scrollBy({ left: 180, behavior: 'smooth' })}><ChevronRight size={14} /></button></div></div>
+          <div className="match-game-heading"><span>游戏</span><div className="match-game-scroll-controls"><button type="button" aria-label="向左滚动游戏列表" disabled={!canScrollGamesLeft} onClick={() => gameListRef.current?.scrollBy({ left: -180, behavior: 'smooth' })}><ChevronLeft size={14} /></button><button type="button" aria-label="向右滚动游戏列表" disabled={!canScrollGamesRight} onClick={() => gameListRef.current?.scrollBy({ left: 180, behavior: 'smooth' })}><ChevronRight size={14} /></button></div></div>
           <div className="match-game-list" ref={gameListRef} onScroll={updateGameScrollButtons} role="listbox" aria-label="游戏列表">
             {games.filter((game) => game.id !== 'all').map((game) => <button type="button" role="option" aria-selected={logic.gameId === game.id} key={game.id} className={`match-game-option${logic.gameId === game.id ? ' is-selected' : ''}`} onClick={() => { logic.chooseGame(game.id); setClubSearch(''); setClubPickerOpen(false) }}><span>{game.shortName}</span><strong>{game.name}</strong></button>)}
           </div>
@@ -194,7 +194,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <fieldset className="match-field match-field--fieldset"><legend>性别</legend><div className="match-choice-row">{(['不限', '男', '女'] as const).map((value) => <button type="button" key={value} className={`match-choice${logic.gender === value ? ' is-active' : ''}`} aria-pressed={logic.gender === value} onClick={() => logic.setGender(value)}>{value}</button>)}</div></fieldset>
         <label className="match-field"><span>数量</span><span className="match-select-wrap"><select value={logic.quantity} onChange={(event) => logic.setQuantity(Number(event.target.value))}>{[1, 2, 3, 4].map((count) => <option key={count} value={count}>{count} {logic.selectedService?.unit ?? '小时'}</option>)}</select><ChevronDown size={14} /></span></label>
         <label className="match-field match-field--remark"><span>备注</span><textarea value={logic.remark} onChange={(event) => logic.setRemark(event.target.value)} rows={2} placeholder="补充你的游戏偏好或需求" /></label>
-        <div className="match-panel__price"><span>推荐单价</span><strong>{logic.recommendedUnitPrice.toLocaleString()} <small>钻石 / {logic.selectedService?.unit ?? '小时'}</small></strong><span className="match-panel__price-hint">{logic.people === '双陪' ? '双陪单价按两位陪玩计算' : `${logic.selectedService?.playName ?? '当前服务'} · ${logic.selectedService?.levelName ?? ''}`}</span></div>
+        <div className="match-panel__price"><span>推荐单价</span><strong>{logic.recommendedUnitPrice.toLocaleString()} <small>钻石 / {logic.selectedService?.unit ?? '小时'}</small></strong>{logic.people === '双陪' && <span className="match-panel__price-hint">双陪 ×2</span>}</div>
         <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.selectedService || !club} onClick={() => logic.tryout ? onGoToVoiceRoom() : startMatching()}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
       </div>}
 

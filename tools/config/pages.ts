@@ -46,11 +46,23 @@ const demoPageStates: readonly PageStateOption[] = [
   { id: 'error', label: '异常' },
 ]
 
+const loginPageStates: readonly PageStateOption[] = [
+  { id: 'normal', label: '正常' },
+  { id: 'loading', label: '加载中' },
+  { id: 'error', label: '异常' },
+]
+
+const identityVerificationPageStates: readonly PageStateOption[] = [
+  { id: 'normal', label: '正常' },
+]
+
 type PageConfig = { path: string; label: string; states: readonly PageStateOption[]; entryView?: string }
 
 const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
   'game-companion-client': [
-    { path: '/game-companion-client', label: '陪玩平台首页', entryView: 'home', states: demoPageStates },
+    { path: '/game-companion-login', label: '登录', entryView: 'login', states: loginPageStates },
+    { path: '/game-companion-identity-verification', label: '实名认证', entryView: 'identity-verification', states: identityVerificationPageStates },
+    { path: '/game-companion-client', label: '首页', entryView: 'home', states: demoPageStates },
     { path: '/game-companion-club-detail', label: '俱乐部详情', entryView: 'club-detail', states: demoPageStates },
     { path: '/game-companion-companion-detail', label: '陪玩详情', entryView: 'companion-detail', states: demoPageStates },
     { path: '/game-companion-checkout', label: '下单结算', entryView: 'checkout', states: demoPageStates },

@@ -69,6 +69,7 @@ Hook 只执行确定性的命令，不自动格式化、修改源文件、写入
 - 生产批注 API 使用 `ANNOTATIONS_KV` 和 `annotations` Key，具体 Worker、Assets、KV 和本地验证规则见 `rules/cloudflare-deployment-guide.md`。
 - 当前批注 API 没有用户身份校验、租户隔离或敏感数据保护。不得在文档或回复中暗示它已经具备这些能力。
 - `skills/` 是任务方法和辅助流程，不是项目事实来源；项目规范仍以本文件、`rules/`、PRD/SPEC 为准。
+- Avoid unnecessary secondary labels and descriptions. Let the layout do the explaining.
 
 ## 5. Git 与交付边界
 

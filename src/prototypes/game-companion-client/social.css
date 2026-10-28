@@ -50,7 +50,6 @@
 .chat-member-stack button{width:31px;height:31px;margin-left:-4px;border:2px solid #fff}
 .chat-member-stack .chat-add-member{border:1px dashed #d1d5db;color:var(--client-muted)}
 .chat-message-list{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;gap:16px;overflow:auto;padding:18px 24px}
-.chat-history-note{align-self:center;border-radius:12px;padding:4px 10px;background:#f3f4f6;color:var(--client-muted);font-size:10px}
 .social-message{display:flex;max-width:90%;align-items:flex-start;gap:9px}
 .social-message.is-self{align-self:flex-end;flex-direction:row-reverse}
 .social-message__avatar{width:30px;height:30px}
@@ -149,7 +148,7 @@
 .group-settings-danger-zone{margin-top:auto;background:#fafafa}
 .friend-preview,.chat-empty-state{display:flex;min-width:0;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--client-muted);text-align:center}
 .friend-preview h2,.chat-empty-state h2{margin:0;color:var(--client-text);font-size:16px}
-.friend-preview>span,.chat-empty-state p{margin:0;font-size:12px}
+.friend-preview>span{margin:0;font-size:12px}
 .friend-preview__actions{display:flex;gap:8px;margin-top:10px}
 .social-state-wrap{display:grid;width:100%;height:100%;place-items:center}
 .voice-page{position:relative;gap:0}
