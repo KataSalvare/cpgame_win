@@ -78,6 +78,8 @@ export interface WindowsSidebarItem {
   label: string
   icon?: ReactNode
   group?: string
+  groupTitle?: string
+  badge?: number
   variant?: 'default' | 'primary'
 }
 
@@ -96,14 +98,19 @@ export function WindowsSidebar({ items, activeId, onSelect, heading, footer, cla
     {heading && <div className="windows-sidebar__heading">{heading}</div>}
     <div className="windows-sidebar__items">
       {groups.map((group) => <section className="windows-sidebar__group" key={group || 'default'}>
-        {group && <h2 className="windows-sidebar__group-title">{group}</h2>}
+        {(() => {
+          const firstItem = items.find((item) => (item.group ?? '') === group)
+          const groupTitle = firstItem?.groupTitle ?? group
+          return groupTitle && <h2 className="windows-sidebar__group-title">{groupTitle}</h2>
+        })()}
         {items.filter((item) => (item.group ?? '') === group).map((item) => <button
           type="button"
           key={item.id}
           className={`windows-sidebar__item${item.variant === 'primary' ? ' windows-sidebar__item--primary' : ''}${activeId === item.id ? ' is-active' : ''}`}
           aria-current={activeId === item.id ? 'page' : undefined}
+          aria-label={item.badge && item.badge > 0 ? `${item.label}，${item.badge} 条未读消息` : undefined}
           onClick={() => onSelect(item.id)}
-        >{item.icon && <span className="windows-sidebar__icon" aria-hidden="true">{item.icon}</span>}<span>{item.label}</span></button>)}
+        >{item.icon && <span className="windows-sidebar__icon" aria-hidden="true">{item.icon}</span>}<span>{item.label}</span>{item.badge !== undefined && item.badge > 0 && <span className="windows-sidebar__badge" aria-hidden="true">{item.badge > 99 ? '99+' : item.badge}</span>}</button>)}
       </section>)}
     </div>
     {footer && <div className="windows-sidebar__footer">{footer}</div>}

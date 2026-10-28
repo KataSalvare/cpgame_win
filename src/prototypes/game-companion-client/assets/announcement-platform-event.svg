@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">周末组队挑战活动头图</title>
+  <desc id="desc">灰阶竞技场景，展示组队挑战主题</desc>
+  <rect width="1200" height="675" fill="#e5e7eb"/>
+  <path d="m0 480 220-170 190 98 190-178 260 174 140-96 200 112v255H0Z" fill="#d1d5db"/>
+  <path d="m0 560 270-180 200 92 182-150 220 132 154-111 174 116v216H0Z" fill="#9ca3af"/>
+  <g fill="none" stroke="#4b5563" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M442 248h316a112 112 0 0 1 103 74l55 141a54 54 0 0 1-78 66l-82-54H444l-82 54a54 54 0 0 1-78-66l55-141a112 112 0 0 1 103-74Z"/>
+    <path d="M492 333v96m-48-48h96m160-20h4m-56 74h4"/>
+  </g>
+  <circle cx="600" cy="115" r="35" fill="#6b7280"/>
+  <path d="M568 159h64l31 55H537Z" fill="#6b7280"/>
+</svg>

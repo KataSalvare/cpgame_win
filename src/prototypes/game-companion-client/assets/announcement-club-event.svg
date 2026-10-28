@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">俱乐部水友赛活动头图</title>
+  <desc id="desc">灰阶奖杯与竞技场背景，展示俱乐部赛事主题</desc>
+  <rect width="1200" height="675" fill="#f3f4f6"/>
+  <path d="M0 525h1200v150H0Z" fill="#d1d5db"/>
+  <path d="m0 470 150-90 150 90 150-92 150 92 150-92 150 92 150-92 150 92v55H0Z" fill="#e5e7eb"/>
+  <g fill="none" stroke="#4b5563" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M460 160h280v100c0 106-62 180-140 180s-140-74-140-180Z"/>
+    <path d="M460 205h-76v46c0 68 39 109 96 115m260-161h76v46c0 68-39 109-96 115m-120 78v68m-74 0h148"/>
+  </g>
+  <path d="m600 202 22 45 49 7-36 35 8 50-43-23-43 23 8-50-36-35 49-7Z" fill="#6b7280"/>
+  <circle cx="280" cy="185" r="22" fill="#9ca3af"/>
+  <circle cx="920" cy="245" r="16" fill="#9ca3af"/>
+  <circle cx="830" cy="120" r="12" fill="#6b7280"/>
+</svg>

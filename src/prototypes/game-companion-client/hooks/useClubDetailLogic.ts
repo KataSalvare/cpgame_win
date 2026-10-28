@@ -4,7 +4,7 @@ import { companions } from '../data/mockData'
 
 export type CompanionSort = 'recommended' | 'price-asc' | 'price-desc' | 'orders-asc' | 'orders-desc'
 
-export function useClubDetailLogic(clubId: string) {
+export function useCompanionDirectoryLogic(clubId?: string) {
   const [gameId, setGameId] = useState('all')
   const [status, setStatus] = useState('全部状态')
   const [gender, setGender] = useState('全部性别')
@@ -14,7 +14,7 @@ export function useClubDetailLogic(clubId: string) {
 
   const visibleCompanions = useMemo(() => {
     const filtered = companions.filter((person) => {
-      if (person.clubId !== clubId) return false
+      if (clubId && person.clubId !== clubId) return false
       if (gameId !== 'all' && !person.gameIds.includes(gameId)) return false
       if (status !== '全部状态' && person.status !== status) return false
       if (gender !== '全部性别' && person.gender !== gender) return false
@@ -44,6 +44,8 @@ export function useClubDetailLogic(clubId: string) {
 
   return { gameId, setGameId, status, setStatus, gender, setGender, region, setRegion, age, setAge, sort, setSort, visibleCompanions, resetFilters }
 }
+
+export const useClubDetailLogic = useCompanionDirectoryLogic
 
 function matchesAge(value: number, option: string) {
   if (option === '18-25岁') return value >= 18 && value <= 25

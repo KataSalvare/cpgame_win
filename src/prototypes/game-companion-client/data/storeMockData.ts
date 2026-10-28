@@ -30,6 +30,7 @@ export type PremiumCard = {
   name: string
   price: number
   minimumRechargeAmount: number
+  serviceDiscountRate: number
   benefits: string[]
 }
 
@@ -42,12 +43,12 @@ export type PremiumCardTransaction = {
 }
 
 export const premiumCards: PremiumCard[] = [
-  { id: 'premium-001-a', clubId: 'club-001', name: '北境月度尊享卡', price: 300, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '每月专属组队活动名额', '俱乐部服务下单专属优惠'] },
-  { id: 'premium-001-b', clubId: 'club-001', name: '北境季度尊享卡', price: 800, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '优先参与俱乐部活动', '俱乐部服务下单专属优惠', '专属客服通道'] },
-  { id: 'premium-001-c', clubId: 'club-001', name: '北境年度尊享卡', price: 2880, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '优先参与俱乐部活动', '俱乐部服务下单专属优惠', '专属客服通道'] },
-  { id: 'premium-002-a', clubId: 'club-002', name: '月光月度畅玩卡', price: 260, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '每月组队活动名额', '俱乐部服务专属优惠'] },
-  { id: 'premium-002-b', clubId: 'club-002', name: '月光季度畅玩卡', price: 720, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '优先参与组队活动', '俱乐部服务专属优惠'] },
-  { id: 'premium-003-a', clubId: 'club-003', name: '破晓赛季卡', price: 520, minimumRechargeAmount: 100, benefits: ['俱乐部专属身份标识', '赛事训练活动名额', '俱乐部服务专属优惠'] },
+  { id: 'premium-001-a', clubId: 'club-001', name: '北境月度尊享卡', price: 300, minimumRechargeAmount: 100, serviceDiscountRate: 0.95, benefits: ['俱乐部专属身份标识', '每月专属组队活动名额', '俱乐部服务下单 95 折'] },
+  { id: 'premium-001-b', clubId: 'club-001', name: '北境季度尊享卡', price: 800, minimumRechargeAmount: 100, serviceDiscountRate: 0.95, benefits: ['俱乐部专属身份标识', '优先参与俱乐部活动', '俱乐部服务下单 95 折', '专属客服通道'] },
+  { id: 'premium-001-c', clubId: 'club-001', name: '北境年度尊享卡', price: 2880, minimumRechargeAmount: 100, serviceDiscountRate: 0.95, benefits: ['俱乐部专属身份标识', '优先参与俱乐部活动', '俱乐部服务下单 95 折', '专属客服通道'] },
+  { id: 'premium-002-a', clubId: 'club-002', name: '月光月度畅玩卡', price: 260, minimumRechargeAmount: 100, serviceDiscountRate: 0.95, benefits: ['俱乐部专属身份标识', '每月组队活动名额', '俱乐部服务下单 95 折'] },
+  { id: 'premium-002-b', clubId: 'club-002', name: '月光季度畅玩卡', price: 720, minimumRechargeAmount: 100, serviceDiscountRate: 0.95, benefits: ['俱乐部专属身份标识', '优先参与组队活动', '俱乐部服务下单 95 折'] },
+  { id: 'premium-003-a', clubId: 'club-003', name: '破晓赛季卡', price: 520, minimumRechargeAmount: 100, serviceDiscountRate: 0.95, benefits: ['俱乐部专属身份标识', '赛事训练活动名额', '俱乐部服务下单 95 折'] },
 ]
 
 export const initialOwnedPremiumCardIds = ['premium-001-a', 'premium-002-b']

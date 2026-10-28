@@ -63,6 +63,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-login', label: '登录', entryView: 'login', states: loginPageStates },
     { path: '/game-companion-identity-verification', label: '实名认证', entryView: 'identity-verification', states: identityVerificationPageStates },
     { path: '/game-companion-client', label: '首页', entryView: 'home', states: demoPageStates },
+    { path: '/game-companion-talents', label: '大神', entryView: 'talents', states: demoPageStates },
     { path: '/game-companion-club-detail', label: '俱乐部详情', entryView: 'club-detail', states: demoPageStates },
     { path: '/game-companion-companion-detail', label: '陪玩详情', entryView: 'companion-detail', states: demoPageStates },
     { path: '/game-companion-checkout', label: '下单结算', entryView: 'checkout', states: demoPageStates },
@@ -75,6 +76,8 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-orders', label: '我的订单', entryView: 'orders', states: demoPageStates },
     { path: '/game-companion-messages', label: '消息', entryView: 'messages', states: demoPageStates },
     { path: '/game-companion-voice-room', label: '语音房', entryView: 'voice-room', states: demoPageStates },
+    { path: '/game-companion-announcements', label: '平台公告', entryView: 'announcements', states: demoPageStates },
+    { path: '/game-companion-club-announcements', label: '俱乐部公告', entryView: 'club-announcements', states: demoPageStates },
   ],
 }
 

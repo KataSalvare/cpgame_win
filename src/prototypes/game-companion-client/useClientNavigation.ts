@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { clubs, companions, servicesByCompanion } from './data/mockData'
 
-export type ClientPage = 'home' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards'
+export type ClientPage = 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements'
 
 type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | null
 type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; returnTo: ClientPage | null; panel: StorePanel }
 
 const DEFAULT_CLUB_ID = 'club-001'
 const DEFAULT_COMPANION_ID = 'companion-001'
-const clientPages: ClientPage[] = ['home', 'club-detail', 'checkout', 'profile', 'wallet', 'orders', 'messages', 'voice-room', 'recharge', 'coupons', 'club-cards', 'my-cards']
+const clientPages: ClientPage[] = ['home', 'talents', 'club-detail', 'checkout', 'profile', 'wallet', 'orders', 'messages', 'voice-room', 'recharge', 'coupons', 'club-cards', 'my-cards', 'announcements', 'club-announcements']
 
 const readRoute = (entryView: string | undefined): RouteSnapshot => {
   const params = new URLSearchParams(window.location.hash.slice(1))
@@ -21,8 +21,8 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   const defaultClubId = initialView === 'companion-detail' ? defaultCompanion.clubId : DEFAULT_CLUB_ID
   const clubId = clubs.some((club) => club.id === params.get('club')) ? params.get('club')! : defaultClubId
   const requestedCompanionId = params.get('companion')
-  const requestedCompanion = companions.find((companion) => companion.id === requestedCompanionId && companion.clubId === clubId)
-  const requestedCompanionIds = (params.get('companions') ?? '').split(',').filter(Boolean).filter((id) => companions.some((companion) => companion.id === id && companion.clubId === clubId))
+  const requestedCompanion = companions.find((companion) => companion.id === requestedCompanionId && (page === 'talents' || companion.clubId === clubId))
+  const requestedCompanionIds = (params.get('companions') ?? '').split(',').filter(Boolean).filter((id) => companions.some((companion) => companion.id === id && (page === 'talents' || companion.clubId === clubId)))
   const initialCompanionId = initialView === 'companion-detail' || initialView === 'checkout' ? DEFAULT_COMPANION_ID : null
   const companionId = requestedCompanionIds[0] ?? requestedCompanion?.id ?? initialCompanionId
   const companionIds = requestedCompanionIds.length ? requestedCompanionIds : companionId ? [companionId] : []
@@ -60,14 +60,19 @@ export function useClientNavigation(entryView?: string) {
 
   const goHome = useCallback(() => writeRoute('home', route.clubId, null), [route.clubId])
   const openClub = useCallback((clubId: string) => writeRoute('club-detail', clubId, route.companionId), [route.companionId])
-  const openCompanion = useCallback((companionId: string) => writeRoute('club-detail', route.clubId, companionId), [route.clubId])
-  const closeCompanion = useCallback(() => writeRoute('club-detail', route.clubId, null), [route.clubId])
+  const openCompanion = useCallback((companionId: string) => {
+    const companion = companions.find((item) => item.id === companionId)
+    if (!companion) return
+    const page = route.page === 'talents' ? 'talents' : 'club-detail'
+    writeRoute(page, companion.clubId, companionId)
+  }, [route.page])
+  const closeCompanion = useCallback(() => writeRoute(route.page === 'talents' ? 'talents' : 'club-detail', route.clubId, null), [route.page, route.clubId])
   const backToClub = closeCompanion
   const goToPage = useCallback((requestedPage: ClientPage, returnTo?: ClientPage) => {
     const page: ClientPage = requestedPage === 'club-cards' ? 'club-detail' : requestedPage === 'coupons' || requestedPage === 'my-cards' ? 'wallet' : requestedPage
     const panel: StorePanel = requestedPage === 'club-cards' || requestedPage === 'coupons' || requestedPage === 'my-cards' ? requestedPage : null
     const serviceId = requestedPage === 'recharge' && returnTo === 'checkout' ? route.serviceId : null
-    writeRoute(page, route.clubId, route.companionId, serviceId, returnTo, panel)
+    writeRoute(page, route.clubId, requestedPage === 'talents' ? null : route.companionId, serviceId, returnTo, panel)
   }, [route.clubId, route.companionId, route.serviceId])
   const closePanel = useCallback(() => writeRoute(route.page, route.clubId, route.companionId), [route.page, route.clubId, route.companionId])
   const openWalletLedger = useCallback((wallet: 'diamond' | 'bean') => {
@@ -80,10 +85,12 @@ export function useClientNavigation(entryView?: string) {
     writeRoute('wallet', route.clubId, route.companionId, null, null, 'diamond-recharge')
   }, [route.clubId, route.companionId])
   const openClubGroups = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-groups'), [route.clubId])
+  const openClubAnnouncements = useCallback(() => writeRoute('club-announcements', route.clubId, null), [route.clubId])
   const beginOrder = useCallback((serviceId: string, companionId: string) => {
     const companionClubId = companions.find((item) => item.id === companionId)?.clubId ?? route.clubId
     const companionIds = route.page === 'checkout' && route.companionIds.includes(companionId) ? route.companionIds : undefined
-    writeRoute('checkout', companionClubId, companionId, serviceId, null, null, companionIds)
+    const returnTo = route.page === 'talents' ? 'talents' : null
+    writeRoute('checkout', companionClubId, companionId, serviceId, returnTo, null, companionIds)
   }, [route.clubId, route.companionIds, route.page])
   const beginMatchOrder = useCallback((serviceId: string, companionIds: string[]) => {
     const primaryCompanion = companions.find((item) => item.id === companionIds[0])
@@ -106,6 +113,7 @@ export function useClientNavigation(entryView?: string) {
     openBeanWithdraw,
     openDiamondRecharge,
     openClubGroups,
+    openClubAnnouncements,
     beginOrder,
     beginMatchOrder,
   }

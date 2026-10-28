@@ -34,14 +34,51 @@ export function useAccountLogic() {
     setOrders((current) => current.map((order) => order.id === orderId ? { ...order, status } : order))
   }, [])
 
-  const completePayment = useCallback((service: Service, companion: Companion, gameName: string, quantity: number, amount: number, remark: string, selectedCompanions: Companion[] = []): ClientOrder | null => {
-    if (amount > diamondBalance) return null
-    const order = makeClientOrder(service, companion, gameName, quantity, amount, remark, selectedCompanions.filter((item) => item.id !== companion.id))
-    setDiamondBalance((balance) => balance - amount)
+  const pauseOrder = useCallback((orderId: string) => {
+    const pausedAt = new Date().toLocaleString('zh-CN', { hour12: false })
+    setOrders((current) => current.map((order) => {
+      if (order.id !== orderId || order.status !== '服务中') return order
+      const activeSegmentIndex = order.serviceSegments.findLastIndex((segment) => segment.startAt && !segment.endAt)
+      const serviceSegments = activeSegmentIndex < 0
+        ? order.serviceSegments
+        : order.serviceSegments.map((segment, index) => index === activeSegmentIndex ? { ...segment, endAt: pausedAt } : segment)
+      return { ...order, status: '待服务', serviceSegments }
+    }))
+  }, [])
+
+  const renewOrder = useCallback((orderId: string, quantity: number) => {
+    const order = orders.find((item) => item.id === orderId)
+    if (!order || order.status !== '服务中' || !Number.isInteger(quantity) || quantity <= 0) return false
+    const renewalAmount = order.unitPrice * quantity
+    if (!Number.isInteger(renewalAmount) || renewalAmount <= 0 || renewalAmount > diamondBalance) return false
+    const renewedAt = new Date().toLocaleString('zh-CN', { hour12: false })
+    setDiamondBalance((balance) => balance - renewalAmount)
+    setDiamondTransactions((current) => [{ id: `renewal-${Date.now()}`, title: `订单续单 · ${order.serviceName}`, date: renewedAt, amount: -renewalAmount }, ...current])
+    setOrders((current) => current.map((item) => item.id === orderId
+      ? { ...item, duration: item.duration + quantity, amount: item.amount + renewalAmount }
+      : item))
+    return true
+  }, [diamondBalance, orders])
+
+  const completePayment = useCallback((service: Service, companion: Companion, gameName: string, quantity: number, amount: number, remark: string, selectedCompanions: Companion[] = [], tipAmount = 0, paymentSource: 'wallet' | 'premium-card' = 'wallet', premiumCardId?: string): ClientOrder | null => {
+    const paymentCard = paymentSource === 'premium-card' ? premiumCards.find((card) => card.id === premiumCardId && card.clubId === companion.clubId && ownedPremiumCardIds.includes(card.id)) : undefined
+    const availableBalance = paymentSource === 'wallet' ? diamondBalance : paymentCard ? premiumCardBalances[paymentCard.id] ?? 0 : 0
+    const companionCount = Math.max(1, selectedCompanions.length)
+    const serviceSubtotal = service.price * quantity * companionCount
+    const discountedSubtotal = Math.round(serviceSubtotal * (paymentCard?.serviceDiscountRate ?? 1))
+    const expectedAmount = discountedSubtotal + tipAmount
+    if (!Number.isInteger(quantity) || quantity <= 0 || !Number.isInteger(tipAmount) || tipAmount < 0 || !Number.isInteger(amount) || amount !== expectedAmount || amount > availableBalance || (paymentSource === 'premium-card' && !paymentCard)) return null
+    const order = makeClientOrder(service, companion, gameName, quantity, amount, remark, selectedCompanions.filter((item) => item.id !== companion.id), tipAmount, paymentSource, paymentCard?.id)
+    if (paymentSource === 'wallet') {
+      setDiamondBalance((balance) => balance - amount)
+      setDiamondTransactions((current) => [{ id: order.id, title: `订单消费 · ${service.playName}${tipAmount > 0 ? `（含加价 ${tipAmount}）` : ''}`, date: order.createdAt, amount: -amount }, ...current])
+    } else if (paymentCard) {
+      setPremiumCardBalances((current) => ({ ...current, [paymentCard.id]: (current[paymentCard.id] ?? 0) - amount }))
+      setPremiumCardTransactions((current) => [{ id: order.id, cardId: paymentCard.id, title: `服务订单支付 · ${service.playName}${tipAmount > 0 ? `（含加价 ${tipAmount}）` : ''}`, date: order.createdAt, amount: -amount }, ...current])
+    }
     setOrders((current) => [order, ...current])
-    setDiamondTransactions((current) => [{ id: order.id, title: `订单消费 · ${service.playName}`, date: order.createdAt, amount: -amount }, ...current])
     return order
-  }, [diamondBalance])
+  }, [diamondBalance, ownedPremiumCardIds, premiumCardBalances])
 
   const completeRecharge = useCallback((diamonds: number, amount: number, couponId: string | null) => {
     setDiamondBalance((balance) => balance + diamonds)
@@ -89,6 +126,8 @@ export function useAccountLogic() {
     getGameName,
     completePayment,
     completeRecharge,
+    pauseOrder,
+    renewOrder,
     purchasePremiumCard,
     rechargePremiumCard,
     updateOrderStatus,

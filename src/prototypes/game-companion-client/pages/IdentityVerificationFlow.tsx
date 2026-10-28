@@ -59,13 +59,14 @@ export function IdentityVerificationFlow() {
     {step === 'notice' && <DialogPanel overlayId="identity-verification-notice" title="需要完成实名认证" width={480} className="identity-flow-dialog" onClose={() => setStep('closed')}>
       <div className="identity-flow__body">
         <span className="identity-flow__icon"><ShieldCheck size={23} /></span>
+        <p>按照国家法律法规规定，请先完成实名认证。</p>
         <button type="button" className="client-button client-button--primary identity-flow__primary" onClick={() => { setError(''); setStep('phone') }}>开始认证</button>
       </div>
     </DialogPanel>}
 
     {step === 'phone' && <DialogPanel overlayId="identity-verification-phone" title="绑定手机号" width={480} className="identity-flow-dialog" onClose={() => setStep('closed')} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setError(''); setStep('notice') }}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={bindPhone}>完成绑定</button></>}>
       <div className="identity-flow__form">
-        <label className="identity-flow__field"><span>手机号</span><input id="identity-phone-input" autoComplete="off" inputMode="numeric" maxLength={11} value={phone} onChange={(event) => { setPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setCode(''); setCodeSent(false); setError('') }} /></label>
+        <label className="identity-flow__field"><span>手机号</span><input id="identity-phone-input" autoComplete="off" inputMode="numeric" maxLength={11} placeholder="请输入11位手机号" value={phone} onChange={(event) => { setPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setCode(''); setCodeSent(false); setError('') }} /></label>
         <div className="identity-flow__field"><span className="identity-flow__label"><label htmlFor="identity-code-input">验证码</label></span><span className="identity-flow__code"><input id="identity-code-input" autoComplete="off" inputMode="numeric" maxLength={6} placeholder="6 位验证码" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }} /><button type="button" className="client-button client-button--secondary" onClick={sendCode} disabled={codeSent}>{codeSent ? '已获取' : '获取验证码'}</button></span></div>
         {error && <p className="identity-flow__error" role="alert">{error}</p>}
       </div>
@@ -73,8 +74,8 @@ export function IdentityVerificationFlow() {
 
     {step === 'identity' && <DialogPanel overlayId="identity-verification-info" title="实名认证" width={480} className="identity-flow-dialog" onClose={() => setStep('closed')} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setError(''); setStep('phone') }}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={continueToQr}>继续</button></>}>
       <div className="identity-flow__form">
-        <label className="identity-flow__field"><span>真实姓名</span><input autoComplete="off" value={name} onChange={(event) => { setName(event.target.value); setError('') }} /></label>
-        <label className="identity-flow__field"><span>身份证号</span><input autoComplete="off" maxLength={18} value={idNumber} onChange={(event) => { setIdNumber(event.target.value.slice(0, 18)); setError('') }} /></label>
+        <label className="identity-flow__field"><span>真实姓名</span><input autoComplete="off" placeholder="请输入真实姓名" value={name} onChange={(event) => { setName(event.target.value); setError('') }} /></label>
+        <label className="identity-flow__field"><span>身份证号</span><input autoComplete="off" maxLength={18} placeholder="请输入18位身份证号" value={idNumber} onChange={(event) => { setIdNumber(event.target.value.slice(0, 18)); setError('') }} /></label>
         {error && <p className="identity-flow__error" role="alert">{error}</p>}
       </div>
     </DialogPanel>}
