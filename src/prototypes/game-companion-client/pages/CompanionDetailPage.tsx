@@ -8,6 +8,7 @@ import { CompanionProfileCard } from '../components/CompanionProfileCard'
 import { companionToProfileCard } from '../components/profileCardData'
 import type { ProfileCardData } from '../components/profileCardData'
 import { PageStatePanel } from '../components/PageStatePanel'
+import { VoiceMessageButton } from '../components/VoiceMessageButton'
 
 type Props = {
   companion: Companion
@@ -64,6 +65,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
               const game = games.find((item) => item.id === service.gameId)
               return <article className="service-offer" key={service.id}>
               <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small>{service.playName}</small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></div>
+              {service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}
                 <div className="service-offer__facts"><span><small>等级</small>{service.levelName}</span><span><small>服务单数</small>{service.orderCount}</span><span><small>评分</small><span className="rating-mark"><Star size={12} />{service.rating.toFixed(2)}</span></span><strong>{service.price} 钻石 / {service.unit}</strong></div>
               </article>
             })}</div> : <div className="service-table-wrap">
@@ -72,7 +74,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
                 <tbody>{logic.pageServices.map((service) => {
                   const game = games.find((item) => item.id === service.gameId)
                   return <tr key={service.id}>
-                    <td><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small>{service.playName}</small></span></div></td>
+                    <td><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small>{service.playName}</small>{service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}</span></div></td>
                     <td>{service.levelName}</td><td>{service.orderCount}</td><td><span className="rating-mark"><Star size={14} />{service.rating.toFixed(2)}</span></td><td><strong>{service.price} 钻石 / {service.unit}</strong></td><td><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></td>
                   </tr>
                 })}</tbody>

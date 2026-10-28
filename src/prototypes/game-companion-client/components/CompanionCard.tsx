@@ -1,6 +1,7 @@
 import { MessageCircle, ShoppingCart, Star } from 'lucide-react'
 import type { Companion } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
+import { VoiceMessageButton } from './VoiceMessageButton'
 
 type CompanionCardProps = {
   companion: Companion
@@ -31,6 +32,7 @@ export function CompanionCard({ companion, onOpen, onChat, onOrder }: CompanionC
     </div>
     <div className="client-tag-row">{companion.tags.slice(0, 3).map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
     <p className="companion-card__intro">{companion.intro}</p>
+    {companion.voiceMessage && <VoiceMessageButton message={companion.voiceMessage} label="语音介绍" compact />}
     <div className="companion-card__meta">
       <span className="rating-mark"><Star size={14} />{companion.rating.toFixed(2)}</span>
       <span>{companion.orderCount.toLocaleString()} 单</span>

@@ -1,11 +1,12 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import { BadgeCheck, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gift, History, ImagePlus, LockKeyhole, LogOut, Pencil, Settings2, ShieldCheck, Star, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { BadgeCheck, Bell, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gift, History, ImagePlus, LockKeyhole, LogOut, Megaphone, MessageCircle, Monitor, PackageCheck, Pencil, Settings2, Shield, ShieldCheck, Star, UserRound, UsersRound, Volume2, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { AvatarMark } from '../components/AvatarMark'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { clubs, games } from '../data/mockData'
 import { type ClientOrder, type PlayerProfile } from '../data/accountMockData'
 import { profileFootprints, profileRoomVisits, profileVisitors, receivedGiftRecords } from '../data/personalCenterMockData'
+import { type BlockedProfile, type NotificationPreferences } from '../data/personalSettingsMockData'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 type CenterSection = 'profile' | 'clubs' | 'onboarding' | 'visits' | 'gifts'
@@ -23,6 +24,15 @@ type PersonalCenterProps = {
   onOpenWallet: () => void
   onOpenOrders: () => void
   onOpenClub: (clubId: string) => void
+  boundPhone: string
+  onSaveBoundPhone: (phone: string) => void
+  endedDeviceIds: string[]
+  onEndDevice: (deviceId: string) => void
+  notifications: NotificationPreferences
+  onUpdateNotifications: (preferences: NotificationPreferences) => void
+  blockedProfiles: BlockedProfile[]
+  onUnblockProfile: (profileId: string) => void
+  onLogout: () => void
 }
 
 const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }[] = [
@@ -33,7 +43,7 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
   { id: 'gifts', label: '我的礼物', icon: Gift },
 ]
 
-export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub }: PersonalCenterProps) {
+export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, notifications, onUpdateNotifications, blockedProfiles, onUnblockProfile, onLogout }: PersonalCenterProps) {
   const [section, setSection] = useState<CenterSection>('profile')
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
   const [editingProfile, setEditingProfile] = useState(false)
@@ -47,6 +57,7 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
   const [applicationGame, setApplicationGame] = useState(games[1]?.id ?? '')
   const [applicationIntro, setApplicationIntro] = useState('')
   const [applicationSubmitted, setApplicationSubmitted] = useState<Record<ApplicationKind, boolean>>({ companion: false, club: false })
+  const [activeSetting, setActiveSetting] = useState<'security' | 'notifications' | 'blacklist' | 'logout' | null>(null)
 
   const joinedClub = useMemo(() => clubs.find((club) => club.id === joinedClubId) ?? null, [joinedClubId])
 
@@ -80,7 +91,7 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
       {sectionItems.map(({ id, label, icon: Icon }) => <button type="button" role="tab" key={id} className={`personal-center-tab${section === id ? ' is-active' : ''}`} aria-selected={section === id} onClick={() => { setSection(id); setFeedback('') }}><Icon size={16} /><span>{label}</span></button>)}
     </nav>
     <main className="personal-center-content" aria-live="polite">
-        {section === 'profile' && <ProfileOverview profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} feedback={feedback} onFeedback={setFeedback} />}
+        {section === 'profile' && <ProfileOverview profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
         {section === 'clubs' && <section className="personal-module">
           <ModuleHeading title="我的俱乐部" />
           {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status"><Check size={12} />已加入</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(2)}</span><span><UsersRound size={13} />{joinedClub.companionCount} 位成员</span><span>{joinedClub.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions"><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmExitClubId(joinedClub.id)}>退出俱乐部</button></div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => setChoosingClub(true)} />}
@@ -125,10 +136,14 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
         <p className="personal-demo-note personal-field--full">申请状态仅在当前原型会话中展示，不代表正式审核结果。</p>
       </form>
     </DialogPanel>}
+    {activeSetting === 'security' && <AccountSecurityDialog phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} onClose={() => setActiveSetting(null)} />}
+    {activeSetting === 'notifications' && <NotificationSettingsDialog preferences={notifications} onChange={onUpdateNotifications} onClose={() => setActiveSetting(null)} />}
+    {activeSetting === 'blacklist' && <BlacklistDialog profiles={blockedProfiles} onRemove={onUnblockProfile} onClose={() => setActiveSetting(null)} />}
+    {activeSetting === 'logout' && <DialogPanel overlayId="logout-confirmation-dialog" title="退出登录" description="确认退出当前账号并返回登录页？" onClose={() => setActiveSetting(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setActiveSetting(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={onLogout}>确认退出</button></>}><p className="social-dialog-copy">退出后将返回登录页面。本次原型不会清除或提交真实账号数据。</p></DialogPanel>}
   </div>
 }
 
-function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, feedback, onFeedback }: {
+function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, feedback, onFeedback, onOpenSetting }: {
   profile: PlayerProfile
   onEdit: () => void
   orders: ClientOrder[]
@@ -138,17 +153,23 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
   onOpenOrders: () => void
   feedback: string
   onFeedback: (feedback: string) => void
+  onOpenSetting: (setting: 'security' | 'notifications' | 'blacklist' | 'logout') => void
 }) {
   const [playerIdCopied, setPlayerIdCopied] = useState(false)
   const [lifePhotoIndex, setLifePhotoIndex] = useState(0)
   const lifePhotoCount = profile.lifePhotoDataUrls.length
   const visibleLifePhotoIndex = lifePhotoCount ? lifePhotoIndex % lifePhotoCount : 0
+  useEffect(() => {
+    if (lifePhotoCount < 2) return
+    const timer = window.setInterval(() => setLifePhotoIndex((index) => (index % lifePhotoCount + 1) % lifePhotoCount), 3000)
+    return () => window.clearInterval(timer)
+  }, [lifePhotoCount])
   const pendingOrderCount = orders.filter((order) => order.status === '待接单' || order.status === '待服务').length
   const activeOrderCount = orders.filter((order) => order.status === '服务中').length
   const settings = [
     { id: 'security', label: '账号安全', icon: LockKeyhole },
     { id: 'notifications', label: '通知设置', icon: Settings2 },
-    { id: 'privacy', label: '隐私设置', icon: ShieldCheck },
+    { id: 'blacklist', label: '黑名单', icon: ShieldCheck },
     { id: 'logout', label: '退出登录', icon: LogOut },
   ]
   return <section className="personal-module personal-profile-module">
@@ -158,11 +179,80 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
       <section className="client-card personal-life-photos"><header><h3>生活照</h3><div className="personal-life-photo-controls"><span>{lifePhotoCount ? `${visibleLifePhotoIndex + 1} / ${lifePhotoCount}` : '0 张'}</span><button type="button" aria-label="上一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex - 1 + lifePhotoCount) % lifePhotoCount)}><ChevronLeft size={15} /></button><button type="button" aria-label="下一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex + 1) % lifePhotoCount)}><ChevronRight size={15} /></button></div></header>{lifePhotoCount ? <div className="personal-life-photo-stage"><img src={profile.lifePhotoDataUrls[visibleLifePhotoIndex]} alt={`生活照 ${visibleLifePhotoIndex + 1}`} /></div> : <p>暂无生活照</p>}</section>
       <div className="personal-summary-stack">
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><span className="client-eyebrow">账户资产</span><h2>钱包</h2></div><button type="button" className="client-text-button" onClick={onOpenWallet}>钱包总览 <ChevronRight size={15} /></button></div><div className="personal-summary-values"><BalanceMini icon={<Coins size={16} />} label="钻石" value={diamondBalance} /><BalanceMini icon={<WalletCards size={16} />} label="糖豆" value={beanBalance} /></div></section>
-        <section className="client-card personal-summary-card"><div className="client-section-heading"><div><span className="client-eyebrow">服务订单</span><h2>订单</h2></div><button type="button" className="client-text-button" onClick={onOpenOrders}>全部订单 <ChevronRight size={15} /></button></div><div className="personal-order-stats"><button type="button" onClick={onOpenOrders}><strong>{orders.length}</strong><span>全部订单</span></button><button type="button" onClick={onOpenOrders}><strong>{pendingOrderCount}</strong><span>待处理</span></button><button type="button" onClick={onOpenOrders}><strong>{activeOrderCount}</strong><span>服务中</span></button></div></section>
+        <section className="client-card personal-summary-card"><div className="client-section-heading"><div><span className="client-eyebrow">服务订单</span><h2>订单</h2></div><button type="button" className="client-text-button" onClick={onOpenOrders}>全部订单 <ChevronRight size={15} /></button></div><div className="personal-order-stats"><button type="button" onClick={onOpenOrders}><span>全部订单</span><strong>{orders.length}</strong></button><button type="button" onClick={onOpenOrders}><span>待处理</span><strong>{pendingOrderCount}</strong></button><button type="button" onClick={onOpenOrders}><span>服务中</span><strong>{activeOrderCount}</strong></button></div></section>
       </div>
     </div>
-    <section className="client-card account-settings-card"><div className="client-section-heading"><div><span className="client-eyebrow">账户偏好</span><h2>常用设置</h2></div><UserRound size={18} className="client-muted" /></div><div className="account-settings-list">{settings.map((item) => <button type="button" key={item.id} onClick={() => onFeedback(item.id === 'logout' ? '退出登录仅作界面演示，当前不会更改登录状态。' : `${item.label}暂未提供可修改项。`)}><item.icon size={17} /><span>{item.label}</span><ChevronRight size={16} /></button>)}</div>{feedback && <FeedbackMessage>{feedback}<button type="button" onClick={() => onFeedback('')} aria-label="关闭提示"><X size={14} /></button></FeedbackMessage>}</section>
+    <section className="client-card account-settings-card"><div className="client-section-heading"><div><span className="client-eyebrow">账户偏好</span><h2>常用设置</h2></div><UserRound size={18} className="client-muted" /></div><div className="account-settings-list">{settings.map((item) => <button type="button" key={item.id} onClick={() => onOpenSetting(item.id as 'security' | 'notifications' | 'blacklist' | 'logout')}><item.icon size={17} /><span>{item.label}</span><ChevronRight size={16} /></button>)}</div>{feedback && <FeedbackMessage>{feedback}<button type="button" onClick={() => onFeedback('')} aria-label="关闭提示"><X size={14} /></button></FeedbackMessage>}</section>
   </section>
+}
+
+const mockDevices = [
+  { id: 'device-current', name: 'Windows 客户端', detail: '本设备 · 当前登录', current: true },
+  { id: 'device-laptop', name: 'Windows 笔记本', detail: '最近登录：今天 09:42', current: false },
+  { id: 'device-phone', name: 'Android 设备', detail: '最近登录：10 月 26 日', current: false },
+]
+
+function maskPhone(phone: string) {
+  return phone.replace(/^(\d{3})\d{4}(\d{4})$/, '$1****$2')
+}
+
+function AccountSecurityDialog({ phone, onSavePhone, endedDeviceIds, onEndDevice, onClose }: {
+  phone: string
+  onSavePhone: (phone: string) => void
+  endedDeviceIds: string[]
+  onEndDevice: (deviceId: string) => void
+  onClose: () => void
+}) {
+  const [changingPhone, setChangingPhone] = useState(false)
+  const [newPhone, setNewPhone] = useState('')
+  const [code, setCode] = useState('')
+  const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null)
+  const [error, setError] = useState('')
+  const [feedback, setFeedback] = useState('')
+  const changePhone = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setError('')
+    if (!/^1\d{10}$/.test(newPhone)) { setError('请输入正确的 11 位手机号。'); return }
+    if (!/^\d{6}$/.test(code)) { setError('请输入 6 位数字验证码。'); return }
+    onSavePhone(newPhone)
+    setNewPhone('')
+    setCode('')
+    setChangingPhone(false)
+    setFeedback('手机号已更新')
+  }
+  const pendingDevice = mockDevices.find((device) => device.id === pendingDeviceId)
+  return <DialogPanel overlayId="account-security-dialog" title="账号安全" description="管理绑定手机号和登录设备。" onClose={onClose} width={600} footer={pendingDevice ? <><button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { onEndDevice(pendingDevice.id); setPendingDeviceId(null); setFeedback('已结束该设备的登录') }}>确认结束登录</button></> : <button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
+    {pendingDevice ? <div className="personal-setting-confirm"><Monitor size={22} /><div><strong>结束「{pendingDevice.name}」的登录？</strong><p>该设备将退出当前账号。此操作仅更新本次原型中的设备状态。</p></div></div> : <div className="personal-setting-content">
+      <section className="personal-setting-section"><header><div><span className="client-eyebrow">绑定手机</span><strong>{maskPhone(phone)}</strong></div><button type="button" className="client-button client-button--secondary" onClick={() => { setChangingPhone((value) => !value); setError('') }}>{changingPhone ? '取消更换' : '更换手机号'}</button></header>
+        {changingPhone && <form className="personal-phone-form" onSubmit={changePhone}><label className="personal-setting-field" htmlFor="personal-new-phone">新手机号<input id="personal-new-phone" type="tel" inputMode="numeric" maxLength={11} placeholder="请输入 11 位手机号" value={newPhone} onChange={(event) => setNewPhone(event.target.value.replace(/\D/g, ''))} /></label><div className="personal-setting-field"><label htmlFor="personal-phone-code">验证码</label><div className="personal-code-field"><input id="personal-phone-code" inputMode="numeric" maxLength={6} placeholder="输入验证码" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} /><button type="submit" className="client-button client-button--primary">验证并更换</button></div></div><small>请输入 6 位数字验证码（本地演示）</small>{error && <p className="personal-setting-error" role="alert">{error}</p>}</form>}
+      </section>
+      <section className="personal-setting-section"><header><div><span className="client-eyebrow">登录设备</span><strong>{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).length} 台设备</strong></div></header><div className="personal-device-list">{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).map((device) => <article key={device.id}><span className="personal-device-icon"><Monitor size={17} /></span><div><strong>{device.name}{device.current && <small>当前设备</small>}</strong><span>{device.detail}</span></div>{device.current ? <span className="personal-device-current">当前使用</span> : <button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(device.id)}>结束登录</button>}</article>)}{mockDevices.every((device) => endedDeviceIds.includes(device.id)) && <p className="personal-setting-empty">暂无其他登录设备</p>}</div></section>
+      {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
+    </div>}
+  </DialogPanel>
+}
+
+const notificationOptions: { key: keyof NotificationPreferences; label: string; description: string; icon: typeof Bell }[] = [
+  { key: 'desktopReminder', label: '桌面提醒', description: '在客户端外显示新消息提醒', icon: Monitor },
+  { key: 'sound', label: '声音提醒', description: '播放消息与状态变化提示音', icon: Volume2 },
+  { key: 'privateMessages', label: '私聊消息', description: '好友发来的私聊消息', icon: MessageCircle },
+  { key: 'groupMessages', label: '群聊消息', description: '群聊中的新消息', icon: UsersRound },
+  { key: 'orderUpdates', label: '订单更新', description: '订单状态和服务进度变化', icon: PackageCheck },
+  { key: 'announcements', label: '平台公告', description: '平台活动与规则更新', icon: Megaphone },
+]
+
+function NotificationSettingsDialog({ preferences, onChange, onClose }: { preferences: NotificationPreferences; onChange: (preferences: NotificationPreferences) => void; onClose: () => void }) {
+  return <DialogPanel overlayId="notification-settings-dialog" title="通知设置" description="选择希望接收的提醒。" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
+    <div className="personal-notification-list">{notificationOptions.map(({ key, label, description, icon: Icon }) => <div className="personal-notification-row" key={key}><span className="personal-device-icon"><Icon size={17} /></span><div><strong>{label}</strong><small>{description}</small></div><button type="button" role="switch" aria-checked={preferences[key]} aria-label={label} className={`personal-toggle${preferences[key] ? ' is-on' : ''}`} onClick={() => onChange({ ...preferences, [key]: !preferences[key] })}><span /></button></div>)}</div>
+  </DialogPanel>
+}
+
+function BlacklistDialog({ profiles, onRemove, onClose }: { profiles: BlockedProfile[]; onRemove: (profileId: string) => void; onClose: () => void }) {
+  const [removedId, setRemovedId] = useState<string | null>(null)
+  const visibleProfiles = profiles.filter((profile) => profile.id !== removedId)
+  return <DialogPanel overlayId="profile-blacklist-dialog" title="黑名单" description="移除后可重新查看资料并发起私聊，历史消息会保留。" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
+    {visibleProfiles.length ? <div className="personal-blacklist-list">{visibleProfiles.map((profile) => <article key={profile.id}><AvatarMark initials={profile.initials} size="sm" /><div><strong>{profile.name}</strong><small>{profile.kind} · ID：{profile.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => { onRemove(profile.id); setRemovedId(profile.id) }}>移除</button></article>)}</div> : <div className="personal-blacklist-empty"><Shield size={24} /><strong>黑名单为空</strong><span>被拉黑的玩家和陪玩会显示在这里</span></div>}
+  </DialogPanel>
 }
 
 function ProfileAvatar({ profile, size }: { profile: PlayerProfile; size: 'sm' | 'md' | 'lg' }) {

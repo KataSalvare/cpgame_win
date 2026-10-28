@@ -3,6 +3,7 @@ import { MessageCircle, Shield, Star, ThumbsUp } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import type { ProfileCardData } from './profileCardData'
 import { AvatarMark } from './AvatarMark'
+import { VoiceMessageButton } from './VoiceMessageButton'
 
 export function CompanionProfileCard({ profile, onChat, className = '', followed = false, blocked = false, onToggleFollow, onBlock }: { profile: ProfileCardData; onChat?: () => void; className?: string; followed?: boolean; blocked?: boolean; onToggleFollow?: () => void; onBlock?: () => void }) {
   const [blockConfirmationOpen, setBlockConfirmationOpen] = useState(false)
@@ -15,6 +16,7 @@ export function CompanionProfileCard({ profile, onChat, className = '', followed
       {profile.friendCount !== undefined && profile.followingCount !== undefined && profile.followerCount !== undefined && <div className="companion-profile-card__stats" aria-label="社交数据"><span><strong>{profile.friendCount}</strong>朋友</span><span><strong>{profile.followingCount}</strong>关注</span><span><strong>{profile.followerCount}</strong>粉丝</span></div>}
       <div className="client-tag-row">{profile.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
       <p>{profile.intro}</p>
+      {profile.voiceMessage && <VoiceMessageButton message={profile.voiceMessage} label="语音介绍" />}
     </div>
     <div className="companion-profile-card__actions" aria-label="用户操作入口">
       <ProfileAction icon={<Shield size={15} />} label={blocked ? '已拉黑' : '拉黑'} onClick={() => !blocked && setBlockConfirmationOpen(true)} disabled={blocked} />

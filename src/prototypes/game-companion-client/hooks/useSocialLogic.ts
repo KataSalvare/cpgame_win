@@ -429,10 +429,11 @@ export function useSocialLogic() {
   const ignoreVoiceInvitation = (invitationId: string) => setVoiceInvitations((items) => items.filter((item) => item.id !== invitationId))
   const toggleProfileFollow = (profileId: string) => setFollowedProfileIds((items) => items.includes(profileId) ? items.filter((id) => id !== profileId) : [...items, profileId])
   const blockProfile = (profileId: string) => setBlockedProfileIds((items) => items.includes(profileId) ? items : [...items, profileId])
+  const unblockProfile = (profileId: string) => setBlockedProfileIds((items) => items.filter((id) => id !== profileId))
 
   return {
     conversations, selectedConversation, selectedFriend, selectedProfile, visibleConversations, visibleFriends, clubGroups,
-    followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile,
+    followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile, unblockProfile,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
     selectedProfileId, setSelectedProfileId, openConversation, startDirectMessage, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, setGroupAdmin, removeGroupMember, setGroupJoinApproval, dissolveGroup, sendChatMessage, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms,

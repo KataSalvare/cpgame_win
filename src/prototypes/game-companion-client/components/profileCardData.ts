@@ -1,4 +1,4 @@
-import type { Companion } from '../data/mockData'
+import type { Companion, VoiceMessage } from '../data/mockData'
 
 export type ProfileCardData = {
   name: string
@@ -13,6 +13,7 @@ export type ProfileCardData = {
   followerCount?: number
   tags: string[]
   intro: string
+  voiceMessage?: VoiceMessage
 }
 
 export function companionToProfileCard(companion: Companion): ProfileCardData {
@@ -41,5 +42,6 @@ export function companionToProfileCard(companion: Companion): ProfileCardData {
     followerCount,
     tags: companion.tags,
     intro: companion.intro,
+    voiceMessage: companion.voiceMessage,
   }
 }
