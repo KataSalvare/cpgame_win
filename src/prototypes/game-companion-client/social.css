@@ -110,6 +110,19 @@
 .support-queue-row{display:flex;min-height:48px;align-items:center;gap:10px;border-radius:6px;padding:5px 8px}
 .support-queue-row>span:last-child{margin-left:auto;color:var(--client-muted);font-size:12px}
 .support-queue-row.is-self{background:var(--prototype-canvas, #f3f4f6)}
+.club-support-selection-dialog .windows-dialog-panel__content{display:grid;gap:14px}
+.club-support-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:20px;padding:4px;background:var(--prototype-canvas,#f3f4f6)}
+.club-support-tabs button{min-height:36px;border:0;border-radius:18px;background:transparent;color:var(--prototype-text-secondary,#4b5563);font:inherit;font-size:14px;cursor:pointer}
+.club-support-tabs button.is-active{background:var(--prototype-surface,#fff);color:var(--prototype-text,#1f2937);font-weight:600;box-shadow:0 1px 3px rgb(17 24 39 / 8%)}
+.club-support-tabs button:focus-visible,.club-support-staff button:focus-visible{outline:2px solid var(--prototype-text,#1f2937);outline-offset:2px}
+.club-support-list{display:grid;gap:10px;max-height:390px;overflow:auto}
+.club-support-staff{display:flex;min-height:84px;align-items:center;gap:14px;border:1px solid var(--prototype-border,#e5e7eb);border-radius:8px;padding:12px;background:var(--prototype-surface,#fff)}
+.club-support-staff>.client-avatar{width:48px;height:48px;flex:0 0 48px;border-radius:50%;font-size:16px}
+.club-support-staff__info{display:grid;min-width:0;flex:1;gap:4px}
+.club-support-staff__info strong{color:var(--prototype-text,#1f2937);font-size:16px;font-weight:600}
+.club-support-staff__info span{color:var(--prototype-text-muted,#6b7280);font-size:13px}
+.club-support-staff>button{min-width:72px}
+.club-support-message-status{margin:0;color:var(--prototype-text-muted,#6b7280);font-size:12px}
 .voice-call-invite-list{display:grid;max-height:320px;gap:6px;overflow:auto;margin-top:14px}
 .voice-call-invite{display:flex;min-height:64px;align-items:center;gap:12px;border:1px solid var(--client-border);border-radius:7px;padding:10px 12px;background:var(--prototype-surface, #fff);cursor:pointer}
 .voice-call-invite:hover,.voice-call-invite.is-selected{background:var(--prototype-surface-muted, #f9fafb);border-color:var(--prototype-text-subtle, #9ca3af)}

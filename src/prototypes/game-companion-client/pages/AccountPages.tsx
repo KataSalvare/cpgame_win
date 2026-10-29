@@ -4,7 +4,7 @@ import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { type ClientOrder, type OrderStatus } from '../data/accountMockData'
-import { clubs, companions, type Companion, type Service } from '../data/mockData'
+import { clubs, companions, games, type Companion, type Service } from '../data/mockData'
 
 export { PersonalCenterPage } from './PersonalCenterPage'
 
@@ -218,22 +218,27 @@ type CheckoutPageProps = StateProps & {
   hideRechargePrompt: boolean
   onResetRechargePrompt: () => void
   onSelectService: (serviceId: string) => void
+  onCommunicate: (companionId: string) => void
   onComplete: (quantity: number, amount: number, remark: string, selectedCompanions: Companion[], tipAmount: number, paymentSource: 'wallet' | 'premium-card', premiumCardId?: string) => string | null
   onOpenOrders: () => void
 }
 
-export function CheckoutPage({ pageState, onRetry, orderService, selectedCompanions, availableServices, diamondBalance, paymentCards, onBack, onOpenWallet, hideRechargePrompt, onResetRechargePrompt, onSelectService, onComplete, onOpenOrders }: CheckoutPageProps) {
+export function CheckoutPage({ pageState, onRetry, orderService, selectedCompanions, availableServices, diamondBalance, paymentCards, onBack, onOpenWallet, hideRechargePrompt, onResetRechargePrompt, onSelectService, onCommunicate, onComplete, onOpenOrders }: CheckoutPageProps) {
   const [quantity, setQuantity] = useState(1)
   const [remark, setRemark] = useState('')
   const [tipInput, setTipInput] = useState('0')
   const [paymentMethod, setPaymentMethod] = useState('wallet')
   const [servicePickerOpen, setServicePickerOpen] = useState(false)
+  const [pickerServiceId, setPickerServiceId] = useState('')
+  const [selectedGameId, setSelectedGameId] = useState('')
+  const [selectedPlayName, setSelectedPlayName] = useState('')
+  const [selectedLevelName, setSelectedLevelName] = useState('')
   const [completedOrderId, setCompletedOrderId] = useState<string | null>(null)
   const [checkoutDialog, setCheckoutDialog] = useState<'payment' | 'recharge' | null>(null)
   if (pageState !== 'normal') return <div className="client-content account-page"><PageState pageState={pageState} onRetry={onRetry} /></div>
   if (!orderService) return <div className="client-content account-page"><PageStatePanel state="error" title="找不到这项服务" description="请返回陪玩详情重新选择服务。" actionLabel="返回陪玩详情" onAction={onBack} /></div>
 
-  const { companion, service, gameName } = orderService
+  const { companion, service } = orderService
   const checkoutCompanions = selectedCompanions.length ? selectedCompanions : [companion]
   const parsedTipAmount = tipInput === '' ? 0 : Number(tipInput)
   const tipPerCompanion = Number.isFinite(parsedTipAmount) && parsedTipAmount >= 0 ? parsedTipAmount : 0
@@ -246,6 +251,34 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
   const selectedPaymentBalance = selectedPaymentCard?.balance ?? diamondBalance
   const selectedPaymentName = selectedPaymentCard ? `尊享卡 · ${selectedPaymentCard.name}` : '钻石钱包'
   const validTip = Number.isInteger(parsedTipAmount) && parsedTipAmount >= 0
+  const matchingService = availableServices.find((item) => item.id === pickerServiceId)
+  const serviceTree = [...new Set(availableServices.map((item) => item.gameId))].map((gameId) => {
+    const gameServices = availableServices.filter((item) => item.gameId === gameId)
+    return {
+      gameId,
+      gameName: games.find((game) => game.id === gameId)?.name ?? gameId,
+      plays: [...new Set(gameServices.map((item) => item.playName))].map((playName) => {
+        const playServices = gameServices.filter((item) => item.playName === playName)
+        return {
+          playName,
+          levels: [...new Set(playServices.map((item) => item.levelName))].map((levelName) => ({
+            levelName,
+            services: playServices.filter((item) => item.levelName === levelName),
+          })),
+        }
+      }),
+    }
+  })
+  const openServicePicker = () => {
+    setPickerServiceId('')
+    setSelectedGameId('')
+    setSelectedPlayName('')
+    setSelectedLevelName('')
+    setServicePickerOpen(true)
+  }
+  const selectedGame = serviceTree.find((node) => node.gameId === selectedGameId)
+  const selectedPlay = selectedGame?.plays.find((node) => node.playName === selectedPlayName)
+  const selectedLevel = selectedPlay?.levels.find((node) => node.levelName === selectedLevelName)
   if (completedOrderId) return <div className="client-content account-page">
     <section className="client-card checkout-success-card"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><h1>订单已提交</h1><p>订单编号：{completedOrderId}</p><div className="checkout-success-card__actions"><button type="button" className="client-button client-button--primary" onClick={onOpenOrders}>查看我的订单</button><button type="button" className="client-button client-button--secondary" onClick={onBack}>返回陪玩详情</button></div></section>
   </div>
@@ -256,16 +289,21 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
     <div className="checkout-grid">
       <section className="client-card checkout-service-card">
         <div className="client-section-heading"><div><h2>服务信息</h2></div><span className="client-badge">{checkoutCompanions.length === 2 ? '双陪服务' : '单陪服务'}</span></div>
-        <div className="checkout-companion"><div className="checkout-companion__avatars">{checkoutCompanions.map((item) => <AvatarMark key={item.id} initials={item.initials} size="md" />)}</div><div><strong>{checkoutCompanions.map((item) => item.name).join('、')}</strong><span>{gameName} · {service.playName}</span></div></div>
+        <div className="checkout-companion"><div className="checkout-companion__avatars">{checkoutCompanions.map((item) => <AvatarMark key={item.id} initials={item.initials} size="md" />)}</div><div className="checkout-companion__details">{checkoutCompanions.map((item) => <div className="checkout-companion__person" key={item.id}><UserNameWithLevel name={item.name} identityId={item.id} /><span className={`client-status${item.status === '接单中' ? ' is-available' : ''}`}>{item.status === '接单中' ? '空闲中' : item.status}</span></div>)}</div><button type="button" className="client-button client-button--primary client-button--small checkout-companion__communicate" onClick={() => onCommunicate(companion.id)}><MessageCircle size={14} />马上沟通</button></div>
         <div className="checkout-service-facts"><span>选择服务</span><div className="checkout-service-picker">
-          <button type="button" className="checkout-service-picker__trigger" aria-expanded={servicePickerOpen} onClick={() => setServicePickerOpen((open) => !open)}><span><strong>{service.playName}</strong><small>{service.price} 钻石 / {service.unit}</small></span><ChevronDown size={16} /></button>
+          <button type="button" className="checkout-service-picker__trigger" aria-expanded={servicePickerOpen} onClick={() => servicePickerOpen ? setServicePickerOpen(false) : openServicePicker()}><span><strong>{games.find((game) => game.id === service.gameId)?.name} · {service.playName} · {service.levelName}</strong></span><ChevronDown size={16} /></button>
           {servicePickerOpen && <div className="checkout-service-picker__panel" role="dialog" aria-label="选择服务">
             <div className="checkout-service-picker__heading"><strong>选择服务</strong><button type="button" className="windows-icon-button" aria-label="关闭服务选择" onClick={() => setServicePickerOpen(false)}><X size={16} /></button></div>
-            <div className="checkout-service-picker__list">{availableServices.map((item) => <button type="button" key={item.id} className={`checkout-service-option${item.id === service.id ? ' is-active' : ''}`} aria-pressed={item.id === service.id} disabled={!item.canAcceptOrders} onClick={() => { setQuantity(1); setServicePickerOpen(false); onSelectService(item.id) }}>
-              <span className="checkout-service-option__main"><strong>{item.playName}</strong></span><span className="checkout-service-option__price">{item.price} 钻石 / {item.unit}</span>
-            </button>)}</div>
+            <div className="checkout-service-cascade" aria-label="按游戏、玩法、等级和服务选择">
+              <label><span>游戏</span><span className="match-select-wrap"><select value={selectedGameId} onChange={(event) => { setSelectedGameId(event.target.value); setSelectedPlayName(''); setSelectedLevelName(''); setPickerServiceId('') }}><option value="">请选择游戏</option>{serviceTree.map((node) => <option key={node.gameId} value={node.gameId}>{node.gameName}</option>)}</select><ChevronDown size={14} /></span></label>
+              <label><span>玩法</span><span className="match-select-wrap"><select value={selectedPlayName} disabled={!selectedGame} onChange={(event) => { setSelectedPlayName(event.target.value); setSelectedLevelName(''); setPickerServiceId('') }}><option value="">请选择玩法</option>{selectedGame?.plays.map((node) => <option key={node.playName} value={node.playName}>{node.playName}</option>)}</select><ChevronDown size={14} /></span></label>
+              <label><span>等级</span><span className="match-select-wrap"><select value={selectedLevelName} disabled={!selectedPlay} onChange={(event) => { setSelectedLevelName(event.target.value); setPickerServiceId('') }}><option value="">请选择等级</option>{selectedPlay?.levels.map((node) => <option key={node.levelName} value={node.levelName}>{node.levelName}</option>)}</select><ChevronDown size={14} /></span></label>
+              <label><span>服务</span><span className="match-select-wrap"><select value={pickerServiceId} disabled={!selectedLevel} onChange={(event) => setPickerServiceId(event.target.value)}><option value="">请选择服务</option>{selectedLevel?.services.map((item) => <option key={item.id} value={item.id} disabled={!item.canAcceptOrders}>{item.price} 钻石 / {item.unit}{item.canAcceptOrders ? '' : ' · 暂不可接单'}</option>)}</select><ChevronDown size={14} /></span></label>
+            </div>
+            {matchingService && <div className="checkout-service-picker__selection"><span>{matchingService.price} 钻石 / {matchingService.unit}</span><button type="button" className="client-button client-button--primary client-button--small" disabled={!matchingService.canAcceptOrders} onClick={() => { setQuantity(1); setServicePickerOpen(false); onSelectService(matchingService.id) }}>{matchingService.canAcceptOrders ? '选择服务' : '暂不可接单'}</button></div>}
           </div>}
         </div></div>
+        <div className="checkout-service-unit-price"><span>服务单价</span><strong>{service.price} 钻石 / {service.unit}</strong></div>
         <fieldset className="checkout-duration"><legend>选择服务时长</legend><div>{[1, 2, 3, 4].map((value) => <button type="button" key={value} className={`client-choice-button${quantity === value ? ' is-active' : ''}`} aria-pressed={quantity === value} onClick={() => setQuantity(value)}>{value} {service.unit}</button>)}</div></fieldset>
         <label className="checkout-tip"><span>每位陪玩加价 <small>选填</small></span><div><input aria-label="每位陪玩加价金额，钻石" type="number" min="0" step="1" inputMode="numeric" value={tipInput} onChange={(event) => setTipInput(event.target.value)} /><span>钻石 / 人</span></div></label>
         {!validTip && <p className="checkout-tip-error" role="alert">请输入不小于 0 的整数钻石。</p>}
@@ -282,7 +320,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
         <div className="checkout-summary-line"><span>加价</span><strong>{tipPerCompanion.toLocaleString()} × {checkoutCompanions.length} 位 = {tipAmount.toLocaleString()} 钻石</strong></div>
         <div className="checkout-summary-line checkout-summary-line--balance"><span>{selectedPaymentCard ? '尊享卡余额' : '钻石余额'}</span><strong>{selectedPaymentBalance.toLocaleString()} 钻石</strong></div>
         <div className="checkout-total"><span>应付金额</span><strong>{amount.toLocaleString()} <small>钻石</small></strong></div>
-        {!service.canAcceptOrders ? <div className="checkout-insufficient" role="status"><strong>暂不可接单</strong><button type="button" className="client-button client-button--secondary" onClick={() => setServicePickerOpen(true)}>选择其他服务</button></div> : <button type="button" className="client-button client-button--primary checkout-pay-button" disabled={!validTip || (selectedPaymentCard !== undefined && selectedPaymentBalance < amount)} onClick={() => { onResetRechargePrompt(); setCheckoutDialog(selectedPaymentBalance >= amount ? 'payment' : 'recharge') }}><Coins size={16} />确认支付</button>}
+        {!service.canAcceptOrders ? <div className="checkout-insufficient" role="status"><strong>暂不可接单</strong><button type="button" className="client-button client-button--secondary" onClick={openServicePicker}>选择其他服务</button></div> : <button type="button" className="client-button client-button--primary checkout-pay-button" disabled={!validTip || (selectedPaymentCard !== undefined && selectedPaymentBalance < amount)} onClick={() => { onResetRechargePrompt(); setCheckoutDialog(selectedPaymentBalance >= amount ? 'payment' : 'recharge') }}><Coins size={16} />确认支付</button>}
       </aside>
     </div>
     {checkoutDialog && !(checkoutDialog === 'recharge' && hideRechargePrompt) && <div className="order-action-overlay checkout-confirm-overlay" data-overlay={checkoutDialog === 'payment' ? 'checkout-payment-confirmation' : 'checkout-recharge-confirmation'} role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setCheckoutDialog(null) }}>

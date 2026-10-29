@@ -32,6 +32,15 @@ type PageState = 'normal' | 'loading' | 'empty' | 'error'
 type PageStateProps = { pageState: PageState; onRetry: () => void }
 
 const quickReplies = ['收到，马上来。', '等我一下，马上到。', '可以，开一把吧。', '我先准备一下。', '稍等，我马上回来。', '今天先到这里，下次再玩。']
+const clubPresaleStaff = [
+  { id: 'presale-1', name: '客服1号', initials: '客', hours: '13:00–22:00', available: true },
+  { id: 'presale-2', name: '客服2号', initials: '服', hours: '13:00–22:00', available: true },
+  { id: 'presale-3', name: '客服3号', initials: '3', hours: '13:00–22:00', available: false },
+]
+const clubAftersaleStaff = [
+  { id: 'aftersale-1', name: '售后客服1号', initials: '售', hours: '09:00–18:00', available: true },
+  { id: 'aftersale-2', name: '售后客服2号', initials: '后', hours: '09:00–18:00', available: false },
+]
 function QuickReplyMenu({ onSelect, className = '' }: { onSelect: (text: string) => void; className?: string }) {
   return <div className={`social-quick-replies ${className}`} role="menu" aria-label="快捷回复">{quickReplies.map((text) => <button key={text} type="button" role="menuitem" onClick={() => onSelect(text)}>{text}</button>)}</div>
 }
@@ -486,6 +495,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [outputVolume, setOutputVolume] = useState(70)
   const [supportDialogOpen, setSupportDialogOpen] = useState(false)
   const [supportQueued, setSupportQueued] = useState(false)
+  const [clubSupportSelectionOpen, setClubSupportSelectionOpen] = useState(false)
   useEffect(() => {
     if (!voiceModeOpen) return
     const onPointerDown = (event: PointerEvent) => {
@@ -750,7 +760,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
         <section className="voice-owner-card" aria-label="房间归属">
           <AvatarMark initials={roomClub?.initials ?? roomOwner?.initials ?? currentSocialUser.initials} size="md" />
           <div className="voice-owner-card__identity">{roomClub ? <strong>{roomClub.name}</strong> : <strong><UserNameWithLevel name={roomOwner?.name ?? currentSocialUser.name} identityId={roomOwner?.id ?? currentSocialUser.profileId} /></strong>}<span>ID：{roomClub?.id ?? roomOwner?.profileId ?? currentSocialUser.profileId}</span></div>
-          {roomClub && <button type="button" className="voice-owner-card__support" aria-label="联系俱乐部客服" onClick={onOpenClubSupport}><Headphones size={14} />客服</button>}
+          {roomClub && <button type="button" className="voice-owner-card__support" aria-label="联系俱乐部客服" onClick={() => setClubSupportSelectionOpen(true)}><Headphones size={14} />客服</button>}
         </section>
         <label className="social-search"><Search size={16} /><input value={logic.roomSearch} onChange={(event) => logic.setRoomSearch(event.target.value)} placeholder="搜索语音房" aria-label="搜索语音房" /></label>
         <button type="button" className="voice-invite-entry" onClick={() => room && openInviteForChannel(room.name, channel?.name ?? '房间A')} disabled={!room}><UserPlus size={15} />邀请好友</button>
@@ -918,6 +928,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
 
     {memberAction && <DialogPanel overlayId="voice-member-action-dialog" children={null} title={`确认${memberActionLabel}`} description={memberAction.type === 'block' ? `拉黑「${memberAction.member.name}」后，对方会从语音房成员中移除。` : memberAction.type === 'remove' ? `确定将「${memberAction.member.name}」移出当前语音房吗？` : memberAction.type === 'role' ? memberAction.member.role === 'admin' ? `确定撤销「${memberAction.member.name}」的管理员身份吗？` : `确定将「${memberAction.member.name}」设为管理员吗？` : `确定${memberActionLabel}「${memberAction.member.name}」吗？`} onClose={() => setMemberAction(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setMemberAction(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmMemberAction}>{`确认${memberActionLabel}`}</button></>} /> }
 
+    {clubSupportSelectionOpen && roomClub && <ClubSupportSelectionDialog onClose={() => setClubSupportSelectionOpen(false)} onConsult={onOpenClubSupport} />}
     {supportDialogOpen && <DialogPanel overlayId="voice-customer-support-queue" title="呼叫客服" onClose={() => setSupportDialogOpen(false)} width={500} footer={supportQueued ? <><button type="button" className="client-button client-button--secondary" onClick={() => setSupportQueued(false)}>取消呼叫</button><button type="button" className="client-button client-button--primary" onClick={() => setSupportDialogOpen(false)}>完成</button></> : <><button type="button" className="client-button client-button--secondary" onClick={() => setSupportDialogOpen(false)}>暂不呼叫</button><button type="button" className="client-button client-button--primary" onClick={() => setSupportQueued(true)}>确认呼叫</button></>}>
       <div className="support-queue-summary"><Headphones size={18} /><strong>{supportQueued ? `正在排队 · 第 ${initialSupportQueue.length + 1} 位` : `当前 ${initialSupportQueue.length} 人排队`}</strong>{!supportQueued && <span>预计排在第 {initialSupportQueue.length + 1} 位</span>}</div>
       <div className="support-queue-list" aria-label="客服排队列表">{initialSupportQueue.map((person, index) => <div className="support-queue-row" key={person.id}><AvatarMark initials={person.initials} size="sm" /><strong><UserNameWithLevel name={person.name} identityId={person.name} /></strong><span>第 {index + 1} 位</span></div>)}{supportQueued && <div className="support-queue-row is-self"><AvatarMark initials={currentSocialUser.initials} size="sm" /><strong><UserNameWithLevel name={`${currentSocialUser.name}（我）`} identityId={currentSocialUser.profileId} /></strong><span>第 {initialSupportQueue.length + 1} 位</span></div>}</div>
@@ -926,6 +937,28 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={invitees.includes(friend.id)} onChange={() => toggleInvitee(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>
     </DialogPanel>}
   </div>
+}
+
+export function ClubSupportSelectionDialog({ onClose, onConsult }: { onClose: () => void; onConsult: () => void }) {
+  const [tab, setTab] = useState<'presale' | 'aftersale'>('presale')
+  const [messageSentTo, setMessageSentTo] = useState<string | null>(null)
+  const staffList = tab === 'presale' ? clubPresaleStaff : clubAftersaleStaff
+  return <DialogPanel overlayId="club-support-selection" title="咨询客服" onClose={onClose} width={520} className="club-support-selection-dialog">
+    <div className="club-support-tabs" role="tablist" aria-label="客服类型">
+      <button type="button" role="tab" aria-selected={tab === 'presale'} className={tab === 'presale' ? 'is-active' : ''} onClick={() => setTab('presale')}>售前客服</button>
+      <button type="button" role="tab" aria-selected={tab === 'aftersale'} className={tab === 'aftersale' ? 'is-active' : ''} onClick={() => setTab('aftersale')}>售后客服</button>
+    </div>
+    <div className="club-support-list" role="tabpanel" aria-label={tab === 'presale' ? '售前客服列表' : '售后客服列表'}>
+      {staffList.map((staff) => <article className="club-support-staff" key={staff.id}>
+        <AvatarMark initials={staff.initials} size="md" />
+        <div className="club-support-staff__info"><strong>{staff.name}</strong><span>工作时间：{staff.hours}</span></div>
+        {staff.available
+          ? <button type="button" className="client-button client-button--secondary" onClick={() => { onClose(); onConsult() }}>咨询</button>
+          : <button type="button" className="client-button client-button--secondary" disabled={messageSentTo === staff.id} onClick={() => setMessageSentTo(staff.id)}>{messageSentTo === staff.id ? '已留言' : '留言'}</button>}
+      </article>)}
+      {messageSentTo && <p className="club-support-message-status" role="status">已留言（仅演示）</p>}
+    </div>
+  </DialogPanel>
 }
 
 export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, onSendOrder, onReview }: { conversation?: NonNullable<SocialLogic['selectedConversation']>; orders: ClientOrder[]; onClose: () => void; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => void; onSendOrder: (order?: ClientOrder) => void; onReview: (messageId: string, rating: number, submitted: boolean) => void }) {
@@ -947,15 +980,15 @@ export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, on
   }
   const sendQuickReply = (content: string) => { onSend('text', content, undefined, replyTarget ? replySnapshot(replyTarget) : undefined); setReplyTarget(null); setQuickRepliesOpen(false) }
   const handleEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submit() } }
-  return <section className="club-support-chat" aria-label="GM-客服会话" role="region">
-    <header className="chat-panel__header"><div className="chat-panel__identity"><AvatarMark initials={conversation.initials} size="md" /><div><h2>{conversation.title}</h2></div></div><button type="button" className="windows-icon-button" onClick={onClose} aria-label="关闭客服聊天"><X size={17} /></button></header>
+  return <section className="club-support-chat" aria-label={`${conversation.title}聊天窗口`} role="region">
+    <header className="chat-panel__header"><div className="chat-panel__identity"><AvatarMark initials={conversation.initials} size="md" /><div><h2>{conversation.title}</h2></div></div><button type="button" className="windows-icon-button" onClick={onClose} aria-label={`关闭与${conversation.title}的聊天`}><X size={17} /></button></header>
     <div className="chat-message-list" ref={messagesRef} aria-live="polite">{conversation.messages.map((message) => <ChatMessage key={message.id} message={message} selfId={conversation.self?.id} onReviewChange={(rating, submitted) => onReview(message.id, rating, submitted)} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} />)}</div>
     <div className="chat-composer">
       {conversation.supportAction && <div className="chat-support-actions"><button type="button" className="client-button client-button--secondary client-button--small" onClick={() => { if (conversation.supportAction === 'order') { setSelectedOrderId(''); setOrderDialogOpen(true) } else onSendOrder() }}>{conversation.supportAction === 'order' ? <ReceiptText size={15} /> : <Star size={15} />}{conversation.supportAction === 'order' ? '发送订单' : '评价'}</button></div>}
       {replyTarget && <ReplyPreview message={replyTarget} onCancel={() => setReplyTarget(null)} />}
       {quickRepliesOpen && <QuickReplyMenu className="chat-quick-replies" onSelect={sendQuickReply} />}
       {emojiOpen && <div className="emoji-picker" role="group" aria-label="选择表情">{['😀', '😊', '😂', '👍', '🎮', '🎉', '❤️', '🙌'].map((emoji) => <button type="button" key={emoji} onClick={() => { onSend('emoji', emoji); setEmojiOpen(false) }} aria-label={`发送${emoji}`}>{emoji}</button>)}</div>}
-      <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleEnter} placeholder="发送消息给 GM-客服…" aria-label="客服消息内容" />
+      <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleEnter} placeholder={`发送消息给 ${conversation.title}…`} aria-label={`发送给${conversation.title}的消息内容`} />
       <div className="chat-composer__toolbar"><div className="chat-composer__tools"><button type="button" className="windows-icon-button" aria-label="表情" aria-expanded={emojiOpen} onClick={() => { setQuickRepliesOpen(false); setEmojiOpen((value) => !value) }}><Smile size={18} /></button><button type="button" className="windows-icon-button" aria-label="发送示例图片" title="发送示例图片" onClick={() => onSend('image', '战绩截图 · 示例图片')}><ImagePlus size={18} /></button><button type="button" className="windows-icon-button" aria-label="发送示例语音" title="发送示例语音" onClick={() => onSend('voice', '语音消息', 6)}><Mic size={18} /></button><button type="button" className="windows-icon-button" aria-label="快捷回复" title="快捷回复" aria-expanded={quickRepliesOpen} onClick={() => { setEmojiOpen(false); setQuickRepliesOpen((open) => !open) }}><MessageSquareText size={17} /></button></div><button type="button" className="client-button client-button--primary chat-send-button" onClick={submit} disabled={!draft.trim()}><Send size={15} />发送</button></div>
     </div>
     {orderDialogOpen && <DialogPanel overlayId="send-club-support-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogOpen(false)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedOrderId); if (order) { onSendOrder(order); setOrderDialogOpen(false) } }}>发送订单</button></>}><div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? orders.map((order) => <label className={`chat-order-option${selectedOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name="club-support-order" value={order.id} checked={selectedOrderId === order.id} onChange={() => setSelectedOrderId(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span><UserNameWithLevel name={order.companionName} identityId={order.companionId} /> · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p>暂无订单</p>}</div></DialogPanel>}

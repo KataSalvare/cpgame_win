@@ -9,7 +9,7 @@ import { CompanionDirectory } from '../components/CompanionDirectory'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
 import type { useSocialLogic } from '../hooks/useSocialLogic'
-import { ClubSupportChatPanel } from './SocialPages'
+import { ClubSupportChatPanel, ClubSupportSelectionDialog } from './SocialPages'
 
 type Props = {
   club: Club
@@ -30,6 +30,7 @@ type Props = {
 
 export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, social, orders, onRetry }: Props) {
   const [supportChatOpen, setSupportChatOpen] = useState(false)
+  const [supportSelectionOpen, setSupportSelectionOpen] = useState(false)
   const [clubInfoTab, setClubInfoTab] = useState<ClubInfoTab | null>(null)
   if (pageState !== 'normal') {
     return <div className="client-content client-content--narrow-state">
@@ -64,7 +65,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
         <DisplayAction icon={<ShoppingCart size={17} />} label="自助下单" onClick={onOpenMatch} variant="primary" />
         </div>
         <div className="club-profile-card__secondary-actions" role="group" aria-label="俱乐部服务">
-        <DisplayAction icon={<Headphones size={15} />} label="客服" onClick={() => { setSupportChatOpen(true); social.markConversationRead('direct-club-support') }} />
+        <DisplayAction icon={<Headphones size={15} />} label="客服" onClick={() => setSupportSelectionOpen(true)} />
         <DisplayAction icon={<ShieldCheck size={15} />} label="尊享卡" onClick={onOpenPremiumCards} />
         <DisplayAction icon={<Star size={15} />} label="价目表" onClick={() => setClubInfoTab('pricing')} />
         </div>
@@ -77,6 +78,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
 
     <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} onOrderWithCompanion={onOrderWithCompanion} />
     {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
+    {supportSelectionOpen && <ClubSupportSelectionDialog onClose={() => setSupportSelectionOpen(false)} onConsult={() => { social.markConversationRead('direct-club-support'); setSupportChatOpen(true) }} />}
     {supportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={orders} onClose={() => setSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}
   </div>
 }
