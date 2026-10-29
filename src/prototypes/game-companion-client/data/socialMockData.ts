@@ -1,6 +1,6 @@
 import { initialOrders, type ClientOrder } from './accountMockData'
 
-export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review'
+export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review' | 'companion-share'
 
 export interface SocialFriend {
   id: string
@@ -26,6 +26,8 @@ export interface SocialMessage {
   time: string
   kind: ChatMessageKind
   content: string
+  companionShare?: { id: string; clubId: string; name: string; initials: string; intro: string }
+  recalled?: boolean
   order?: { id: string; companion: string; service: string; duration: string; amount: number; status: string }
   review?: { support: string; rating: number; submitted: boolean }
   duration?: number
@@ -53,6 +55,8 @@ export interface SocialConversation {
 
 export type VoiceRole = 'owner' | 'admin' | 'member'
 export const MAX_VOICE_CHANNEL_MEMBERS = 8
+export const MAX_VOICE_GROUP_MEMBERS = 100
+export const DEFAULT_VOICE_GROUP_CAPACITY = 25
 
 export interface VoiceMember {
   id: string
@@ -76,6 +80,7 @@ export interface VoiceSubchannel {
 export interface VoiceRoom {
   id: string
   name: string
+  capacity: number
   privacy: '公开' | '私密'
   currentRole: VoiceRole
   ownerType?: 'club' | 'personal'
@@ -98,7 +103,7 @@ export interface VoiceInvitation {
 export const currentSocialUser = { id: 'player', name: '林小满', initials: '满', gender: '女' as const, age: 24, profileId: 'P-102860', rating: 4.96, tags: ['稳定在线', '团队协作'], intro: '喜欢和熟悉的队友一起开黑，沟通配合，享受每一局。', status: '在线', online: true }
 
 export const socialFriends: SocialFriend[] = [
-  { id: 'friend-1', companionId: 'companion-001', name: '晚风', initials: '风', status: '正在玩《星域突围》', online: true, role: '好友', gender: '女', age: 24, profileId: 'P-102861', rating: 4.99, tags: ['战术指挥', '稳定在线'], intro: '擅长信息沟通和团队配合，节奏清晰，交流轻松。' },
+  { id: 'friend-1', companionId: 'companion-001', name: '晚风', initials: '风', status: '空闲中', online: true, role: '好友', gender: '女', age: 24, profileId: 'P-102861', rating: 4.99, tags: ['战术指挥', '稳定在线'], intro: '擅长信息沟通和团队配合，节奏清晰，交流轻松。' },
   { id: 'friend-2', companionId: 'companion-004', name: '青柠汽水', initials: '柠', status: '在线', online: true, role: '好友', gender: '女', age: 22, profileId: 'P-102862', rating: 4.97, tags: ['轻松聊天', '新手友好'], intro: '喜欢轻松开黑，也乐于陪队友熟悉玩法。' },
   { id: 'friend-3', companionId: 'companion-002', name: '北岸', initials: '北', status: '组队中', online: true, role: '好友', gender: '男', age: 27, profileId: 'P-102863', rating: 4.96, tags: ['团队协作', '思路清晰'], intro: '熟悉地图点位，重视沟通和团队配合。' },
   { id: 'friend-4', companionId: 'companion-007', name: '一颗糖', initials: '糖', status: '2 小时前在线', online: false, role: '好友', gender: '女', age: 23, profileId: 'P-102864', rating: 4.93, tags: ['周末组队', '轻松娱乐'], intro: '喜欢探索新玩法，周末经常和好友组队。' },
@@ -114,6 +119,7 @@ const seedMessages: SocialMessage[] = [
   { id: 'msg-2', senderId: 'player', senderName: '林小满', initials: '满', time: '19:43', kind: 'text', content: '好呀，我刚好有空。' },
   { id: 'msg-3', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:43', kind: 'emoji', content: '收到，房间里见' },
   { id: 'msg-4', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:44', kind: 'voice', content: '语音消息', duration: 8 },
+  { id: 'msg-5-shared-friend', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:45', kind: 'companion-share', content: '[陪玩名片] 北纬三十度', companionShare: { id: 'companion-002', clubId: 'club-001', name: '北纬三十度', initials: '北纬', intro: '熟悉多种地图点位，重视沟通和复盘。' } },
 ]
 
 export const orderMessageFromOrder = (order: ClientOrder): Pick<SocialMessage, 'kind' | 'content' | 'order'> => ({
@@ -148,13 +154,20 @@ export const initialConversations: SocialConversation[] = [
       { id: 'kata-4', senderId: supportIdentity.id, senderName: supportIdentity.name, initials: supportIdentity.initials, time: '15:16', ...supportReviewSample },
     ],
   },
-  { id: 'direct-friend-1', kind: 'direct', title: '晚风', initials: '风', members: ['friend-1'], unread: 2, messages: seedMessages },
+  { id: 'direct-friend-1', kind: 'direct', title: '聊天枚举', initials: '风', members: ['friend-1'], unread: 2, messages: seedMessages },
   {
     id: 'group-squad', kind: 'group', title: '周末五排小队', initials: '五', members: ['friend-1', 'friend-2', 'friend-3', 'friend-5'], unread: 1, ownerId: 'player', adminIds: ['friend-1'], joinApprovalRequired: true,
     messages: [
       { id: 'gmsg-1', senderId: 'friend-2', senderName: '青柠汽水', initials: '柠', time: '18:26', kind: 'text', content: '我拉了一个新房间，大家到了说一声。' },
       { id: 'gmsg-2', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '18:31', kind: 'image', content: '战绩截图' },
       { id: 'gmsg-3', senderId: 'friend-5', senderName: '小熊饼干', initials: '熊', time: '18:32', kind: 'text', content: '这把阵容不错！' },
+    ],
+  },
+  {
+    id: 'group-ordinary', kind: 'group', title: '普通用户群', initials: '普', members: ['friend-1', 'friend-2', 'friend-3'], unread: 0, ownerId: 'friend-3', adminIds: ['friend-1'], joinApprovalRequired: false,
+    messages: [
+      { id: 'ordinary-1', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '昨天', kind: 'text', content: '晚上还有人一起玩吗？' },
+      { id: 'ordinary-2', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '昨天', kind: 'text', content: '我可以，晚点进房间。' },
     ],
   },
   { id: 'direct-friend-2', kind: 'direct', title: '青柠汽水', initials: '柠', members: ['friend-2'], unread: 0, messages: [{ id: 'cmsg-1', senderId: 'friend-2', senderName: '青柠汽水', initials: '柠', time: '昨天', kind: 'text', content: '下次一起玩呀。' }] },
@@ -164,18 +177,18 @@ const voiceMember = (friend: SocialFriend, role: VoiceRole = 'member'): VoiceMem
 
 export const initialVoiceRooms: VoiceRoom[] = [
   {
-    id: 'room-ranked', name: '分组A', privacy: '公开', currentRole: 'owner', ownerType: 'club', clubId: 'club-001',
+    id: 'room-ranked', name: '分组A', capacity: DEFAULT_VOICE_GROUP_CAPACITY, privacy: '公开', currentRole: 'owner', ownerType: 'club', clubId: 'club-001',
     channels: [
       { id: 'channel-main', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), voiceMember(socialFriends[4])] },
       { id: 'channel-warmup', name: '房间B', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
     ],
   },
   {
-    id: 'room-weekend', name: '分组B', privacy: '公开', currentRole: 'admin', ownerType: 'personal', ownerId: 'friend-1',
+    id: 'room-weekend', name: '分组B', capacity: DEFAULT_VOICE_GROUP_CAPACITY, privacy: '公开', currentRole: 'admin', ownerType: 'personal', ownerId: 'friend-1',
     channels: [{ id: 'channel-weekend', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
   },
   {
-    id: 'room-friends', name: '分组C', privacy: '私密', currentRole: 'member', ownerType: 'personal', ownerId: 'friend-2',
+    id: 'room-friends', name: '分组C', capacity: DEFAULT_VOICE_GROUP_CAPACITY, privacy: '私密', currentRole: 'member', ownerType: 'personal', ownerId: 'friend-2',
     channels: [{ id: 'channel-friends', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
   },
 ]

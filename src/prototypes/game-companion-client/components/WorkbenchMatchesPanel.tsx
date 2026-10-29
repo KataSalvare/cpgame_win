@@ -1,5 +1,6 @@
 import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
 import { AvatarMark } from './AvatarMark'
+import { UserNameWithLevel } from './UserNameWithLevel'
 
 type Props = {
   logic: WorkbenchLogic
@@ -21,7 +22,7 @@ export function WorkbenchMatchesPanel({ logic: w, filter, onFilterChange, onCanc
         const service = w.services.find(s => s.id === request.serviceId)
         const unavailable = !w.enabled.includes(request.serviceId)
         return <article className="order-item workbench-match-grid" key={request.id} aria-label={`匹配请求 ${request.id} ${request.player}`}>
-          <div className="order-item__companion"><AvatarMark initials={request.playerInitials} size="sm" /><div className="order-item__info"><strong>{request.player}</strong><small>{request.id}</small></div></div>
+          <div className="order-item__companion"><AvatarMark initials={request.playerInitials} size="sm" /><div className="order-item__info"><strong><UserNameWithLevel name={request.player} identityId={request.player} /></strong><small>{request.id}</small></div></div>
           <span className="order-item__duration">{request.audition}</span>
           <div className="order-item__service"><strong>{w.serviceLabel(request.serviceId)}</strong></div>
           <div className="order-item__price"><strong>{request.matchPrice} 钻石 / {service?.unit ?? '小时'}</strong><small>加价 {request.tipAmount} 钻石</small></div>

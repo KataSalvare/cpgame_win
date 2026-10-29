@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, CreditCard, Gift, History, ImagePlus, MessageCircle, Star, Ticket, WalletCards, X, Plus, Pencil, Landmark, BadgeCheck } from 'lucide-react'
 import { AvatarMark } from '../components/AvatarMark'
+import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { type ClientOrder, type OrderStatus } from '../data/accountMockData'
 import { clubs, companions, type Companion, type Service } from '../data/mockData'
@@ -313,9 +314,9 @@ function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpd
     : order.status === '已完成' ? ['再次下单', '评价']
     : []
   return <article className={`order-item${selected ? ' is-selected' : ''}`}>
-    <button type="button" className="order-item__main" aria-pressed={selected} aria-label={`查看订单 ${order.id}，${order.companionName}，${order.gameName} ${order.serviceName}，${order.duration} ${order.durationUnit}，${order.amount.toLocaleString()} 钻石，${order.status}${order.tipAmount ? `，加价合计 ${order.tipAmount} 钻石` : ''}`} onClick={onSelect}>
+    <button type="button" className="order-item__main" aria-pressed={selected} aria-label={`查看订单 ${order.id}，${order.companionName}，所属俱乐部 ${getOrderClubName(order)}，${order.gameName} ${order.serviceName}，${order.duration} ${order.durationUnit}，${order.amount.toLocaleString()} 钻石，${order.status}`} onClick={onSelect}>
       <span className="order-item__info"><strong>{order.id}</strong><small>{order.createdAt}</small></span>
-      <span className="order-item__companion"><AvatarMark initials={order.companionInitials} size="sm" /><strong>{order.companionName}</strong></span>
+      <span className="order-item__companion"><AvatarMark initials={order.companionInitials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong><small>{getOrderClubName(order)}</small></span></span>
       <span className="order-item__service"><strong>{order.gameName} · {order.serviceName}</strong><small>{order.levelName} · {order.durationUnit}服务</small></span>
       <span className="order-item__duration">{order.duration} {order.durationUnit}</span>
       <span className="order-item__price"><strong>{order.unitPrice.toLocaleString()} 钻石 / {order.durationUnit}</strong><small>合计 {order.amount.toLocaleString()} 钻石{order.tipAmount ? `（含加价 ${order.tipAmount}）` : ''}</small></span>
@@ -525,13 +526,13 @@ export function OrderDetailPanel({ order, companion, diamondBalance, onContact, 
 
     <section className="order-detail-section">
       <div className="order-detail-section__heading"><span className="client-eyebrow">陪玩信息</span><button type="button" className="client-button client-button--secondary" onClick={onContact}>联系陪玩</button></div>
-      <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><strong>{order.companionName}</strong><span>{companion ? `${companion.gender} · ${companion.age} 岁 · ${companion.region}` : '陪玩资料'}</span></div></div>
+      <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong><span>{companion ? `${companion.gender} · ${companion.age} 岁 · ${companion.region}` : '陪玩资料'}</span><span>所属俱乐部 · {getOrderClubName(order)}</span></div></div>
       {companion && <div className="order-detail-facts"><span>陪玩 ID</span><strong>{companion.id}</strong></div>}
     </section>
 
     <section className="order-detail-section">
       <div className="order-detail-section__heading"><span className="client-eyebrow">订单信息</span><History size={15} aria-hidden="true" /></div>
-      <div className="order-detail-facts"><span>服务信息</span><strong>{order.gameName} · {order.serviceName} · {order.levelName} · {order.durationUnit}服务</strong><span>服务时长</span><strong>{order.duration} {order.durationUnit}</strong><span>服务单价</span><strong>{order.unitPrice.toLocaleString()} 钻石 / {order.durationUnit}</strong>{Boolean(order.tipAmount) && <><span>加价合计</span><strong>{order.tipAmount?.toLocaleString()} 钻石</strong></>}<span>订单金额</span><strong>{order.amount.toLocaleString()} 钻石</strong>{order.paymentSource && <><span>支付方式</span><strong>{order.paymentSource === 'wallet' ? '钻石钱包' : '尊享卡'}</strong></>}<span>订单备注</span><strong>{order.remark || '无'}</strong></div>
+      <div className="order-detail-facts"><span>服务信息</span><strong>{order.gameName} · {order.serviceName} · {order.levelName} · {order.durationUnit}服务</strong><span>服务时长</span><strong>{order.duration} {order.durationUnit}</strong><span>服务单价</span><strong>{order.unitPrice.toLocaleString()} 钻石 / {order.durationUnit}</strong><span>加价</span><strong>{(order.tipAmount ?? 0).toLocaleString()} 钻石</strong><span>优惠金额</span><strong>{(order.discountAmount ?? 0).toLocaleString()} 钻石</strong><span>订单金额</span><strong>{order.amount.toLocaleString()} 钻石</strong><span>支付方式</span><strong>{order.paymentSource === 'premium-card' ? '尊享卡' : '钻石钱包'}</strong><span>订单备注</span><strong>{order.remark || '无'}</strong></div>
     </section>
 
     <OrderTimeSection title="服务记录" icon={<Clock3 size={15} />} emptyLabel="暂无服务记录" segments={order.serviceSegments} kind="service" />

@@ -1,5 +1,5 @@
 import '@/themes/grayscale-prototype/palette.css'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DocDrawer from './components/DocDrawer'
 import { Sidebar } from './shell/Sidebar'
@@ -7,7 +7,6 @@ import { Topbar } from './shell/Topbar'
 import { useAnnotationController } from './tools/AnnotationController'
 import { pages } from './config/pages'
 import { loadProjectName, loadShortcuts, loadTheme, saveProjectName, saveTheme, type Theme } from './lib/shortcuts'
-import { HomePage } from '@/workspace/HomePage'
 import { ThemeDetailPage } from '@/workspace/ThemeDetailPage'
 import { ThemesListPage } from '@/workspace/ThemesListPage'
 import { DocDetailPage } from '@/workspace/DocDetailPage'
@@ -222,7 +221,7 @@ function AppContent() {
                             )}
                           >
                             <Routes>
-                              <Route path="/" element={<HomePage />} />
+                              <Route path="/" element={<Navigate to="/game-companion-login" replace />} />
                               {pages.map(page => (
                                 <Route
                                   key={page.path}

@@ -8,6 +8,7 @@ export type ProfileCardData = {
   age: number
   userId: string
   rating: number
+  realNameVerified?: boolean
   friendCount?: number
   followingCount?: number
   followerCount?: number
@@ -37,6 +38,7 @@ export function companionToProfileCard(companion: Companion): ProfileCardData {
     age: companion.age,
     userId: companion.id.replace('companion-', 'P-'),
     rating: companion.rating,
+    realNameVerified: companion.realNameVerified,
     friendCount,
     followingCount,
     followerCount,

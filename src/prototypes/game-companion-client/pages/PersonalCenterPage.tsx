@@ -1,20 +1,27 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import { BadgeCheck, Bookmark, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gift, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Pencil, Settings2, Shield, ShieldCheck, Star, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
+import { BadgeCheck, BatteryCharging, Bookmark, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gem, Gift, HandHeart, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Orbit, Pencil, Settings2, Shield, ShieldCheck, Sparkles, Star, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { NotificationSettingsDialog } from '../components/NotificationSettingsDialog'
 import { AvatarMark } from '../components/AvatarMark'
+import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { clubs, games } from '../data/mockData'
 import { type ClientOrder, type PlayerProfile } from '../data/accountMockData'
 import { favoriteClubs, favoriteUsers, favoriteVoiceRooms } from '../data/personalFavoritesMockData'
 import { personalGiftInventory, profileFootprints, profileRoomVisits, profileVisitors } from '../data/personalCenterMockData'
 import { type BlockedProfile, type NotificationPreferences } from '../data/personalSettingsMockData'
+import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
-type CenterSection = 'profile' | 'clubs' | 'onboarding' | 'visits' | 'gifts' | 'favorites'
+type CenterSection = 'profile' | 'clubs' | 'onboarding' | 'visits' | 'gifts' | 'favorites' | 'wealth'
 type VisitTab = 'footprints' | 'visitors' | 'rooms'
 type FavoriteTab = 'clubs' | 'users' | 'rooms'
 type ApplicationKind = 'companion' | 'club'
+type ClubApplicationField = 'entityName' | 'legalPhone' | 'applicationForm' | 'businessLicense' | 'legalIdFront' | 'legalIdBack' | 'authorizationLetter' | 'servicePriceList' | 'afterSalesStandard' | 'clubName' | 'monthlyTurnover' | 'managerName' | 'managerPhone' | 'managerWeChat' | 'managerIdFront' | 'managerIdBack'
+
+const emptyClubApplication: Record<ClubApplicationField, string> = {
+  entityName: '', legalPhone: '', applicationForm: '', businessLicense: '', legalIdFront: '', legalIdBack: '', authorizationLetter: '', servicePriceList: '', afterSalesStandard: '', clubName: '', monthlyTurnover: '', managerName: '', managerPhone: '', managerWeChat: '', managerIdFront: '', managerIdBack: '',
+}
 
 type PersonalCenterProps = {
   pageState: PageState
@@ -40,31 +47,54 @@ type PersonalCenterProps = {
 
 const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }[] = [
   { id: 'profile', label: '个人资料', icon: UserRound },
+  { id: 'wealth', label: '财富等级', icon: Gem },
   { id: 'clubs', label: '我的俱乐部', icon: Building2 },
   { id: 'onboarding', label: '入驻中心', icon: FileBadge2 },
-  { id: 'visits', label: '访问记录', icon: Footprints },
   { id: 'gifts', label: '我的礼物', icon: Gift },
   { id: 'favorites', label: '我的收藏', icon: Bookmark },
+  { id: 'visits', label: '访问记录', icon: Footprints },
 ]
+
+const personalGiftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 
 export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, notifications, onUpdateNotifications, blockedProfiles, onUnblockProfile, onLogout }: PersonalCenterProps) {
   const [section, setSection] = useState<CenterSection>('profile')
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
   const [favoriteTab, setFavoriteTab] = useState<FavoriteTab>('clubs')
+  const [visibleFavoriteClubs, setVisibleFavoriteClubs] = useState(favoriteClubs)
+  const [visibleFavoriteUsers, setVisibleFavoriteUsers] = useState(favoriteUsers)
+  const [visibleFavoriteVoiceRooms, setVisibleFavoriteVoiceRooms] = useState(favoriteVoiceRooms)
   const [editingProfile, setEditingProfile] = useState(false)
   const [profileDraft, setProfileDraft] = useState(profile)
   const [feedback, setFeedback] = useState('')
   const [joinedClubId, setJoinedClubId] = useState<string | null>('club-001')
+  const [clubMembershipStatus, setClubMembershipStatus] = useState<'idle' | 'joining' | 'leaving'>('idle')
   const [choosingClub, setChoosingClub] = useState(false)
-  const [confirmExitClubId, setConfirmExitClubId] = useState<string | null>(null)
+  const [clubApplicationId, setClubApplicationId] = useState<string | null>(null)
+  const [clubJoinReason, setClubJoinReason] = useState('')
+  const [confirmCancelClubApplication, setConfirmCancelClubApplication] = useState(false)
   const [applicationKind, setApplicationKind] = useState<ApplicationKind | null>(null)
   const [applicationName, setApplicationName] = useState('')
   const [applicationGame, setApplicationGame] = useState(games[1]?.id ?? '')
   const [applicationIntro, setApplicationIntro] = useState('')
+  const [clubApplication, setClubApplication] = useState(emptyClubApplication)
   const [applicationSubmitted, setApplicationSubmitted] = useState<Record<ApplicationKind, boolean>>({ companion: false, club: false })
   const [activeSetting, setActiveSetting] = useState<'security' | 'notifications' | 'blacklist' | 'logout' | null>(null)
 
   const joinedClub = useMemo(() => clubs.find((club) => club.id === joinedClubId) ?? null, [joinedClubId])
+
+  useEffect(() => {
+    if (clubMembershipStatus === 'idle' || confirmCancelClubApplication) return
+    const timer = window.setTimeout(() => {
+      if (clubMembershipStatus === 'joining') setFeedback('加入申请已通过')
+      if (clubMembershipStatus === 'leaving') {
+        setJoinedClubId(null)
+        setFeedback('已退出俱乐部')
+      }
+      setClubMembershipStatus('idle')
+    }, 3000)
+    return () => window.clearTimeout(timer)
+  }, [clubMembershipStatus, confirmCancelClubApplication])
 
   const closeProfileEditor = () => {
     setEditingProfile(false)
@@ -82,10 +112,39 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
 
   const submitApplication = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (applicationKind === 'club') {
+      setApplicationSubmitted((current) => ({ ...current, club: true }))
+      setApplicationKind(null)
+      setClubApplication(emptyClubApplication)
+      setFeedback('申请已提交（仅演示）')
+      return
+    }
     if (!applicationKind || !applicationName.trim() || !applicationIntro.trim()) return
     setApplicationSubmitted((current) => ({ ...current, [applicationKind]: true }))
     setApplicationKind(null)
     setFeedback('申请已提交（仅演示）')
+  }
+
+  const submitClubJoinApplication = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const club = clubs.find((item) => item.id === clubApplicationId)
+    if (!club || !clubJoinReason.trim()) return
+    setJoinedClubId(club.id)
+    setClubMembershipStatus('joining')
+    setClubApplicationId(null)
+    setClubJoinReason('')
+    setFeedback(`已提交加入「${club.name}」的申请`)
+  }
+
+  const cancelClubApplication = () => {
+    if (clubMembershipStatus === 'joining') {
+      setJoinedClubId(null)
+      setFeedback('已取消加入申请')
+    } else if (clubMembershipStatus === 'leaving') {
+      setFeedback('已取消退出申请')
+    }
+    setClubMembershipStatus('idle')
+    setConfirmCancelClubApplication(false)
   }
 
   if (pageState !== 'normal') return <div className="client-content account-page"><PageStatePanel state={pageState} title={pageState === 'empty' ? '暂时没有内容' : '页面暂不可用'} description={pageState === 'error' ? '加载遇到问题，请重试。' : '当前没有可展示的内容。'} actionLabel={pageState === 'error' ? '重新加载' : '返回个人中心'} onAction={onRetry} /></div>
@@ -99,14 +158,14 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
         {section === 'profile' && <ProfileOverview profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
         {section === 'clubs' && <section className="personal-module">
           <ModuleHeading title="我的俱乐部" />
-          {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status"><Check size={12} />已加入</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(2)}</span><span><UsersRound size={13} />{joinedClub.companionCount} 位成员</span><span>{joinedClub.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions"><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmExitClubId(joinedClub.id)}>退出俱乐部</button></div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => setChoosingClub(true)} />}
+          {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status">{clubMembershipStatus === 'idle' && <Check size={12} />}{clubMembershipStatus === 'joining' || clubMembershipStatus === 'leaving' ? '待审核' : '已加入'}</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(2)}</span><span><UsersRound size={13} />{joinedClub.companionCount} 位成员</span><span>{joinedClub.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions">{clubMembershipStatus === 'idle' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => { setClubMembershipStatus('leaving'); setFeedback('退出申请已提交，待审核') }}>退出俱乐部</button></> : <><button type="button" className="client-button client-button--secondary" disabled>待审核</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(true)}>取消申请</button></>}</div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => setChoosingClub(true)} />}
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
         </section>}
         {section === 'onboarding' && <section className="personal-module">
           <ModuleHeading title="入驻中心" description="选择申请身份，开始填写资料。" />
           <div className="onboarding-card-grid">
             <OnboardingCard icon={<UserRound size={20} />} title="陪玩入驻" description="提交个人资料与擅长游戏，申请成为平台陪玩。" submitted={applicationSubmitted.companion} onApply={() => { setApplicationKind('companion'); setApplicationName(profile.nickname); setApplicationIntro('') }} />
-            <OnboardingCard icon={<Building2 size={20} />} title="俱乐部入驻" description="提交俱乐部资料，申请在平台展示和招募成员。" submitted={applicationSubmitted.club} onApply={() => { setApplicationKind('club'); setApplicationName(''); setApplicationIntro('') }} />
+            <OnboardingCard icon={<Building2 size={20} />} title="俱乐部入驻" description="提交俱乐部资料，申请在平台展示和招募成员。" submitted={applicationSubmitted.club} onApply={() => { setApplicationKind('club'); setClubApplication(emptyClubApplication) }} />
           </div>
           <p className="personal-demo-note">申请流程仅用于原型演示，不会提交到平台。</p>
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
@@ -117,27 +176,35 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
           <VisitList tab={visitTab} />
         </section>}
         {section === 'gifts' && <section className="personal-module">
-          <ModuleHeading title="我的礼物" count={`${personalGiftInventory.reduce((sum, gift) => sum + gift.count, 0)} 件`} />
-          {personalGiftInventory.length ? <div className="personal-gift-list">{personalGiftInventory.map((gift) => <article className={`personal-gift-tile${gift.count === 0 ? ' is-unlit' : ''}`} key={gift.id} aria-label={`${gift.name}，收到 ${gift.count} 个`}>
-            <Gift size={40} strokeWidth={2.8} aria-hidden="true" />
-            {gift.count > 0 ? <strong>× {gift.count}</strong> : <strong>未点亮</strong>}
-          </article>)}</div> : <EmptyPanel icon={<Gift size={22} />} title="还没有收到礼物" />}
+          <ModuleHeading title="礼物墙" count={`${personalGiftInventory.reduce((sum, gift) => sum + gift.count, 0)} 件`} />
+          {personalGiftInventory.length ? <div className="personal-gift-list">{personalGiftInventory.map((gift, index) => {
+            const GiftIcon = personalGiftIcons[index % personalGiftIcons.length]
+            return <article className={`personal-gift-tile${gift.count === 0 ? ' is-unlit' : ''}`} key={gift.id} aria-label={`${gift.name}，收到 ${gift.count} 个`}>
+              <span className="personal-gift-tile__icon"><GiftIcon size={23} strokeWidth={1.8} aria-hidden="true" /></span>
+              <strong>{gift.name}</strong>
+              <small>{gift.count > 0 ? `×${gift.count}` : '未点亮'}</small>
+            </article>
+          })}</div> : <EmptyPanel icon={<Gift size={22} />} title="还没有收到礼物" />}
         </section>}
         {section === 'favorites' && <section className="personal-module personal-favorites-module">
           <ModuleHeading title="我的收藏" />
           <div className="personal-record-tabs" role="tablist" aria-label="我的收藏类型">
-            {([{ id: 'clubs', label: '关注的俱乐部', count: favoriteClubs.length }, { id: 'users', label: '关注的用户', count: favoriteUsers.length }, { id: 'rooms', label: '收藏的语音房', count: favoriteVoiceRooms.length }] as const).map((tab) => <button type="button" role="tab" aria-selected={favoriteTab === tab.id} className={favoriteTab === tab.id ? 'is-active' : ''} key={tab.id} onClick={() => setFavoriteTab(tab.id)}>{tab.label}<span>{tab.count}</span></button>)}
+            {([{ id: 'clubs', label: '关注的俱乐部', count: visibleFavoriteClubs.length }, { id: 'users', label: '关注的用户', count: visibleFavoriteUsers.length }, { id: 'rooms', label: '收藏的语音房', count: visibleFavoriteVoiceRooms.length }] as const).map((tab) => <button type="button" role="tab" aria-selected={favoriteTab === tab.id} className={favoriteTab === tab.id ? 'is-active' : ''} key={tab.id} onClick={() => setFavoriteTab(tab.id)}>{tab.label}<span>{tab.count}</span></button>)}
           </div>
           <div className="personal-favorite-panel" role="tabpanel">
-            {favoriteTab === 'clubs' && <div className="personal-favorite-grid personal-favorite-grid--clubs">{favoriteClubs.map((club) => <article className="client-card personal-favorite-card" key={club.id}><AvatarMark initials={club.initials} size="md" /><div className="personal-favorite-card__body"><strong>{club.name}</strong><span>{club.game}</span><small><UsersRound size={13} />{club.members} 位成员</small><div className="personal-favorite-tags">{club.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div></article>)}</div>}
-            {favoriteTab === 'users' && <div className="personal-favorite-grid personal-favorite-grid--users">{favoriteUsers.map((user) => <article className="client-card personal-favorite-card" key={user.id}><AvatarMark initials={user.initials} size="md" /><div className="personal-favorite-card__body"><strong>{user.name}</strong><span>{user.detail}</span><small><span className={`personal-favorite-status${user.status === '接单中' ? ' is-available' : ''}`} />{user.status}</small></div></article>)}</div>}
-            {favoriteTab === 'rooms' && <div className="personal-favorite-grid personal-favorite-grid--rooms">{favoriteVoiceRooms.map((room) => <article className="client-card personal-favorite-room" key={room.id}><div className="personal-favorite-room__icon"><Headphones size={19} /></div><div className="personal-favorite-card__body"><strong>{room.name}</strong><span>{room.category}</span><small>{room.owner}<span>{room.occupants}</span></small></div></article>)}</div>}
+            {favoriteTab === 'clubs' && (visibleFavoriteClubs.length ? <div className="personal-favorite-grid personal-favorite-grid--clubs">{visibleFavoriteClubs.map((club) => <article className="client-card personal-favorite-card" key={club.id}><AvatarMark initials={club.initials} size="md" /><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong>{club.name}</strong><button type="button" className="personal-favorite-remove" onClick={() => setVisibleFavoriteClubs((current) => current.filter((item) => item.id !== club.id))}>取消关注</button></div><span>{club.game}</span><small><UsersRound size={13} />{club.members} 位成员</small><div className="personal-favorite-tags">{club.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div></article>)}</div> : <EmptyPanel icon={<Building2 size={22} />} title="暂无关注的俱乐部" />)}
+            {favoriteTab === 'users' && (visibleFavoriteUsers.length ? <div className="personal-favorite-grid personal-favorite-grid--users">{visibleFavoriteUsers.map((user) => <article className="client-card personal-favorite-card" key={user.id}><AvatarMark initials={user.initials} size="md" /><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong><UserNameWithLevel name={user.name} identityId={user.name} /></strong><button type="button" className="personal-favorite-remove" onClick={() => setVisibleFavoriteUsers((current) => current.filter((item) => item.id !== user.id))}>取消关注</button></div><span>{user.detail}</span><small><span className={`personal-favorite-status${user.status === '接单中' ? ' is-available' : ''}`} />{user.status}</small></div></article>)}</div> : <EmptyPanel icon={<UsersRound size={22} />} title="暂无关注的用户" />)}
+            {favoriteTab === 'rooms' && (visibleFavoriteVoiceRooms.length ? <div className="personal-favorite-grid personal-favorite-grid--rooms">{visibleFavoriteVoiceRooms.map((room) => <article className="client-card personal-favorite-room" key={room.id}><div className="personal-favorite-room__icon"><Headphones size={19} /></div><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong>{room.name}</strong><button type="button" className="personal-favorite-remove" onClick={() => setVisibleFavoriteVoiceRooms((current) => current.filter((item) => item.id !== room.id))}>取消收藏</button></div><span>{room.category}</span><small><UserNameWithLevel name={room.owner} identityId={room.owner} /><span>{room.occupants}</span></small></div></article>)}</div> : <EmptyPanel icon={<Headphones size={22} />} title="暂无收藏的语音房" />)}
           </div>
         </section>}
+        {section === 'wealth' && <WealthLevelSection />}
     </main>
 
-    {confirmExitClubId && <DialogPanel overlayId="leave-club-dialog" title="退出俱乐部" description={`退出「${clubs.find((club) => club.id === confirmExitClubId)?.name ?? ''}」后即可加入其他俱乐部。`} onClose={() => setConfirmExitClubId(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmExitClubId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { setJoinedClubId(null); setFeedback('已退出俱乐部'); setConfirmExitClubId(null) }}>确认退出</button></>}><p className="social-dialog-copy">本次演示会立即更新俱乐部状态。</p></DialogPanel>}
-    {choosingClub && <DialogPanel overlayId="choose-club-dialog" title="加入俱乐部" description="选择一个俱乐部加入。" onClose={() => setChoosingClub(false)} width={620} footer={<button type="button" className="client-button client-button--secondary" onClick={() => setChoosingClub(false)}>关闭</button>}><div className="personal-club-picker">{clubs.map((club) => <article className="client-card personal-club-card" key={club.id}><AvatarMark initials={club.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{club.name}</h3></div><p>{club.intro}</p><div className="personal-card-meta"><span><Star size={13} />{club.rating.toFixed(2)}</span><span><UsersRound size={13} />{club.companionCount} 位成员</span><span>{club.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions"><button type="button" className="client-button client-button--primary" onClick={() => { setJoinedClubId(club.id); setChoosingClub(false); setFeedback(`已加入「${club.name}」`) }}>加入</button></div></article>)}</div></DialogPanel>}
+    {choosingClub && <DialogPanel overlayId="choose-club-dialog" title="加入俱乐部" description="选择想要申请加入的俱乐部。" onClose={() => setChoosingClub(false)} width={620} footer={<button type="button" className="client-button client-button--secondary" onClick={() => setChoosingClub(false)}>关闭</button>}><div className="personal-club-picker">{clubs.map((club) => <article className="client-card personal-club-card" key={club.id}><AvatarMark initials={club.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{club.name}</h3></div><p>{club.intro}</p><div className="personal-card-meta"><span><Star size={13} />{club.rating.toFixed(2)}</span><span><UsersRound size={13} />{club.companionCount} 位成员</span><span>{club.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions"><button type="button" className="client-button client-button--primary" onClick={() => { setChoosingClub(false); setClubApplicationId(club.id); setClubJoinReason('') }}>加入</button></div></article>)}</div></DialogPanel>}
+    {clubApplicationId && <DialogPanel overlayId="club-join-application-dialog" title="加入俱乐部申请" description={`申请加入「${clubs.find((club) => club.id === clubApplicationId)?.name ?? ''}」。`} onClose={() => setClubApplicationId(null)} width={560} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setClubApplicationId(null); setChoosingClub(true) }}>返回选择</button><button type="submit" form="club-join-application" className="client-button client-button--primary" disabled={!clubJoinReason.trim()}>提交申请</button></>}>
+      <form id="club-join-application" className="personal-club-application" onSubmit={submitClubJoinApplication}><label className="personal-field">加入原因<textarea required maxLength={200} rows={5} value={clubJoinReason} onChange={(event) => setClubJoinReason(event.target.value)} placeholder="介绍一下你想加入俱乐部的原因" /></label><small>{clubJoinReason.length}/200</small></form>
+    </DialogPanel>}
+    {confirmCancelClubApplication && <DialogPanel overlayId="cancel-club-application-dialog" title="取消申请" description={clubMembershipStatus === 'joining' ? '确认取消加入申请？取消后将不再显示该俱乐部。' : '确认取消退出申请？取消后将继续保留已加入状态。'} onClose={() => setConfirmCancelClubApplication(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(false)}>返回</button><button type="button" className="client-button client-button--primary" onClick={cancelClubApplication}>确认取消申请</button></>}>确定后会立即更新俱乐部状态。</DialogPanel>}
     {editingProfile && <DialogPanel overlayId="edit-player-profile-dialog" title="编辑个人资料" onClose={closeProfileEditor} width={560} footer={<><button type="button" className="client-button client-button--secondary" onClick={closeProfileEditor}>取消</button><button type="submit" form="edit-player-profile" className="client-button client-button--primary" disabled={!profileDraft.nickname.trim()}>保存资料</button></>}>
       <form id="edit-player-profile" className="personal-profile-form" onSubmit={submitProfile}>
         <div className="personal-avatar-editor"><ProfileAvatar profile={profileDraft} size="lg" /><label className="client-button client-button--secondary personal-upload-button"><ImagePlus size={15} />更换头像<input type="file" accept="image/*" aria-label="上传头像图片" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => setProfileDraft((current) => ({ ...current, avatarDataUrl: String(reader.result) })); reader.readAsDataURL(file) }} /></label></div>
@@ -147,13 +214,35 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
         <section className="personal-life-photo-editor personal-field--full" aria-label="编辑生活照"><div className="personal-life-photo-editor__heading"><strong>生活照</strong><label className="client-button client-button--secondary personal-upload-button"><ImagePlus size={14} />添加照片<input type="file" accept="image/*" multiple aria-label="添加生活照，可多选" onChange={(event) => { const files = Array.from(event.currentTarget.files ?? []); event.currentTarget.value = ''; void Promise.all(files.map(readImageFile)).then((images) => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: [...current.lifePhotoDataUrls, ...images] }))).catch(() => setFeedback('部分生活照无法读取，请重新选择')) }} /></label></div><div className="personal-life-photo-grid">{profileDraft.lifePhotoDataUrls.map((image, index) => <div className="personal-life-photo" key={`${index}-${image.slice(-24)}`}><img src={image} alt={`生活照 ${index + 1}`} /><button type="button" aria-label={`移除第 ${index + 1} 张生活照`} onClick={() => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: current.lifePhotoDataUrls.filter((_, photoIndex) => photoIndex !== index) }))}><X size={13} /></button></div>)}</div><small>可一次选择多张，图片只在当前原型会话中预览</small></section>
       </form>
     </DialogPanel>}
-    {applicationKind && <DialogPanel overlayId="onboarding-application-dialog" title={applicationKind === 'companion' ? '陪玩入驻申请' : '俱乐部入驻申请'} description="填写基础资料并提交演示申请。" onClose={() => setApplicationKind(null)} width={560} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setApplicationKind(null)}>取消</button><button type="submit" form="onboarding-application" className="client-button client-button--primary" disabled={!applicationName.trim() || !applicationIntro.trim()}>提交申请</button></>}>
-      <form id="onboarding-application" className="personal-profile-form" onSubmit={submitApplication}>
-        <label className="personal-field">{applicationKind === 'companion' ? '申请昵称' : '俱乐部名称'}<input required maxLength={30} value={applicationName} onChange={(event) => setApplicationName(event.target.value)} /></label>
+    {applicationKind && <DialogPanel overlayId="onboarding-application-dialog" className={applicationKind === 'club' ? 'personal-onboarding-dialog' : ''} title={applicationKind === 'companion' ? '陪玩入驻申请' : '俱乐部入驻申请'} description="填写基础资料并提交演示申请。" onClose={() => setApplicationKind(null)} width={applicationKind === 'club' ? 920 : 560} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setApplicationKind(null)}>取消</button><button type="submit" form="onboarding-application" className="client-button client-button--primary" disabled={applicationKind === 'companion' && (!applicationName.trim() || !applicationIntro.trim())}>提交申请</button></>}>
+      {applicationKind === 'club' ? <form id="onboarding-application" className="club-onboarding-form" onSubmit={submitApplication}>
+        <ApplicationSection title="经营主体">
+          <ApplicationTextField label="经营主体名称" value={clubApplication.entityName} required onChange={(value) => setClubApplication((current) => ({ ...current, entityName: value }))} />
+          <ApplicationTextField label="法人手机号" value={clubApplication.legalPhone} required type="tel" onChange={(value) => setClubApplication((current) => ({ ...current, legalPhone: value }))} />
+          <ApplicationFileField label="入驻申请表" value={clubApplication.applicationForm} required accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, applicationForm: value }))} />
+          <ApplicationFileField label="营业执照" value={clubApplication.businessLicense} required accept=".pdf,.jpg,.jpeg,.png" onChange={(value) => setClubApplication((current) => ({ ...current, businessLicense: value }))} />
+          <ApplicationFileField label="法人身份证（人像面）" value={clubApplication.legalIdFront} required accept="image/*" onChange={(value) => setClubApplication((current) => ({ ...current, legalIdFront: value }))} />
+          <ApplicationFileField label="法人身份证（国徽面）" value={clubApplication.legalIdBack} required accept="image/*" onChange={(value) => setClubApplication((current) => ({ ...current, legalIdBack: value }))} />
+          <ApplicationFileField label="授权委托书" value={clubApplication.authorizationLetter} required accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, authorizationLetter: value }))} />
+          <ApplicationFileField label="服务价目表" value={clubApplication.servicePriceList} required accept=".pdf,.xls,.xlsx,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, servicePriceList: value }))} />
+          <ApplicationFileField label="售后服务标准" value={clubApplication.afterSalesStandard} required accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, afterSalesStandard: value }))} />
+        </ApplicationSection>
+        <ApplicationSection title="俱乐部信息">
+          <ApplicationTextField label="俱乐部名称" value={clubApplication.clubName} required onChange={(value) => setClubApplication((current) => ({ ...current, clubName: value }))} />
+          <ApplicationTextField label="当月流水（元）" value={clubApplication.monthlyTurnover} required type="number" min="0" onChange={(value) => setClubApplication((current) => ({ ...current, monthlyTurnover: value }))} />
+          <ApplicationTextField label="店长姓名" value={clubApplication.managerName} required onChange={(value) => setClubApplication((current) => ({ ...current, managerName: value }))} />
+          <ApplicationTextField label="店长手机号" value={clubApplication.managerPhone} required type="tel" onChange={(value) => setClubApplication((current) => ({ ...current, managerPhone: value }))} />
+          <ApplicationTextField label="店长微信" value={clubApplication.managerWeChat} required onChange={(value) => setClubApplication((current) => ({ ...current, managerWeChat: value }))} />
+          <ApplicationFileField label="店长身份证（人像面）" value={clubApplication.managerIdFront} required accept="image/*" onChange={(value) => setClubApplication((current) => ({ ...current, managerIdFront: value }))} />
+          <ApplicationFileField label="店长身份证（国徽面）" value={clubApplication.managerIdBack} required accept="image/*" onChange={(value) => setClubApplication((current) => ({ ...current, managerIdBack: value }))} />
+        </ApplicationSection>
+        <p className="personal-demo-note">申请状态仅在当前原型会话中展示；文件不上传。</p>
+      </form> : <form id="onboarding-application" className="personal-profile-form" onSubmit={submitApplication}>
+        <label className="personal-field">申请昵称<input required maxLength={30} value={applicationName} onChange={(event) => setApplicationName(event.target.value)} /></label>
         <label className="personal-field">擅长游戏<select value={applicationGame} onChange={(event) => setApplicationGame(event.target.value)}>{games.filter((game) => game.id !== 'all').map((game) => <option key={game.id} value={game.id}>{game.name}</option>)}</select></label>
-        <label className="personal-field personal-field--full">{applicationKind === 'companion' ? '个人介绍' : '俱乐部介绍'}<textarea required maxLength={200} rows={4} value={applicationIntro} onChange={(event) => setApplicationIntro(event.target.value)} placeholder="填写介绍" /></label>
+        <label className="personal-field personal-field--full">个人介绍<textarea required maxLength={200} rows={4} value={applicationIntro} onChange={(event) => setApplicationIntro(event.target.value)} placeholder="填写介绍" /></label>
         <p className="personal-demo-note personal-field--full">申请状态仅在当前原型会话中展示，不代表正式审核结果。</p>
-      </form>
+      </form>}
     </DialogPanel>}
     {activeSetting === 'security' && <AccountSecurityDialog phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'notifications' && <NotificationSettingsDialog preferences={notifications} onChange={onUpdateNotifications} onClose={() => setActiveSetting(null)} />}
@@ -174,10 +263,15 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
   onFeedback: (feedback: string) => void
   onOpenSetting: (setting: 'security' | 'notifications' | 'blacklist' | 'logout') => void
 }) {
-  const [playerIdCopied, setPlayerIdCopied] = useState(false)
+  const [playerIdCopyFeedback, setPlayerIdCopyFeedback] = useState('')
   const [lifePhotoIndex, setLifePhotoIndex] = useState(0)
   const lifePhotoCount = profile.lifePhotoDataUrls.length
   const visibleLifePhotoIndex = lifePhotoCount ? lifePhotoIndex % lifePhotoCount : 0
+  useEffect(() => {
+    if (!playerIdCopyFeedback) return
+    const timer = window.setTimeout(() => setPlayerIdCopyFeedback(''), 1800)
+    return () => window.clearTimeout(timer)
+  }, [playerIdCopyFeedback])
   useEffect(() => {
     if (lifePhotoCount < 2) return
     const timer = window.setInterval(() => setLifePhotoIndex((index) => (index % lifePhotoCount + 1) % lifePhotoCount), 3000)
@@ -193,7 +287,7 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
   ]
   return <section className="personal-module personal-profile-module">
     <ModuleHeading title="个人资料" action={<button type="button" className="client-button client-button--secondary" onClick={onEdit}><Pencil size={14} />编辑资料</button>} />
-    <section className="client-card account-profile-card personal-profile-card"><ProfileAvatar profile={profile} size="lg" /><div className="account-profile-card__identity"><h2>{profile.nickname}</h2><span>{profile.gender} · {calculateAge(profile.birthday)} 岁 · 生日 {profile.birthday || '未设置'}</span><div className="personal-user-id"><span>用户 ID：{profile.userId}</span><button type="button" onClick={() => { void (async () => { try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(profile.userId); setPlayerIdCopied(true) } catch { setPlayerIdCopied(false); onFeedback('复制失败，请重试。') } })() }} aria-label={`复制用户 ID ${profile.userId}`}>{playerIdCopied ? <><Check size={13} />已复制</> : <><Copy size={13} />复制</>}</button></div><p className="personal-profile-signature">{profile.signature || '暂无签名'}</p></div><div className="account-social-stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} /><Metric label="粉丝" value={profile.followers} /></div></section>
+    <section className="client-card account-profile-card personal-profile-card"><ProfileAvatar profile={profile} size="lg" /><div className="account-profile-card__identity"><div className="personal-profile-name"><h2><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></h2></div><div className="personal-profile-meta"><span aria-label={`${profile.gender}，${calculateAge(profile.birthday)}岁`}>{profile.gender === '女' ? '♀' : profile.gender === '男' ? '♂' : profile.gender}{calculateAge(profile.birthday)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div><div className="personal-user-id"><button type="button" className="client-profile-popover__user-id" onClick={() => { void (async () => { try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(profile.userId); setPlayerIdCopyFeedback('复制成功') } catch { setPlayerIdCopyFeedback('复制失败，请重试') } })() }} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{playerIdCopyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{playerIdCopyFeedback === '复制成功' && <Check size={12} />}{playerIdCopyFeedback}</span>}</div><p className="personal-profile-signature">{profile.signature || '暂无签名'}</p></div><div className="account-social-stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} /><Metric label="粉丝" value={profile.followers} /></div></section>
     <div className="personal-account-overview">
       <section className="client-card personal-life-photos"><header><h3>生活照</h3><div className="personal-life-photo-controls"><span>{lifePhotoCount ? `${visibleLifePhotoIndex + 1} / ${lifePhotoCount}` : '0 张'}</span><button type="button" aria-label="上一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex - 1 + lifePhotoCount) % lifePhotoCount)}><ChevronLeft size={15} /></button><button type="button" aria-label="下一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex + 1) % lifePhotoCount)}><ChevronRight size={15} /></button></div></header>{lifePhotoCount ? <div className="personal-life-photo-stage"><img src={profile.lifePhotoDataUrls[visibleLifePhotoIndex]} alt={`生活照 ${visibleLifePhotoIndex + 1}`} /></div> : <p>暂无生活照</p>}</section>
       <div className="personal-summary-stack">
@@ -202,6 +296,26 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
       </div>
     </div>
     <section className="client-card account-settings-card"><div className="client-section-heading"><div><span className="client-eyebrow">账户偏好</span><h2>常用设置</h2></div><UserRound size={18} className="client-muted" /></div><div className="account-settings-list">{settings.map((item) => <button type="button" key={item.id} onClick={() => onOpenSetting(item.id as 'security' | 'notifications' | 'blacklist' | 'logout')}><item.icon size={17} /><span>{item.label}</span><ChevronRight size={16} /></button>)}</div>{feedback && <FeedbackMessage>{feedback}<button type="button" onClick={() => onFeedback('')} aria-label="关闭提示"><X size={14} /></button></FeedbackMessage>}</section>
+  </section>
+}
+
+function WealthLevelSection() {
+  const current = wealthLevels.find((item) => item.level === currentWealthLevel) ?? wealthLevels[0]
+  const next = wealthLevels.find((item) => item.level === currentWealthLevel + 1)
+  const progress = next ? Math.min(100, Math.max(0, ((currentWealthValue - current.requiredWealth) / (next.requiredWealth - current.requiredWealth)) * 100)) : 100
+  const benefits = [
+    { key: 'profileStyle', label: '资料卡标识' },
+    { key: 'entranceEffect', label: '进场效果' },
+    { key: 'weeklyGift', label: '每周礼物' },
+    { key: 'giftDiscount', label: '赠礼优惠' },
+  ] as const
+  return <section className="personal-module personal-wealth-module">
+    <ModuleHeading title="财富等级" />
+    <section className="client-card personal-wealth-current">
+      <div className="personal-wealth-current__level"><span className="personal-wealth-badge personal-wealth-badge--large"><Gem size={19} />V{currentWealthLevel}</span><div><span className="client-eyebrow">当前财富等级</span><h3>V{currentWealthLevel} · {current.profileStyle}</h3></div></div>
+      <div className="personal-wealth-current__progress"><div><span>财富值</span><strong>{currentWealthValue.toLocaleString()}</strong></div><div className="personal-wealth-progress" role="progressbar" aria-label="升级进度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}><span style={{ width: `${progress}%` }} /></div><small>{next ? `再获得 ${(next.requiredWealth - currentWealthValue).toLocaleString()} 财富值升至 V${next.level}` : '已达到最高等级'}</small></div>
+    </section>
+    <section className="client-card personal-wealth-benefits"><div className="client-section-heading"><div><span className="client-eyebrow">等级对比</span><h2>等级权益</h2></div></div><div className="personal-wealth-table-wrap"><table className="personal-wealth-table"><thead><tr><th scope="col">等级</th><th scope="col">所需财富值</th>{benefits.map((benefit) => <th scope="col" key={benefit.key}>{benefit.label}</th>)}</tr></thead><tbody>{wealthLevels.map((level) => <tr key={level.level} className={level.level === currentWealthLevel ? 'is-current' : undefined}><th scope="row"><span className="personal-wealth-badge"><Gem size={12} />V{level.level}</span>{level.level === currentWealthLevel && <small>当前</small>}</th><td>{level.requiredWealth.toLocaleString()}</td>{benefits.map((benefit) => <td key={benefit.key}>{level[benefit.key]}</td>)}</tr>)}</tbody></table></div><p className="personal-demo-note">财富等级与权益为本地 mock 展示。</p></section>
   </section>
 }
 
@@ -288,7 +402,7 @@ function BlacklistDialog({ profiles, onRemove, onClose }: { profiles: BlockedPro
   const [removedId, setRemovedId] = useState<string | null>(null)
   const visibleProfiles = profiles.filter((profile) => profile.id !== removedId)
   return <DialogPanel overlayId="profile-blacklist-dialog" title="黑名单" description="移除后可重新查看资料并发起私聊，历史消息会保留。" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
-    {visibleProfiles.length ? <div className="personal-blacklist-list">{visibleProfiles.map((profile) => <article key={profile.id}><AvatarMark initials={profile.initials} size="sm" /><div><strong>{profile.name}</strong><small>{profile.kind} · ID：{profile.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => { onRemove(profile.id); setRemovedId(profile.id) }}>移除</button></article>)}</div> : <div className="personal-blacklist-empty"><Shield size={24} /><strong>黑名单为空</strong><span>被拉黑的玩家和陪玩会显示在这里</span></div>}
+    {visibleProfiles.length ? <div className="personal-blacklist-list">{visibleProfiles.map((profile) => <article key={profile.id}><AvatarMark initials={profile.initials} size="sm" /><div><strong><UserNameWithLevel name={profile.name} identityId={profile.profileId} /></strong><small>{profile.kind} · ID：{profile.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => { onRemove(profile.id); setRemovedId(profile.id) }}>移除</button></article>)}</div> : <div className="personal-blacklist-empty"><Shield size={24} /><strong>黑名单为空</strong><span>被拉黑的玩家和陪玩会显示在这里</span></div>}
   </DialogPanel>
 }
 
@@ -331,10 +445,22 @@ function OnboardingCard({ icon, title, description, submitted, onApply }: { icon
   return <article className="client-card onboarding-card"><span className="onboarding-card__icon">{icon}</span><div><div className="personal-card-title"><h3>{title}</h3>{submitted && <span className="personal-status"><BadgeCheck size={13} />已提交</span>}</div><p>{description}</p></div><button type="button" className="client-button client-button--primary" onClick={onApply}>{submitted ? '再次申请' : '开始申请'}<ChevronRight size={15} /></button></article>
 }
 
+function ApplicationSection({ title, children }: { title: string; children: ReactNode }) {
+  return <section className="club-onboarding-section"><h3>{title}</h3><div className="club-onboarding-section__fields">{children}</div></section>
+}
+
+function ApplicationTextField({ label, value, onChange, type = 'text', required = false, min }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; min?: string }) {
+  return <label className="club-onboarding-field"><span>{label}</span><input type={type} min={min} required={required} value={value} onChange={(event) => onChange(event.target.value)} /></label>
+}
+
+function ApplicationFileField({ label, value, onChange, accept, required = false }: { label: string; value: string; onChange: (value: string) => void; accept: string; required?: boolean }) {
+  return <label className="club-onboarding-field"><span>{label}</span><span className={`club-onboarding-file${value ? ' has-file' : ''}`}><span className="club-onboarding-file__name">{value || '选择文件'}</span><span className="club-onboarding-file__action">浏览</span><input type="file" accept={accept} required={required} aria-label={label} onChange={(event) => onChange(event.currentTarget.files?.[0]?.name ?? '')} /></span></label>
+}
+
 function VisitList({ tab }: { tab: VisitTab }) {
   const records = tab === 'footprints' ? profileFootprints : tab === 'visitors' ? profileVisitors : profileRoomVisits
   const emptyText = tab === 'visitors' ? '还没有访客记录' : tab === 'rooms' ? '还没有进房记录' : '还没有浏览足迹'
-  return records.length ? <div className="personal-visit-list">{records.map((record) => <article className="client-card personal-visit-row" key={record.id}><AvatarMark initials={record.initials} size="sm" /><div className="personal-visit-row__main"><strong>{record.name}</strong><small>{record.detail}</small></div><time>{record.time}</time>{tab === 'rooms' && <span className="personal-record-kind"><UsersRound size={13} />语音房</span>}</article>)}</div> : <EmptyPanel icon={<History size={22} />} title={emptyText} />
+  return records.length ? <div className="personal-visit-list">{records.map((record) => <article className="client-card personal-visit-row" key={record.id}><AvatarMark initials={record.initials} size="sm" /><div className="personal-visit-row__main"><strong>{tab === 'rooms' ? record.name : <UserNameWithLevel name={record.name} identityId={record.name} />}</strong><small>{record.detail}</small></div><time>{record.time}</time>{tab === 'rooms' && <span className="personal-record-kind"><UsersRound size={13} />语音房</span>}</article>)}</div> : <EmptyPanel icon={<History size={22} />} title={emptyText} />
 }
 
 function EmptyPanel({ icon, title, action, actionClassName = 'client-button--secondary', onAction }: { icon: ReactNode; title: string; action?: string; actionClassName?: string; onAction?: () => void }) {

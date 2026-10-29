@@ -76,6 +76,8 @@
 }
 .workbench-order-table-row { width:100%; border-right:0; border-bottom:0; border-left:0; border-radius:0; color:inherit; font:inherit; text-align:left; cursor:pointer; }
 .workbench-order-table-row:focus-visible { outline:2px solid var(--prototype-text-muted, #6b7280); outline-offset:-2px; }
+.workbench-order-table-row__status { display:grid; justify-items:start; gap:5px; }
+.workbench-order-table-row__status small { color:var(--client-muted); font-size:10px; }
 
 .workbench-services-panel { display:grid; grid-template-columns:200px minmax(0,1fr); height:640px; min-height:0; overflow:hidden; }
 .workbench-services-games { display:flex; flex-direction:column; gap:4px; min-height:0; overflow-y:auto; padding:12px; border-right:1px solid var(--client-border); }
@@ -118,6 +120,9 @@
 .workbench-waiver-field { display:grid; gap:10px; margin:20px 0; font-size:14px; }
 .workbench-waiver-field input { min-height:36px; padding:8px 12px; border:1px solid var(--client-border); border-radius:6px; }
 .workbench-waiver-field small { color:var(--client-muted); font-size:12px; }
+.workbench-early-end-summary { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--client-border); border-radius:6px; padding:11px 12px; background:var(--prototype-surface-muted, #f9fafb); font-size:12px; }
+.workbench-early-end-summary strong { font-weight:500; color:var(--client-muted); }
+.workbench-early-end-summary span { font-weight:600; text-align:right; }
 
-.workbench-orders-table .order-list-header, .workbench-orders-table .order-item { grid-template-columns:minmax(120px,1fr) minmax(105px,.8fr) minmax(180px,1.5fr) minmax(60px,.5fr) minmax(130px,1fr) minmax(100px,.7fr) minmax(170px,1.2fr); }
+.workbench-orders-table .order-list-header, .workbench-orders-table .order-item { grid-template-columns:minmax(120px,1fr) minmax(105px,.8fr) minmax(180px,1.5fr) minmax(60px,.5fr) minmax(130px,1fr) minmax(100px,.7fr) minmax(200px,1.4fr); }
 .workbench-orders-table .order-item__main { grid-column:1 / 7; grid-template-columns:minmax(120px,1fr) minmax(105px,.8fr) minmax(180px,1.5fr) minmax(60px,.5fr) minmax(130px,1fr) minmax(100px,.7fr); }

@@ -83,7 +83,7 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
       return
     }
     setCodeSent(true)
-    setNotice('演示验证码：246810')
+    setNotice('验证码已发送')
   }
 
   const submitPhoneLogin = (event: FormEvent<HTMLFormElement>) => {
@@ -101,8 +101,8 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
       setError('请先获取验证码。')
       return
     }
-    if (code !== '246810') {
-      setError('验证码不正确，请检查后重试。')
+    if (!/^\d{6}$/.test(code)) {
+      setError('请输入 6 位验证码。')
       return
     }
     navigate('/game-companion-client')

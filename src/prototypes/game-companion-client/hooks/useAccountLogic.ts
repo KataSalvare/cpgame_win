@@ -68,7 +68,7 @@ export function useAccountLogic() {
     const discountedSubtotal = Math.round(serviceSubtotal * (paymentCard?.serviceDiscountRate ?? 1))
     const expectedAmount = discountedSubtotal + tipAmount
     if (!Number.isInteger(quantity) || quantity <= 0 || !Number.isInteger(tipAmount) || tipAmount < 0 || !Number.isInteger(amount) || amount !== expectedAmount || amount > availableBalance || (paymentSource === 'premium-card' && !paymentCard)) return null
-    const order = makeClientOrder(service, companion, gameName, quantity, amount, remark, selectedCompanions.filter((item) => item.id !== companion.id), tipAmount, paymentSource, paymentCard?.id)
+    const order = makeClientOrder(service, companion, gameName, quantity, amount, remark, selectedCompanions.filter((item) => item.id !== companion.id), tipAmount, paymentSource, paymentCard?.id, serviceSubtotal - discountedSubtotal)
     if (paymentSource === 'wallet') {
       setDiamondBalance((balance) => balance - amount)
       setDiamondTransactions((current) => [{ id: order.id, title: `订单消费 · ${service.playName}${tipAmount > 0 ? `（含加价 ${tipAmount}）` : ''}`, date: order.createdAt, amount: -amount }, ...current])

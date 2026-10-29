@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, ChevronLeft, ChevronRight, Gift, MessageCircle, Star } from 'lucide-react'
+import { ArrowLeft, BatteryCharging, ChevronLeft, ChevronRight, Gift, HandHeart, MessageCircle, Orbit, Sparkles, Star, UsersRound } from 'lucide-react'
 import type { Companion } from '../data/mockData'
 import { games, gifts, reviews, servicesByCompanion } from '../data/mockData'
 import { useCompanionDetailLogic } from '../hooks/useCompanionDetailLogic'
@@ -11,6 +11,7 @@ import { PageStatePanel } from '../components/PageStatePanel'
 import { VoiceMessageButton } from '../components/VoiceMessageButton'
 
 type Props = {
+  onShare?: (friendIds: string[]) => void
   companion: Companion
   pageState: 'normal' | 'loading' | 'empty' | 'error'
   onBack: () => void
@@ -30,8 +31,10 @@ type Props = {
 
 type DetailTab = 'services' | 'reviews' | 'gifts'
 const tabNames: Record<DetailTab, string> = { services: '服务', reviews: '评价', gifts: '礼物' }
+const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
+const receivedGiftCount = gifts.reduce((total, gift) => total + gift.count, 0)
 
-export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, onGift, followed, blocked, onToggleFollow, onBlock, note, onSaveNote }: Props) {
+export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, onGift, followed, blocked, onToggleFollow, onBlock, note, onSaveNote, onShare }: Props) {
   const [activeTab, setActiveTab] = useState<DetailTab>('services')
   const logic = useCompanionDetailLogic(companion.id)
   const totalServiceCount = servicesByCompanion[companion.id]?.length ?? 0
@@ -51,12 +54,12 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
 
   return <div className={`client-content companion-detail-page${presentation === 'panel' ? ' companion-detail-page--panel' : ''}`}>
     {presentation !== 'panel' && <button type="button" className="client-back-link" onClick={onBack} aria-label="返回俱乐部详情"><ArrowLeft size={16} /> 俱乐部</button>}
-    <CompanionProfileCard profile={{ ...companionToProfileCard(companion), ...profileOverride }} onChat={onChat} followed={followed} blocked={blocked} onToggleFollow={onToggleFollow} onBlock={onBlock} note={note} onSaveNote={onSaveNote} />
+    <CompanionProfileCard onShare={onShare} profile={{ ...companionToProfileCard(companion), ...profileOverride }} onChat={onChat} followed={followed} blocked={blocked} onToggleFollow={onToggleFollow} onBlock={onBlock} note={note} onSaveNote={onSaveNote} />
 
     <section className="companion-detail-content">
       <div className="companion-tabs" role="tablist" aria-label="陪玩详情内容">
         {(Object.keys(tabNames) as DetailTab[]).map((tab) => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} className={`companion-tabs__tab${activeTab === tab ? ' is-active' : ''}`} onClick={() => setActiveTab(tab)}>
-          {tabNames[tab]}<span>{tab === 'services' ? totalServiceCount : tab === 'reviews' ? reviews.length : gifts.length}</span>
+          {tabNames[tab]}<span>{tab === 'services' ? totalServiceCount : tab === 'reviews' ? reviews.length : receivedGiftCount}</span>
         </button>)}
       </div>
 
@@ -67,9 +70,9 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
             {presentation === 'panel' ? <div className="service-offer-list">{logic.pageServices.map((service) => {
               const game = games.find((item) => item.id === service.gameId)
               return <article className="service-offer" key={service.id}>
-              <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small>{service.playName}</small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></div>
+              <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small className="service-offer__play-level"><span>{service.playName}</span><span aria-label={`等级：${service.levelName}`}>{service.levelName}</span></small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></div>
               {service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}
-                <div className="service-offer__facts"><span><small>等级</small>{service.levelName}</span><span><small>服务单数</small>{service.orderCount}</span><span><small>评分</small><span className="rating-mark"><Star size={12} />{service.rating.toFixed(2)}</span></span><strong>{service.price} 钻石 / {service.unit}</strong></div>
+                <div className="service-offer__facts"><span><small>单价</small><strong className="service-offer__price">{service.price} 钻石 / {service.unit}</strong></span><span><small>服务单数</small>{service.orderCount}</span><span><small>评分</small><span className="rating-mark"><Star size={12} />{service.rating.toFixed(2)}</span></span></div>
               </article>
             })}</div> : <div className="service-table-wrap">
               <table className="service-table">
@@ -98,15 +101,17 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
           </article>)}</div>
         </section>}
 
-        {activeTab === 'gifts' && <section className="detail-list-section" aria-labelledby="gifts-title">
-          <div className="client-section-heading"><h2 id="gifts-title">礼物</h2><span className="client-count">{gifts.length} 种</span></div>
-          <div className="gift-grid">{gifts.map((gift) => <article className="client-card gift-card" key={gift.id}><span className="gift-card__mark">{gift.initials}</span><div><h3>{gift.name}</h3><p>{gift.description}</p><span className="client-muted">收到 {gift.count} 次</span></div></article>)}</div>
+        {activeTab === 'gifts' && <section className="detail-list-section" aria-label="礼物墙">
+          <div className="gift-wall">{gifts.map((gift, index) => {
+            const GiftIcon = giftIcons[index % giftIcons.length]
+            return <article className="gift-wall__item" key={gift.id} aria-label={`${gift.name}，收到 ${gift.count} 个`}><span className="gift-wall__art" aria-hidden="true"><GiftIcon size={38} strokeWidth={1.5} /></span><h3>{gift.name}</h3><span className="gift-wall__count">×{gift.count}</span></article>
+          })}</div>
         </section>}
       </div>
     </section>
     <footer className="companion-detail-page__actions" aria-label="陪玩操作">
       <button type="button" className={`client-button client-button--secondary${followed ? ' is-followed' : ''}`} aria-pressed={Boolean(followed)} onClick={onToggleFollow}><Star size={15} />{followed ? '已关注' : '关注'}</button>
-      <button type="button" className="client-button client-button--primary" onClick={onChat}><MessageCircle size={15} />聊一聊</button>
+      <button type="button" className="client-button client-button--primary" onClick={onChat}><MessageCircle size={15} />找TA开黑</button>
       <button type="button" className="client-button client-button--secondary" onClick={(event) => onGift?.(event.currentTarget)}><Gift size={15} />送礼</button>
     </footer>
   </div>

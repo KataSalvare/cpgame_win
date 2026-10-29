@@ -4,7 +4,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, Gamepad2, Headphones, History, MessageCircle, Search, Sparkles, Swords, UserRound, WalletCards } from 'lucide-react'
+import { Bell, Building2, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Sparkles, Swords, UserRound, WalletCards } from 'lucide-react'
 import { DialogPanel, RightDrawer, WindowsClientFrame, WindowsSidebar, WindowsTitleBar } from '@/components/WindowsClient'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 import { playerProfile, type PlayerProfile } from './data/accountMockData'
@@ -27,6 +27,7 @@ import { ClubGroupsPanel } from './pages/ClubGroupsPanel'
 import { MatchPanel } from './pages/MatchPanel'
 import { useMatchLogic } from './hooks/useMatchLogic'
 import { GlobalSearchPanel, type GlobalSearchUser } from './components/GlobalSearchPanel'
+import { UserNameWithLevel } from './components/UserNameWithLevel'
 import { currentSocialUser, initialVoiceCallNotifications, socialFriends, type VoiceCallNotification } from './data/socialMockData'
 import { LoginPage } from './pages/LoginPage'
 import { IdentityVerificationFlow } from './pages/IdentityVerificationFlow'
@@ -40,6 +41,7 @@ import { WorkbenchOrderActionDialog } from './components/WorkbenchOrderActionDia
 import { WorkbenchOrderDetailPanel } from './components/WorkbenchOrderDetailPanel'
 import { WorkbenchPage } from './pages/WorkbenchPage'
 import { useWorkbenchLogic } from './hooks/useWorkbenchLogic'
+import clubAdminDashboardReference from './assets/club-admin-dashboard-reference.png'
 import './workbench.css'
 import './style.css'
 
@@ -58,6 +60,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
   const [platformSupportOpen, setPlatformSupportOpen] = useState(false)
   const [clubSupportChatOpen, setClubSupportChatOpen] = useState(false)
+  const [clubAdminPreviewOpen, setClubAdminPreviewOpen] = useState(false)
   const closePlatformSupport = useCallback(() => setPlatformSupportOpen(false), [])
   const [isMatching, setIsMatching] = useState(false)
   const [checkoutRechargeOpen, setCheckoutRechargeOpen] = useState(false)
@@ -203,9 +206,10 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         { id: 'wallet', label: '我的钱包', icon: <WalletCards size={16} />, group: 'account' },
         { id: 'orders', label: '我的订单', icon: <History size={16} />, group: 'account' },
         { id: 'workbench', label: '陪玩工作台', icon: <Gamepad2 size={16} />, group: 'workbench', groupTitle: '', badge: workbench.pending },
+        { id: 'club-admin', label: '俱乐部后台', icon: <LayoutDashboard size={16} />, group: 'workbench' },
       ]}
       activeId={matchPanelOpen || isMatching ? 'quick-match' : activeNavId}
-      onSelect={(id) => id === 'quick-match' ? setMatchPanelOpen(true) : id === 'home' ? navigation.goHome() : id === 'voice-room' ? navigation.goToVoiceRoom('personal') : navigation.goToPage(id as 'workbench' | 'talents' | 'profile' | 'wallet' | 'orders' | 'messages' | 'announcements')}
+      onSelect={(id) => id === 'club-admin' ? setClubAdminPreviewOpen(true) : id === 'quick-match' ? setMatchPanelOpen(true) : id === 'home' ? navigation.goHome() : id === 'voice-room' ? navigation.goToVoiceRoom('personal') : navigation.goToPage(id as 'workbench' | 'talents' | 'profile' | 'wallet' | 'orders' | 'messages' | 'announcements')}
       footer={<>{voiceRoomMinimized && <button type="button" className="voice-minimized-float" onClick={() => { setVoiceRoomMinimized(false); window.sessionStorage.removeItem('voice-room-minimized'); navigation.goToPage('voice-room') }}><Headphones size={17} /><span>语音聊天中</span><small>点击返回语音房</small><span className="voice-minimized-float__wave" aria-hidden="true"><i /><i /><i /><i /></span></button>}<ProfileQuickPanel profile={profile} diamondBalance={account.diamondBalance} beanBalance={account.beanBalance} orderCount={account.orders.length} onNavigate={(action) => navigation.goToPage(action)}>{profile.avatarDataUrl ? <img src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" />}</ProfileQuickPanel></>}
     />}
     rightPanel={navigation.page === 'workbench' && pageState === 'normal' && workbench.selectedOrder ? <RightDrawer mode="inline" title="订单详情" description={workbench.selectedOrder.id} onClose={() => workbench.setSelectedOrderId(null)} className="game-order-drawer" width="100%"><WorkbenchOrderDetailPanel logic={workbench} /></RightDrawer> : navigation.panel === 'club-announcements' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部公告" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} presentation="panel" /></RightDrawer> : navigation.panel === 'club-groups' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部群聊" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><ClubGroupsPanel club={navigation.club} groups={social.clubGroups.filter((group) => group.clubId === navigation.clubId)} onApply={social.applyToClubGroup} onOpenChat={(groupId) => { social.openClubGroupChat(groupId); navigation.goToPage('messages') }} /></RightDrawer> : navigation.panel === 'diamond-ledger' ? <RightDrawer mode="inline" title="钻石明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.diamondTransactions} /></RightDrawer> : navigation.panel === 'bean-ledger' ? <RightDrawer mode="inline" title="糖豆明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.beanTransactions} /></RightDrawer> : premiumCardsDrawer ? premiumCardsDrawer : navigation.panel === 'coupons' ? <RightDrawer mode="inline" title="我的优惠券" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><CouponsPage pageState={pageState} onRetry={() => setPageState('normal')} coupons={account.coupons} onBack={navigation.closePanel} /></RightDrawer> : (navigation.page === 'club-detail' || navigation.page === 'talents') && navigation.companion ? <RightDrawer
@@ -225,6 +229,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         blocked={social.blockedProfileIds.includes(navigation.companion.id)}
         note={social.profileNotes[navigation.companion.id] ?? ''}
         onSaveNote={(note) => social.setProfileNote(navigation.companion!.id, note)}
+        onShare={(friendIds) => social.shareCompanionToFriends(navigation.companion!.id, friendIds)}
         onToggleFollow={() => social.toggleProfileFollow(navigation.companion!.id)}
         onBlock={() => social.blockProfile(navigation.companion!.id)}
         onGift={(anchor) => openGiftPanel([], { id: navigation.companion!.id, name: navigation.companion!.name, initials: navigation.companion!.initials, profileId: navigation.companion!.id.replace('companion-', 'P-') }, anchor)}
@@ -249,6 +254,9 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     rightPanelWidth="var(--client-profile-drawer-width)"
     overlayLayer={<>
       {workbench.orderAction && <WorkbenchOrderActionDialog key={`${workbench.orderAction.id}-${workbench.orderAction.action}`} logic={workbench} />}
+      {clubAdminPreviewOpen && <DialogPanel overlayId="club-admin-dashboard-preview" title="俱乐部后台" onClose={() => setClubAdminPreviewOpen(false)} width={1680} className="club-admin-preview-dialog">
+        <img src={clubAdminDashboardReference} alt="俱乐部后台工作台示例" />
+      </DialogPanel>}
       <PlatformSupportDialog open={platformSupportOpen} onClose={closePlatformSupport} />
       {clubSupportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={account.orders} onClose={() => setClubSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}
       <MatchPanel
@@ -301,7 +309,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         <div className="voice-call-invite-list" role="radiogroup" aria-label="选择要加入的用户房间">{voiceCallNotifications.map((invite) => <label className={`voice-call-invite${selectedVoiceCallId === invite.id ? ' is-selected' : ''}`} key={invite.id}>
           <input type="radio" name="voice-call-invite" value={invite.id} checked={selectedVoiceCallId === invite.id} onChange={() => setSelectedVoiceCallId(invite.id)} />
           <AvatarMark initials={invite.callerInitials} size="sm" />
-          <span className="voice-call-invite__content"><strong>{invite.callerName}</strong><small>{invite.roomName} · {invite.channelName}</small></span>
+          <span className="voice-call-invite__content"><strong><UserNameWithLevel name={invite.callerName} identityId={invite.callerName} /></strong><small>{invite.roomName} · {invite.channelName}</small></span>
           <span className="voice-call-invite__action">加入</span>
         </label>)}</div>
       </DialogPanel>}

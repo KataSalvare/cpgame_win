@@ -4,6 +4,7 @@ import type { Club } from '../data/mockData'
 import type { ClientOrder } from '../data/accountMockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { FollowIconButton } from '../components/FollowIconButton'
+import { ClubInfoDialog, ClubMoreActions, type ClubInfoTab } from '../components/ClubMoreActions'
 import { CompanionDirectory } from '../components/CompanionDirectory'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
@@ -29,6 +30,7 @@ type Props = {
 
 export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, social, orders, onRetry }: Props) {
   const [supportChatOpen, setSupportChatOpen] = useState(false)
+  const [clubInfoTab, setClubInfoTab] = useState<ClubInfoTab | null>(null)
   if (pageState !== 'normal') {
     return <div className="client-content client-content--narrow-state">
       <button type="button" className="client-back-link" onClick={onBack} aria-label="返回首页"><ArrowLeft size={16} /> 首页</button>
@@ -54,7 +56,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
           <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
           <p>{club.intro}</p>
         </div>
-        <FollowIconButton followed={social.followedClubIds.includes(club.id)} name={club.name} onToggle={() => social.toggleClubFollow(club.id)} />
+        <div className="club-profile-card__tools"><FollowIconButton followed={social.followedClubIds.includes(club.id)} name={club.name} onToggle={() => social.toggleClubFollow(club.id)} /><ClubMoreActions club={club} followed={social.followedClubIds.includes(club.id)} onToggleFollow={() => social.toggleClubFollow(club.id)} onOpenInfo={setClubInfoTab} /></div>
       </div>
       <div className="club-profile-card__actions" role="group" aria-label="俱乐部操作">
         <div className="club-profile-card__primary-actions" role="group" aria-label="主要操作">
@@ -64,8 +66,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
         <div className="club-profile-card__secondary-actions" role="group" aria-label="俱乐部服务">
         <DisplayAction icon={<Headphones size={15} />} label="客服" onClick={() => { setSupportChatOpen(true); social.markConversationRead('direct-club-support') }} />
         <DisplayAction icon={<ShieldCheck size={15} />} label="尊享卡" onClick={onOpenPremiumCards} />
-        <DisplayAction icon={<Star size={15} />} label="优惠券" />
-        <DisplayAction icon={<Star size={15} />} label="价目表" />
+        <DisplayAction icon={<Star size={15} />} label="价目表" onClick={() => setClubInfoTab('pricing')} />
         </div>
         <div className="club-profile-card__community-actions" role="group" aria-label="俱乐部动态">
         <DisplayAction icon={<Bell size={15} />} label="俱乐部公告" onClick={onOpenAnnouncements} />
@@ -75,6 +76,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
     </section>
 
     <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} onOrderWithCompanion={onOrderWithCompanion} />
+    {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
     {supportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={orders} onClose={() => setSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}
   </div>
 }

@@ -3,11 +3,11 @@ import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as Rea
 import {
   Bell, Megaphone, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Globe2, Headphones, MessageSquareText,
   Gift, ImagePlus, LockKeyhole, MessageCircle, Mic, MicOff, MonitorUp, MoreHorizontal, Music2, Pencil,
-  PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, UserPlus, Users, PanelRightClose, PanelRightOpen,
+  PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, Undo2, UserPlus, Users, PanelRightClose, PanelRightOpen,
   Volume2, VolumeX, X,
 } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
-import { currentSocialUser, initialSupportQueue, MAX_VOICE_CHANNEL_MEMBERS, socialFriends, type ChatMessageKind, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceRoom, type VoiceSubchannel } from '../data/socialMockData'
+import { currentSocialUser, initialSupportQueue, DEFAULT_VOICE_GROUP_CAPACITY, MAX_VOICE_CHANNEL_MEMBERS, MAX_VOICE_GROUP_MEMBERS, socialFriends, type ChatMessageKind, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceRoom, type VoiceSubchannel } from '../data/socialMockData'
 import { clubs, companions } from '../data/mockData'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { useSocialLogic } from '../hooks/useSocialLogic'
@@ -15,6 +15,7 @@ import { FixedMessageFeedPanel } from '../components/FixedMessageFeedPanel'
 import { fixedMessageFeeds } from '../data/socialMockData'
 import type { GiftRecipient } from '../components/GiftPanel'
 import { AvatarMark } from '../components/AvatarMark'
+import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { FollowIconButton } from '../components/FollowIconButton'
 import { CompanionProfileCard } from '../components/CompanionProfileCard'
 import type { ProfileCardData } from '../components/profileCardData'
@@ -60,6 +61,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
   const [quickRepliesOpen, setQuickRepliesOpen] = useState(false)
   const [playingMessage, setPlayingMessage] = useState<string | null>(null)
   const [feedback, setFeedback] = useState('')
+  const [globalNotice, setGlobalNotice] = useState('')
   const [groupSettingsOpen, setGroupSettingsOpen] = useState(false)
   const [groupManagementAction, setGroupManagementAction] = useState<GroupManagementAction | null>(null)
   const [groupMemberDialog, setGroupMemberDialog] = useState<'admin' | 'remove' | null>(null)
@@ -148,7 +150,8 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
       setGroupSettingsOpen(false)
     }
     const names = groupManagementAction.type === 'admin-batch' || groupManagementAction.type === 'remove-batch' ? groupManagementAction.members.map((member) => member.name).join('、') : ''
-    setFeedback(groupManagementAction.type === 'dissolve' ? `已解散群聊「${conversation.title}」。` : groupManagementAction.type === 'leave' ? `已退出群聊「${conversation.title}」。` : groupManagementAction.type === 'admin' ? groupManagementAction.makeAdmin ? `已将「${groupManagementAction.memberName}」设为管理员。` : `已撤销「${groupManagementAction.memberName}」的管理员身份。` : groupManagementAction.type === 'remove' ? `已将「${groupManagementAction.memberName}」移出群聊。` : groupManagementAction.type === 'admin-batch' ? `${groupManagementAction.makeAdmin ? '已设置' : '已撤销'}「${names}」的管理员身份。` : `已将「${names}」移出群聊。`)
+    setGlobalNotice(groupManagementAction.type === 'dissolve' ? `已解散群聊「${conversation.title}」。` : groupManagementAction.type === 'leave' ? `已退出群聊「${conversation.title}」。` : groupManagementAction.type === 'admin' ? groupManagementAction.makeAdmin ? `已将「${groupManagementAction.memberName}」设为管理员。` : `已撤销「${groupManagementAction.memberName}」的管理员身份。` : groupManagementAction.type === 'remove' ? `已将「${groupManagementAction.memberName}」移出群聊。` : groupManagementAction.type === 'admin-batch' ? `${groupManagementAction.makeAdmin ? '已设置' : '已撤销'}「${names}」的管理员身份。` : `已将「${names}」移出群聊。`)
+    setFeedback('')
     setGroupManagementAction(null)
   }
   const isRemoveAction = groupManagementAction?.type === 'remove' || groupManagementAction?.type === 'remove-batch'
@@ -172,13 +175,13 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
     if (!contextConversation) return
     if (type === 'pin') {
       logic.setConversationPinned(contextConversation.id, !contextConversation.pinned)
-      setFeedback(contextConversation.pinned ? '已取消置顶' : '会话已置顶')
+      setGlobalNotice(contextConversation.pinned ? '已取消置顶' : '会话已置顶')
       setContextConversation(null)
       return
     }
     if (type === 'read') {
       logic.markConversationRead(contextConversation.id)
-      setFeedback('消息已标为已读')
+      setGlobalNotice('消息已标为已读')
       setContextConversation(null)
       return
     }
@@ -189,7 +192,8 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
     const { type, conversation: target } = conversationAction
     if (type === 'clear') logic.clearConversationMessages(target.id)
     if (type === 'delete') logic.deleteConversation(target.id)
-    setFeedback(type === 'clear' ? '聊天记录已清空' : '聊天已删除')
+    setGlobalNotice(type === 'clear' ? '聊天记录已清空' : '聊天已删除')
+    setFeedback('')
     setConversationAction(null)
   }
   const conversationActionTitle = conversationAction ? ({ clear: '清空消息', delete: '删除聊天' } as const)[conversationAction.type] : ''
@@ -200,6 +204,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
   const conversationActionConfirmLabel = conversationAction ? ({ clear: '确认清空', delete: '确认删除' } as const)[conversationAction.type] : ''
 
   return <div className="social-page messages-page">
+    {globalNotice && <div className="social-toast social-toast--global" role="status" aria-live="polite">{globalNotice}<button type="button" className="windows-icon-button" onClick={() => setGlobalNotice('')} aria-label="关闭全局通知"><X size={15} /></button></div>}
     <div className={`messages-layout${!logic.activeFixedFeed && (logic.selectedProfile || (groupSettingsOpen && conversation?.kind === 'group')) ? ' messages-layout--profile-open' : ''}`}>
       <aside className="messages-list-panel" aria-label="会话和好友">
         <div className="social-segmented" role="tablist" aria-label="消息内容">
@@ -222,7 +227,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
               const last = item.messages[item.messages.length - 1]
               return <button type="button" className={`conversation-row${!logic.activeFixedFeed && conversation?.id === item.id ? ' is-active' : ''}`} key={item.id} onClick={() => { logic.openConversation(item); logic.setSelectedProfileId(null); if (item.kind !== 'group') setGroupSettingsOpen(false) }} onContextMenu={(event) => openConversationMenu(event, item)}>
                 <AvatarMark initials={item.initials} imageUrl={item.avatarDataUrl} size="md" />
-                <span className="conversation-row__copy"><span className="conversation-row__title"><strong>{item.title}</strong>{item.kind === 'group' && <span className="conversation-group-tag">群</span>}{item.pinned && <Pin size={12} aria-label="已置顶" />}</span><small>{last ? messagePreview(last) : '开始一段新对话'}</small></span>
+                <span className="conversation-row__copy"><span className="conversation-row__title"><strong>{item.kind === 'direct' ? <UserNameWithLevel name={item.title} identityId={socialFriends.find((friend) => friend.id === item.members[0])?.profileId ?? companions.find((companion) => companion.id === item.members[0])?.id ?? item.members[0] ?? item.id} /> : item.title}</strong>{item.kind === 'group' && <span className="conversation-group-tag">群</span>}{item.pinned && <Pin size={12} aria-label="已置顶" />}</span><small>{last ? messagePreview(last) : '开始一段新对话'}</small></span>
                 <span className="conversation-row__meta"><small>{last?.time}</small>{item.unread > 0 && <span className="social-unread-count">{item.unread}</span>}</span>
               </button>
             })}
@@ -231,7 +236,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
         </> : <div className="social-friend-list">
           <div className="social-list-caption">好友 · {logic.visibleFriends.length}</div>
           {logic.visibleFriends.map((friend) => <div className={`social-friend-row${logic.selectedFriendId === friend.id ? ' is-active' : ''}`} key={friend.id}>
-            <button type="button" className="social-friend-identity" onClick={() => { logic.startDirectMessage(friend.id); logic.setSelectedProfileId(friend.id); setGroupSettingsOpen(false) }} aria-label={`打开与${friend.name}的聊天和资料`}><span className="social-avatar-wrap"><AvatarMark initials={friend.initials} size="md" /><i className={friend.online ? 'is-online' : ''} /></span><span><strong>{friend.name}</strong><small>{friend.status}</small></span></button>
+            <button type="button" className="social-friend-identity" onClick={() => { logic.startDirectMessage(friend.id); logic.setSelectedProfileId(friend.id); setGroupSettingsOpen(false) }} aria-label={`打开与${friend.name}的聊天和资料`}><span className="social-avatar-wrap"><AvatarMark initials={friend.initials} size="md" /><i className={friend.online ? 'is-online' : ''} /></span><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></button>
             <button type="button" className="windows-icon-button" aria-label={`查看${friend.name}资料`} onClick={() => showFriendProfile(friend.id)}><MoreHorizontal size={18} /></button>
           </div>)}
         </div>}
@@ -246,7 +251,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
           <div className="chat-panel__identity">
             <button type="button" className="chat-avatar-trigger" aria-expanded={conversation.kind === 'group' ? groupSettingsOpen : Boolean(logic.selectedProfile)} onClick={() => conversation.kind === 'direct' ? showFriendProfile(conversation.members[0]) : openGroupSettings()} aria-label={conversation.kind === 'group' ? `打开${conversation.title}群设置` : `查看${conversation.title}资料`}><AvatarMark initials={conversation.initials} imageUrl={conversation.avatarDataUrl} size="md" /></button>
             <div>{conversation.kind === 'direct' ? <>
-              <div className="chat-panel__titleline"><h2>{conversation.title}</h2>{directCompanion && <span className="chat-companion-status" aria-label="接单状态">{directCompanion.status}</span>}</div>
+              <div className="chat-panel__titleline"><h2><UserNameWithLevel name={conversation.title} identityId={directFriend?.profileId ?? directCompanion?.id ?? directMemberId ?? conversation.id} /></h2>{directCompanion && <span className="chat-companion-status" aria-label="接单状态">{directCompanion.status}</span>}</div>
               {directUserTags.length > 0 && <div className="chat-user-tags" aria-label="用户标签">{directUserTags.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}</div>}
             </> : <><h2>{conversation.title}</h2><small>{conversation.members.length + 1} 位成员</small></>}</div>
           </div>
@@ -275,7 +280,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
       </section> : <section className="chat-empty-state"><MessageCircle size={28} /><h2>选择一个会话</h2></section>}
 
       {selectedProfile && <aside className="social-profile-panel" aria-label={`${selectedProfile.name}资料`}>
-        <header><h2>{selectedProfile.name}</h2><button type="button" className="windows-icon-button" aria-label="关闭资料" onClick={() => logic.setSelectedProfileId(null)}><X size={17} /></button></header>
+        <header><h2><UserNameWithLevel name={selectedProfile.name} identityId={selectedProfile.id} /></h2><button type="button" className="windows-icon-button" aria-label="关闭资料" onClick={() => logic.setSelectedProfileId(null)}><X size={17} /></button></header>
         {linkedCompanion && selectedProfileCard ? <CompanionDetailPage
           key={linkedCompanion.id}
           companion={linkedCompanion}
@@ -287,6 +292,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
           profileOverride={selectedProfileCard}
           followed={logic.followedProfileIds.includes(linkedCompanion.id)}
           blocked={logic.blockedProfileIds.includes(linkedCompanion.id)}
+          onShare={(friendIds) => logic.shareCompanionToFriends(linkedCompanion.id, friendIds)}
           onToggleFollow={() => logic.toggleProfileFollow(linkedCompanion.id)}
           onBlock={() => logic.blockProfile(linkedCompanion.id)}
           onChat={selectedProfile.id === currentSocialUser.id ? undefined : () => logic.startDirectMessage(selectedProfile.id)}
@@ -330,9 +336,9 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
     {groupManagementAction && <DialogPanel overlayId="group-management-confirm" children={null} title={groupManagementTitle} description={groupManagementDescription} onClose={() => setGroupManagementAction(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setGroupManagementAction(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmGroupManagementAction}>{groupManagementConfirmLabel}</button></>} />}
     {contextConversation && <ConversationContextMenu conversation={contextConversation} point={contextPoint} onClose={() => setContextConversation(null)} onAction={handleConversationMenuAction} />}
     {conversationAction && <DialogPanel overlayId="conversation-action-confirm" children={null} title={conversationActionTitle} description={conversationActionDescription} onClose={() => setConversationAction(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConversationAction(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmConversationAction}>{conversationActionConfirmLabel}</button></>} />}
-    {contextMessage && <MessageContextMenu point={contextPoint} onClose={() => setContextMessage(null)} onReply={() => { setReplyTarget(contextMessage); setContextMessage(null) }} onCopy={() => copyMessage(contextMessage, setFeedback, () => setContextMessage(null))} onReport={() => { setReportTarget(contextMessage); setReportReason('骚扰或辱骂'); setContextMessage(null) }} />}
+    {contextMessage && <MessageContextMenu point={contextPoint} canRecall={contextMessage.senderId === (conversation?.self?.id ?? currentSocialUser.id)} canReport={contextMessage.senderId !== (conversation?.self?.id ?? currentSocialUser.id)} onClose={() => setContextMessage(null)} onReply={() => { setReplyTarget(contextMessage); setContextMessage(null) }} onCopy={() => copyMessage(contextMessage, setFeedback, () => setContextMessage(null))} onRecall={() => { if (conversation && logic.recallChatMessage(conversation.id, contextMessage.id)) setFeedback('消息已撤回'); setContextMessage(null) }} onReport={() => { setReportTarget(contextMessage); setReportReason('骚扰或辱骂'); setContextMessage(null) }} />}
     {orderDialogConversationId === conversation?.id && <DialogPanel overlayId="send-chat-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogConversationId(null)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogConversationId(null)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedSendOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedSendOrderId); if (order) { logic.sendSupportCard(order); setOrderDialogConversationId(null) } }}>发送订单</button></>}>
-      <div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? orders.map((order) => <label className={`chat-order-option${selectedSendOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name="chat-order" value={order.id} checked={selectedSendOrderId === order.id} onChange={() => setSelectedSendOrderId(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span>{order.companionName} · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p>暂无订单</p>}</div>
+      <div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? orders.map((order) => <label className={`chat-order-option${selectedSendOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name="chat-order" value={order.id} checked={selectedSendOrderId === order.id} onChange={() => setSelectedSendOrderId(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span><UserNameWithLevel name={order.companionName} identityId={order.companionId} /> · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p>暂无订单</p>}</div>
     </DialogPanel>}
 
     {reportTarget && <DialogPanel overlayId="report-chat-message" title="举报消息" onClose={() => setReportTarget(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setReportTarget(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { setFeedback('举报已提交（仅演示）'); setReportTarget(null) }}>提交举报</button></>}><ReportReasons value={reportReason} onChange={setReportReason} /></DialogPanel>}
@@ -340,7 +346,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
 }
 
 function FriendPreview({ friend, onMessage, onOpenProfile }: { friend: (typeof socialFriends)[number]; onMessage: () => void; onOpenProfile: () => void }) {
-  return <section className="friend-preview"><button type="button" className="friend-preview__avatar" onClick={onOpenProfile} aria-label={`查看${friend.name}资料`}><AvatarMark initials={friend.initials} size="lg" /></button><h2>{friend.name}</h2><span>{friend.status}</span><div className="friend-preview__actions"><button type="button" className="client-button client-button--primary" onClick={onMessage}><MessageCircle size={15} />发起私聊</button><button type="button" className="client-button client-button--secondary" onClick={onOpenProfile}>查看资料</button></div></section>
+  return <section className="friend-preview"><button type="button" className="friend-preview__avatar" onClick={onOpenProfile} aria-label={`查看${friend.name}资料`}><AvatarMark initials={friend.initials} size="lg" /></button><h2><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></h2><span>{friend.status}</span><div className="friend-preview__actions"><button type="button" className="client-button client-button--primary" onClick={onMessage}><MessageCircle size={15} />发起私聊</button><button type="button" className="client-button client-button--secondary" onClick={onOpenProfile}>查看资料</button></div></section>
 }
 
 function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdateAvatar, onOpenProfile, onSetJoinApproval, onSetMuted, onSetPinned, onOpenMemberDialog, onLeave, onDissolve }: {
@@ -370,25 +376,25 @@ function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdat
         <input value={name} onChange={(event) => setName(event.target.value)} aria-label="群名称" maxLength={24} />
         <button type="submit" className="client-button client-button--primary client-button--small" disabled={!name.trim()}>保存</button>
         <button type="button" className="client-button client-button--secondary client-button--small" onClick={() => { setName(conversation.title); setIsEditingName(false) }}>取消</button>
-      </form> : <div><h3>{conversation.title}</h3><small className="group-settings-id">群聊ID：{conversation.id}</small><div className="group-settings-identity-actions"><button type="button" className="group-settings-edit-name" onClick={() => setIsEditingName(true)}><Pencil size={13} />修改群名称</button>{isOwner && <label className="group-settings-edit-name group-settings-avatar-upload"><ImagePlus size={13} />更换群头像<input type="file" accept="image/*" aria-label="上传群头像图片" onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') onUpdateAvatar(reader.result) }; reader.readAsDataURL(file); input.value = '' }} /></label>}</div></div>}
+      </form> : <div><h3>{conversation.title}</h3><small className="group-settings-id">群聊ID：{conversation.id}</small>{isOwner && <div className="group-settings-identity-actions"><button type="button" className="group-settings-edit-name" onClick={() => setIsEditingName(true)}><Pencil size={13} />修改群名称</button><label className="group-settings-edit-name group-settings-avatar-upload"><ImagePlus size={13} />更换群头像<input type="file" accept="image/*" aria-label="上传群头像图片" onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') onUpdateAvatar(reader.result) }; reader.readAsDataURL(file); input.value = '' }} /></label></div>}</div>}
     </section>
     <section className="group-settings-members" aria-label="群成员列表">
       <div className="group-settings-section-heading"><strong>群聊成员</strong><div><span>{conversation.members.length + 1} 人</span></div></div>
       <div className="group-settings-member-grid">
-        <GroupMemberTile initials={currentSocialUser.initials} name={`${currentSocialUser.name}（我）`} role="群主" onClick={() => onOpenProfile(currentSocialUser.id)} />
+        <GroupMemberTile initials={currentSocialUser.initials} name={`${currentSocialUser.name}（我）`} identityId={currentSocialUser.profileId} role={isOwner ? '群主' : conversation.adminIds?.includes(currentSocialUser.id) ? '管理员' : '成员'} onClick={() => onOpenProfile(currentSocialUser.id)} />
         {members.map((friend) => {
           const isAdmin = conversation.adminIds?.includes(friend.id) ?? false
-          return <GroupMemberTile key={friend.id} initials={friend.initials} name={friend.name} role={isAdmin ? '管理员' : '成员'} onClick={() => onOpenProfile(friend.id)} />
+          return <GroupMemberTile key={friend.id} initials={friend.initials} name={friend.name} identityId={friend.profileId} role={friend.id === conversation.ownerId ? '群主' : isAdmin ? '管理员' : '成员'} onClick={() => onOpenProfile(friend.id)} />
         })}
         <button type="button" className="group-settings-member-tile group-settings-member-add" onClick={onInvite}><span className="group-settings-member-avatar"><UserPlus size={19} /></span><strong>添加</strong></button>
         {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('remove')}><span className="group-settings-member-avatar"><X size={19} /></span><strong>移除</strong></button>}
         {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('admin')}><span className="group-settings-member-avatar"><Users size={19} /></span><strong>管理</strong></button>}
       </div>
     </section>
-    <section className="group-settings-options" aria-label="群聊选项">
+    {isOwner && <section className="group-settings-options" aria-label="群聊选项">
       <div><strong>加入群聊验证</strong><small>{conversation.joinApprovalRequired ? '新成员申请加入后，需要群主确认' : '好友可直接加入群聊'}</small></div>
       <div className="group-settings-switch"><span>{conversation.joinApprovalRequired ? '已开启' : '已关闭'}</span><button type="button" role="switch" aria-checked={conversation.joinApprovalRequired ?? false} aria-label="加入群聊需要验证" disabled={!isOwner} className={`group-settings-toggle${conversation.joinApprovalRequired ? ' is-on' : ''}`} onClick={() => onSetJoinApproval(!(conversation.joinApprovalRequired ?? false))}><span /></button></div>
-    </section>
+    </section>}
     <section className="group-settings-options" aria-label="消息免打扰">
       <div><strong>消息免打扰</strong></div>
       <div className="group-settings-switch"><span>{conversation.muted ? '已开启' : '已关闭'}</span><button type="button" role="switch" aria-checked={conversation.muted ?? false} aria-label="群聊消息免打扰" className={`group-settings-toggle${conversation.muted ? ' is-on' : ''}`} onClick={() => onSetMuted(!conversation.muted)}><span /></button></div>
@@ -401,21 +407,21 @@ function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdat
   </aside>
 }
 
-function GroupMemberTile({ initials, name, role, onClick }: { initials: string; name: string; role: string; onClick: () => void }) {
-  return <div className="group-settings-member-tile"><button type="button" className="group-settings-member-profile" onClick={onClick} aria-label={`查看${name}资料`}><span className="group-settings-member-avatar"><AvatarMark initials={initials} size="sm" /></span><strong title={name}>{name}</strong><small>{role}</small></button></div>
+function GroupMemberTile({ initials, name, identityId, role, onClick }: { initials: string; name: string; identityId: string; role: string; onClick: () => void }) {
+  return <div className="group-settings-member-tile"><button type="button" className="group-settings-member-profile" onClick={onClick} aria-label={`查看${name}资料`}><span className="group-settings-member-avatar"><AvatarMark initials={initials} size="sm" /></span><strong title={name}><UserNameWithLevel name={name} identityId={identityId} /></strong><small>{role}</small></button></div>
 }
 
 function GroupCreateDialog({ name, members, onNameChange, onToggle, onClose, onSubmit }: { name: string; members: string[]; onNameChange: (value: string) => void; onToggle: (id: string) => void; onClose: () => void; onSubmit: () => void }) {
   return <DialogPanel overlayId="create-group" title="创建群聊" onClose={onClose} width={520} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={onSubmit} disabled={!name.trim() || members.length < 2}>创建群聊</button></>}>
     <label className="social-form-field">群名称<input value={name} onChange={(event) => onNameChange(event.target.value)} placeholder="例如：周末开黑小队" maxLength={24} /></label>
     <div className="social-dialog-section-title">选择好友 <span>已选 {members.length}/至少 2 位</span></div>
-    <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={members.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{friend.status}</small></span></label>)}</div>
+    <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={members.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>
   </DialogPanel>
 }
 
 function GroupInviteDialog({ friends, selected, onToggle, onClose, onSubmit }: { friends: typeof socialFriends; selected: string[]; onToggle: (id: string) => void; onClose: () => void; onSubmit: () => void }) {
   return <DialogPanel overlayId="invite-group-members" title="邀请好友入群" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={onSubmit} disabled={!selected.length}>邀请（{selected.length}）</button></>}>
-    {friends.length ? <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{friend.status}</small></span></label>)}</div> : <p className="social-dialog-copy">所有好友都已在群聊中。</p>}
+    {friends.length ? <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div> : <p className="social-dialog-copy">所有好友都已在群聊中。</p>}
   </DialogPanel>
 }
 
@@ -427,7 +433,7 @@ function GroupMemberAdminDialog({ friends, adminIds, onClose, onSubmit }: { frie
   const toActionMembers = (items: typeof friends) => items.map(({ id, name }) => ({ id, name }))
   return <DialogPanel overlayId="group-member-admin-select" title="设置群管理员" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--secondary" disabled={!admins.length} onClick={() => onSubmit({ type: 'admin-batch', members: toActionMembers(admins), makeAdmin: false })}>取消管理员（{admins.length}）</button><button type="button" className="client-button client-button--primary" disabled={!regularMembers.length} onClick={() => onSubmit({ type: 'admin-batch', members: toActionMembers(regularMembers), makeAdmin: true })}>设为管理员（{regularMembers.length}）</button></>}>
     <div className="social-dialog-section-title">群成员 <span>已选 {selected.length} 位</span></div>
-    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{adminIds.includes(friend.id) ? '管理员' : friend.status}</small></span></label>)}</div>
+    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{adminIds.includes(friend.id) ? '管理员' : friend.status}</small></span></label>)}</div>
   </DialogPanel>
 }
 
@@ -436,7 +442,7 @@ function GroupMemberRemoveDialog({ friends, onClose, onSubmit }: { friends: type
   const selectedMembers = friends.filter((friend) => selected.includes(friend.id))
   return <DialogPanel overlayId="group-member-remove-select" title="移除群成员" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!selectedMembers.length} onClick={() => onSubmit({ type: 'remove-batch', members: selectedMembers.map(({ id, name }) => ({ id, name })) })}>移除（{selected.length}）</button></>}>
     <div className="social-dialog-section-title">群成员 <span>已选 {selected.length} 位</span></div>
-    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{friend.status}</small></span></label>)}</div>
+    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>
   </DialogPanel>
 }
 
@@ -448,6 +454,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [roomDialog, setRoomDialog] = useState<'create' | 'edit' | null>(null)
   const [roomDialogTargetId, setRoomDialogTargetId] = useState<string | undefined>()
   const [roomName, setRoomName] = useState('')
+  const [roomCapacity, setRoomCapacity] = useState(DEFAULT_VOICE_GROUP_CAPACITY)
   const [roomPrivacy, setRoomPrivacy] = useState<VoiceRoom['privacy']>('公开')
   const [channelDialog, setChannelDialog] = useState<{ mode: 'create' | 'edit'; id?: string; roomId?: string } | null>(null)
   const [channelName, setChannelName] = useState('')
@@ -562,7 +569,13 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
 
   const room = logic.activeVoiceRoom
   const channel = logic.activeSubchannel
+  const channelDialogRoom = logic.voiceRooms.find((item) => item.id === channelDialog?.roomId)
+  const channelCapacityLimit = channelDialog?.mode === 'create'
+    ? Math.min(MAX_VOICE_CHANNEL_MEMBERS, channelDialogRoom?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS)
+    : MAX_VOICE_CHANNEL_MEMBERS
   const members = channel?.members ?? []
+  const roomMemberCount = room?.channels.reduce((total, item) => total + item.members.length, 0) ?? 0
+  const roomDialogMemberCount = logic.voiceRooms.find((item) => item.id === roomDialogTargetId)?.channels.reduce((total, item) => total + item.members.length, 0) ?? 0
   const roomClub = ownerSource === 'club' ? clubs.find((club) => club.id === room?.clubId) ?? clubs[0] : undefined
   const roomOwner = ownerSource === 'personal' ? undefined : room?.ownerType === 'personal' ? socialFriends.find((friend) => friend.id === room.ownerId) : undefined
   const voiceMode = channel ? voiceModes[channel.id] ?? '自由模式' : '自由模式'
@@ -597,12 +610,12 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     setInviteTargetChannel({ roomName, channelName })
     setInviteDialog(true)
   }
-  const openCreateRoom = () => { setRoomName(''); setRoomPrivacy('公开'); setRoomDialogTargetId(undefined); setRoomDialog('create') }
-  const openEditRoom = (targetRoom = room) => { if (!targetRoom) return; setRoomName(targetRoom.name); setRoomPrivacy(targetRoom.privacy); setRoomDialogTargetId(targetRoom.id); setRoomDialog('edit') }
+  const openCreateRoom = () => { setRoomName(''); setRoomCapacity(DEFAULT_VOICE_GROUP_CAPACITY); setRoomPrivacy('公开'); setRoomDialogTargetId(undefined); setRoomDialog('create') }
+  const openEditRoom = (targetRoom = room) => { if (!targetRoom) return; setRoomName(targetRoom.name); setRoomCapacity(targetRoom.capacity); setRoomPrivacy(targetRoom.privacy); setRoomDialogTargetId(targetRoom.id); setRoomDialog('edit') }
   const saveRoom = () => {
-    if (!roomName.trim()) return
-    if (roomDialog === 'create') logic.createVoiceRoom(roomName)
-    else logic.updateVoiceRoom(roomName, roomPrivacy, roomDialogTargetId)
+    if (!roomName.trim() || !Number.isInteger(roomCapacity) || roomCapacity < (roomDialog === 'edit' ? roomDialogMemberCount : 1) || roomCapacity > MAX_VOICE_GROUP_MEMBERS) return
+    if (roomDialog === 'create') logic.createVoiceRoom(roomName, roomCapacity)
+    else logic.updateVoiceRoom(roomName, roomPrivacy, roomDialogTargetId, roomCapacity)
     setRoomDialog(null)
   }
   const openChannelDialog = (mode: 'create' | 'edit', id?: string, roomId = room?.id) => {
@@ -610,7 +623,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     if (mode === 'create' && targetRoom) logic.selectVoiceRoom(targetRoom.id)
     const targetChannel = mode === 'edit' ? targetRoom?.channels.find((item) => item.id === id) : undefined
     setChannelName(targetChannel?.name ?? '')
-    setChannelCapacity(targetChannel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS)
+    setChannelCapacity(targetChannel?.capacity ?? Math.min(MAX_VOICE_CHANNEL_MEMBERS, targetRoom?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS))
     setChannelPrivacy(targetChannel?.privacy ?? '公开')
     setChannelPassword(targetChannel?.password ?? '')
     setChannelImageDataUrl(targetChannel?.imageDataUrl ?? '')
@@ -621,7 +634,9 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     const editingChannel = channelDialog.mode === 'edit'
       ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)
       : undefined
-    if (channelCapacity < Math.max(1, editingChannel?.members.length ?? 1) || channelCapacity > MAX_VOICE_CHANNEL_MEMBERS) return
+    const targetRoom = logic.voiceRooms.find((item) => item.id === channelDialog.roomId)
+    const capacityLimit = channelDialog.mode === 'create' ? Math.min(MAX_VOICE_CHANNEL_MEMBERS, targetRoom?.capacity ?? 0) : MAX_VOICE_CHANNEL_MEMBERS
+    if (channelCapacity < Math.max(1, editingChannel?.members.length ?? 1) || channelCapacity > capacityLimit) return
     const details = { name: channelName, imageDataUrl: channelImageDataUrl || undefined, capacity: channelCapacity, privacy: channelPrivacy, password: channelPassword }
     if (channelDialog.mode === 'create') logic.createSubchannel(details, channelDialog.roomId)
     else if (channelDialog.id) logic.updateSubchannel(channelDialog.roomId, channelDialog.id, details)
@@ -734,7 +749,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <aside className="voice-room-tree" aria-label="语音分组与房间">
         <section className="voice-owner-card" aria-label="房间归属">
           <AvatarMark initials={roomClub?.initials ?? roomOwner?.initials ?? currentSocialUser.initials} size="md" />
-          <div className="voice-owner-card__identity"><strong>{roomClub?.name ?? roomOwner?.name ?? currentSocialUser.name}</strong><span>ID：{roomClub?.id ?? roomOwner?.profileId ?? currentSocialUser.profileId}</span></div>
+          <div className="voice-owner-card__identity">{roomClub ? <strong>{roomClub.name}</strong> : <strong><UserNameWithLevel name={roomOwner?.name ?? currentSocialUser.name} identityId={roomOwner?.id ?? currentSocialUser.profileId} /></strong>}<span>ID：{roomClub?.id ?? roomOwner?.profileId ?? currentSocialUser.profileId}</span></div>
           {roomClub && <button type="button" className="voice-owner-card__support" aria-label="联系俱乐部客服" onClick={onOpenClubSupport}><Headphones size={14} />客服</button>}
         </section>
         <label className="social-search"><Search size={16} /><input value={logic.roomSearch} onChange={(event) => logic.setRoomSearch(event.target.value)} placeholder="搜索语音房" aria-label="搜索语音房" /></label>
@@ -742,7 +757,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
         <div className="voice-tree-section-title"><span>语音分组</span><button type="button" className="voice-create-group-entry" onClick={openCreateRoom}><Plus size={14} />创建分组</button></div>
         <div className="voice-room-list">{logic.visibleVoiceRooms.map((item) => <section className={`voice-room-group${room?.id === item.id ? ' is-active' : ''}`} key={item.id}>
           <div className="voice-room-heading-row">
-            <button type="button" className="voice-room-heading" aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => { logic.selectVoiceRoom(item.id); setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id]) }}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span>{item.privacy === '私密' ? <LockKeyhole size={15} /> : <Globe2 size={15} />}</span><strong>{item.name}</strong></button>
+            <button type="button" className="voice-room-heading" aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => { logic.selectVoiceRoom(item.id); setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id]) }}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span>{item.privacy === '私密' ? <LockKeyhole size={15} /> : <Globe2 size={15} />}</span><strong>{item.name}</strong><small className="voice-room-heading__count">{item.channels.reduce((total, roomChannel) => total + roomChannel.members.length, 0)}/{item.capacity}</small></button>
             {item.currentRole !== 'member' && <button type="button" className="voice-create-child-channel" aria-label={`在${item.name}创建房间`} title="新增房间" onClick={() => openChannelDialog('create', undefined, item.id)}><Plus size={13} /></button>}
             {item.currentRole !== 'member' && <button type="button" className="windows-icon-button voice-tree-manage" aria-label={`编辑${item.name}分组`} title="编辑分组" onClick={() => openEditRoom(item)}><Pencil size={13} /></button>}
           </div>
@@ -755,7 +770,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
                 <button type="button" className="voice-subchannel__collapse" aria-label={`${collapsedChannelIds.includes(subchannel.id) ? '展开' : '折叠'}${subchannel.name}成员`} aria-expanded={!collapsedChannelIds.includes(subchannel.id)} onClick={() => setCollapsedChannelIds((ids) => ids.includes(subchannel.id) ? ids.filter((id) => id !== subchannel.id) : [...ids, subchannel.id])}><ChevronRight size={13} className={`voice-room-chevron${collapsedChannelIds.includes(subchannel.id) ? '' : ' is-expanded'}`} /></button>
               </div>
             </div>
-            {!collapsedChannelIds.includes(subchannel.id) && <div className="voice-channel-members">{subchannel.members.map((member) => <span className={`voice-channel-member${member.id === currentSocialUser.id ? ' is-self' : ''}`} data-voice-member-id={member.id} tabIndex={member.id === currentSocialUser.id ? -1 : undefined} key={member.id} draggable={room?.id === item.id && canManage && member.id !== currentSocialUser.id} onDragStart={() => logic.setDraggedMemberId(member.id)} onDragEnd={() => logic.setDraggedMemberId(null)} title={canManage ? '拖动到其他房间' : member.name}><AvatarMark initials={member.initials} size="sm" /><span>{member.name}</span>{member.muted && <MicOff size={12} />}</span>)}</div>}
+            {!collapsedChannelIds.includes(subchannel.id) && <div className="voice-channel-members">{subchannel.members.map((member) => <span className={`voice-channel-member${member.id === currentSocialUser.id ? ' is-self' : ''}`} data-voice-member-id={member.id} tabIndex={member.id === currentSocialUser.id ? -1 : undefined} key={member.id} draggable={room?.id === item.id && canManage && member.id !== currentSocialUser.id} onDragStart={() => logic.setDraggedMemberId(member.id)} onDragEnd={() => logic.setDraggedMemberId(null)} title={canManage ? '拖动到其他房间' : member.name}><AvatarMark initials={member.initials} size="sm" /><UserNameWithLevel name={member.name} identityId={member.id} />{member.muted && <MicOff size={12} />}</span>)}</div>}
           </div>)}
         </div>}
         </section>)}
@@ -773,7 +788,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
             <button type="button" className={`voice-audio-icon${logic.isInVoice && logic.isSelfMuted ? ' is-active' : ''}`} onClick={logic.toggleSelfMute} disabled={!logic.isInVoice} aria-label={logic.isSelfMuted ? '取消静音' : '静音'} title={logic.isSelfMuted ? '取消静音' : '静音'}>{logic.isSelfMuted ? <MicOff size={16} /> : <Mic size={16} />}</button>
             <label className="voice-volume-control"><Volume2 size={15} /><input type="range" min="0" max="100" value={outputVolume} onChange={(event) => setOutputVolume(Number(event.target.value))} aria-label="音量" /><span>{outputVolume}</span></label>
           </div>
-          <div className="voice-device-panel__join"><span>{logic.isInVoice ? logic.isMicOn ? '麦克风已开启' : '当前在听' : '正在浏览房间'}</span><button type="button" onClick={logic.isInVoice ? logic.toggleMic : logic.joinVoice} disabled={!logic.isInVoice && members.length >= (channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS)} aria-label={logic.isInVoice ? logic.isMicOn ? '下麦' : '上麦' : '加入语音'}>{logic.isInVoice ? logic.isMicOn ? <><MicOff size={14} />下麦</> : <><Mic size={14} />上麦</> : <><Headphones size={14} />加入语音</>}</button></div>
+          <div className="voice-device-panel__join"><span>{logic.isInVoice ? logic.isMicOn ? '麦克风已开启' : '当前在听' : '正在浏览房间'}</span><button type="button" onClick={logic.isInVoice ? logic.toggleMic : logic.joinVoice} disabled={!logic.isInVoice && (members.length >= (channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS) || roomMemberCount >= (room?.capacity ?? MAX_VOICE_GROUP_MEMBERS))} aria-label={logic.isInVoice ? logic.isMicOn ? '下麦' : '上麦' : '加入语音'}>{logic.isInVoice ? logic.isMicOn ? <><MicOff size={14} />下麦</> : <><Mic size={14} />上麦</> : <><Headphones size={14} />加入语音</>}</button></div>
         </section>
       </aside>
 
@@ -794,7 +809,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           return <div className={`voice-seat${member ? ' is-occupied' : ''}${member?.micOn && !member.muted ? ' is-speaking' : ''}`} key={member?.id ?? `seat-${index}`}>
             {member ? <>
               <button type="button" className="voice-seat__avatar" aria-label={`${member.name}资料`}><AvatarMark initials={member.initials} size="lg" />{member.muted ? <span className="voice-seat__mic"><MicOff size={14} /></span> : member.micOn ? <span className="voice-seat__mic"><Mic size={14} /></span> : <span className="voice-seat__mic"><VolumeX size={14} /></span>}</button>
-              <strong>{member.name}{member.id === currentSocialUser.id ? '（我）' : ''}</strong>
+              <strong><UserNameWithLevel name={`${member.name}${member.id === currentSocialUser.id ? '（我）' : ''}`} identityId={member.id} /></strong>
               <span className="voice-role-label">{roleLabel(member.role)}</span>
               {canManage && member.id !== currentSocialUser.id && <div className="voice-seat__management"><button type="button" onClick={() => setMemberAction({ type: 'mute', member })}>{member.muted ? '解除禁言' : '禁言'}</button><button type="button" onClick={() => setMemberAction({ type: 'remove', member })}>移出</button><button type="button" onClick={() => setMemberAction({ type: 'block', member })}>拉黑</button>{isOwner && member.role !== 'owner' && <button type="button" onClick={() => toggleRole(member)}>{member.role === 'admin' ? '撤销管理员' : '设为管理员'}</button>}</div>}
             </> : <><span className="voice-seat__empty"><Mic size={18} /></span><span>空麦位 {index + 1}</span></>}
@@ -809,7 +824,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
             <div className="voice-members-drawer__list">
               {filteredMembers.map((member) => <div className="voice-members-row" key={member.id} onContextMenu={(event) => openMemberContextMenu(event, member)}>
                 <button type="button" className="voice-members-row__avatar" onClick={() => openMemberProfile(member.id)} onContextMenu={(event) => openMemberContextMenu(event, member)} aria-label={`查看${member.name}陪玩详情`}><AvatarMark initials={member.initials} size="sm" /></button>
-                <button type="button" className="voice-members-row__name" onClick={() => openMemberProfile(member.id)} onContextMenu={(event) => openMemberContextMenu(event, member)}>{member.name}{member.id === currentSocialUser.id ? '（我）' : ''}</button>
+                <button type="button" className="voice-members-row__name" onClick={() => openMemberProfile(member.id)} onContextMenu={(event) => openMemberContextMenu(event, member)}><UserNameWithLevel name={`${member.name}${member.id === currentSocialUser.id ? '（我）' : ''}`} identityId={member.id} /></button>
                 {member.role !== 'member' && <span className={`voice-members-row__role is-${member.role}`}>{roleLabel(member.role)}</span>}
                 <span className="voice-members-row__mic" role="img" aria-label={member.muted || !member.micOn ? '麦克风已关闭' : '麦克风已开启'} title={member.muted || !member.micOn ? '麦克风已关闭' : '麦克风已开启'}>{member.muted || !member.micOn ? <MicOff size={14} /> : <Mic size={14} />}</span>
               </div>)}
@@ -820,9 +835,9 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       </section>
       {leaveDialogOpen && <DialogPanel overlayId="voice-leave-options" title="退出语音房" description="选择如何处理当前语音连接。" onClose={() => setLeaveDialogOpen(false)} width={420} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setLeaveDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--secondary" onClick={() => { setLeaveDialogOpen(false); onMinimizeVoice() }}>最小化</button><button type="button" className="client-button client-button--primary" onClick={() => { logic.leaveVoice(); setLeaveDialogOpen(false); onExitVoice() }}>退出房间</button></>} children={null} />}
 
-      <RoomChatPanel hidden={Boolean(selectedProfile)} collapsed={roomChatCollapsed} onToggleCollapsed={() => setRoomChatCollapsed((value) => !value)} messages={logic.roomMessages} onSend={(kind, text, duration, replyTo) => logic.sendRoomMessage(kind, text, duration, replyTo)} onOpenProfile={openMemberProfile} onAvatarContextMenu={openMemberContextMenu} onOpenGift={(anchor) => onOpenGift(members.filter((member) => member.id !== currentSocialUser.id).map((member) => ({ id: member.id, name: member.name, initials: member.initials, profileId: socialFriends.find((friend) => friend.id === member.id)?.profileId })), undefined, anchor)} members={room?.channels.flatMap((subchannel) => subchannel.members) ?? []} />
+      <RoomChatPanel hidden={Boolean(selectedProfile)} collapsed={roomChatCollapsed} onToggleCollapsed={() => setRoomChatCollapsed((value) => !value)} messages={logic.roomMessages} onRecallMessage={logic.recallRoomMessage} onSend={(kind, text, duration, replyTo) => logic.sendRoomMessage(kind, text, duration, replyTo)} onOpenProfile={openMemberProfile} onAvatarContextMenu={openMemberContextMenu} onOpenGift={(anchor) => onOpenGift(members.filter((member) => member.id !== currentSocialUser.id).map((member) => ({ id: member.id, name: member.name, initials: member.initials, profileId: socialFriends.find((friend) => friend.id === member.id)?.profileId })), undefined, anchor)} members={room?.channels.flatMap((subchannel) => subchannel.members) ?? []} />
       {selectedProfile && <aside className="social-profile-panel voice-profile-panel" aria-label={`${selectedProfile.name}陪玩详情`}>
-        <header><h2>{selectedProfile.name}</h2><button type="button" className="windows-icon-button" aria-label="关闭陪玩详情" onClick={() => setVoiceProfileId(null)}><X size={17} /></button></header>
+        <header><h2><UserNameWithLevel name={selectedProfile.name} identityId={selectedProfile.id} /></h2><button type="button" className="windows-icon-button" aria-label="关闭陪玩详情" onClick={() => setVoiceProfileId(null)}><X size={17} /></button></header>
         {linkedCompanion && selectedProfileCard ? <CompanionDetailPage
           key={linkedCompanion.id}
           companion={linkedCompanion}
@@ -834,6 +849,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           profileOverride={selectedProfileCard}
           followed={logic.followedProfileIds.includes(linkedCompanion.id)}
           blocked={logic.blockedProfileIds.includes(linkedCompanion.id)}
+          onShare={(friendIds) => logic.shareCompanionToFriends(linkedCompanion.id, friendIds)}
           onToggleFollow={() => logic.toggleProfileFollow(linkedCompanion.id)}
           onBlock={() => logic.blockProfile(linkedCompanion.id)}
           onChat={() => logic.startDirectMessage(selectedProfile.id)}
@@ -865,13 +881,14 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <button type="button" role="menuitem" onClick={locateMyVoicePosition}>定位我的位置</button>
     </div>}
 
-    {roomDialog && <DialogPanel overlayId="voice-room-dialog" title={roomDialog === 'create' ? '创建分组' : '编辑分组设置'} description={roomDialog === 'create' ? '创建后默认为公开，并自动添加房间A。' : undefined} onClose={() => setRoomDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setRoomDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveRoom} disabled={!roomName.trim()}>{roomDialog === 'create' ? '创建分组' : '保存设置'}</button></>}>
+    {roomDialog && <DialogPanel overlayId="voice-room-dialog" title={roomDialog === 'create' ? '创建分组' : '编辑分组设置'} description={roomDialog === 'create' ? '创建后默认为公开，并自动添加房间A。' : undefined} onClose={() => setRoomDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setRoomDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveRoom} disabled={!roomName.trim() || !Number.isInteger(roomCapacity) || roomCapacity < (roomDialog === 'edit' ? roomDialogMemberCount : 1) || roomCapacity > MAX_VOICE_GROUP_MEMBERS}>{roomDialog === 'create' ? '创建分组' : '保存设置'}</button></>}>
       <label className="social-form-field">分组名称<input value={roomName} onChange={(event) => setRoomName(event.target.value)} maxLength={24} placeholder="输入分组名称" /></label>
+      <label className="social-form-field">分组最大人数（含所有房间）<input type="number" inputMode="numeric" min={roomDialog === 'edit' ? roomDialogMemberCount : 1} max={MAX_VOICE_GROUP_MEMBERS} step={1} value={roomCapacity} onChange={(event) => setRoomCapacity(Number(event.target.value))} aria-label="分组最大人数，包含分组内所有房间" /></label>
       {roomDialog === 'edit' && <fieldset className="voice-privacy-choice"><legend>分组权限</legend><label><input type="radio" name="roomPrivacy" checked={roomPrivacy === '公开'} onChange={() => setRoomPrivacy('公开')} /><Globe2 size={17} /><span><strong>公开分组</strong><small>好友和玩家都可以浏览并加入</small></span></label><label><input type="radio" name="roomPrivacy" checked={roomPrivacy === '私密'} onChange={() => setRoomPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密分组</strong><small>仅通过邀请加入</small></span></label></fieldset>}
     </DialogPanel>}
 
     {memberContextMenu && <div ref={memberMenuRef} className="voice-channel-context-menu voice-member-context-menu" role="menu" aria-label={`${memberContextMenu.member.name}成员操作`} style={{ left: memberContextMenu.x, top: memberContextMenu.y }} onContextMenu={(event) => event.preventDefault()}>
-      <div className="voice-member-context-menu__title"><AvatarMark initials={memberContextMenu.member.initials} size="sm" /><strong>{memberContextMenu.member.name}</strong></div>
+      <div className="voice-member-context-menu__title"><AvatarMark initials={memberContextMenu.member.initials} size="sm" /><strong><UserNameWithLevel name={memberContextMenu.member.name} identityId={memberContextMenu.member.id} /></strong></div>
       <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id} onClick={() => { setMemberAction({ type: 'mute', member: memberContextMenu.member }); setMemberContextMenu(null) }}><MicOff size={15} />{memberContextMenu.member.muted ? '解除禁言' : '静音'}</button>
       <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id} onClick={() => { setMemberAction({ type: 'remove', member: memberContextMenu.member }); setMemberContextMenu(null) }}><X size={15} />移出房间</button>
       <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id} onClick={() => { setMemberAction({ type: 'block', member: memberContextMenu.member }); setMemberContextMenu(null) }}><Flag size={15} />拉黑</button>
@@ -887,11 +904,11 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       }))}</div>}
     </div>}
 
-    {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' ? `添加到「${logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > MAX_VOICE_CHANNEL_MEMBERS}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>
+    {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' ? `添加到「${channelDialogRoom?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > channelCapacityLimit}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>
       <div className="voice-channel-form">
         <label className="social-form-field">房间名称<input value={channelName} onChange={(event) => setChannelName(event.target.value)} maxLength={20} placeholder="例如：战术讨论" /></label>
         <div className="social-form-field"><span>房间图片</span><label className="voice-room-image-upload">{channelImageDataUrl ? <img src={channelImageDataUrl} alt="房间图片预览" /> : <ImagePlus size={20} />}<span>{channelImageDataUrl ? '更换图片' : '上传图片'}</span><input type="file" accept="image/*" aria-label="上传房间图片" onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') setChannelImageDataUrl(reader.result) }; reader.readAsDataURL(file); input.value = '' }} /></label></div>
-        <label className="social-form-field">人数上限<input type="number" min={1} max={MAX_VOICE_CHANNEL_MEMBERS} value={channelCapacity} onChange={(event) => setChannelCapacity(event.target.value === '' ? 0 : Number(event.target.value))} aria-label="人数上限" /><small>可设置 1–{MAX_VOICE_CHANNEL_MEMBERS} 人；不能低于当前房间人数。</small></label>
+        <label className="social-form-field">人数上限<input type="number" min={1} max={channelCapacityLimit} value={channelCapacity} onChange={(event) => setChannelCapacity(event.target.value === '' ? 0 : Number(event.target.value))} aria-label="人数上限" /><small>{channelDialog.mode === 'create' ? `可设置 1–${channelCapacityLimit} 人，不能超过分组上限（${channelDialogRoom?.capacity ?? 0} 人）。` : `可设置 1–${MAX_VOICE_CHANNEL_MEMBERS} 人；不能低于当前房间人数。`}</small></label>
         <fieldset className="voice-privacy-choice"><legend>房间权限</legend><div className="voice-privacy-choice__options"><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '公开'} onChange={() => { setChannelPrivacy('公开'); setChannelPassword('') }} /><Globe2 size={17} /><span><strong>公开房间</strong><small>可在房间列表中浏览</small></span></label><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '私密'} onChange={() => setChannelPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密房间</strong><small>可选设置进入密码</small></span></label></div></fieldset>
         {channelPrivacy === '私密' && <label className="social-form-field">房间密码<input type="password" value={channelPassword} onChange={(event) => setChannelPassword(event.target.value)} maxLength={32} placeholder="设置房间密码（可选）" autoComplete="new-password" /></label>}
       </div>
@@ -903,10 +920,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
 
     {supportDialogOpen && <DialogPanel overlayId="voice-customer-support-queue" title="呼叫客服" onClose={() => setSupportDialogOpen(false)} width={500} footer={supportQueued ? <><button type="button" className="client-button client-button--secondary" onClick={() => setSupportQueued(false)}>取消呼叫</button><button type="button" className="client-button client-button--primary" onClick={() => setSupportDialogOpen(false)}>完成</button></> : <><button type="button" className="client-button client-button--secondary" onClick={() => setSupportDialogOpen(false)}>暂不呼叫</button><button type="button" className="client-button client-button--primary" onClick={() => setSupportQueued(true)}>确认呼叫</button></>}>
       <div className="support-queue-summary"><Headphones size={18} /><strong>{supportQueued ? `正在排队 · 第 ${initialSupportQueue.length + 1} 位` : `当前 ${initialSupportQueue.length} 人排队`}</strong>{!supportQueued && <span>预计排在第 {initialSupportQueue.length + 1} 位</span>}</div>
-      <div className="support-queue-list" aria-label="客服排队列表">{initialSupportQueue.map((person, index) => <div className="support-queue-row" key={person.id}><AvatarMark initials={person.initials} size="sm" /><strong>{person.name}</strong><span>第 {index + 1} 位</span></div>)}{supportQueued && <div className="support-queue-row is-self"><AvatarMark initials={currentSocialUser.initials} size="sm" /><strong>{currentSocialUser.name}（我）</strong><span>第 {initialSupportQueue.length + 1} 位</span></div>}</div>
+      <div className="support-queue-list" aria-label="客服排队列表">{initialSupportQueue.map((person, index) => <div className="support-queue-row" key={person.id}><AvatarMark initials={person.initials} size="sm" /><strong><UserNameWithLevel name={person.name} identityId={person.name} /></strong><span>第 {index + 1} 位</span></div>)}{supportQueued && <div className="support-queue-row is-self"><AvatarMark initials={currentSocialUser.initials} size="sm" /><strong><UserNameWithLevel name={`${currentSocialUser.name}（我）`} identityId={currentSocialUser.profileId} /></strong><span>第 {initialSupportQueue.length + 1} 位</span></div>}</div>
     </DialogPanel>}
     {inviteDialog && <DialogPanel overlayId="invite-friends-dialog" title="邀请好友进入语音房" description={`邀请好友加入「${inviteTargetChannel?.roomName ?? room?.name ?? ''} · ${inviteTargetChannel?.channelName ?? channel?.name ?? ''}」。`} onClose={() => { setInviteDialog(false); setInviteTargetChannel(null) }} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setInviteDialog(false); setInviteTargetChannel(null) }}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveInvites} disabled={!invitees.length}>发送邀请（{invitees.length}）</button></>}>
-      <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={invitees.includes(friend.id)} onChange={() => toggleInvitee(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong>{friend.name}</strong><small>{friend.status}</small></span></label>)}</div>
+      <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={invitees.includes(friend.id)} onChange={() => toggleInvitee(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>
     </DialogPanel>}
   </div>
 }
@@ -941,11 +958,11 @@ export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, on
       <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleEnter} placeholder="发送消息给 GM-客服…" aria-label="客服消息内容" />
       <div className="chat-composer__toolbar"><div className="chat-composer__tools"><button type="button" className="windows-icon-button" aria-label="表情" aria-expanded={emojiOpen} onClick={() => { setQuickRepliesOpen(false); setEmojiOpen((value) => !value) }}><Smile size={18} /></button><button type="button" className="windows-icon-button" aria-label="发送示例图片" title="发送示例图片" onClick={() => onSend('image', '战绩截图 · 示例图片')}><ImagePlus size={18} /></button><button type="button" className="windows-icon-button" aria-label="发送示例语音" title="发送示例语音" onClick={() => onSend('voice', '语音消息', 6)}><Mic size={18} /></button><button type="button" className="windows-icon-button" aria-label="快捷回复" title="快捷回复" aria-expanded={quickRepliesOpen} onClick={() => { setEmojiOpen(false); setQuickRepliesOpen((open) => !open) }}><MessageSquareText size={17} /></button></div><button type="button" className="client-button client-button--primary chat-send-button" onClick={submit} disabled={!draft.trim()}><Send size={15} />发送</button></div>
     </div>
-    {orderDialogOpen && <DialogPanel overlayId="send-club-support-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogOpen(false)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedOrderId); if (order) { onSendOrder(order); setOrderDialogOpen(false) } }}>发送订单</button></>}><div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? orders.map((order) => <label className={`chat-order-option${selectedOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name="club-support-order" value={order.id} checked={selectedOrderId === order.id} onChange={() => setSelectedOrderId(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span>{order.companionName} · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p>暂无订单</p>}</div></DialogPanel>}
+    {orderDialogOpen && <DialogPanel overlayId="send-club-support-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogOpen(false)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedOrderId); if (order) { onSendOrder(order); setOrderDialogOpen(false) } }}>发送订单</button></>}><div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? orders.map((order) => <label className={`chat-order-option${selectedOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name="club-support-order" value={order.id} checked={selectedOrderId === order.id} onChange={() => setSelectedOrderId(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span><UserNameWithLevel name={order.companionName} identityId={order.companionId} /> · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p>暂无订单</p>}</div></DialogPanel>}
   </section>
 }
 
-function RoomChatPanel({ messages, onSend, hidden = false, collapsed = false, onToggleCollapsed, onOpenProfile, onAvatarContextMenu, onOpenGift, members = [] }: { messages: SocialMessage[]; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => void; hidden?: boolean; collapsed?: boolean; onToggleCollapsed?: () => void; onOpenProfile?: (memberId: string) => void; onAvatarContextMenu?: (event: ReactMouseEvent, member: VoiceMember) => void; onOpenGift: (anchor: HTMLButtonElement) => void; members?: VoiceMember[] }) {
+function RoomChatPanel({ messages, onSend, onRecallMessage, hidden = false, collapsed = false, onToggleCollapsed, onOpenProfile, onAvatarContextMenu, onOpenGift, members = [] }: { messages: SocialMessage[]; onRecallMessage: (messageId: string) => boolean; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => void; hidden?: boolean; collapsed?: boolean; onToggleCollapsed?: () => void; onOpenProfile?: (memberId: string) => void; onAvatarContextMenu?: (event: ReactMouseEvent, member: VoiceMember) => void; onOpenGift: (anchor: HTMLButtonElement) => void; members?: VoiceMember[] }) {
   const [draft, setDraft] = useState('')
   const [playingMessage, setPlayingMessage] = useState<string | null>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
@@ -963,23 +980,24 @@ function RoomChatPanel({ messages, onSend, hidden = false, collapsed = false, on
     <header><div><h2><MessageCircle size={16} />房间聊天</h2></div><button type="button" className="windows-icon-button" onClick={onToggleCollapsed} aria-label={collapsed ? "展开聊天面板" : "折叠聊天面板"} title={collapsed ? "展开聊天面板" : "折叠聊天面板"}>{collapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}</button></header>
     <div className="room-chat-panel__messages">{messages.map((message) => {
       const member = members.find((item) => item.id === message.senderId) ?? (message.senderId === currentSocialUser.id ? { ...currentSocialUser, role: 'member' as const, micOn: false, muted: false } : socialFriends.find((friend) => friend.id === message.senderId) ? { ...socialFriends.find((friend) => friend.id === message.senderId)!, role: 'member' as const, micOn: false, muted: false } : undefined)
-      return <ChatMessage key={message.id} message={message} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onAvatarClick={() => onOpenProfile?.(message.senderId)} onAvatarContextMenu={member ? (event) => onAvatarContextMenu?.(event, member) : undefined} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />
+      return <ChatMessage key={message.id} message={message} selfId={currentSocialUser.id} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onAvatarClick={() => onOpenProfile?.(message.senderId)} onAvatarContextMenu={member && member.id !== currentSocialUser.id ? (event) => onAvatarContextMenu?.(event, member) : undefined} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />
     })}</div>
     <div className="room-chat-composer">{replyTarget && <ReplyPreview message={replyTarget} onCancel={() => setReplyTarget(null)} />}{feedback && <div className="social-inline-feedback" role="status">{feedback}<button type="button" onClick={() => setFeedback('')} aria-label="关闭提示"><X size={14} /></button></div>}{quickRepliesOpen && <QuickReplyMenu className="room-quick-replies" onSelect={sendQuickReply} />}{emojiOpen && <div className="emoji-picker room-emoji-picker" role="group" aria-label="选择房间表情">{['😀', '😊', '😂', '👍', '🎮', '🎉', '❤️', '🙌'].map((emoji) => <button type="button" key={emoji} onClick={() => { onSend('emoji', emoji); setEmojiOpen(false) }} aria-label={`发送${emoji}`}>{emoji}</button>)}</div>}<textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={enter} placeholder="发送房间消息…" aria-label="房间消息内容" /><div className="room-chat-composer__tools"><button type="button" className="windows-icon-button" aria-label="表情" aria-expanded={emojiOpen} onClick={() => { setQuickRepliesOpen(false); setEmojiOpen((value) => !value) }}><Smile size={16} /></button><button type="button" className="windows-icon-button" aria-label="发送示例图片" title="发送示例图片" onClick={() => onSend('image', '房间图片 · 示例图片')}><ImagePlus size={16} /></button><button type="button" className="windows-icon-button" aria-label="送礼" title="送礼" onClick={(event) => onOpenGift(event.currentTarget)}><Gift size={16} /></button><button type="button" className="windows-icon-button" aria-label="快捷回复" title="快捷回复" aria-expanded={quickRepliesOpen} onClick={() => { setEmojiOpen(false); setQuickRepliesOpen((open) => !open) }}><MessageSquareText size={15} /></button><button type="button" className="room-chat-send" aria-label="发送消息" onClick={send} disabled={!draft.trim()}><Send size={16} /></button></div></div>
-    {contextMessage && <MessageContextMenu point={contextPoint} onClose={() => setContextMessage(null)} onReply={() => { setReplyTarget(contextMessage); setContextMessage(null) }} onCopy={() => copyMessage(contextMessage, setFeedback, () => setContextMessage(null))} onReport={() => { setReportTarget(contextMessage); setReportReason('骚扰或辱骂'); setContextMessage(null) }} />}
+    {contextMessage && <MessageContextMenu point={contextPoint} canRecall={contextMessage.senderId === currentSocialUser.id && !contextMessage.recalled} canReport={contextMessage.senderId !== currentSocialUser.id} onClose={() => setContextMessage(null)} onReply={() => { setReplyTarget(contextMessage); setContextMessage(null) }} onCopy={() => copyMessage(contextMessage, setFeedback, () => setContextMessage(null))} onRecall={() => { onRecallMessage(contextMessage.id); setContextMessage(null) }} onReport={() => { setReportTarget(contextMessage); setReportReason('骚扰或辱骂'); setContextMessage(null) }} />}
     {reportTarget && <DialogPanel overlayId="report-room-message" title="举报消息" onClose={() => setReportTarget(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setReportTarget(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { setFeedback('举报已提交（仅演示）'); setReportTarget(null) }}>提交举报</button></>}><ReportReasons value={reportReason} onChange={setReportReason} /></DialogPanel>}
   </section>
 }
 
 function ChatMessage({ message, selfId = currentSocialUser.id, onReviewChange, playing, onTogglePlay, onAvatarClick, onAvatarContextMenu, onContextMenu }: { message: SocialMessage; selfId?: string; onReviewChange?: (rating: number, submitted: boolean) => void; playing: boolean; onTogglePlay: () => void; onAvatarClick?: () => void; onAvatarContextMenu?: (event: ReactMouseEvent<HTMLButtonElement>) => void; onContextMenu?: (event: ReactMouseEvent<HTMLElement>) => void }) {
   const isSelf = message.senderId === selfId
-  return <article className={`social-message${isSelf ? ' is-self' : ''}`} onContextMenu={onContextMenu}>
+  return <article className={`social-message${isSelf ? ' is-self' : ''}${message.recalled ? ' is-recalled' : ''}`} onContextMenu={message.recalled ? undefined : onContextMenu}>
     <button type="button" className="social-message__avatar" onClick={onAvatarClick} onContextMenu={(event) => { if (onAvatarContextMenu) { event.preventDefault(); event.stopPropagation(); onAvatarContextMenu(event) } }} disabled={!onAvatarClick} aria-label={`查看${message.senderName}陪玩详情`}><AvatarMark initials={message.initials} size="sm" /></button>
-    <div className="social-message__body"><div className="social-message__meta"><strong>{message.senderName}</strong><time>{message.time}</time></div>
-      {message.replyTo && <div className="social-message__reply"><strong>回复 {message.replyTo.senderName}</strong><span>{message.replyTo.kind === 'image' ? '[图片]' : message.replyTo.kind === 'voice' ? '[语音消息]' : message.replyTo.content}</span></div>}
+    <div className="social-message__body"><div className="social-message__meta"><strong><UserNameWithLevel name={message.senderName} identityId={message.senderId} /></strong><time>{message.time}</time></div>
+      {!message.recalled && message.replyTo && <div className="social-message__reply"><strong>回复 <UserNameWithLevel name={message.replyTo.senderName} identityId={message.replyTo.senderName} /></strong><span>{message.replyTo.kind === 'image' ? '[图片]' : message.replyTo.kind === 'voice' ? '[语音消息]' : message.replyTo.content}</span></div>}
+      {!message.recalled && message.kind === 'companion-share' && message.companionShare && <a className="social-message-card companion-share-message" href={`#page=talents&club=${message.companionShare.clubId}&companion=${message.companionShare.id}`} aria-label={`查看${message.companionShare.name}陪玩详情`}><header><AvatarMark initials={message.companionShare.initials} size="sm" /><strong><UserNameWithLevel name={message.companionShare.name} identityId={message.companionShare.id} /></strong></header><div className="social-message-card__content"><p>{message.companionShare.intro}</p></div><footer>陪玩名片<ChevronRight size={14} /></footer></a>}
       {message.kind === 'order' && message.order && <div className="social-message-card" aria-label="订单消息"><header><ReceiptText size={17} /><strong>订单信息</strong><span>{message.order.status}</span></header><div className="social-message-card__content"><strong>{message.order.service}</strong><p>{message.order.companion} · {message.order.duration}</p><b>{message.order.amount} 钻石</b></div><footer>订单号 {message.order.id}</footer></div>}
       {message.kind === 'support-review' && message.review && <div className="social-message-card" aria-label="客服评价消息"><header><Star size={17} /><strong>客服评价</strong>{message.review.submitted && <span>已评价</span>}</header><div className="social-message-card__content"><strong>{message.review.support}</strong><div className="social-message-card__stars" role="group" aria-label="客服评分">{Array.from({ length: 5 }, (_, index) => <button type="button" key={index} disabled={message.review!.submitted || !onReviewChange} aria-label={`${index + 1} 星`} aria-pressed={index < message.review!.rating} onClick={() => onReviewChange?.(index + 1, false)}><Star size={22} fill={index < message.review!.rating ? 'currentColor' : 'none'} /></button>)}{message.review.rating > 0 && <span>{message.review.rating} 分</span>}</div>{message.review.submitted ? <p role="status">评价完成，感谢您的反馈</p> : message.review.rating > 0 && <button type="button" className="client-button client-button--primary" onClick={() => onReviewChange?.(message.review!.rating, true)}>确认评价</button>}</div></div>}
-      {message.kind === 'text'  && <p className="social-message__text">{message.content}</p>}
+      {message.recalled ? <p className="social-message__text social-message__text--recalled" role="status">消息已撤回</p> : message.kind === 'text'  && <p className="social-message__text">{message.content}</p>}
       {message.kind === 'emoji' && <p className="social-message__emoji" aria-label="表情消息">{message.content}</p>}
       {message.kind === 'image' && <div className="social-message__image"><ImagePlus size={20} /><span>{message.content}</span></div>}
       {message.kind === 'voice' && <button type="button" className="social-message__voice" onClick={onTogglePlay} aria-label={`${playing ? '暂停' : '播放'}语音消息`}><span>{playing ? <VolumeX size={16} /> : <Play size={15} />}</span><i className={playing ? 'is-playing' : ''} /><b>{message.duration ?? 5}″</b><small>{playing ? '播放中' : '语音消息'}</small></button>}
@@ -993,7 +1011,7 @@ function openMessageMenu(event: ReactMouseEvent<HTMLElement>, message: SocialMes
   setMessage(message)
 }
 
-function getMessageMenuPoint(event: ReactMouseEvent<HTMLElement>, menuWidth = 176, menuHeight = 142) {
+function getMessageMenuPoint(event: ReactMouseEvent<HTMLElement>, menuWidth = 176, menuHeight = 174) {
   let fixedContainer: HTMLElement | null = event.currentTarget
   while (fixedContainer) {
     const style = window.getComputedStyle(fixedContainer)
@@ -1026,15 +1044,15 @@ async function copyMessage(message: SocialMessage, setFeedback: (value: string) 
 
 function ReplyPreview({ message, onCancel }: { message: SocialMessage; onCancel: () => void }) {
   const preview = message.kind === 'image' ? '[图片]' : message.kind === 'voice' ? '[语音消息]' : message.content
-  return <div className="message-reply-preview"><div><strong>回复 {message.senderName}</strong><span>{preview}</span></div><button type="button" aria-label="取消回复" onClick={onCancel}><X size={15} /></button></div>
+  return <div className="message-reply-preview"><div><strong>回复 <UserNameWithLevel name={message.senderName} identityId={message.senderName} /></strong><span>{preview}</span></div><button type="button" aria-label="取消回复" onClick={onCancel}><X size={15} /></button></div>
 }
 
-function MessageContextMenu({ point, onClose, onReply, onCopy, onReport }: { point: { x: number; y: number }; onClose: () => void; onReply: () => void; onCopy: () => void; onReport: () => void }) {
+function MessageContextMenu({ point, canRecall = false, canReport = true, onClose, onReply, onCopy, onRecall, onReport }: { point: { x: number; y: number }; canRecall?: boolean; canReport?: boolean; onClose: () => void; onReply: () => void; onCopy: () => void; onRecall?: () => void; onReport: () => void }) {
   return <><button type="button" className="message-context-backdrop" aria-label="关闭消息菜单" onClick={onClose} /><div className="message-context-menu" role="menu" style={{ left: point.x, top: point.y }} onContextMenu={(event) => event.preventDefault()}>
     <button type="button" role="menuitem" onClick={onReply}><Reply size={15} />回复</button>
     <button type="button" role="menuitem" onClick={onCopy}><Clipboard size={15} />复制</button>
-    <span className="message-context-menu__divider" />
-    <button type="button" role="menuitem" className="is-danger" onClick={onReport}><Flag size={15} />举报</button>
+    {canRecall && onRecall && <button type="button" role="menuitem" onClick={onRecall}><Undo2 size={15} />撤回</button>}
+    {canReport && <><span className="message-context-menu__divider" /><button type="button" role="menuitem" className="is-danger" onClick={onReport}><Flag size={15} />举报</button></>}
   </div></>
 }
 

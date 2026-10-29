@@ -3,8 +3,19 @@ import { Check, ChevronDown, ChevronLeft, ChevronRight, Headphones, Maximize2, M
 import type { useMatchLogic } from '../hooks/useMatchLogic'
 import { companions, games } from '../data/mockData'
 import { AvatarMark } from '../components/AvatarMark'
+import { UserNameWithLevel } from '../components/UserNameWithLevel'
+import noticeImageOne from '../assets/profile-life-photo-city.svg'
+import noticeImageTwo from '../assets/profile-life-photo-cafe.svg'
+import noticeImageThree from '../assets/profile-life-photo-window.svg'
 
 type MatchLogic = ReturnType<typeof useMatchLogic>
+type NoticeTab = 'tab1' | 'tab2' | 'tab3'
+
+const matchNoticePreferenceKey = 'game-companion-client:skip-match-notice'
+
+function shouldSkipMatchNotice() {
+  try { return window.sessionStorage.getItem(matchNoticePreferenceKey) === 'true' } catch { return false }
+}
 
 type Props = {
   open: boolean
@@ -19,7 +30,10 @@ type Props = {
 }
 
 export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onStartMatching, onGoToVoiceRoom, onCancel, onChooseCompanions }: Props) {
-  const [dialog, setDialog] = useState<'price' | 'cancel' | null>(null)
+  const [dialog, setDialog] = useState<'price' | 'cancel' | 'notice' | null>(null)
+  const [noticeTab, setNoticeTab] = useState<NoticeTab>('tab1')
+  const [dontRemind, setDontRemind] = useState(false)
+  const [skipNotice, setSkipNotice] = useState(shouldSkipMatchNotice)
   const [priceInput, setPriceInput] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [candidatesReady, setCandidatesReady] = useState(false)
@@ -104,6 +118,25 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
     onStartMatching()
   }
 
+  const beginMatching = () => {
+    if (skipNotice) {
+      startMatching()
+      return
+    }
+    setNoticeTab('tab1')
+    setDontRemind(false)
+    setDialog('notice')
+  }
+
+  const agreeAndContinue = () => {
+    if (dontRemind) {
+      try { window.sessionStorage.setItem(matchNoticePreferenceKey, 'true') } catch { /* Keep the preference for this page session. */ }
+      setSkipNotice(true)
+    }
+    setDialog(null)
+    startMatching()
+  }
+
   useEffect(() => {
     if (!matching) return
     const timeout = window.setTimeout(() => setCandidatesReady(true), 3000)
@@ -163,7 +196,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         {candidatesReady && <section className="match-found-list" aria-label="匹配到的陪玩">
           <header><strong><UsersRound size={15} />选择陪玩</strong><span>已选 {selectedIds.length}/{expectedCount}</span></header>
           <div className="match-candidate-list">
-            {candidates.map((companion) => <button type="button" key={companion.id} className={`match-candidate${selectedIds.includes(companion.id) ? ' is-selected' : ''}`} aria-pressed={selectedIds.includes(companion.id)} onClick={() => toggleCandidate(companion.id)}><AvatarMark initials={companion.initials} size="md" /><span className="match-candidate__info"><strong>{companion.name}<small>{companion.gender} · {companion.region}</small></strong><small>{companion.status} · {companion.tags.slice(0, 2).join(' · ')}</small></span><span className="match-candidate__check">{selectedIds.includes(companion.id) && <Check size={14} />}</span></button>)}
+            {candidates.map((companion) => <button type="button" key={companion.id} className={`match-candidate${selectedIds.includes(companion.id) ? ' is-selected' : ''}`} aria-pressed={selectedIds.includes(companion.id)} onClick={() => toggleCandidate(companion.id)}><AvatarMark initials={companion.initials} size="md" /><span className="match-candidate__info"><strong><UserNameWithLevel name={companion.name} identityId={companion.id} /><small>{companion.gender} · {companion.region}</small></strong><small>{companion.status} · {companion.tags.slice(0, 2).join(' · ')}</small></span><span className="match-candidate__check">{selectedIds.includes(companion.id) && <Check size={14} />}</span></button>)}
             {candidates.length === 0 && <div className="match-candidate-empty"><UserRound size={20} /><span>当前条件下没有可选陪玩</span></div>}
           </div>
         </section>}
@@ -195,9 +228,19 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <label className="match-field"><span>数量</span><span className="match-select-wrap"><select value={logic.quantity} onChange={(event) => logic.setQuantity(Number(event.target.value))}>{[1, 2, 3, 4].map((count) => <option key={count} value={count}>{count} {logic.selectedService?.unit ?? '小时'}</option>)}</select><ChevronDown size={14} /></span></label>
         <label className="match-field match-field--remark"><span>备注</span><textarea value={logic.remark} onChange={(event) => logic.setRemark(event.target.value)} rows={2} placeholder="补充你的游戏偏好或需求" /></label>
         <div className="match-panel__price"><span>推荐单价</span><strong>{logic.recommendedUnitPrice.toLocaleString()} <small>钻石 / {logic.selectedService?.unit ?? '小时'}</small></strong>{logic.people === '双陪' && <span className="match-panel__price-hint">双陪 ×2</span>}</div>
-        <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.selectedService || !club} onClick={() => logic.tryout ? onGoToVoiceRoom() : startMatching()}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
+        <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.selectedService || !club} onClick={() => logic.tryout ? onGoToVoiceRoom() : beginMatching()}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
       </div>}
 
+      {dialog === 'notice' && <div className="match-dialog-scrim"><section className="match-dialog match-dialog--notice" role="dialog" aria-modal="true" aria-labelledby="match-notice-title">
+        <header><div><h3 id="match-notice-title">下单须知</h3></div><button type="button" className="windows-icon-button" aria-label="关闭下单须知" onClick={() => setDialog(null)}><X size={15} /></button></header>
+        <div className="match-notice-tabs" role="tablist" aria-label="下单须知内容">
+          {([{ id: 'tab1', label: '后台配置TAB1' }, { id: 'tab2', label: '后台配置TAB2' }, { id: 'tab3', label: '后台配置TAB3' }] as const).map((tab) => <button type="button" role="tab" id={`match-notice-tab-${tab.id}`} aria-selected={noticeTab === tab.id} aria-controls="match-notice-panel" tabIndex={noticeTab === tab.id ? 0 : -1} key={tab.id} onClick={() => setNoticeTab(tab.id)}>{tab.label}</button>)}
+        </div>
+        <div className="match-notice-panel" id="match-notice-panel" role="tabpanel" aria-labelledby={`match-notice-tab-${noticeTab}`}>
+          <figure className="match-notice-content"><img src={{ tab1: noticeImageOne, tab2: noticeImageTwo, tab3: noticeImageThree }[noticeTab]} alt="" /><figcaption>{({ tab1: '在熟悉的风景里，发现日常中的小小灵感。', tab2: '给热爱的事情留一点时间，让每一刻都轻松自在。', tab3: '换个角度看世界，也许会遇见新的惊喜。' })[noticeTab]}</figcaption></figure>
+        </div>
+        <footer className="match-notice-footer"><label className="match-notice-remember"><input type="checkbox" checked={dontRemind} onChange={(event) => setDontRemind(event.target.checked)} />不再提醒</label><button type="button" className="client-button client-button--primary" onClick={agreeAndContinue}>同意并继续</button></footer>
+      </section></div>}
       {dialog === 'price' && <div className="match-dialog-scrim"><section className="match-dialog" role="dialog" aria-modal="true" aria-labelledby="match-price-title"><header><h3 id="match-price-title">加价</h3><button type="button" className="windows-icon-button" aria-label="关闭" onClick={() => setDialog(null)}><X size={15} /></button></header><p>提高本次匹配的单价。</p><label>加价金额（钻石）<input type="number" min="1" step="1" value={priceInput} onChange={(event) => setPriceInput(event.target.value)} placeholder="请输入金额" /></label><footer><button type="button" className="client-button client-button--secondary" onClick={() => setDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!Number.isInteger(Number(priceInput)) || Number(priceInput) <= 0} onClick={() => { logic.setAddedPrice(Number(priceInput)); setDialog(null) }}>确认加价</button></footer></section></div>}
       {dialog === 'cancel' && <div className="match-dialog-scrim"><section className="match-dialog" role="dialog" aria-modal="true" aria-labelledby="match-cancel-title"><header><h3 id="match-cancel-title">取消匹配</h3><button type="button" className="windows-icon-button" aria-label="关闭" onClick={() => setDialog(null)}><X size={15} /></button></header><p>确定取消当前匹配并返回首页吗？</p><footer><button type="button" className="client-button client-button--secondary" onClick={() => setDialog(null)}>继续匹配</button><button type="button" className="client-button client-button--primary" onClick={() => { setDialog(null); onCancel() }}>确认取消</button></footer></section></div>}
     </section>}

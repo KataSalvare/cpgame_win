@@ -1,6 +1,7 @@
 import { MessageCircle, ShoppingCart, Star } from 'lucide-react'
 import type { Companion } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
+import { UserNameWithLevel } from './UserNameWithLevel'
 import { VoiceMessageButton } from './VoiceMessageButton'
 
 type CompanionCardProps = {
@@ -25,7 +26,7 @@ export function CompanionCard({ companion, onOpen, onChat, onOrder }: CompanionC
     <div className="companion-card__heading">
       <AvatarMark initials={companion.initials} size="lg" />
       <div className="companion-card__identity">
-        <h3>{companion.name}</h3>
+        <h3><UserNameWithLevel name={companion.name} identityId={companion.id} /></h3>
         <span className="client-muted">{companion.gender} · {companion.age} 岁 · {companion.region}</span>
       </div>
       <span className={`client-status ${companion.status === '接单中' ? 'is-available' : ''}`}>{companion.status}</span>

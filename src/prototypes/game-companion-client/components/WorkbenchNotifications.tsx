@@ -3,6 +3,9 @@ import { Headphones, PhoneCall, X } from 'lucide-react'
 import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
 import type { VoiceCallNotification, VoiceInvitation } from '../data/socialMockData'
 import { AvatarMark } from './AvatarMark'
+import { socialFriends } from '../data/socialMockData'
+import { companions } from '../data/mockData'
+import { UserNameWithLevel } from './UserNameWithLevel'
 
 function NotificationCard({ label, children }: { label: string; children: ReactNode }) {
   const [visible, setVisible] = useState(true)
@@ -35,7 +38,7 @@ export function WorkbenchNotifications({ logic: w, open, voiceCallNotifications,
       return <NotificationCard key={message.id} label={`${message.kind === 'match' ? '匹配请求' : '订单通知'}：${message.player}`}>
         <header className="workbench-notice-heading">
           <AvatarMark initials={message.playerInitials} size="sm" />
-          <strong>{message.player}</strong>
+          <strong><UserNameWithLevel name={message.player} identityId={message.player} /></strong>
           <span className="workbench-notice-type">{message.kind === 'match' ? `匹配 · ${message.audition}` : '订单通知'}</span>
         </header>
         <p className="workbench-notice-service">{w.serviceLabel(message.serviceId)}{message.kind === 'order' && ` · ${service?.name ?? '组队开黑'}`}</p>
@@ -47,13 +50,13 @@ export function WorkbenchNotifications({ logic: w, open, voiceCallNotifications,
     })}
     {voiceCallNotifications.length > 0 && <NotificationCard label="呼叫通知">
       <header className="workbench-notice-heading"><PhoneCall size={17} /><strong>呼叫通知</strong><span className="workbench-notice-type">{voiceCallNotifications.length} 条</span></header>
-      <p className="workbench-global-notice__message">{voiceCallNotifications.length === 1 ? `${voiceCallNotifications[0].callerName} 正在呼叫客服` : `${voiceCallNotifications[0].callerName} 等${voiceCallNotifications.length}位用户正在呼叫客服`}</p>
+      <p className="workbench-global-notice__message">{voiceCallNotifications.length === 1 ? <><UserNameWithLevel name={voiceCallNotifications[0].callerName} identityId={voiceCallNotifications[0].callerName} /> 正在呼叫客服</> : <><UserNameWithLevel name={voiceCallNotifications[0].callerName} identityId={voiceCallNotifications[0].callerName} /> 等{voiceCallNotifications.length}位用户正在呼叫客服</>}</p>
       <footer className="workbench-notice-actions"><button type="button" className="client-button client-button--secondary" onClick={onIgnoreVoiceCall}>忽略</button><button type="button" className="client-button client-button--primary" onClick={onOpenVoiceCall}>查看</button></footer>
     </NotificationCard>}
     {voiceInvitations.slice(0, 1).map((invitation) => <NotificationCard key={invitation.id} label={`邀请进房：${invitation.inviter}`}>
       <header className="workbench-notice-heading">
         <AvatarMark initials={invitation.inviterInitials ?? invitation.inviter.slice(0, 1)} size="sm" />
-        <strong>{invitation.inviter}</strong>
+        <strong><UserNameWithLevel name={invitation.inviter} identityId={socialFriends.find((friend) => friend.name === invitation.inviter)?.profileId ?? companions.find((companion) => companion.name === invitation.inviter)?.id ?? invitation.inviter} /></strong>
         <span className="workbench-notice-type">邀请进房</span>
       </header>
       <p className="workbench-notice-service">{invitation.roomName}{invitation.channelName && ` · ${invitation.channelName}`} · {invitation.time}</p>
