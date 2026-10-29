@@ -4,7 +4,7 @@ import { clubs, companions, servicesByCompanion } from './data/mockData'
 export type ClientPage = 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements'
 
 type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | null
-type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; returnTo: ClientPage | null; panel: StorePanel }
+type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; returnTo: ClientPage | null; panel: StorePanel; voiceRoomSource: 'personal' | 'club' }
 
 const DEFAULT_CLUB_ID = 'club-001'
 const DEFAULT_COMPANION_ID = 'companion-001'
@@ -37,16 +37,18 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   if (page === 'club-detail' && requestedPanel === 'club-groups') panel = 'club-groups'
   if (page === 'club-detail' && requestedPanel === 'club-announcements') panel = 'club-announcements'
   if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger' || requestedPanel === 'bean-withdraw' || requestedPanel === 'diamond-recharge')) panel = requestedPanel
-  return { page, clubId, companionId, companionIds, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null), returnTo, panel }
+  const voiceRoomSource = params.get('voiceFrom') === 'club' || (!params.has('voiceFrom') && page === 'voice-room' && params.has('club')) ? 'club' : 'personal'
+  return { page, clubId, companionId, companionIds, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null), returnTo, panel, voiceRoomSource }
 }
 
-const writeRoute = (page: ClientPage, clubId: string, companionId: string | null, serviceId?: string | null, returnTo?: ClientPage | null, panel?: StorePanel, companionIds?: string[]) => {
+const writeRoute = (page: ClientPage, clubId: string, companionId: string | null, serviceId?: string | null, returnTo?: ClientPage | null, panel?: StorePanel, companionIds?: string[], voiceRoomSource?: 'personal' | 'club') => {
   const params = new URLSearchParams({ page, club: clubId })
   if (companionId) params.set('companion', companionId)
   if (serviceId) params.set('service', serviceId)
   if (returnTo) params.set('returnTo', returnTo)
   if (panel) params.set('panel', panel)
   if (companionIds && companionIds.length > 1) params.set('companions', companionIds.join(','))
+  if (page === 'voice-room' && voiceRoomSource) params.set('voiceFrom', voiceRoomSource)
   window.location.hash = params.toString()
 }
 
@@ -73,8 +75,9 @@ export function useClientNavigation(entryView?: string) {
     const page: ClientPage = requestedPage === 'club-cards' ? 'club-detail' : requestedPage === 'coupons' || requestedPage === 'my-cards' ? 'wallet' : requestedPage
     const panel: StorePanel = requestedPage === 'club-cards' || requestedPage === 'coupons' || requestedPage === 'my-cards' ? requestedPage : null
     const serviceId = requestedPage === 'recharge' && returnTo === 'checkout' ? route.serviceId : null
-    writeRoute(page, route.clubId, requestedPage === 'talents' ? null : route.companionId, serviceId, returnTo, panel)
-  }, [route.clubId, route.companionId, route.serviceId])
+    writeRoute(page, route.clubId, requestedPage === 'talents' ? null : route.companionId, serviceId, returnTo, panel, undefined, page === 'voice-room' ? route.voiceRoomSource : undefined)
+  }, [route.clubId, route.companionId, route.serviceId, route.voiceRoomSource])
+  const goToVoiceRoom = useCallback((source: 'personal' | 'club' = 'personal') => writeRoute('voice-room', route.clubId, route.companionId, null, null, null, undefined, source), [route.clubId, route.companionId])
   const closePanel = useCallback(() => writeRoute(route.page, route.clubId, route.companionId), [route.page, route.clubId, route.companionId])
   const openWalletLedger = useCallback((wallet: 'diamond' | 'bean') => {
     writeRoute('wallet', route.clubId, route.companionId, null, null, wallet === 'diamond' ? 'diamond-ledger' : 'bean-ledger')
@@ -109,6 +112,7 @@ export function useClientNavigation(entryView?: string) {
     backToClub,
     closeCompanion,
     goToPage,
+    goToVoiceRoom,
     closePanel,
     openWalletLedger,
     openBeanWithdraw,

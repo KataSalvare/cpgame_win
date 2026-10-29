@@ -302,11 +302,18 @@
 .voice-stage{position:relative;display:flex;min-width:360px;min-height:0;flex:1 1 auto;flex-direction:column;background:var(--prototype-surface, #fff)}
 .voice-stage__header{position:relative;display:flex;min-height:62px;flex:0 0 auto;align-items:center;justify-content:space-between;border-bottom:1px solid var(--client-border);padding:0 18px}
 .voice-stage__header-actions{display:flex;align-items:center;gap:8px}
+.voice-stage__room-identity{display:flex;min-width:0;align-items:center;gap:10px}
+.voice-stage__room-identity>.client-avatar{flex:0 0 auto}
 .voice-stage__breadcrumbs{display:flex;align-items:center;gap:7px;font-size:14px}
 .voice-stage__breadcrumbs>span{color:var(--client-muted)}
 .voice-stage__breadcrumbs strong{font-weight:600}
 .voice-stage__header>div:first-child>small{display:block;margin-top:3px;color:var(--client-muted);font-size:10px}
+.voice-stage__room-identity small{display:block;margin-top:3px;color:var(--client-muted);font-size:10px}
 .voice-mode-control{position:relative;flex:0 0 auto}
+.voice-room-image-upload{position:relative;display:flex;width:92px;height:76px;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px dashed var(--client-border);border-radius:7px;background:var(--prototype-surface-muted,#f9fafb);color:var(--client-muted);font-size:10px;cursor:pointer}
+.voice-room-image-upload:hover{border-color:var(--prototype-text-subtle,#9ca3af);color:var(--client-text)}
+.voice-room-image-upload img{width:100%;height:52px;object-fit:cover}
+.voice-room-image-upload input{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .voice-mode-trigger{display:inline-flex;min-height:32px;align-items:center;gap:8px;border:1px solid var(--client-border);border-radius:6px;padding:0 10px;background:var(--prototype-surface, #fff);color:var(--client-text);font:inherit;font-size:11px;font-weight:600;cursor:pointer}
 .voice-mode-trigger:hover,.voice-mode-trigger[aria-expanded="true"]{border-color:var(--prototype-text-subtle, #9ca3af);background:var(--prototype-surface-muted, #f9fafb)}
 .voice-mode-trigger:focus-visible,.voice-mode-menu button:focus-visible{outline:2px solid var(--prototype-text-subtle, #9ca3af);outline-offset:2px}

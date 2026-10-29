@@ -440,7 +440,7 @@ function GroupMemberRemoveDialog({ friends, onClose, onSubmit }: { friends: type
   </DialogPanel>
 }
 
-export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeVoice, onExitVoice, onOpenClubSupport, onOpenGift }: PageStateProps & { logic: SocialLogic; onOrder: (serviceId: string, companionId: string) => void; onMinimizeVoice: () => void; onExitVoice: () => void; onOpenClubSupport: () => void; onOpenGift: (recipients: GiftRecipient[], fixedRecipient?: GiftRecipient, anchor?: HTMLButtonElement) => void }) {
+export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeVoice, onExitVoice, onOpenClubSupport, onOpenGift, ownerSource = 'personal' }: PageStateProps & { logic: SocialLogic; onOrder: (serviceId: string, companionId: string) => void; onMinimizeVoice: () => void; onExitVoice: () => void; onOpenClubSupport: () => void; onOpenGift: (recipients: GiftRecipient[], fixedRecipient?: GiftRecipient, anchor?: HTMLButtonElement) => void; ownerSource?: 'personal' | 'club' }) {
   const voicePageRef = useRef<HTMLDivElement>(null)
   const channelMenuRef = useRef<HTMLDivElement>(null)
   const memberMenuRef = useRef<HTMLDivElement>(null)
@@ -454,6 +454,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [channelCapacity, setChannelCapacity] = useState(MAX_VOICE_CHANNEL_MEMBERS)
   const [channelPrivacy, setChannelPrivacy] = useState<VoiceSubchannel['privacy']>('公开')
   const [channelPassword, setChannelPassword] = useState('')
+  const [channelImageDataUrl, setChannelImageDataUrl] = useState('')
   const [inviteDialog, setInviteDialog] = useState(false)
   const [inviteTargetChannel, setInviteTargetChannel] = useState<{ roomName: string; channelName: string } | null>(null)
   const [invitees, setInvitees] = useState<string[]>([])
@@ -562,8 +563,8 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const room = logic.activeVoiceRoom
   const channel = logic.activeSubchannel
   const members = channel?.members ?? []
-  const roomClub = room?.ownerType === 'club' ? clubs.find((club) => club.id === room.clubId) : undefined
-  const roomOwner = room?.ownerType === 'personal' ? socialFriends.find((friend) => friend.id === room.ownerId) : undefined
+  const roomClub = ownerSource === 'club' ? clubs.find((club) => club.id === room?.clubId) ?? clubs[0] : undefined
+  const roomOwner = ownerSource === 'personal' ? undefined : room?.ownerType === 'personal' ? socialFriends.find((friend) => friend.id === room.ownerId) : undefined
   const voiceMode = channel ? voiceModes[channel.id] ?? '自由模式' : '自由模式'
   const normalizedMemberSearch = memberSearch.trim().toLocaleLowerCase()
   const filteredMembers = members.filter((member) => member.name.toLocaleLowerCase().includes(normalizedMemberSearch))
@@ -612,6 +613,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     setChannelCapacity(targetChannel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS)
     setChannelPrivacy(targetChannel?.privacy ?? '公开')
     setChannelPassword(targetChannel?.password ?? '')
+    setChannelImageDataUrl(targetChannel?.imageDataUrl ?? '')
     setChannelDialog({ mode, id, roomId })
   }
   const saveChannel = () => {
@@ -620,7 +622,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)
       : undefined
     if (channelCapacity < Math.max(1, editingChannel?.members.length ?? 1) || channelCapacity > MAX_VOICE_CHANNEL_MEMBERS) return
-    const details = { name: channelName, capacity: channelCapacity, privacy: channelPrivacy, password: channelPassword }
+    const details = { name: channelName, imageDataUrl: channelImageDataUrl || undefined, capacity: channelCapacity, privacy: channelPrivacy, password: channelPassword }
     if (channelDialog.mode === 'create') logic.createSubchannel(details, channelDialog.roomId)
     else if (channelDialog.id) logic.updateSubchannel(channelDialog.roomId, channelDialog.id, details)
     setChannelDialog(null)
@@ -777,7 +779,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
 
       <section className="voice-stage" aria-label="语音房麦位">
         <header className="voice-stage__header">
-          <div><div className="voice-stage__breadcrumbs"><span>{room?.name}</span><ChevronRight size={14} /><strong>{channel?.name}</strong></div><small>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人 · {channel?.privacy ?? room?.privacy}房间</small></div>
+          <div className="voice-stage__room-identity"><AvatarMark initials={channel?.name.slice(0, 1) ?? '房'} imageUrl={channel?.imageDataUrl} size="md" /><div><div className="voice-stage__breadcrumbs"><span>{room?.name}</span><ChevronRight size={14} /><strong>{channel?.name}</strong></div><small>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人 · {channel?.privacy ?? room?.privacy}房间</small></div></div>
           <div className="voice-stage__header-actions">
             {room && channel && <FollowIconButton followed={logic.followedChannelIds.includes(`${room.id}:${channel.id}`)} name={`${room.name}${channel.name}`} onToggle={() => logic.toggleChannelFollow(`${room.id}:${channel.id}`)} />}
             <button type="button" className="voice-support-call" onClick={() => setSupportDialogOpen(true)}><Headphones size={14} />{supportQueued ? `排队中 · 第 ${initialSupportQueue.length + 1} 位` : '呼叫客服'}</button>
@@ -888,6 +890,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' ? `添加到「${logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > MAX_VOICE_CHANNEL_MEMBERS}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>
       <div className="voice-channel-form">
         <label className="social-form-field">房间名称<input value={channelName} onChange={(event) => setChannelName(event.target.value)} maxLength={20} placeholder="例如：战术讨论" /></label>
+        <div className="social-form-field"><span>房间图片</span><label className="voice-room-image-upload">{channelImageDataUrl ? <img src={channelImageDataUrl} alt="房间图片预览" /> : <ImagePlus size={20} />}<span>{channelImageDataUrl ? '更换图片' : '上传图片'}</span><input type="file" accept="image/*" aria-label="上传房间图片" onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') setChannelImageDataUrl(reader.result) }; reader.readAsDataURL(file); input.value = '' }} /></label></div>
         <label className="social-form-field">人数上限<input type="number" min={1} max={MAX_VOICE_CHANNEL_MEMBERS} value={channelCapacity} onChange={(event) => setChannelCapacity(event.target.value === '' ? 0 : Number(event.target.value))} aria-label="人数上限" /><small>可设置 1–{MAX_VOICE_CHANNEL_MEMBERS} 人；不能低于当前房间人数。</small></label>
         <fieldset className="voice-privacy-choice"><legend>房间权限</legend><div className="voice-privacy-choice__options"><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '公开'} onChange={() => { setChannelPrivacy('公开'); setChannelPassword('') }} /><Globe2 size={17} /><span><strong>公开房间</strong><small>可在房间列表中浏览</small></span></label><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '私密'} onChange={() => setChannelPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密房间</strong><small>可选设置进入密码</small></span></label></div></fieldset>
         {channelPrivacy === '私密' && <label className="social-form-field">房间密码<input type="password" value={channelPassword} onChange={(event) => setChannelPassword(event.target.value)} maxLength={32} placeholder="设置房间密码（可选）" autoComplete="new-password" /></label>}

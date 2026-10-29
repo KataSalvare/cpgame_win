@@ -66,6 +66,7 @@ export interface VoiceMember {
 export interface VoiceSubchannel {
   id: string
   name: string
+  imageDataUrl?: string
   capacity: number
   privacy: '公开' | '私密'
   password: string

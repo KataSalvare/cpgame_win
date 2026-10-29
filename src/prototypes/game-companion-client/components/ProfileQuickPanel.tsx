@@ -55,12 +55,12 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, orderC
 
   return <div ref={rootRef} className="client-profile-quick client-profile-quick--sidebar" onKeyDown={handleKeyDown}>
     <button type="button" className="client-sidebar-account" onClick={() => setOpen((isOpen) => !isOpen)} aria-label={open ? '关闭个人快捷面板' : '打开个人快捷面板'} aria-haspopup="true" aria-expanded={open}>
-      {children}<span className="client-sidebar-account__details"><strong>{profile.nickname}</strong><span>{profile.userId}</span><small>{profile.gender}</small></span>
+      {children}<span className="client-sidebar-account__details"><strong>{profile.nickname}</strong><span>{profile.userId}</span></span>
     </button>
     {open && <section className="client-profile-popover" aria-label="个人资料快捷面板">
       <div className="client-profile-popover__identity">
         {profile.avatarDataUrl ? <img className="client-profile-popover__avatar" src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" />}
-        <div><strong>{profile.nickname}</strong><span className="client-profile-popover__meta"><span>{profile.gender}</span><button type="button" className="client-profile-popover__user-id" onClick={() => void copyUserId()} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{copyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{copyFeedback === '复制成功' && <Check size={12} />}{copyFeedback}</span>}</span></div>
+        <div><strong>{profile.nickname}</strong><span className="client-profile-popover__meta"><button type="button" className="client-profile-popover__user-id" onClick={() => void copyUserId()} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{copyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{copyFeedback === '复制成功' && <Check size={12} />}{copyFeedback}</span>}</span></div>
       </div>
       <div className="client-profile-popover__stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} /><Metric label="粉丝" value={profile.followers} /></div>
       <div className="client-profile-popover__balances"><span><Coins size={14} />钻石 <strong>{diamondBalance.toLocaleString()}</strong></span><span><WalletCards size={14} />糖豆 <strong>{beanBalance.toLocaleString()}</strong></span></div>

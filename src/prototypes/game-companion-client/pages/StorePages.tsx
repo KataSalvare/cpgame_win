@@ -56,8 +56,9 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
     {presentation === 'page' && <button type="button" className="client-back-link" onClick={() => setPaymentPending(false)}><ArrowLeft size={15} />返回修改</button>}
     <section className="client-card wallet-recharge-payment">
       <span className="client-eyebrow">{payMethod}</span>
-      <h1>支付确认</h1>
+      <h1>扫码支付</h1>
       <strong className="wallet-recharge-payment__amount">¥{amount}</strong>
+      <DemoPaymentQr method={payMethod} />
       <span className="wallet-recharge-payment__status">等待支付</span>
       <div className="wallet-recharge-payment__actions">
         <button type="button" className="client-button client-button--secondary" onClick={() => setPaymentPending(false)}>返回修改</button>
@@ -82,7 +83,25 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
       <aside className="client-card store-summary-card"><h2>订单摘要</h2><div className="checkout-summary-line"><span>充值钻石</span><strong>{rechargeDiamonds.toLocaleString()} 钻石</strong></div><div className="checkout-summary-line"><span>充值金额</span><strong>¥{validRechargeAmount ? parsedRechargeAmount : 0}</strong></div><div className="checkout-summary-line"><span>优惠券</span><strong>{selectedCoupon ? `-¥${selectedCoupon.discount}` : '未使用'}</strong></div><div className="checkout-total"><span>实付金额</span><strong>¥{amount}</strong></div><div className="store-summary-payment"><CreditCard size={16} /><span>{payMethod}</span></div><button type="button" className="client-button client-button--primary store-submit-button" disabled={!validRechargeAmount} onClick={() => setPaymentPending(true)}>确认充值</button></aside>
     </div>
   </div>
-  return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className={`store-benefit-dialog wallet-recharge-dialog${completed ? ' is-completed' : paymentPending ? ' is-payment' : ''}`} role="dialog" aria-modal="true" aria-label={completed ? '充值结果' : paymentPending ? '支付确认' : '钻石充值'}><header><div><span className="client-eyebrow">账户资产</span><h2>{completed ? '充值结果' : paymentPending ? '支付确认' : '钻石充值'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭充值弹窗" onClick={onBack}><X size={17} /></button></header>{content}</section></div> : content
+  return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className={`store-benefit-dialog wallet-recharge-dialog${completed ? ' is-completed' : paymentPending ? ' is-payment' : ''}`} role="dialog" aria-modal="true" aria-label={completed ? '充值结果' : paymentPending ? '扫码支付' : '钻石充值'}><header><div><span className="client-eyebrow">账户资产</span><h2>{completed ? '充值结果' : paymentPending ? '扫码支付' : '钻石充值'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭充值弹窗" onClick={onBack}><X size={17} /></button></header>{content}</section></div> : content
+}
+
+function DemoPaymentQr({ method }: { method: string }) {
+  const size = 29
+  const finders = [[0, 0], [22, 0], [0, 22]] as const
+  const cells = Array.from({ length: size * size }, (_, index) => {
+    const x = index % size
+    const y = Math.floor(index / size)
+    const finder = finders.find(([left, top]) => x >= left && x < left + 7 && y >= top && y < top + 7)
+    if (finder) {
+      const [left, top] = finder
+      const edge = x === left || x === left + 6 || y === top || y === top + 6
+      const center = x >= left + 2 && x <= left + 4 && y >= top + 2 && y <= top + 4
+      return { x, y, active: edge || center }
+    }
+    return { x, y, active: ((x * 11 + y * 7 + x * y * 3 + x * x + y * y) % 9) < 4 }
+  })
+  return <div className="wallet-recharge-payment__qr"><svg viewBox={`0 0 ${size} ${size}`} role="img" aria-label="充值支付二维码">{cells.filter((cell) => cell.active).map((cell) => <rect key={`${cell.x}-${cell.y}`} x={cell.x} y={cell.y} width="1" height="1" fill="#1f2937" />)}</svg><span>{method}</span></div>
 }
 
 export function CouponsPage({ pageState, onRetry, coupons, onBack }: StateProps & { coupons: RechargeCoupon[]; onBack: () => void }) {
