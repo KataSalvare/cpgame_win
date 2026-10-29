@@ -1432,3 +1432,20 @@
 [data-prototype-palette="color"] .personal-toggle.is-on,
 [data-prototype-palette="color"] .workbench-service-switch[aria-checked=true],
 [data-prototype-palette="color"] .group-settings-toggle.is-on { background: var(--prototype-brand); border-color: var(--prototype-brand); }
+
+.personal-notification-table { width: 100%; border-collapse: collapse; table-layout: fixed; color: var(--client-text); font-size: 13px; }
+.personal-notification-table th, .personal-notification-table td { height: 60px; border-bottom: 1px solid var(--client-border); padding: 8px; text-align: center; }
+.personal-notification-table thead th { height: 36px; color: var(--client-muted); font-size: 12px; font-weight: 400; }
+.personal-notification-table th:first-child { width: 110px; padding-left: 0; text-align: left; }
+.personal-notification-table th:nth-child(2), .personal-notification-table th:nth-child(3) { width: 80px; }
+.personal-notification-table th:nth-child(4) { width: 260px; }
+.personal-notification-table tbody th { font-weight: 600; }
+.personal-notification-table tbody tr:last-child > * { border-bottom: 0; }
+.personal-notification-table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--prototype-primary, #374151); cursor: pointer; }
+.personal-notification-sound, .personal-notification-volume { display: flex; align-items: center; gap: 8px; }
+.personal-notification-volume { justify-content: center; }
+.personal-notification-sound select { min-width: 0; flex: 1; height: 32px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 8px; background: var(--prototype-surface, #fff); color: var(--client-text); }
+.personal-notification-volume input { width: 80px; min-width: 0; accent-color: var(--prototype-primary, #374151); }
+.personal-notification-volume output { min-width: 34px; color: var(--client-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.personal-notification-table :disabled { opacity: .45; cursor: not-allowed; }
+.personal-notification-table :focus-visible { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; }

@@ -24,7 +24,7 @@ export function WorkbenchNotifications({ logic: w, open, voiceCallNotifications,
   ]
   const respond = (message: typeof messages[number], accept: boolean) => {
     if (message.kind === 'match' && !w.respond(message.id, accept)) return
-    if (message.kind === 'order' && accept) w.updateOrder(message.id, '待服务')
+    if (message.kind === 'order' && accept) { w.setOrderAction({ id: message.id, action: '接收' }); return }
     const key = message.kind === 'match' ? `match-${message.audition}` : 'order'
     setHandled(keys => keys.includes(key) ? keys : [...keys, key])
   }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import { BadgeCheck, Bell, Bookmark, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gift, Headphones, History, ImagePlus, LockKeyhole, LogOut, Megaphone, MessageCircle, Monitor, PackageCheck, Pencil, Settings2, Shield, ShieldCheck, Star, UserRound, UsersRound, Volume2, WalletCards, X } from 'lucide-react'
+import { BadgeCheck, Bookmark, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gift, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Pencil, Settings2, Shield, ShieldCheck, Star, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
+import { NotificationSettingsDialog } from '../components/NotificationSettingsDialog'
 import { AvatarMark } from '../components/AvatarMark'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { clubs, games } from '../data/mockData'
@@ -280,21 +281,6 @@ function AccountSecurityDialog({ phone, onSavePhone, endedDeviceIds, onEndDevice
       : view === 'closure-warning' ? <div className="personal-closure-content"><div className="personal-closure-warning"><p>您即将注销账号，<strong>注销操作不可撤回</strong>。</p><ul><li>账号下的资料、历史数据与内容记录将按平台规则处理，无法恢复。</li><li>账号下资产及权益将失效，请提前妥善处理。</li><li>正在进行中的订单、服务或售后可能影响注销，请确认已处理完毕。</li></ul></div><section className="personal-closure-balance"><h3>钱包余额</h3><div><span><Coins size={17} />钻石</span><strong>{diamondBalance.toLocaleString('zh-CN')}</strong></div><div><span><WalletCards size={17} />糖豆</span><strong>{beanBalance.toLocaleString('zh-CN')}</strong></div></section><label className="personal-closure-check"><input type="checkbox" checked={warningAccepted} onChange={(event) => setWarningAccepted(event.target.checked)} /><span>我已阅读并理解注销带来的全部损失。</span></label></div>
       : view === 'closure-phone' ? <form id="account-closure-phone-form" className="personal-security-form" onSubmit={completeClosure}><div className="personal-bound-phone"><span>绑定手机号</span><strong>{maskPhone(phone)}</strong></div><label className="personal-setting-field" htmlFor="account-closure-phone">手机号<input id="account-closure-phone" type="tel" inputMode="numeric" maxLength={11} placeholder="请输入绑定手机号" value={newPhone} onChange={(event) => setNewPhone(event.target.value.replace(/\D/g, '').slice(0, 11))} /></label><div className="personal-setting-field"><label htmlFor="account-closure-code">验证码</label><div className="personal-code-field"><input id="account-closure-code" inputMode="numeric" maxLength={6} placeholder="输入验证码" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))} /><button type="button" className="client-button client-button--secondary" onClick={() => { setCodeSent(true); setFeedback('验证码已发送（本地演示，不校验内容）') }}>{codeSent ? '已获取' : '获取验证码'}</button></div></div><small className="personal-form-note">仅校验手机号格式；验证码为演示字段，不进行校验。</small>{error && <p className="personal-setting-error" role="alert">{error}</p>}{feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}</form>
       : <div className="personal-closure-complete"><span><Check size={24} /></span><h3>注销完成</h3><p>账号注销流程已完成（本地原型演示）。</p></div>}
-  </DialogPanel>
-}
-
-const notificationOptions: { key: keyof NotificationPreferences; label: string; description: string; icon: typeof Bell }[] = [
-  { key: 'desktopReminder', label: '桌面提醒', description: '在客户端外显示新消息提醒', icon: Monitor },
-  { key: 'sound', label: '声音提醒', description: '播放消息与状态变化提示音', icon: Volume2 },
-  { key: 'privateMessages', label: '私聊消息', description: '好友发来的私聊消息', icon: MessageCircle },
-  { key: 'groupMessages', label: '群聊消息', description: '群聊中的新消息', icon: UsersRound },
-  { key: 'orderUpdates', label: '订单更新', description: '订单状态和服务进度变化', icon: PackageCheck },
-  { key: 'announcements', label: '平台公告', description: '平台活动与规则更新', icon: Megaphone },
-]
-
-function NotificationSettingsDialog({ preferences, onChange, onClose }: { preferences: NotificationPreferences; onChange: (preferences: NotificationPreferences) => void; onClose: () => void }) {
-  return <DialogPanel overlayId="notification-settings-dialog" title="通知设置" description="选择希望接收的提醒。" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
-    <div className="personal-notification-list">{notificationOptions.map(({ key, label, description, icon: Icon }) => <div className="personal-notification-row" key={key}><span className="personal-device-icon"><Icon size={17} /></span><div><strong>{label}</strong><small>{description}</small></div><button type="button" role="switch" aria-checked={preferences[key]} aria-label={label} className={`personal-toggle${preferences[key] ? ' is-on' : ''}`} onClick={() => onChange({ ...preferences, [key]: !preferences[key] })}><span /></button></div>)}</div>
   </DialogPanel>
 }
 

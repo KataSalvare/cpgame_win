@@ -275,10 +275,17 @@
 .voice-device-panel__heading .voice-status-dot.is-connected{background:var(--prototype-primary, #374151)}
 .voice-leave-button,.voice-audio-icon,.voice-quick-action{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--client-border);border-radius:5px;background:var(--prototype-surface, #fff);color:var(--prototype-text-secondary, #4b5563);cursor:pointer}
 .voice-leave-button{width:26px;height:24px;color:var(--prototype-text-muted, #6b7280)}
-.voice-minimized-float{display:grid;width:100%;grid-template-columns:20px 1fr;align-items:center;column-gap:8px;border:1px solid var(--client-border);border-radius:6px;margin-bottom:8px;padding:9px 8px;background:var(--prototype-surface, #fff);color:var(--client-text);text-align:left;cursor:pointer}
+.voice-minimized-float{position:relative;display:grid;width:100%;grid-template-columns:20px minmax(0,1fr);align-items:center;column-gap:8px;border:1px solid var(--client-border);border-radius:6px;margin-bottom:8px;padding:9px 8px;background:var(--prototype-surface, #fff);color:var(--client-text);text-align:left;cursor:pointer}
 .voice-minimized-float>svg{grid-row:span 2}
-.voice-minimized-float>span{font-size:13px;font-weight:600}
+.voice-minimized-float>span:not(.voice-minimized-float__wave){min-width:0;font-size:13px;font-weight:600}
 .voice-minimized-float>small{margin-top:2px;color:var(--client-muted);font-size:11px}
+.voice-minimized-float__wave{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:2px;height:14px}
+.voice-minimized-float__wave i{width:2px;height:4px;border-radius:2px;background:var(--prototype-text-secondary,#4b5563);animation:voice-minimized-wave 900ms ease-in-out infinite alternate}
+.voice-minimized-float__wave i:nth-child(2){height:8px;animation-delay:120ms}
+.voice-minimized-float__wave i:nth-child(3){height:11px;animation-delay:240ms}
+.voice-minimized-float__wave i:nth-child(4){height:6px;animation-delay:360ms}
+@keyframes voice-minimized-wave{to{transform:scaleY(.35);opacity:.55}}
+@media(prefers-reduced-motion:reduce){.voice-minimized-float__wave i{animation:none}}
 .voice-quick-actions{gap:5px}
 .voice-quick-action{position:relative;min-height:27px;gap:5px;padding:0 7px;font:inherit;font-size:10px}
 .voice-quick-action--share{flex:1;justify-content:flex-start}

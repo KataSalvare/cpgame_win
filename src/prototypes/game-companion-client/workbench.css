@@ -113,3 +113,11 @@
 .workbench-match-actions { display:flex; justify-content:flex-end; align-items:center; gap:8px; }
 .workbench-match-actions .client-button { min-height:32px; }
 .workbench-matches-table .order-item__service strong { white-space:normal; overflow-wrap:anywhere; }
+
+.workbench-order-action-overlay { position:absolute; inset:0; z-index:80; display:grid; place-items:center; padding:24px; background:rgba(31,41,55,.28); }
+.workbench-waiver-field { display:grid; gap:10px; margin:20px 0; font-size:14px; }
+.workbench-waiver-field input { min-height:36px; padding:8px 12px; border:1px solid var(--client-border); border-radius:6px; }
+.workbench-waiver-field small { color:var(--client-muted); font-size:12px; }
+
+.workbench-orders-table .order-list-header, .workbench-orders-table .order-item { grid-template-columns:minmax(120px,1fr) minmax(105px,.8fr) minmax(180px,1.5fr) minmax(60px,.5fr) minmax(130px,1fr) minmax(100px,.7fr) minmax(170px,1.2fr); }
+.workbench-orders-table .order-item__main { grid-column:1 / 7; grid-template-columns:minmax(120px,1fr) minmax(105px,.8fr) minmax(180px,1.5fr) minmax(60px,.5fr) minmax(130px,1fr) minmax(100px,.7fr); }

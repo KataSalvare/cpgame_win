@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { games, servicesByCompanion } from '../data/mockData'
 
-export type WorkOrder = { id: string; player: string; playerInitials: string; serviceId: string; status: string; amount: number; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; deadline?: number }
+export type WorkOrderAction = '接收' | '取消' | '开始服务' | '完成服务' | '免单'
+export type WorkOrder = { id: string; player: string; playerInitials: string; serviceId: string; status: string; amount: number; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
 const initialServiceIds = services.filter(s => s.canAcceptOrders).map(s => s.id)
@@ -25,6 +26,8 @@ export function useWorkbenchLogic() {
   const [automatic, setAutomatic] = useState(false)
   const [requests, setRequests] = useState(services.slice(0, 3).map((s, i) => ({ id: `M-${i+1}`, player: ['小宇', '晚风玩家', '星河'][i], playerInitials: ['宇', '晚风', '星河'][i], audition: i % 2 === 0 ? '试音' : '不试音', matchPrice: 150, tipAmount: [100, 0, 100][i], serviceId: s.id, status: '待响应' })))
   const [orders, setOrders] = useState<WorkOrder[]>(() => ['待接单', '待服务', '服务中', '待玩家确认', '已完成'].map((status, i) => ({ id: `CW-1028-${100+i}`, player: ['晚风玩家', '小宇', '星河', '阿白', '奶糖'][i], playerInitials: ['晚风', '宇', '星河', '白', '糖'][i], serviceId: services[i % services.length]?.id ?? '', status, amount: 120 + i * 20, createdAt: `2026-10-28 ${String(14 - i).padStart(2, '0')}:20`, duration: 2, durationUnit: services[i % services.length]?.unit ?? '小时', unitPrice: (120 + i * 20) / 2, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) })))
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
+  const [orderAction, setOrderAction] = useState<{ id: string; action: WorkOrderAction } | null>(null)
   const [feedback, setFeedback] = useState('')
   useEffect(() => {
     const timer = window.setInterval(() => setOrders(items => items.some(o => o.deadline && o.status === '待玩家确认' && o.deadline <= Date.now()) ? items.map(o => o.deadline && o.status === '待玩家确认' && o.deadline <= Date.now() ? { ...o, status: '已完成' } : o) : items), 1000)
@@ -58,10 +61,25 @@ export function useWorkbenchLogic() {
     })
   }
   const updateOrder = (id: string, status: string) => {
-    setOrders(items => items.map(o => o.id === id ? { ...o, status, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) } : o))
+    setOrders(items => items.map(o => o.id === id ? { ...o, status, ...(status === '服务中' ? { startedAt: new Date().toLocaleString('zh-CN') } : {}), ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000, completionRequestedAt: new Date().toLocaleString('zh-CN') } : {}) } : o))
     setFeedback(status === '已取消' ? '订单已取消，已退款并通知玩家' : status === '待玩家确认' ? '已通知玩家确认，24 小时后自动完成' : `订单已变更为${status}`)
   }
-  return { services, serviceGroups, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder,
+  const recordOrderWaiver = (id: string, quantity: number) => {
+    const order = orders.find(item => item.id === id)
+    if (!order || order.status !== '服务中' || !Number.isFinite(quantity) || quantity <= 0 || !Number.isSafeInteger(quantity * 2)) return false
+    const total = (order.waivedQuantity ?? 0) + quantity
+    if (!Number.isSafeInteger(total * 2)) return false
+    const record = { id: `${id}-waiver-${Date.now()}`, recordedAt: new Date().toISOString(), quantity, unit: order.durationUnit }
+    setOrders(items => items.map(item => item.id === id && item.status === '服务中' ? {
+      ...item,
+      status: '已完成',
+      waivedQuantity: (item.waivedQuantity ?? 0) + quantity,
+      afterSalesRecords: [...(item.afterSalesRecords ?? []), record],
+    } : item))
+    setFeedback(`免单 ${quantity} ${order.durationUnit}，订单已完成，已新增售后记录`)
+    return true
+  }
+  return { selectedOrderId, setSelectedOrderId, selectedOrder: orders.find(o => o.id === selectedOrderId) ?? null, orderAction, setOrderAction, services, serviceGroups, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder, recordOrderWaiver,
     toggleLevel: (key: string) => {
       const opening = !enabledLevelKeys.includes(key)
       setEnabledLevelKeys(items => opening ? [...items.filter(x => x !== key), key] : items.filter(x => x !== key))
