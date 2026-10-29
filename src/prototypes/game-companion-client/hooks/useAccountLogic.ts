@@ -86,6 +86,13 @@ export function useAccountLogic() {
     if (couponId) setCoupons((current) => current.map((coupon) => coupon.id === couponId ? { ...coupon, status: '已使用' } : coupon))
   }, [])
 
+  const payGift = useCallback((giftName: string, recipientName: string, amount: number) => {
+    if (!Number.isInteger(amount) || amount <= 0 || amount > diamondBalance) return false
+    setDiamondBalance((balance) => balance - amount)
+    setDiamondTransactions((current) => [{ id: `gift-${Date.now()}`, title: `赠送礼物 · ${giftName}（送给${recipientName}）`, date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -amount }, ...current])
+    return true
+  }, [diamondBalance])
+
   const purchasePremiumCard = useCallback((cardId: string) => {
     const card = premiumCards.find((item) => item.id === cardId)
     if (!card || ownedPremiumCardIds.includes(cardId) || diamondBalance < card.price) return false
@@ -121,11 +128,22 @@ export function useAccountLogic() {
       setBeanTransactions((current) => [{ id: `bean-withdraw-${Date.now()}`, title: '糖豆提现申请', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -amount }, ...current])
       return true
     },
+    exchangeBeans: (amount: number) => {
+      if (!Number.isInteger(amount) || amount <= 0 || amount > beanBalance) return false
+      const id = `bean-exchange-${Date.now()}`
+      const date = new Date().toLocaleString('zh-CN', { hour12: false })
+      setBeanBalance((balance) => balance - amount)
+      setDiamondBalance((balance) => balance + amount)
+      setBeanTransactions((current) => [{ id, title: '兑换钻石', date, amount: -amount }, ...current])
+      setDiamondTransactions((current) => [{ id, title: '糖豆兑换', date, amount }, ...current])
+      return true
+    },
     beanTransactions,
     findOrderService,
     getGameName,
     completePayment,
     completeRecharge,
+    payGift,
     pauseOrder,
     renewOrder,
     purchasePremiumCard,

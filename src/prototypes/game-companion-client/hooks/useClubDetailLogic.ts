@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react'
 import type { Companion } from '../data/mockData'
 import { companions } from '../data/mockData'
 
-export type CompanionSort = 'recommended' | 'price-asc' | 'price-desc' | 'orders-asc' | 'orders-desc'
+export type CompanionSort = 'recommended' | 'price-asc' | 'price-desc' | 'orders-asc' | 'orders-desc' | 'rating-desc' | 'rating-asc'
 
 export function useCompanionDirectoryLogic(clubId?: string) {
   const [gameId, setGameId] = useState('all')
-  const [status, setStatus] = useState('全部状态')
+  const [onlineStatus, setOnlineStatus] = useState('全部在线状态')
+  const [status, setStatus] = useState('全部接单状态')
   const [gender, setGender] = useState('全部性别')
   const [region, setRegion] = useState('全部地区')
   const [age, setAge] = useState('全部年龄')
@@ -16,7 +17,8 @@ export function useCompanionDirectoryLogic(clubId?: string) {
     const filtered = companions.filter((person) => {
       if (clubId && person.clubId !== clubId) return false
       if (gameId !== 'all' && !person.gameIds.includes(gameId)) return false
-      if (status !== '全部状态' && person.status !== status) return false
+      if (onlineStatus !== '全部在线状态' && person.onlineStatus !== onlineStatus) return false
+      if (status !== '全部接单状态' && person.status !== status) return false
       if (gender !== '全部性别' && person.gender !== gender) return false
       if (region !== '全部地区' && person.region !== region) return false
       if (age !== '全部年龄' && !matchesAge(person.age, age)) return false
@@ -25,24 +27,27 @@ export function useCompanionDirectoryLogic(clubId?: string) {
 
     const priceFor = (person: Companion) => 80 + Number(person.id.slice(-1)) * 10
     return filtered.sort((a, b) => {
+      if (sort === 'rating-asc') return a.rating - b.rating
+      if (sort === 'rating-desc') return b.rating - a.rating
       if (sort === 'price-asc') return priceFor(a) - priceFor(b)
       if (sort === 'price-desc') return priceFor(b) - priceFor(a)
       if (sort === 'orders-asc') return a.orderCount - b.orderCount
       if (sort === 'orders-desc') return b.orderCount - a.orderCount
       return b.rating - a.rating
     })
-  }, [clubId, gameId, status, gender, region, age, sort])
+  }, [clubId, gameId, onlineStatus, status, gender, region, age, sort])
 
   const resetFilters = () => {
     setGameId('all')
-    setStatus('全部状态')
+    setOnlineStatus('全部在线状态')
+    setStatus('全部接单状态')
     setGender('全部性别')
     setRegion('全部地区')
     setAge('全部年龄')
     setSort('recommended')
   }
 
-  return { gameId, setGameId, status, setStatus, gender, setGender, region, setRegion, age, setAge, sort, setSort, visibleCompanions, resetFilters }
+  return { gameId, setGameId, onlineStatus, setOnlineStatus, status, setStatus, gender, setGender, region, setRegion, age, setAge, sort, setSort, visibleCompanions, resetFilters }
 }
 
 export const useClubDetailLogic = useCompanionDirectoryLogic

@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import { BadgeCheck, Bell, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gift, History, ImagePlus, LockKeyhole, LogOut, Megaphone, MessageCircle, Monitor, PackageCheck, Pencil, Settings2, Shield, ShieldCheck, Star, UserRound, UsersRound, Volume2, WalletCards, X } from 'lucide-react'
+import { BadgeCheck, Bell, Bookmark, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gift, Headphones, History, ImagePlus, LockKeyhole, LogOut, Megaphone, MessageCircle, Monitor, PackageCheck, Pencil, Settings2, Shield, ShieldCheck, Star, UserRound, UsersRound, Volume2, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { AvatarMark } from '../components/AvatarMark'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { clubs, games } from '../data/mockData'
 import { type ClientOrder, type PlayerProfile } from '../data/accountMockData'
-import { profileFootprints, profileRoomVisits, profileVisitors, receivedGiftRecords } from '../data/personalCenterMockData'
+import { favoriteClubs, favoriteUsers, favoriteVoiceRooms } from '../data/personalFavoritesMockData'
+import { personalGiftInventory, profileFootprints, profileRoomVisits, profileVisitors } from '../data/personalCenterMockData'
 import { type BlockedProfile, type NotificationPreferences } from '../data/personalSettingsMockData'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
-type CenterSection = 'profile' | 'clubs' | 'onboarding' | 'visits' | 'gifts'
+type CenterSection = 'profile' | 'clubs' | 'onboarding' | 'visits' | 'gifts' | 'favorites'
 type VisitTab = 'footprints' | 'visitors' | 'rooms'
+type FavoriteTab = 'clubs' | 'users' | 'rooms'
 type ApplicationKind = 'companion' | 'club'
 
 type PersonalCenterProps = {
@@ -41,11 +43,13 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
   { id: 'onboarding', label: '入驻中心', icon: FileBadge2 },
   { id: 'visits', label: '访问记录', icon: Footprints },
   { id: 'gifts', label: '我的礼物', icon: Gift },
+  { id: 'favorites', label: '我的收藏', icon: Bookmark },
 ]
 
 export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, notifications, onUpdateNotifications, blockedProfiles, onUnblockProfile, onLogout }: PersonalCenterProps) {
   const [section, setSection] = useState<CenterSection>('profile')
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
+  const [favoriteTab, setFavoriteTab] = useState<FavoriteTab>('clubs')
   const [editingProfile, setEditingProfile] = useState(false)
   const [profileDraft, setProfileDraft] = useState(profile)
   const [feedback, setFeedback] = useState('')
@@ -112,8 +116,22 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
           <VisitList tab={visitTab} />
         </section>}
         {section === 'gifts' && <section className="personal-module">
-          <ModuleHeading title="我的礼物" count={`${receivedGiftRecords.reduce((sum, gift) => sum + gift.count, 0)} 件`} />
-          <div className="personal-gift-list">{receivedGiftRecords.map((record) => <article className="client-card personal-gift-card" key={record.id}><AvatarMark initials={record.initials} size="sm" /><div className="personal-gift-card__sender"><strong>{record.sender}</strong><small>{record.game} · {record.time}</small></div><span className="personal-gift-token">{record.giftInitials}</span><div className="personal-gift-card__info"><strong>{record.giftName}</strong><small>收到 × {record.count}</small></div></article>)}</div>
+          <ModuleHeading title="我的礼物" count={`${personalGiftInventory.reduce((sum, gift) => sum + gift.count, 0)} 件`} />
+          {personalGiftInventory.length ? <div className="personal-gift-list">{personalGiftInventory.map((gift) => <article className={`personal-gift-tile${gift.count === 0 ? ' is-unlit' : ''}`} key={gift.id} aria-label={`${gift.name}，收到 ${gift.count} 个`}>
+            <Gift size={40} strokeWidth={2.8} aria-hidden="true" />
+            {gift.count > 0 ? <strong>× {gift.count}</strong> : <strong>未点亮</strong>}
+          </article>)}</div> : <EmptyPanel icon={<Gift size={22} />} title="还没有收到礼物" />}
+        </section>}
+        {section === 'favorites' && <section className="personal-module personal-favorites-module">
+          <ModuleHeading title="我的收藏" />
+          <div className="personal-record-tabs" role="tablist" aria-label="我的收藏类型">
+            {([{ id: 'clubs', label: '关注的俱乐部', count: favoriteClubs.length }, { id: 'users', label: '关注的用户', count: favoriteUsers.length }, { id: 'rooms', label: '收藏的语音房', count: favoriteVoiceRooms.length }] as const).map((tab) => <button type="button" role="tab" aria-selected={favoriteTab === tab.id} className={favoriteTab === tab.id ? 'is-active' : ''} key={tab.id} onClick={() => setFavoriteTab(tab.id)}>{tab.label}<span>{tab.count}</span></button>)}
+          </div>
+          <div className="personal-favorite-panel" role="tabpanel">
+            {favoriteTab === 'clubs' && <div className="personal-favorite-grid personal-favorite-grid--clubs">{favoriteClubs.map((club) => <article className="client-card personal-favorite-card" key={club.id}><AvatarMark initials={club.initials} size="md" /><div className="personal-favorite-card__body"><strong>{club.name}</strong><span>{club.game}</span><small><UsersRound size={13} />{club.members} 位成员</small><div className="personal-favorite-tags">{club.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div></article>)}</div>}
+            {favoriteTab === 'users' && <div className="personal-favorite-grid personal-favorite-grid--users">{favoriteUsers.map((user) => <article className="client-card personal-favorite-card" key={user.id}><AvatarMark initials={user.initials} size="md" /><div className="personal-favorite-card__body"><strong>{user.name}</strong><span>{user.detail}</span><small><span className={`personal-favorite-status${user.status === '接单中' ? ' is-available' : ''}`} />{user.status}</small></div></article>)}</div>}
+            {favoriteTab === 'rooms' && <div className="personal-favorite-grid personal-favorite-grid--rooms">{favoriteVoiceRooms.map((room) => <article className="client-card personal-favorite-room" key={room.id}><div className="personal-favorite-room__icon"><Headphones size={19} /></div><div className="personal-favorite-card__body"><strong>{room.name}</strong><span>{room.category}</span><small>{room.owner}<span>{room.occupants}</span></small></div></article>)}</div>}
+          </div>
         </section>}
     </main>
 

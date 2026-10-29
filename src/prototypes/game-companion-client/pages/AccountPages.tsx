@@ -30,11 +30,12 @@ type WalletPageProps = StateProps & {
   onOpenDiamondDetails: () => void
   onOpenBeanDetails: () => void
   onWithdrawBeans: () => void
+  onExchangeBeans: () => void
   onOpenCoupons: () => void
   onOpenPremiumCards: () => void
 }
 
-export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, availableCouponCount, ownedPremiumCardCount, onOpenRecharge, onOpenDiamondDetails, onOpenBeanDetails, onWithdrawBeans, onOpenCoupons, onOpenPremiumCards }: WalletPageProps) {
+export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, availableCouponCount, ownedPremiumCardCount, onOpenRecharge, onOpenDiamondDetails, onOpenBeanDetails, onWithdrawBeans, onExchangeBeans, onOpenCoupons, onOpenPremiumCards }: WalletPageProps) {
   if (pageState !== 'normal') return <div className="client-content account-page"><PageState pageState={pageState} onRetry={onRetry} /></div>
 
   return <div className="client-content account-page wallet-page">
@@ -56,6 +57,7 @@ export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, av
         icon={<WalletCards size={20} />}
         onToggle={onOpenBeanDetails}
         onWithdraw={onWithdrawBeans}
+        onExchange={onExchangeBeans}
         actionLabel="查看明细"
       />
       <WalletBalanceCard title="优惠券" amount={availableCouponCount} unit="张可用" icon={<Ticket size={20} />} onToggle={onOpenCoupons} actionLabel="查看优惠券" />
@@ -64,13 +66,13 @@ export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, av
   </div>
 }
 
-function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, onRecharge, onWithdraw, actionLabel = '收支明细' }: {
-  title: string; description?: string; amount: number; unit: string; icon: React.ReactNode; expanded?: boolean; onToggle: () => void; onRecharge?: () => void; onWithdraw?: () => void; actionLabel?: string
+function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, onRecharge, onWithdraw, onExchange, actionLabel = '收支明细' }: {
+  title: string; description?: string; amount: number; unit: string; icon: React.ReactNode; expanded?: boolean; onToggle: () => void; onRecharge?: () => void; onWithdraw?: () => void; onExchange?: () => void; actionLabel?: string
 }) {
   return <section className="client-card wallet-balance-card">
     <div className="wallet-balance-card__heading"><span className="wallet-balance-card__icon">{icon}</span><div><h2>{title}</h2>{description && <p>{description}</p>}</div></div>
     <span className="client-eyebrow">{title === '优惠券' || title === '我的尊享卡' ? '当前数量' : '当前余额'}</span><strong className="wallet-balance-card__amount">{amount.toLocaleString()} <small>{unit}</small></strong>
-    <div className="wallet-balance-card__actions">{onRecharge && <button type="button" className="client-button client-button--primary" onClick={onRecharge}><CreditCard size={15} />充值</button>}{onWithdraw && <button type="button" className="client-button client-button--primary" onClick={onWithdraw}>提现</button>}<button type="button" className={`client-button ${onRecharge || onWithdraw ? 'client-button--secondary' : 'client-button--primary'}`} onClick={onToggle}>{(onRecharge || onWithdraw) && <History size={15} />}{actionLabel}</button></div>
+    <div className="wallet-balance-card__actions">{onRecharge && <button type="button" className="client-button client-button--primary" onClick={onRecharge}><CreditCard size={15} />充值</button>}{onWithdraw && <button type="button" className="client-button client-button--primary" onClick={onWithdraw}>提现</button>}{onExchange && <button type="button" className="client-button client-button--secondary" onClick={onExchange}>兑换钻石</button>}<button type="button" className={`client-button ${onRecharge || onWithdraw || onExchange ? 'client-button--secondary' : 'client-button--primary'}`} onClick={onToggle}>{(onRecharge || onWithdraw || onExchange) && <History size={15} />}{actionLabel}</button></div>
   </section>
 }
 
@@ -137,6 +139,26 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
       </section>
     </>}
     {feedback && <p className="account-inline-feedback" role="status">{feedback}</p>}
+  </section></div>
+}
+
+export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBalance: number; onExchange: (amount: number) => boolean; onClose: () => void }) {
+  const [amount, setAmount] = useState('')
+  const [exchangedAmount, setExchangedAmount] = useState<number | null>(null)
+  const parsedAmount = Number(amount)
+  const validAmount = Number.isInteger(parsedAmount) && parsedAmount > 0 && parsedAmount <= beanBalance
+
+  return <div className="store-overlay bean-exchange-overlay" data-overlay="bean-exchange-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-exchange-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-exchange-title">
+    <header><div><span className="client-eyebrow">糖豆钱包</span><h2 id="bean-exchange-title">{exchangedAmount === null ? '兑换钻石' : '兑换完成'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭兑换弹窗" onClick={onClose}><X size={17} /></button></header>
+    {exchangedAmount === null ? <>
+      <section className="client-card bean-exchange-balance"><span className="client-eyebrow">可用糖豆</span><strong>{beanBalance.toLocaleString()} <small>糖豆</small></strong></section>
+      <label className="bean-withdraw-amount bean-exchange-amount"><span>兑换糖豆数</span><div><input aria-label="兑换糖豆数" inputMode="numeric" type="number" min="1" max={beanBalance} step="1" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="请输入糖豆数" /><span>糖豆</span></div></label>
+      <div className="bean-exchange-preview" aria-live="polite"><span>{validAmount ? parsedAmount.toLocaleString() : '—'} 糖豆</span><strong>1 : 1</strong><span>{validAmount ? parsedAmount.toLocaleString() : '—'} 钻石</span></div>
+      <footer><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!validAmount} onClick={() => { if (onExchange(parsedAmount)) setExchangedAmount(parsedAmount) }}>确认兑换</button></footer>
+    </> : <>
+      <div className="bean-exchange-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><strong>{exchangedAmount.toLocaleString()} <small>糖豆</small></strong><span>已兑换为 {exchangedAmount.toLocaleString()} 钻石</span></div>
+      <footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
+    </>}
   </section></div>
 }
 

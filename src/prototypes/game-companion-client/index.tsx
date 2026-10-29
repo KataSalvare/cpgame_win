@@ -9,14 +9,15 @@ import { DialogPanel, RightDrawer, WindowsClientFrame, WindowsSidebar, WindowsTi
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 import { playerProfile, type PlayerProfile } from './data/accountMockData'
 import { useAccountLogic } from './hooks/useAccountLogic'
-import { BeanWithdrawPanel, CheckoutPage, OrderDetailPanel, OrdersPage, PersonalCenterPage, WalletLedgerPanel, WalletPage } from './pages/AccountPages'
+import { BeanExchangePanel, BeanWithdrawPanel, CheckoutPage, OrderDetailPanel, OrdersPage, PersonalCenterPage, WalletLedgerPanel, WalletPage } from './pages/AccountPages'
 import { CompanionDetailPage } from './pages/CompanionDetailPage'
 import { ClubDetailPage } from './pages/ClubDetailPage'
 import { TalentsPage } from './pages/TalentsPage'
 import { HomePage } from './pages/HomePage'
 import { AvatarMark } from './components/AvatarMark'
 import { ProfileQuickPanel } from './components/ProfileQuickPanel'
-import { MessagesPage, VoiceRoomsPage } from './pages/SocialPages'
+import { GiftPanel, type GiftRecipient } from './components/GiftPanel'
+import { ClubSupportChatPanel, MessagesPage, VoiceRoomsPage } from './pages/SocialPages'
 import { useSocialLogic } from './hooks/useSocialLogic'
 import { useClientNavigation, type ClientPage } from './useClientNavigation'
 import { clubs, companions, servicesByCompanion, type Companion } from './data/mockData'
@@ -54,11 +55,18 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [matchPanelOpen, setMatchPanelOpen] = useState(false)
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
   const [platformSupportOpen, setPlatformSupportOpen] = useState(false)
+  const [clubSupportChatOpen, setClubSupportChatOpen] = useState(false)
   const closePlatformSupport = useCallback(() => setPlatformSupportOpen(false), [])
   const [isMatching, setIsMatching] = useState(false)
   const [checkoutRechargeOpen, setCheckoutRechargeOpen] = useState(false)
   const [rechargeReturnLabel, setRechargeReturnLabel] = useState('返回钱包')
   const [checkoutRechargePromptDismissed, setCheckoutRechargePromptDismissed] = useState(false)
+  const [giftPanelOpen, setGiftPanelOpen] = useState(false)
+  const [giftRecipients, setGiftRecipients] = useState<GiftRecipient[]>([])
+  const [fixedGiftRecipient, setFixedGiftRecipient] = useState<GiftRecipient | undefined>()
+  const [giftAnchor, setGiftAnchor] = useState<HTMLButtonElement | null>(null)
+  const [giftPanelKey, setGiftPanelKey] = useState(0)
+  const [beanExchangeOpen, setBeanExchangeOpen] = useState(false)
   const [readAnnouncementIds, setReadAnnouncementIds] = useState<string[]>([])
   const [rechargeMenuState, setRechargeMenuState] = useState({ entryView: props.entryView, open: props.entryView === 'wallet-recharge' })
   if (rechargeMenuState.entryView !== props.entryView) setRechargeMenuState({ entryView: props.entryView, open: props.entryView === 'wallet-recharge' })
@@ -89,6 +97,17 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [voiceCallDialogOpen, setVoiceCallDialogOpen] = useState(false)
   const [selectedVoiceCallId, setSelectedVoiceCallId] = useState(initialVoiceCallNotifications[0]?.id ?? '')
   const social = useSocialLogic()
+  const openGiftPanel = (recipients: GiftRecipient[], fixedRecipient?: GiftRecipient, anchor?: HTMLButtonElement) => {
+    setGiftPanelKey((key) => key + 1)
+    setGiftRecipients(recipients)
+    setFixedGiftRecipient(fixedRecipient)
+    setGiftAnchor(anchor ?? null)
+    setGiftPanelOpen(true)
+  }
+  const openClubSupportChat = () => {
+    social.markConversationRead('direct-club-support')
+    setClubSupportChatOpen(true)
+  }
   const openVoiceCallNotification = () => {
     if (!voiceCallNotifications.length) return
     if (!voiceCallNotifications.some((notification) => notification.id === selectedVoiceCallId)) setSelectedVoiceCallId(voiceCallNotifications[0].id)
@@ -202,8 +221,11 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         onOrder={navigation.beginOrder}
         followed={social.followedProfileIds.includes(navigation.companion.id)}
         blocked={social.blockedProfileIds.includes(navigation.companion.id)}
+        note={social.profileNotes[navigation.companion.id] ?? ''}
+        onSaveNote={(note) => social.setProfileNote(navigation.companion!.id, note)}
         onToggleFollow={() => social.toggleProfileFollow(navigation.companion!.id)}
         onBlock={() => social.blockProfile(navigation.companion!.id)}
+        onGift={(anchor) => openGiftPanel([], { id: navigation.companion!.id, name: navigation.companion!.name, initials: navigation.companion!.initials, profileId: navigation.companion!.id.replace('companion-', 'P-') }, anchor)}
         onChat={() => {
           social.startDirectMessageWithCompanion(navigation.companion!.id)
           navigation.goToPage('messages')
@@ -225,6 +247,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     rightPanelWidth="var(--client-profile-drawer-width)"
     overlayLayer={<>
       <PlatformSupportDialog open={platformSupportOpen} onClose={closePlatformSupport} />
+      {clubSupportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={account.orders} onClose={() => setClubSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}
       <MatchPanel
       open={matchPanelOpen}
       matching={isMatching}
@@ -253,7 +276,9 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       }}
       />
       {navigation.page === 'wallet' && navigation.panel === 'bean-withdraw' && <BeanWithdrawPanel balance={account.beanBalance} onWithdraw={account.withdrawBeans} onClose={navigation.closePanel} />}
+      {beanExchangeOpen && <BeanExchangePanel beanBalance={account.beanBalance} onExchange={account.exchangeBeans} onClose={() => setBeanExchangeOpen(false)} />}
       {isRechargeModalOpen && <RechargePage presentation="modal" pageState={pageState} onRetry={() => setPageState('normal')} diamondBalance={account.diamondBalance} coupons={account.coupons} onBack={closeRechargeModal} backLabel={rechargeReturnLabel} onComplete={account.completeRecharge} />}
+      <GiftPanel key={giftPanelKey} open={giftPanelOpen} recipients={giftRecipients} fixedRecipient={fixedGiftRecipient} anchor={giftAnchor} balance={account.diamondBalance} onClose={() => setGiftPanelOpen(false)} onPay={(gift, quantity, recipient, amount) => account.payGift(`${gift.name} × ${quantity}`, recipient.name, amount)} onRecharge={() => { setGiftPanelOpen(false); setRechargeReturnLabel('返回送礼'); setCheckoutRechargeOpen(true) }} />
       {globalSearchOpen && <GlobalSearchPanel
         clubs={clubs}
         rooms={searchableVoiceRooms}
@@ -280,7 +305,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       {props.entryView === 'identity-verification' && <IdentityVerificationFlow />}
     </>}
   >
-    {navigation.page === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} /> : navigation.page === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} /> : navigation.page === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : navigation.page === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} /> : navigation.page === 'voice-room' ? <VoiceRoomsPage logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} /> : navigation.page === 'profile' ? <PersonalCenterPage
+    {navigation.page === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} onOpenExchange={() => setBeanExchangeOpen(true)} /> : navigation.page === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} /> : navigation.page === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : navigation.page === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onOpenGift={openGiftPanel} /> : navigation.page === 'voice-room' ? <VoiceRoomsPage logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} onOpenClubSupport={openClubSupportChat} onOpenGift={(recipients, fixedRecipient, anchor) => openGiftPanel(recipients, fixedRecipient, anchor)} /> : navigation.page === 'profile' ? <PersonalCenterPage
       pageState={pageState}
       onRetry={() => setPageState('normal')}
       profile={profile}
@@ -311,6 +336,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onOpenDiamondDetails={() => navigation.openWalletLedger('diamond')}
       onOpenBeanDetails={() => navigation.openWalletLedger('bean')}
       onWithdrawBeans={navigation.openBeanWithdraw}
+      onExchangeBeans={() => setBeanExchangeOpen(true)}
       onOpenCoupons={() => navigation.goToPage('coupons')}
       onOpenPremiumCards={() => navigation.goToPage('my-cards')}
     /> : navigation.page === 'recharge' ? <RechargePage
@@ -409,8 +435,11 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onOpenMatch={() => { match.chooseClub(navigation.clubId); setMatchPanelOpen(true) }}
       onOpenPremiumCards={() => navigation.goToPage('club-cards')}
       onOpenAnnouncements={navigation.openClubAnnouncements}
+      social={social}
+      orders={account.orders}
       onRetry={() => setPageState('normal')}
     /> : <HomePage
+      followedClubIds={social.followedClubIds}
       pageState={pageState}
       onOpenClub={navigation.openClub}
       onBrowseClub={() => navigation.goToPage('voice-room')}

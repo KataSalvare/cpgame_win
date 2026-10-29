@@ -3,7 +3,7 @@ import { clubTags, clubs } from '../data/mockData'
 
 export type HomeScope = 'featured' | 'followed' | 'tag'
 
-export function useHomeLogic() {
+export function useHomeLogic(followedClubIds?: string[]) {
   const [gameId, setGameId] = useState('all')
   const [scope, setScope] = useState<HomeScope>('featured')
   const [tag, setTag] = useState(clubTags[0])
@@ -18,10 +18,10 @@ export function useHomeLogic() {
     const matchesScope = scope === 'featured'
       ? club.featured
       : scope === 'followed'
-        ? club.followed
+        ? followedClubIds ? followedClubIds.includes(club.id) : club.followed
         : club.tags.includes(tag)
     return matchesGame && matchesScope
-  }), [gameId, scope, tag])
+  }), [gameId, scope, tag, followedClubIds])
 
   const resetFilters = () => {
     setGameId('all')

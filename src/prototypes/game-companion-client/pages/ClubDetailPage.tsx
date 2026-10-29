@@ -1,10 +1,14 @@
-import type { ReactNode } from 'react'
-import { ArrowLeft, Bell, Headphones, MessageCircle, ShieldCheck, Star, UsersRound } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { ArrowLeft, Bell, Headphones, MessageCircle, ShieldCheck, ShoppingCart, Star, UsersRound } from 'lucide-react'
 import type { Club } from '../data/mockData'
+import type { ClientOrder } from '../data/accountMockData'
 import { AvatarMark } from '../components/AvatarMark'
+import { FollowIconButton } from '../components/FollowIconButton'
 import { CompanionDirectory } from '../components/CompanionDirectory'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
+import type { useSocialLogic } from '../hooks/useSocialLogic'
+import { ClubSupportChatPanel } from './SocialPages'
 
 type Props = {
   club: Club
@@ -18,10 +22,13 @@ type Props = {
   onOpenMatch: () => void
   onOpenPremiumCards: () => void
   onOpenAnnouncements: () => void
+  social: ReturnType<typeof useSocialLogic>
+  orders: ClientOrder[]
   onRetry: () => void
 }
 
-export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, onRetry }: Props) {
+export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, social, orders, onRetry }: Props) {
+  const [supportChatOpen, setSupportChatOpen] = useState(false)
   if (pageState !== 'normal') {
     return <div className="client-content client-content--narrow-state">
       <button type="button" className="client-back-link" onClick={onBack} aria-label="返回首页"><ArrowLeft size={16} /> 首页</button>
@@ -47,20 +54,28 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
           <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
           <p>{club.intro}</p>
         </div>
+        <FollowIconButton followed={social.followedClubIds.includes(club.id)} name={club.name} onToggle={() => social.toggleClubFollow(club.id)} />
       </div>
       <div className="club-profile-card__actions" role="group" aria-label="俱乐部操作">
-        <DisplayAction icon={<UsersRound size={15} />} label="接待大厅" onClick={onOpenVoiceRoom} />
-        <DisplayAction icon={<Star size={15} />} label="价目表" />
+        <div className="club-profile-card__primary-actions" role="group" aria-label="主要操作">
+        <DisplayAction icon={<UsersRound size={17} />} label="接待大厅" onClick={onOpenVoiceRoom} variant="primary" />
+        <DisplayAction icon={<ShoppingCart size={17} />} label="自助下单" onClick={onOpenMatch} variant="primary" />
+        </div>
+        <div className="club-profile-card__secondary-actions" role="group" aria-label="俱乐部服务">
+        <DisplayAction icon={<Headphones size={15} />} label="客服" onClick={() => { setSupportChatOpen(true); social.markConversationRead('direct-club-support') }} />
         <DisplayAction icon={<ShieldCheck size={15} />} label="尊享卡" onClick={onOpenPremiumCards} />
-        <DisplayAction icon={<Headphones size={15} />} label="客服" />
-        <DisplayAction icon={<UsersRound size={15} />} label="自助下单" onClick={onOpenMatch} variant="primary" />
         <DisplayAction icon={<Star size={15} />} label="优惠券" />
-        <DisplayAction icon={<MessageCircle size={15} />} label="群聊" onClick={onOpenClubGroups} />
+        <DisplayAction icon={<Star size={15} />} label="价目表" />
+        </div>
+        <div className="club-profile-card__community-actions" role="group" aria-label="俱乐部动态">
         <DisplayAction icon={<Bell size={15} />} label="俱乐部公告" onClick={onOpenAnnouncements} />
+        <DisplayAction icon={<MessageCircle size={15} />} label="群聊" onClick={onOpenClubGroups} />
+        </div>
       </div>
     </section>
 
     <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} onOrderWithCompanion={onOrderWithCompanion} />
+    {supportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={orders} onClose={() => setSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}
   </div>
 }
 

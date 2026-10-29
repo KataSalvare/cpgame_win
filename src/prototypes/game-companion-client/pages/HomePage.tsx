@@ -6,6 +6,7 @@ import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
 
 type Props = {
+  followedClubIds?: string[]
   pageState: 'normal' | 'loading' | 'empty' | 'error'
   onOpenClub: (clubId: string) => void
   onBrowseClub: () => void
@@ -13,8 +14,8 @@ type Props = {
   onRetry: () => void
 }
 
-export function HomePage({ pageState, onOpenClub, onBrowseClub, onSelfOrderClub, onRetry }: Props) {
-  const logic = useHomeLogic()
+export function HomePage({ pageState, followedClubIds, onOpenClub, onBrowseClub, onSelfOrderClub, onRetry }: Props) {
+  const logic = useHomeLogic(followedClubIds)
   const gameMap = useMemo(() => new Map(games.map((game) => [game.id, game])), [])
 
   if (pageState !== 'normal') {

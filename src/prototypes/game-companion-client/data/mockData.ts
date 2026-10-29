@@ -30,6 +30,7 @@ export type Companion = {
   gender: '女' | '男'
   age: number
   rating: number
+  onlineStatus: '在线' | '离线'
   status: '接单中' | '服务中' | '暂不接单'
   region: string
   tags: string[]
@@ -64,7 +65,7 @@ export type Review = {
   content: string
 }
 
-export type Gift = { id: string; name: string; initials: string; count: number; description: string }
+export type Gift = { id: string; name: string; initials: string; count: number; description: string; price: number }
 
 export const games: Game[] = [
   { id: 'all', name: '全部游戏', shortName: '全部' },
@@ -93,15 +94,15 @@ export const clubs: Club[] = [
 ]
 
 export const companions: Companion[] = [
-  { id: 'companion-001', clubId: 'club-001', name: '林间晚风', initials: '晚风', gender: '女', age: 24, rating: 4.99, status: '接单中', region: '上海', tags: ['战术指挥', '温柔耐心', '稳定在线'], intro: '擅长信息沟通和团队配合，节奏清晰，交流轻松。', voiceMessage: { text: '你好，我是林间晚风，擅长信息沟通和团队配合，期待和你一起开黑。', duration: 8 }, gameIds: ['valorant', 'pubg'], orderCount: 1286 },
-  { id: 'companion-002', clubId: 'club-001', name: '北纬三十度', initials: '北纬', gender: '男', age: 27, rating: 4.96, status: '服务中', region: '杭州', tags: ['团队协作', '思路清晰'], intro: '熟悉多种地图点位，重视沟通和复盘。', gameIds: ['valorant', 'apex'], orderCount: 986 },
-  { id: 'companion-003', clubId: 'club-001', name: '云端指挥官', initials: '云端', gender: '女', age: 29, rating: 4.94, status: '接单中', region: '成都', tags: ['赛事经验', '耐心教学'], intro: '从基础配合到进阶战术，按你的节奏来。', gameIds: ['pubg', 'valorant'], orderCount: 764 },
-  { id: 'companion-004', clubId: 'club-002', name: '莓莓汽水', initials: '莓莓', gender: '女', age: 22, rating: 4.98, status: '接单中', region: '广州', tags: ['轻松聊天', '新手友好'], intro: '喜欢轻松开黑，也乐于陪你熟悉游戏。', voiceMessage: { text: '嗨，我是莓莓汽水，喜欢轻松聊天和愉快开黑。', duration: 6 }, gameIds: ['lol', 'apex'], orderCount: 1520 },
-  { id: 'companion-005', clubId: 'club-002', name: '晚睡选手', initials: '晚睡', gender: '男', age: 26, rating: 4.92, status: '暂不接单', region: '重庆', tags: ['娱乐开黑', '声音好听'], intro: '主打轻松氛围和稳定配合。', gameIds: ['lol', 'naraka'], orderCount: 602 },
-  { id: 'companion-006', clubId: 'club-003', name: '折光', initials: '折光', gender: '男', age: 31, rating: 4.97, status: '接单中', region: '北京', tags: ['高阶战术', '赛事陪练'], intro: '专注高阶对局沟通与复盘建议。', voiceMessage: { text: '你好，我是折光，专注高阶对局沟通和复盘建议。', duration: 6 }, gameIds: ['valorant', 'naraka'], orderCount: 1108 },
-  { id: 'companion-007', clubId: 'club-004', name: '汽水不加冰', initials: '汽水', gender: '女', age: 35, rating: 4.91, status: '接单中', region: '南京', tags: ['周末组队', '轻松娱乐'], intro: '熟悉地图探索与队伍协作，气氛轻松。', gameIds: ['pubg', 'apex'], orderCount: 835 },
-  { id: 'companion-008', clubId: 'club-005', name: '松果同学', initials: '松果', gender: '女', age: 28, rating: 4.95, status: '接单中', region: '苏州', tags: ['耐心教学', '新手友好'], intro: '陪你从基础熟悉玩法，循序渐进提升。', gameIds: ['lol', 'naraka'], orderCount: 712 },
-  { id: 'companion-009', clubId: 'club-006', name: '凌晨四点', initials: '凌晨', gender: '男', age: 41, rating: 4.90, status: '接单中', region: '武汉', tags: ['稳定在线', '团队协作'], intro: '擅长多人配合，注重沟通和游戏体验。', gameIds: ['valorant', 'apex'], orderCount: 558 },
+  { id: 'companion-001', onlineStatus: '在线', clubId: 'club-001', name: '林间晚风', initials: '晚风', gender: '女', age: 24, rating: 4.99, status: '接单中', region: '上海', tags: ['战术指挥', '温柔耐心', '稳定在线'], intro: '擅长信息沟通和团队配合，节奏清晰，交流轻松。', voiceMessage: { text: '你好，我是林间晚风，擅长信息沟通和团队配合，期待和你一起开黑。', duration: 8 }, gameIds: ['valorant', 'pubg'], orderCount: 1286 },
+  { id: 'companion-002', onlineStatus: '在线', clubId: 'club-001', name: '北纬三十度', initials: '北纬', gender: '男', age: 27, rating: 4.96, status: '服务中', region: '杭州', tags: ['团队协作', '思路清晰'], intro: '熟悉多种地图点位，重视沟通和复盘。', gameIds: ['valorant', 'apex'], orderCount: 986 },
+  { id: 'companion-003', onlineStatus: '离线', clubId: 'club-001', name: '云端指挥官', initials: '云端', gender: '女', age: 29, rating: 4.94, status: '接单中', region: '成都', tags: ['赛事经验', '耐心教学'], intro: '从基础配合到进阶战术，按你的节奏来。', gameIds: ['pubg', 'valorant'], orderCount: 764 },
+  { id: 'companion-004', onlineStatus: '在线', clubId: 'club-002', name: '莓莓汽水', initials: '莓莓', gender: '女', age: 22, rating: 4.98, status: '接单中', region: '广州', tags: ['轻松聊天', '新手友好'], intro: '喜欢轻松开黑，也乐于陪你熟悉游戏。', voiceMessage: { text: '嗨，我是莓莓汽水，喜欢轻松聊天和愉快开黑。', duration: 6 }, gameIds: ['lol', 'apex'], orderCount: 1520 },
+  { id: 'companion-005', onlineStatus: '离线', clubId: 'club-002', name: '晚睡选手', initials: '晚睡', gender: '男', age: 26, rating: 4.92, status: '暂不接单', region: '重庆', tags: ['娱乐开黑', '声音好听'], intro: '主打轻松氛围和稳定配合。', gameIds: ['lol', 'naraka'], orderCount: 602 },
+  { id: 'companion-006', onlineStatus: '在线', clubId: 'club-003', name: '折光', initials: '折光', gender: '男', age: 31, rating: 4.97, status: '接单中', region: '北京', tags: ['高阶战术', '赛事陪练'], intro: '专注高阶对局沟通与复盘建议。', voiceMessage: { text: '你好，我是折光，专注高阶对局沟通和复盘建议。', duration: 6 }, gameIds: ['valorant', 'naraka'], orderCount: 1108 },
+  { id: 'companion-007', onlineStatus: '在线', clubId: 'club-004', name: '汽水不加冰', initials: '汽水', gender: '女', age: 35, rating: 4.91, status: '接单中', region: '南京', tags: ['周末组队', '轻松娱乐'], intro: '熟悉地图探索与队伍协作，气氛轻松。', gameIds: ['pubg', 'apex'], orderCount: 835 },
+  { id: 'companion-008', onlineStatus: '在线', clubId: 'club-005', name: '松果同学', initials: '松果', gender: '女', age: 28, rating: 4.95, status: '接单中', region: '苏州', tags: ['耐心教学', '新手友好'], intro: '陪你从基础熟悉玩法，循序渐进提升。', gameIds: ['lol', 'naraka'], orderCount: 712 },
+  { id: 'companion-009', onlineStatus: '离线', clubId: 'club-006', name: '凌晨四点', initials: '凌晨', gender: '男', age: 41, rating: 4.90, status: '接单中', region: '武汉', tags: ['稳定在线', '团队协作'], intro: '擅长多人配合，注重沟通和游戏体验。', gameIds: ['valorant', 'apex'], orderCount: 558 },
 ]
 
 const createServices = (companionId: string, gameIds: string[]): Service[] => {
@@ -133,10 +134,12 @@ export const reviews: Review[] = [
 ]
 
 export const gifts: Gift[] = [
-  { id: 'gift-01', name: '星光徽章', initials: '星', count: 126, description: '一份闪亮的认可' },
-  { id: 'gift-02', name: '热烈掌声', initials: '掌', count: 98, description: '为精彩配合喝彩' },
-  { id: 'gift-03', name: '能量补给', initials: '能', count: 76, description: '继续保持好状态' },
-  { id: 'gift-04', name: '默契搭档', initials: '默', count: 42, description: '送给合拍的队友' },
+  { id: 'gift-01', name: '星光徽章', initials: '星', count: 126, description: '一份闪亮的认可', price: 10 },
+  { id: 'gift-02', name: '热烈掌声', initials: '掌', count: 98, description: '为精彩配合喝彩', price: 20 },
+  { id: 'gift-03', name: '能量补给', initials: '能', count: 76, description: '继续保持好状态', price: 50 },
+  { id: 'gift-04', name: '默契搭档', initials: '默', count: 42, description: '送给合拍的队友', price: 88 },
+  { id: 'gift-05', name: '胜利烟花', initials: '烟', count: 31, description: '为精彩胜利庆祝', price: 188 },
+  { id: 'gift-06', name: '星河守护', initials: '河', count: 18, description: '送给最默契的伙伴', price: 520 },
 ]
 
 export const regions = ['上海', '北京', '广州', '杭州', '成都', '南京', '重庆', '苏州', '武汉']

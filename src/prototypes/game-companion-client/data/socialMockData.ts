@@ -41,6 +41,8 @@ export interface SocialConversation {
   unread: number
   messages: SocialMessage[]
   pinned?: boolean
+  muted?: boolean
+  avatarDataUrl?: string
   self?: { id: string; name: string; initials: string }
   supportAction?: 'order' | 'support-review'
   clubGroupId?: string
@@ -124,7 +126,7 @@ const customerIdentity = { id: 'customer-kata', name: '卡塔', initials: '卡' 
 
 export const initialConversations: SocialConversation[] = [
   {
-    id: 'direct-club-support', kind: 'direct', title: 'GM-客服', initials: 'GM', members: ['club-support'], unread: 0, supportAction: 'order',
+    id: 'direct-club-support', kind: 'direct', title: 'GM-客服-用户视角', initials: 'GM', members: ['club-support'], unread: 0, supportAction: 'order',
     messages: [
       { id: 'support-1', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '14:20', kind: 'text', content: '你好，想咨询一下这笔订单。' },
       { id: 'support-2', senderId: 'club-support', senderName: 'GM-客服', initials: 'GM', time: '14:21', kind: 'text', content: '您好，请发送订单，我帮您查看。' },
@@ -134,7 +136,7 @@ export const initialConversations: SocialConversation[] = [
     ],
   },
   {
-    id: 'direct-customer-kata', kind: 'direct', title: '卡塔', initials: '卡', members: ['customer-kata'], unread: 0, self: supportIdentity, supportAction: 'support-review',
+    id: 'direct-customer-kata', kind: 'direct', title: '卡塔-客服视角', initials: '卡', members: ['customer-kata'], unread: 0, self: supportIdentity, supportAction: 'support-review',
     messages: [
       { id: 'kata-1', senderId: customerIdentity.id, senderName: '卡塔', initials: '卡', time: '15:10', kind: 'text', content: '你好，帮我看一下这笔订单。' },
       { id: 'kata-2', senderId: customerIdentity.id, senderName: '卡塔', initials: '卡', time: '15:11', ...supportOrderSample },
@@ -210,4 +212,21 @@ export const initialSupportQueue = [
   { id: 'support-user-1', name: '青柠汽水', initials: '柠' },
   { id: 'support-user-2', name: '北岸', initials: '北' },
   { id: 'support-user-3', name: '小熊饼干', initials: '熊' },
+]
+
+export type FixedMessageFeed = 'activities' | 'system' | 'groups'
+export const fixedMessageFeeds: { id: FixedMessageFeed; title: string; summary: string }[] = [
+  { id: 'activities', title: '活动公告', summary: '查看平台与俱乐部最新活动' },
+  { id: 'system', title: '系统通知', summary: '服务规范、维护及账号消息' },
+  { id: 'groups', title: '群通知', summary: '入群申请与处理结果' },
+]
+export const systemMessageNotifications = [
+  { id: 'system-1', icon: 'shield', title: '账号登录提醒', summary: '您的账号已在当前 Windows 客户端登录。', time: '2026-10-29 14:00' },
+  { id: 'system-2', icon: 'rules', title: '陪玩服务规范更新说明', summary: '服务评价与订单沟通规范将于本周更新，请留意平台公告。', time: '2026-10-27 16:30' },
+  { id: 'system-3', icon: 'maintenance', title: '客户端维护时间调整', summary: '维护时段为 2026-10-28 23:30 至 2026-10-29 01:00。', time: '2026-10-27 12:00' },
+] as const
+export type GroupJoinRequest = { id: string; conversationId: string; groupName: string; applicantId: string; name: string; initials: string; reason: string; time: string; status: 'pending' | 'approved' | 'rejected' }
+export const initialGroupJoinRequests: GroupJoinRequest[] = [
+  { id: 'join-1', conversationId: 'group-squad', groupName: '周末五排小队', applicantId: 'friend-4', name: '一颗糖', initials: '糖', reason: '周末想和大家一起组队开黑。', time: '2026-10-29 14:20', status: 'pending' },
+  { id: 'join-2', conversationId: 'group-squad', groupName: '周末五排小队', applicantId: 'friend-6', name: '阿澈', initials: '澈', reason: '朋友推荐，希望加入小队。', time: '2026-10-29 13:45', status: 'pending' },
 ]

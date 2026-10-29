@@ -41,3 +41,12 @@ export const receivedGiftRecords: ReceivedGiftRecord[] = [
   { id: 'received-gift-02', sender: '北岸', initials: '北', giftName: '热烈掌声', giftInitials: '掌', count: 1, game: '英雄联盟', time: '昨天 22:12' },
   { id: 'received-gift-03', sender: '一颗小行星', initials: '星', giftName: '能量补给', giftInitials: '能', count: 2, game: '绝地求生', time: '10月25日 19:46' },
 ]
+
+export const personalGiftInventory = [
+  { id: 'gift-01', name: '星光徽章', count: 3 },
+  { id: 'gift-02', name: '热烈掌声', count: 1 },
+  { id: 'gift-03', name: '能量补给', count: 2 },
+  { id: 'gift-04', name: '默契搭档', count: 0 },
+  { id: 'gift-05', name: '胜利烟花', count: 0 },
+  { id: 'gift-06', name: '星河守护', count: 0 },
+]

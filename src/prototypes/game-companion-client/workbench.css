@@ -19,6 +19,7 @@
 .workbench-wallet{display:flex;align-items:center;justify-content:space-between;padding:18px}
 .workbench-wallet strong{font-size:24px}
 .workbench-wallet small{font-size:14px}
+.workbench-wallet__actions{display:flex;flex-wrap:wrap;gap:8px}
 .workbench-feedback{display:flex;justify-content:space-between;background:var(--prototype-border, #e5e7eb);padding:12px 16px;border-radius:6px}
 .workbench-feedback button,.workbench-dialog-close{background:transparent;border:0}
 .workbench-empty{padding:60px;text-align:center;color:var(--prototype-text-muted, #6b7280)}
@@ -107,3 +108,8 @@
 
 .workbench-auto-grab.client-button { min-height:40px; padding:0 16px; gap:8px; font-size:16px; font-weight:600; }
 .workbench-confirm-actions { display:flex; justify-content:flex-end; gap:8px; }
+
+.workbench-matches-table .workbench-match-grid { grid-template-columns:minmax(150px,1fr) minmax(70px,.5fr) minmax(240px,1.8fr) minmax(140px,1fr) minmax(120px,.9fr) minmax(170px,1.2fr); }
+.workbench-match-actions { display:flex; justify-content:flex-end; align-items:center; gap:8px; }
+.workbench-match-actions .client-button { min-height:32px; }
+.workbench-matches-table .order-item__service strong { white-space:normal; overflow-wrap:anywhere; }

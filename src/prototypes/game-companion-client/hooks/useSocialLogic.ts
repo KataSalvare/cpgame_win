@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react'
 import {
   currentSocialUser,
   initialConversations,
+  initialGroupJoinRequests,
+  type FixedMessageFeed,
   orderMessageFromOrder,
   supportReviewSample,
   initialRoomMessagesByRoom,
@@ -19,12 +21,23 @@ import {
   type VoiceRoom,
   type VoiceSubchannel,
 } from '../data/socialMockData'
-import { companions } from '../data/mockData'
+import { clubs, companions } from '../data/mockData'
 import { clubGroups as initialClubGroups } from '../data/clubGroupMockData'
 
 const createId = (prefix: string) => `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`
 
 export function useSocialLogic() {
+  const [activeFixedFeed, setActiveFixedFeed] = useState<FixedMessageFeed | null>(null)
+  const [groupJoinRequests, setGroupJoinRequests] = useState(initialGroupJoinRequests)
+  const [readActivityIds, setReadActivityIds] = useState<string[]>([])
+  const readActivity = (id: string) => setReadActivityIds((ids) => ids.includes(id) ? ids : [...ids, id])
+  const resolveGroupJoinRequest = (requestId: string, status: 'approved' | 'rejected') => {
+    const request = groupJoinRequests.find((item) => item.id === requestId)
+    const target = conversations.find((item) => item.id === request?.conversationId)
+    if (!request || request.status !== 'pending' || !target || target.ownerId !== currentSocialUser.id) return
+    setGroupJoinRequests((items) => items.map((item) => item.id === requestId ? { ...item, status } : item))
+    if (status === 'approved') setConversations((items) => items.map((item) => item.id !== request.conversationId || item.members.includes(request.applicantId) ? item : { ...item, members: [...item.members, request.applicantId] }))
+  }
   const [conversations, setConversations] = useState(initialConversations)
   const [clubGroups, setClubGroups] = useState(initialClubGroups)
   const [selectedConversationId, setSelectedConversationId] = useState(initialConversations[0].id)
@@ -35,7 +48,13 @@ export function useSocialLogic() {
   const [voiceRooms, setVoiceRooms] = useState(initialVoiceRooms)
   const [blockedVoiceMemberIds, setBlockedVoiceMemberIds] = useState<string[]>([])
   const [followedProfileIds, setFollowedProfileIds] = useState<string[]>([])
+  const [followedClubIds, setFollowedClubIds] = useState<string[]>(() => clubs.filter((club) => club.followed).map((club) => club.id))
+  const [followedChannelIds, setFollowedChannelIds] = useState<string[]>([])
+  const toggleClubFollow = (clubId: string) => setFollowedClubIds((ids) => ids.includes(clubId) ? ids.filter((id) => id !== clubId) : [...ids, clubId])
+  const toggleChannelFollow = (channelId: string) => setFollowedChannelIds((ids) => ids.includes(channelId) ? ids.filter((id) => id !== channelId) : [...ids, channelId])
   const [blockedProfileIds, setBlockedProfileIds] = useState<string[]>([])
+  const [profileNotes, setProfileNotes] = useState<Record<string, string>>({})
+  const setProfileNote = (profileId: string, note: string) => setProfileNotes((items) => ({ ...items, [profileId]: note }))
   const [activeVoiceRoomId, setActiveVoiceRoomId] = useState(initialVoiceRooms[0].id)
   const [activeSubchannelId, setActiveSubchannelId] = useState(initialVoiceRooms[0].channels[0].id)
   const [roomMessagesByRoom, setRoomMessagesByRoom] = useState(initialRoomMessagesByRoom)
@@ -83,6 +102,7 @@ export function useSocialLogic() {
   }
 
   const openConversation = (conversation: SocialConversation) => {
+    setActiveFixedFeed(null)
     setSelectedConversationId(conversation.id)
     setSelectedFriendId(null)
     setConversations((items) => items.map((item) => item.id === conversation.id ? { ...item, unread: 0 } : item))
@@ -111,6 +131,7 @@ export function useSocialLogic() {
   }
 
   const startDirectMessage = (friendId: string) => {
+    setActiveFixedFeed(null)
     const friend = socialFriends.find((item) => item.id === friendId)
     if (!friend) return
     const existing = conversations.find((item) => item.kind === 'direct' && item.members[0] === friendId)
@@ -125,6 +146,7 @@ export function useSocialLogic() {
   }
 
   const startDirectMessageWithCompanion = (companionId: string) => {
+    setActiveFixedFeed(null)
     const friend = socialFriends.find((item) => item.companionId === companionId)
     if (friend) {
       startDirectMessage(friend.id)
@@ -174,6 +196,12 @@ export function useSocialLogic() {
       : conversation))
   }
 
+  const updateGroupAvatar = (conversationId: string, avatarDataUrl: string) => {
+    setConversations((items) => items.map((conversation) => conversation.id === conversationId && conversation.kind === 'group'
+      ? { ...conversation, avatarDataUrl }
+      : conversation))
+  }
+
   const setGroupAdmin = (conversationId: string, memberId: string, isAdmin: boolean) => {
     setConversations((items) => items.map((conversation) => {
       if (conversation.id !== conversationId || conversation.kind !== 'group' || conversation.ownerId !== currentSocialUser.id || !conversation.members.includes(memberId)) return conversation
@@ -204,9 +232,27 @@ export function useSocialLogic() {
       : conversation))
   }
 
+  const setGroupMuted = (conversationId: string, muted: boolean) => {
+    setConversations((items) => items.map((conversation) => conversation.id === conversationId && conversation.kind === 'group'
+      ? { ...conversation, muted }
+      : conversation))
+  }
+
   const dissolveGroup = (conversationId: string) => {
     const target = conversations.find((conversation) => conversation.id === conversationId)
     if (!target || target.kind !== 'group' || target.ownerId !== currentSocialUser.id) return
+    const remaining = conversations.filter((conversation) => conversation.id !== conversationId)
+    setConversations(remaining)
+    if (selectedConversationId === conversationId) {
+      setSelectedConversationId(remaining[0]?.id ?? '')
+      setSelectedFriendId(null)
+      setSelectedProfileId(null)
+    }
+  }
+
+  const leaveGroup = (conversationId: string) => {
+    const target = conversations.find((conversation) => conversation.id === conversationId)
+    if (!target || target.kind !== 'group' || target.ownerId === currentSocialUser.id) return
     const remaining = conversations.filter((conversation) => conversation.id !== conversationId)
     setConversations(remaining)
     if (selectedConversationId === conversationId) {
@@ -242,6 +288,21 @@ export function useSocialLogic() {
     updateMessages(selectedConversation.id, (id, time) => ({ id, senderId: self.id, senderName: self.name, initials: self.initials, time, kind, content, duration, replyTo }))
   }
 
+  const sendChatMessageToConversation = (conversationId: string, kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => {
+    const target = conversations.find((item) => item.id === conversationId)
+    if (!target || !content.trim()) return
+    const self = target.self ?? currentSocialUser
+    updateMessages(conversationId, (id, time) => ({ id, senderId: self.id, senderName: self.name, initials: self.initials, time, kind, content, duration, replyTo }))
+  }
+
+  const sendSupportCardToConversation = (conversationId: string, order?: ClientOrder) => {
+    const target = conversations.find((item) => item.id === conversationId)
+    if (!target?.supportAction || (target.supportAction === 'order' && !order)) return
+    const self = target.self ?? currentSocialUser
+    const sample = target.supportAction === 'order' ? orderMessageFromOrder(order!) : supportReviewSample
+    updateMessages(conversationId, (id, time) => ({ id, senderId: self.id, senderName: self.name, initials: self.initials, time, ...sample }))
+  }
+
   const sendSupportCard = (order?: ClientOrder) => {
     if (!selectedConversation?.supportAction) return
     const self = selectedConversation.self ?? currentSocialUser
@@ -253,6 +314,15 @@ export function useSocialLogic() {
   const updateSupportReview = (messageId: string, rating: number, submitted = false) => {
     if (!selectedConversation || !Number.isInteger(rating) || rating < 1 || rating > 5) return
     setConversations((items) => items.map((conversation) => conversation.id !== selectedConversation.id ? conversation : {
+      ...conversation, messages: conversation.messages.map((message) => message.id !== messageId || !message.review || message.review.submitted ? message : {
+        ...message, content: submitted ? `[客服评价] ${rating} 分 · 已评价` : '[客服评价] 待评价', review: { ...message.review, rating, submitted },
+      }),
+    }))
+  }
+
+  const updateSupportReviewInConversation = (conversationId: string, messageId: string, rating: number, submitted = false) => {
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) return
+    setConversations((items) => items.map((conversation) => conversation.id !== conversationId ? conversation : {
       ...conversation, messages: conversation.messages.map((message) => message.id !== messageId || !message.review || message.review.submitted ? message : {
         ...message, content: submitted ? `[客服评价] ${rating} 分 · 已评价` : '[客服评价] 待评价', review: { ...message.review, rating, submitted },
       }),
@@ -488,10 +558,12 @@ export function useSocialLogic() {
   const unblockProfile = (profileId: string) => setBlockedProfileIds((items) => items.filter((id) => id !== profileId))
 
   return {
+    followedClubIds, toggleClubFollow, followedChannelIds, toggleChannelFollow,
     conversations, selectedConversation, selectedFriend, selectedProfile, visibleConversations, visibleFriends, clubGroups,
-    followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile, unblockProfile,
+    followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile, unblockProfile, profileNotes, setProfileNote,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
-    selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, setGroupAdmin, removeGroupMember, setGroupJoinApproval, dissolveGroup, sendChatMessage, sendSupportCard, updateSupportReview, applyToClubGroup, openClubGroupChat,
+    activeFixedFeed, setActiveFixedFeed, groupJoinRequests, resolveGroupJoinRequest, readActivityIds, readActivity,
+    selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, updateGroupAvatar, setGroupAdmin, removeGroupMember, setGroupJoinApproval, setGroupMuted, leaveGroup, dissolveGroup, sendChatMessage, sendChatMessageToConversation, sendSupportCard, sendSupportCardToConversation, updateSupportReview, updateSupportReviewInConversation, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms,
     roomSearch, setRoomSearch, roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
     setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,
