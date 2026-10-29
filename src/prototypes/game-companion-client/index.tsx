@@ -453,6 +453,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       pageState={pageState}
       onRetry={() => setPageState('normal')}
       orderService={orderService ? { ...orderService, gameName: account.getGameName(orderService.service.gameId) } : null}
+      orderSelectionMode={navigation.orderSelectionMode}
       availableServices={servicesByCompanion[navigation.companionId ?? ''] ?? []}
       selectedCompanions={checkoutCompanions}
       diamondBalance={account.diamondBalance}
@@ -461,7 +462,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       hideRechargePrompt={checkoutRechargePromptDismissed}
       onResetRechargePrompt={() => setCheckoutRechargePromptDismissed(false)}
       onOpenWallet={() => { setCheckoutRechargePromptDismissed(true); setRechargeReturnLabel('返回下单结算'); setCheckoutRechargeOpen(true) }}
-      onSelectService={(serviceId) => navigation.beginOrder(serviceId, navigation.companionId ?? '', 'cascade')}
+      onSelectService={(serviceId) => navigation.beginOrder(serviceId, navigation.companionId ?? '', navigation.orderSelectionMode)}
       onCommunicate={(companionId) => { setChatCompanionId(companionId); social.startDirectMessageWithCompanion(companionId); setCompanionChatOpen(true) }}
       onComplete={(quantity, amount, remark, _selectedCompanions, tipAmount, paymentSource, premiumCardId) => {
         if (!orderService) return null

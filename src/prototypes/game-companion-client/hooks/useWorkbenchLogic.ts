@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion } from '../data/mockData'
 
 export type WorkOrderAction = '接收' | '取消' | '开始服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
-export type WorkOrder = { id: string; player: string; playerInitials: string; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
+export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
 const initialServiceIds = services.filter(s => s.canAcceptOrders).map(s => s.id)
@@ -27,15 +27,15 @@ export function useWorkbenchLogic() {
   const [automatic, setAutomatic] = useState(false)
   const [requests, setRequests] = useState(services.slice(0, 3).map((s, i) => ({ id: `M-${i+1}`, player: ['小宇', '晚风玩家', '星河'][i], playerInitials: ['宇', '晚风', '星河'][i], audition: i % 2 === 0 ? '试音' : '不试音', matchPrice: 150, tipAmount: [100, 0, 100][i], serviceId: s.id, status: '待响应' })))
   const [orders, setOrders] = useState<WorkOrder[]>(() => {
-    const examples = ['待接单', '待服务', '服务中', '待玩家确认', '已完成'].map((status, i) => ({ id: `CW-1028-${100+i}`, player: ['晚风玩家', '小宇', '星河', '阿白', '奶糖'][i], playerInitials: ['晚风', '宇', '星河', '白', '糖'][i], serviceId: services[i % services.length]?.id ?? '', clubName: workbenchClubName, status, amount: 120 + i * 20 + (i === 0 ? 20 : 0), tipAmount: i === 0 ? 20 : 0, discountAmount: 0, paymentSource: '钻石钱包' as const, createdAt: `2026-10-28 ${String(14 - i).padStart(2, '0')}:20`, duration: 2, durationUnit: services[i % services.length]?.unit ?? '小时', unitPrice: (120 + i * 20) / 2, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) }))
+    const examples = ['待接单', '待服务', '服务中', '待玩家确认', '已完成'].map((status, i) => ({ id: `CW-1028-${100+i}`, player: ['晚风玩家', '小宇', '星河', '阿白', '奶糖'][i], playerId: `P-1028${60 + i}`, playerInitials: ['晚风', '宇', '星河', '白', '糖'][i], serviceId: services[i % services.length]?.id ?? '', clubName: workbenchClubName, status, amount: 120 + i * 20 + (i === 0 ? 20 : 0), tipAmount: i === 0 ? 20 : 0, discountAmount: 0, paymentSource: '钻石钱包' as const, createdAt: `2026-10-28 ${String(14 - i).padStart(2, '0')}:20`, duration: 2, durationUnit: services[i % services.length]?.unit ?? '小时', unitPrice: (120 + i * 20) / 2, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) }))
     const hourlyService = services.find(service => service.unit === '小时')
     const roundService = services.find(service => service.unit === '局')
     return [...examples, {
-      id: 'CW-1028-105', player: '橘子汽水', playerInitials: '橘子', serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
+      id: 'CW-1028-105', player: '橘子汽水', playerId: 'P-102865', playerInitials: '橘子', serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
       status: '服务中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 09:20', duration: 3,
       durationUnit: hourlyService?.unit ?? '小时', unitPrice: 80, startedAt: '2026-10-28 09:35', earlyEndRequested: true, serviceSegmentMinutes: [45, 35, 25],
     }, {
-      id: 'CW-1028-106', player: '小满', playerInitials: '满', serviceId: roundService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
+      id: 'CW-1028-106', player: '小满', playerId: 'P-102866', playerInitials: '满', serviceId: roundService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
       status: '服务中', amount: 400, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 08:20', duration: 5,
       durationUnit: roundService?.unit ?? '局', unitPrice: 80, startedAt: '2026-10-28 08:25', earlyEndRequested: true, serviceSegmentMinutes: [18, 22, 15],
     }]

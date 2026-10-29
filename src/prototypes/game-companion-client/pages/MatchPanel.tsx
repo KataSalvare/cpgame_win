@@ -36,6 +36,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
   const [dontRemind, setDontRemind] = useState(false)
   const [skipNotice, setSkipNotice] = useState(shouldSkipMatchNotice)
   const [priceInput, setPriceInput] = useState('')
+  const [quantityInput, setQuantityInput] = useState(String(logic.quantity))
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [candidatesReady, setCandidatesReady] = useState(false)
   const [clubPickerOpen, setClubPickerOpen] = useState(false)
@@ -49,6 +50,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
   const club = logic.availableClubs.find((item) => item.id === logic.clubId)
   const filteredClubs = logic.availableClubs.filter((item) => item.name.toLocaleLowerCase().includes(clubSearch.trim().toLocaleLowerCase()))
   const expectedCount = logic.people === '双陪' ? 2 : 1
+  const validQuantity = /^\d+$/.test(quantityInput) && Number(quantityInput) >= 1
   const candidates = companions.filter((companion) => {
     if (companion.clubId !== logic.clubId || !companion.gameIds.includes(logic.gameId)) return false
     if (logic.gender !== '不限' && companion.gender !== logic.gender) return false
@@ -109,6 +111,12 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
   const toggleCandidate = (companionId: string) => setSelectedIds((current) => current.includes(companionId)
     ? current.filter((id) => id !== companionId)
     : current.length < expectedCount ? [...current, companionId] : current)
+
+  const stepQuantity = (delta: number) => {
+    const nextQuantity = Math.max(1, logic.quantity + delta)
+    logic.setQuantity(nextQuantity)
+    setQuantityInput(String(nextQuantity))
+  }
 
   const startMatching = () => {
     setCandidatesReady(false)
@@ -207,10 +215,10 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <label className="match-field"><span>等级</span><span className="match-select-wrap"><select value={logic.levelName} onChange={(event) => logic.chooseLevel(event.target.value)}>{logic.levelOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select><ChevronDown size={14} /></span></label>
         <fieldset className="match-field match-field--fieldset"><legend>性别</legend><div className="match-choice-row">{(['不限', '男', '女'] as const).map((value) => <button type="button" key={value} className={`match-choice${logic.gender === value ? ' is-active' : ''}`} aria-pressed={logic.gender === value} onClick={() => logic.setGender(value)}>{value}</button>)}</div></fieldset>
         <fieldset className="match-field match-field--fieldset"><legend>人数</legend><div className="match-choice-row">{(['单陪', '双陪'] as const).map((value) => <button type="button" key={value} className={`match-choice${logic.people === value ? ' is-active' : ''}`} aria-pressed={logic.people === value} onClick={() => logic.setPeople(value)}>{value}</button>)}</div></fieldset>
-        <label className="match-field"><span>数量</span><span className="match-select-wrap"><select value={logic.quantity} onChange={(event) => logic.setQuantity(Number(event.target.value))}>{[1, 2, 3, 4].map((count) => <option key={count} value={count}>{count} {logic.selectedService?.unit ?? '小时'}</option>)}</select><ChevronDown size={14} /></span></label>
+        <label className="match-field"><span>数量</span><span className="match-quantity-control"><button type="button" aria-label="减少数量" disabled={logic.quantity <= 1} onClick={() => stepQuantity(-1)}>−</button><input type="number" min="1" step="1" inputMode="numeric" aria-label={`数量，${logic.selectedService?.unit ?? '小时'}`} aria-invalid={!validQuantity} value={quantityInput} onChange={(event) => { const value = event.target.value; setQuantityInput(value); if (/^\d+$/.test(value) && Number(value) >= 1) logic.setQuantity(Number(value)) }} onBlur={() => { if (!validQuantity) setQuantityInput(String(logic.quantity)) }} /><span>{logic.selectedService?.unit ?? '小时'}</span><button type="button" aria-label="增加数量" onClick={() => stepQuantity(1)}>+</button></span>{!validQuantity && <small className="match-quantity-error" role="alert">请输入大于 0 的整数</small>}</label>
         <label className="match-field match-field--remark"><span>备注</span><textarea value={logic.remark} onChange={(event) => logic.setRemark(event.target.value)} rows={2} placeholder="补充你的游戏偏好或需求" /></label>
         <div className="match-panel__price"><span>推荐单价</span><strong>{logic.recommendedUnitPrice.toLocaleString()} <small>钻石 / {logic.selectedService?.unit ?? '小时'}</small></strong>{logic.people === '双陪' && <span className="match-panel__price-hint">双陪 ×2</span>}</div>
-        <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.selectedService || !club} onClick={() => logic.tryout ? onGoToVoiceRoom() : beginMatching()}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
+        <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.selectedService || !club || !validQuantity} onClick={() => logic.tryout ? onGoToVoiceRoom() : beginMatching()}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
       </div>}
 
       {dialog === 'notice' && <div className="match-dialog-scrim"><section className="match-dialog match-dialog--notice" role="dialog" aria-modal="true" aria-labelledby="match-notice-title">

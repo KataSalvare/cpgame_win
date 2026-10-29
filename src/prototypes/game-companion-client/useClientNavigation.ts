@@ -4,7 +4,7 @@ import { clubs, companions, servicesByCompanion } from './data/mockData'
 export type ClientPage = 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements'
 
 type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | null
-type OrderSelectionMode = 'fixed' | 'cascade'
+type OrderSelectionMode = 'locked' | 'service' | 'cascade'
 type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; orderSelectionMode: OrderSelectionMode; returnTo: ClientPage | null; panel: StorePanel; voiceRoomSource: 'personal' | 'club' }
 
 const DEFAULT_CLUB_ID = 'club-001'
@@ -39,7 +39,9 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   if (page === 'club-detail' && requestedPanel === 'club-announcements') panel = 'club-announcements'
   if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger' || requestedPanel === 'bean-withdraw' || requestedPanel === 'diamond-recharge')) panel = requestedPanel
   const voiceRoomSource = params.get('voiceFrom') === 'club' || (!params.has('voiceFrom') && page === 'voice-room' && params.has('club')) ? 'club' : 'personal'
-  return { page, clubId, companionId, companionIds, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null), orderSelectionMode: params.get('orderMode') === 'cascade' ? 'cascade' : 'fixed', returnTo, panel, voiceRoomSource }
+  const requestedOrderMode = params.get('orderMode')
+  const orderSelectionMode = requestedOrderMode === 'cascade' ? 'cascade' : requestedOrderMode === 'locked' || requestedOrderMode === 'fixed' ? 'locked' : 'service'
+  return { page, clubId, companionId, companionIds, serviceId: params.get('service') ?? (initialView === 'checkout' ? defaultServiceId : null), orderSelectionMode, returnTo, panel, voiceRoomSource }
 }
 
 const writeRoute = (page: ClientPage, clubId: string, companionId: string | null, serviceId?: string | null, returnTo?: ClientPage | null, panel?: StorePanel, companionIds?: string[], voiceRoomSource?: 'personal' | 'club', orderSelectionMode?: OrderSelectionMode) => {
@@ -50,7 +52,7 @@ const writeRoute = (page: ClientPage, clubId: string, companionId: string | null
   if (panel) params.set('panel', panel)
   if (companionIds && companionIds.length > 1) params.set('companions', companionIds.join(','))
   if (page === 'voice-room' && voiceRoomSource) params.set('voiceFrom', voiceRoomSource)
-  if (page === 'checkout' && orderSelectionMode === 'cascade') params.set('orderMode', orderSelectionMode)
+  if (page === 'checkout' && orderSelectionMode) params.set('orderMode', orderSelectionMode)
   window.location.hash = params.toString()
 }
 
@@ -92,16 +94,16 @@ export function useClientNavigation(entryView?: string) {
   }, [route.clubId, route.companionId])
   const openClubGroups = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-groups'), [route.clubId])
   const openClubAnnouncements = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-announcements'), [route.clubId])
-  const beginOrder = useCallback((serviceId: string, companionId: string, orderSelectionMode: OrderSelectionMode = 'fixed') => {
+  const beginOrder = useCallback((serviceId: string, companionId: string, orderSelectionMode: OrderSelectionMode = 'service') => {
     const companionClubId = companions.find((item) => item.id === companionId)?.clubId ?? route.clubId
     const companionIds = route.page === 'checkout' && route.companionIds.includes(companionId) ? route.companionIds : undefined
-    const returnTo = route.page === 'talents' ? 'talents' : null
+    const returnTo = route.page === 'checkout' ? route.returnTo : route.page === 'talents' ? 'talents' : null
     writeRoute('checkout', companionClubId, companionId, serviceId, returnTo, null, companionIds, undefined, orderSelectionMode)
-  }, [route.clubId, route.companionIds, route.page])
+  }, [route.clubId, route.companionIds, route.page, route.returnTo])
   const beginMatchOrder = useCallback((serviceId: string, companionIds: string[]) => {
     const primaryCompanion = companions.find((item) => item.id === companionIds[0])
     if (!primaryCompanion) return
-    writeRoute('checkout', primaryCompanion.clubId, primaryCompanion.id, serviceId, null, null, companionIds, undefined, 'fixed')
+    writeRoute('checkout', primaryCompanion.clubId, primaryCompanion.id, serviceId, null, null, companionIds, undefined, 'locked')
   }, [])
 
   return {

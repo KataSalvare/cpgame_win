@@ -211,6 +211,7 @@ export function OrdersPage({ pageState, onRetry, orders, selectedOrderId, diamon
 
 type CheckoutPageProps = StateProps & {
   orderService: { companion: Companion; service: Service; gameName: string } | null
+  orderSelectionMode: 'locked' | 'service' | 'cascade'
   selectedCompanions: Companion[]
   availableServices: Service[]
   diamondBalance: number
@@ -225,7 +226,7 @@ type CheckoutPageProps = StateProps & {
   onOpenOrders: () => void
 }
 
-export function CheckoutPage({ pageState, onRetry, orderService, selectedCompanions, availableServices, diamondBalance, paymentCards, onBack, onOpenWallet, hideRechargePrompt, onResetRechargePrompt, onSelectService, onCommunicate, onComplete, onOpenOrders }: CheckoutPageProps) {
+export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionMode, selectedCompanions, availableServices, diamondBalance, paymentCards, onBack, onOpenWallet, hideRechargePrompt, onResetRechargePrompt, onSelectService, onCommunicate, onComplete, onOpenOrders }: CheckoutPageProps) {
   const [quantity, setQuantity] = useState(1)
   const [remark, setRemark] = useState('')
   const [tipInput, setTipInput] = useState('0')
@@ -278,7 +279,10 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
   })))))
   const normalizedServiceQuery = serviceSearchQuery.trim().toLocaleLowerCase()
   const filteredServicePaths = normalizedServiceQuery ? servicePaths.filter((path) => path.label.toLocaleLowerCase().includes(normalizedServiceQuery)) : []
+  const serviceOnlyOptions = availableServices.filter((item) => item.gameId === service.gameId && item.playName === service.playName && item.levelName === service.levelName)
+  const filteredServiceOptions = serviceOnlyOptions.filter((item) => `${item.unit}服务 ${item.price} 钻石 / ${item.unit}`.toLocaleLowerCase().includes(normalizedServiceQuery))
   const openServicePicker = () => {
+    if (orderSelectionMode === 'locked') return
     setServiceSearchQuery('')
     setSelectedGameId('')
     setSelectedPlayName('')
@@ -303,10 +307,18 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
     <div className="checkout-grid">
       <section className="client-card checkout-service-card">
         <div className="client-section-heading"><div><h2>服务信息</h2></div><span className="client-badge">{checkoutCompanions.length === 2 ? '双陪服务' : '单陪服务'}</span></div>
-        <div className="checkout-companion"><div className="checkout-companion__avatars">{checkoutCompanions.map((item) => <AvatarMark key={item.id} initials={item.initials} size="md" />)}</div><div className="checkout-companion__details">{checkoutCompanions.map((item) => <div className="checkout-companion__person" key={item.id}><UserNameWithLevel name={item.name} identityId={item.id} /><span className={`client-status${item.status === '接单中' ? ' is-available' : ''}`}>{item.status === '接单中' ? '空闲中' : item.status}</span></div>)}</div><button type="button" className="client-button client-button--primary client-button--small checkout-companion__communicate" onClick={() => onCommunicate(companion.id)}><MessageCircle size={14} />马上沟通</button></div>
+        <div className="checkout-companion-list">{checkoutCompanions.map((item) => <div className="checkout-companion" key={item.id}><div className="checkout-companion__avatars"><AvatarMark initials={item.initials} size="md" /></div><div className="checkout-companion__details"><div className="checkout-companion__person"><UserNameWithLevel name={item.name} identityId={item.id} /><span className={`client-status${item.status === '接单中' ? ' is-available' : ''}`}>{item.status === '接单中' ? '空闲中' : item.status}</span></div><small className="checkout-companion__club">{clubs.find((club) => club.id === item.clubId)?.name}</small></div><button type="button" className="client-button client-button--primary client-button--small checkout-companion__communicate" onClick={() => onCommunicate(item.id)}><MessageCircle size={14} />马上沟通</button></div>)}</div>
         <div className="checkout-service-facts"><span>选择服务</span><div className="checkout-service-picker">
-          <button type="button" className="checkout-service-picker__trigger" aria-expanded={servicePickerOpen} onClick={() => servicePickerOpen ? setServicePickerOpen(false) : openServicePicker()}><span><strong>{games.find((game) => game.id === service.gameId)?.name} · {service.playName} · {service.levelName}</strong></span><ChevronDown size={16} /></button>
+          <button type="button" className="checkout-service-picker__trigger" disabled={orderSelectionMode === 'locked'} aria-expanded={servicePickerOpen} onClick={() => servicePickerOpen ? setServicePickerOpen(false) : openServicePicker()}><span><strong>{games.find((game) => game.id === service.gameId)?.name} · {service.playName} · {service.levelName}{orderSelectionMode === 'locked' ? ` · ${service.unit}服务` : ''}</strong></span>{orderSelectionMode === 'locked' ? <span className="checkout-service-picker__locked">已锁定</span> : <ChevronDown size={16} />}</button>
           {servicePickerOpen && <div className="checkout-service-picker__panel" role="dialog" aria-label="选择服务">
+            {orderSelectionMode === 'service' ? <>
+              <label className="checkout-cascader-search"><Search size={14} /><input type="search" value={serviceSearchQuery} onChange={(event) => setServiceSearchQuery(event.target.value)} placeholder="搜索服务" aria-label="搜索具体服务" />{serviceSearchQuery && <button type="button" aria-label="清除搜索" onClick={() => setServiceSearchQuery('')}><X size={14} /></button>}</label>
+              <div className="checkout-cascader-results" role="listbox" aria-label="可选的具体服务">
+                {(normalizedServiceQuery ? filteredServiceOptions : serviceOnlyOptions).map((item) => <button type="button" role="option" aria-selected={item.id === service.id} disabled={!item.canAcceptOrders} key={item.id} className="checkout-cascader-result" onClick={() => selectService(item.id)}><span>{item.unit}服务 · {item.price.toLocaleString()} 钻石 / {item.unit}</span>{!item.canAcceptOrders && <small>暂不可接单</small>}</button>)}
+                {serviceOnlyOptions.length === 0 && <p className="checkout-cascader-empty">没有其他可选服务</p>}
+                {normalizedServiceQuery && filteredServiceOptions.length === 0 && serviceOnlyOptions.length > 0 && <p className="checkout-cascader-empty">没有匹配的服务</p>}
+              </div>
+            </> : <>
             <label className="checkout-cascader-search"><Search size={14} /><input type="search" value={serviceSearchQuery} onChange={(event) => setServiceSearchQuery(event.target.value)} placeholder="搜索游戏、玩法、等级或服务" aria-label="搜索游戏、玩法、等级或服务" />{serviceSearchQuery && <button type="button" aria-label="清除搜索" onClick={() => setServiceSearchQuery('')}><X size={14} /></button>}</label>
             {normalizedServiceQuery ? <div className="checkout-cascader-results" role="listbox" aria-label="匹配的服务路径">
               {filteredServicePaths.map((path) => <button type="button" role="option" disabled={!path.serviceItem.canAcceptOrders} key={path.serviceItem.id} className="checkout-cascader-result" onClick={() => selectService(path.serviceItem.id)}><span>{path.label}</span>{!path.serviceItem.canAcceptOrders && <small>暂不可接单</small>}</button>)}
@@ -317,6 +329,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
               <div className="checkout-cascader__column" role="listbox" aria-label="等级">{selectedPlay?.levels.map((levelNode) => <button type="button" role="option" aria-selected={selectedLevelName === levelNode.levelName} key={levelNode.levelName} className={`checkout-cascader__option${selectedLevelName === levelNode.levelName ? ' is-selected' : ''}`} onClick={() => setSelectedLevelName(levelNode.levelName)}><span>{levelNode.levelName}</span><ChevronRight size={14} /></button>)}</div>
               <div className="checkout-cascader__column" role="listbox" aria-label="服务">{selectedLevel?.services.map((item) => <button type="button" role="option" disabled={!item.canAcceptOrders} key={item.id} className="checkout-cascader__option checkout-cascader__option--service" onClick={() => selectService(item.id)}><span>服务 · {item.price} 钻石 / {item.unit}</span>{!item.canAcceptOrders && <small>暂不可接单</small>}</button>)}</div>
             </div>}
+            </>}
           </div>}
         </div></div>
         <div className="checkout-service-unit-price"><span>服务单价</span><strong>{service.price} 钻石 / {service.unit}</strong></div>
@@ -365,9 +378,10 @@ function TransactionList({ entries }: { entries: readonly { id: string; title: s
 function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onPauseOrder, onRenewOrder, onOpenRecharge }: { order: ClientOrder; selected: boolean; diamondBalance: number; onSelect: () => void; onReorder: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string) => void; onPauseOrder: (orderId: string) => void; onRenewOrder: (orderId: string, quantity: number) => boolean; onOpenRecharge: () => void }) {
   const [activeAction, setActiveAction] = useState<string | null>(null)
   const displayedStatus = order.earlyEndPending ? '待陪玩确认' : order.status === '待用户确认' ? '待确认' : order.status
-  const quickActions = order.status === '待支付' ? ['支付', '取消订单']
+  const quickActions = order.earlyEndPending ? []
+    : order.status === '待支付' ? ['支付', '取消订单']
     : order.status === '待用户确认' ? ['完成订单']
-    : order.status === '待接单' || order.status === '待服务' ? ['取消订单']
+    : order.status === '待接单' || order.status === '待服务' ? ['提前结束']
     : order.status === '服务中' && !order.earlyEndPending ? ['确认完成', '续单', '提前结束', '暂停']
     : order.status === '已完成' ? ['再次下单', '评价']
     : []
@@ -387,8 +401,8 @@ function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpd
 
 const orderActions: Record<OrderStatus, string[]> = {
   '待支付': ['支付', '取消订单'],
-  '待接单': ['取消订单'],
-  '待服务': ['取消订单'],
+  '待接单': ['提前结束'],
+  '待服务': ['提前结束'],
   '服务中': ['确认完成', '提前结束', '续单', '暂停'],
   '待用户确认': ['完成订单'],
   '已完成': ['发起售后', '再次下单', '评价'],
@@ -471,9 +485,9 @@ function OrderActionConfirmationDialog({ order, action, onClose, onUpdateStatus,
   return <div className="order-action-overlay" data-overlay="order-action-confirmation" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
     <section ref={dialogRef} className="order-action-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-action-title">
       <header><h2 id="order-action-title">{action}</h2><button type="button" className="order-action-dialog__close" aria-label="关闭提示" onClick={onClose}><X size={17} /></button></header>
-      {action === '提前结束' && <div className="order-early-end-duration"><span>已服务时长</span><strong>{formatServedDuration(order.servedDurationMinutes)}</strong></div>}
-      <p>{action === '支付' ? `确认支付${order.amount.toLocaleString()}钻石嘛？` : action === '提前结束' ? '确认后订单保持服务中，并等待陪玩确认。' : orderActionMessage(action)}</p>
-      <footer>{needsConfirmation ? <><button type="button" className="client-button client-button--secondary" onClick={onClose}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { if (action === '支付') { if (!onPayPendingOrder(order.id)) return } else if (action === '暂停') onPauseOrder(order.id); else if (action === '提前结束') onRequestEarlyEnd(order.id); else onUpdateStatus(order.id, action === '取消订单' ? '已取消' : '已完成'); onClose() }}>{action === '支付' ? '确认支付' : action === '取消订单' ? '确认取消' : action === '暂停' ? '确认暂停' : action === '提前结束' ? '确认' : '确认完成'}</button></> : <button type="button" className="client-button client-button--primary" onClick={onClose}>知道了</button>}</footer>
+      {action === '提前结束' && order.status === '服务中' && <div className="order-early-end-duration"><span>已服务时长</span><strong>{formatServedDuration(order.servedDurationMinutes)}</strong></div>}
+      <p>{action === '支付' ? `确认支付${order.amount.toLocaleString()}钻石嘛？` : action === '提前结束' ? '确认提交提前结束申请吗？订单状态保持不变，并等待陪玩确认。' : orderActionMessage(action)}</p>
+      <footer>{needsConfirmation ? <><button type="button" className="client-button client-button--secondary" onClick={onClose}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { if (action === '支付') { if (!onPayPendingOrder(order.id)) return } else if (action === '暂停') onPauseOrder(order.id); else if (action === '提前结束') onRequestEarlyEnd(order.id); else onUpdateStatus(order.id, action === '取消订单' ? '已取消' : '已完成'); onClose() }}>{action === '支付' ? '确认支付' : action === '取消订单' ? '确认取消' : action === '暂停' ? '确认暂停' : action === '提前结束' ? '确认申请' : '确认完成'}</button></> : <button type="button" className="client-button client-button--primary" onClick={onClose}>知道了</button>}</footer>
     </section>
   </div>
 }
@@ -599,7 +613,7 @@ export function OrderDetailPanel({ order, companion, diamondBalance, onContact, 
     <OrderTimeSection title="售后记录" icon={<MessageCircle size={15} />} emptyLabel="暂无售后记录" segments={order.afterSalesSegments} kind="after-sales" />
 
     <div className="order-detail-actions" aria-label="订单操作">
-      {!order.earlyEndPending && orderActions[order.status].map((action) => <button type="button" key={action} className={`client-button ${action === '再次下单' || action === '取消订单' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => action === '再次下单' ? onReorder() : setActiveAction(action)}>{action}</button>)}
+      {!order.earlyEndPending && orderActions[order.status].map((action) => <button type="button" key={action} className={`client-button ${action === '再次下单' || action === '取消订单' || action === '提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => action === '再次下单' ? onReorder() : setActiveAction(action)}>{action}</button>)}
     </div>
 
     {activeAction && <OrderActionDialog order={order} action={activeAction} clubName={getOrderClubName(order)} diamondBalance={diamondBalance} onClose={() => setActiveAction(null)} onOpenRecharge={() => { setActiveAction(null); onOpenRecharge() }} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onPauseOrder={onPauseOrder} onRenewOrder={onRenewOrder} />}

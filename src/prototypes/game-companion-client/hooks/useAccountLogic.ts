@@ -54,7 +54,7 @@ export function useAccountLogic() {
   }, [diamondBalance, orders, premiumCardBalances])
 
   const requestEarlyEnd = useCallback((orderId: string) => {
-    setOrders((current) => current.map((order) => order.id === orderId && order.status === '服务中' ? { ...order, earlyEndPending: true } : order))
+    setOrders((current) => current.map((order) => order.id === orderId && ['待接单', '待服务', '服务中'].includes(order.status) && !order.earlyEndPending ? { ...order, earlyEndPending: true } : order))
   }, [])
 
   const pauseOrder = useCallback((orderId: string) => {
