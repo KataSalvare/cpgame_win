@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, CreditCard, Gift, History, ImagePlus, MessageCircle, Star, Ticket, WalletCards, X, Plus, Pencil, Landmark, BadgeCheck } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, CreditCard, Gift, History, ImagePlus, MessageCircle, Search, Star, Ticket, WalletCards, X, Plus, Pencil, Landmark, BadgeCheck } from 'lucide-react'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
@@ -229,7 +229,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
   const [tipInput, setTipInput] = useState('0')
   const [paymentMethod, setPaymentMethod] = useState('wallet')
   const [servicePickerOpen, setServicePickerOpen] = useState(false)
-  const [pickerServiceId, setPickerServiceId] = useState('')
+  const [serviceSearchQuery, setServiceSearchQuery] = useState('')
   const [selectedGameId, setSelectedGameId] = useState('')
   const [selectedPlayName, setSelectedPlayName] = useState('')
   const [selectedLevelName, setSelectedLevelName] = useState('')
@@ -251,7 +251,6 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
   const selectedPaymentBalance = selectedPaymentCard?.balance ?? diamondBalance
   const selectedPaymentName = selectedPaymentCard ? `尊享卡 · ${selectedPaymentCard.name}` : '钻石钱包'
   const validTip = Number.isInteger(parsedTipAmount) && parsedTipAmount >= 0
-  const matchingService = availableServices.find((item) => item.id === pickerServiceId)
   const serviceTree = [...new Set(availableServices.map((item) => item.gameId))].map((gameId) => {
     const gameServices = availableServices.filter((item) => item.gameId === gameId)
     return {
@@ -269,12 +268,26 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
       }),
     }
   })
+  const servicePaths = serviceTree.flatMap((gameNode) => gameNode.plays.flatMap((playNode) => playNode.levels.flatMap((levelNode) => levelNode.services.map((serviceItem) => ({
+    gameNode,
+    playNode,
+    levelNode,
+    serviceItem,
+    label: `${gameNode.gameName} · ${playNode.playName} · ${levelNode.levelName} · ${serviceItem.price} 钻石 / ${serviceItem.unit}`,
+  })))))
+  const normalizedServiceQuery = serviceSearchQuery.trim().toLocaleLowerCase()
+  const filteredServicePaths = normalizedServiceQuery ? servicePaths.filter((path) => path.label.toLocaleLowerCase().includes(normalizedServiceQuery)) : []
   const openServicePicker = () => {
-    setPickerServiceId('')
+    setServiceSearchQuery('')
     setSelectedGameId('')
     setSelectedPlayName('')
     setSelectedLevelName('')
     setServicePickerOpen(true)
+  }
+  const selectService = (serviceId: string) => {
+    setQuantity(1)
+    setServicePickerOpen(false)
+    onSelectService(serviceId)
   }
   const selectedGame = serviceTree.find((node) => node.gameId === selectedGameId)
   const selectedPlay = selectedGame?.plays.find((node) => node.playName === selectedPlayName)
@@ -293,19 +306,22 @@ export function CheckoutPage({ pageState, onRetry, orderService, selectedCompani
         <div className="checkout-service-facts"><span>选择服务</span><div className="checkout-service-picker">
           <button type="button" className="checkout-service-picker__trigger" aria-expanded={servicePickerOpen} onClick={() => servicePickerOpen ? setServicePickerOpen(false) : openServicePicker()}><span><strong>{games.find((game) => game.id === service.gameId)?.name} · {service.playName} · {service.levelName}</strong></span><ChevronDown size={16} /></button>
           {servicePickerOpen && <div className="checkout-service-picker__panel" role="dialog" aria-label="选择服务">
-            <div className="checkout-service-picker__heading"><strong>选择服务</strong><button type="button" className="windows-icon-button" aria-label="关闭服务选择" onClick={() => setServicePickerOpen(false)}><X size={16} /></button></div>
-            <div className="checkout-service-cascade" aria-label="按游戏、玩法、等级和服务选择">
-              <label><span>游戏</span><span className="match-select-wrap"><select value={selectedGameId} onChange={(event) => { setSelectedGameId(event.target.value); setSelectedPlayName(''); setSelectedLevelName(''); setPickerServiceId('') }}><option value="">请选择游戏</option>{serviceTree.map((node) => <option key={node.gameId} value={node.gameId}>{node.gameName}</option>)}</select><ChevronDown size={14} /></span></label>
-              <label><span>玩法</span><span className="match-select-wrap"><select value={selectedPlayName} disabled={!selectedGame} onChange={(event) => { setSelectedPlayName(event.target.value); setSelectedLevelName(''); setPickerServiceId('') }}><option value="">请选择玩法</option>{selectedGame?.plays.map((node) => <option key={node.playName} value={node.playName}>{node.playName}</option>)}</select><ChevronDown size={14} /></span></label>
-              <label><span>等级</span><span className="match-select-wrap"><select value={selectedLevelName} disabled={!selectedPlay} onChange={(event) => { setSelectedLevelName(event.target.value); setPickerServiceId('') }}><option value="">请选择等级</option>{selectedPlay?.levels.map((node) => <option key={node.levelName} value={node.levelName}>{node.levelName}</option>)}</select><ChevronDown size={14} /></span></label>
-              <label><span>服务</span><span className="match-select-wrap"><select value={pickerServiceId} disabled={!selectedLevel} onChange={(event) => setPickerServiceId(event.target.value)}><option value="">请选择服务</option>{selectedLevel?.services.map((item) => <option key={item.id} value={item.id} disabled={!item.canAcceptOrders}>{item.price} 钻石 / {item.unit}{item.canAcceptOrders ? '' : ' · 暂不可接单'}</option>)}</select><ChevronDown size={14} /></span></label>
-            </div>
-            {matchingService && <div className="checkout-service-picker__selection"><span>{matchingService.price} 钻石 / {matchingService.unit}</span><button type="button" className="client-button client-button--primary client-button--small" disabled={!matchingService.canAcceptOrders} onClick={() => { setQuantity(1); setServicePickerOpen(false); onSelectService(matchingService.id) }}>{matchingService.canAcceptOrders ? '选择服务' : '暂不可接单'}</button></div>}
+            <label className="checkout-cascader-search"><Search size={14} /><input type="search" value={serviceSearchQuery} onChange={(event) => setServiceSearchQuery(event.target.value)} placeholder="搜索游戏、玩法、等级或服务" aria-label="搜索游戏、玩法、等级或服务" />{serviceSearchQuery && <button type="button" aria-label="清除搜索" onClick={() => setServiceSearchQuery('')}><X size={14} /></button>}</label>
+            {normalizedServiceQuery ? <div className="checkout-cascader-results" role="listbox" aria-label="匹配的服务路径">
+              {filteredServicePaths.map((path) => <button type="button" role="option" disabled={!path.serviceItem.canAcceptOrders} key={path.serviceItem.id} className="checkout-cascader-result" onClick={() => selectService(path.serviceItem.id)}><span>{path.label}</span>{!path.serviceItem.canAcceptOrders && <small>暂不可接单</small>}</button>)}
+              {!filteredServicePaths.length && <p className="checkout-cascader-empty">没有匹配的服务</p>}
+            </div> : <div className="checkout-cascader" aria-label="按游戏、玩法、等级和服务选择">
+              <div className="checkout-cascader__column" role="listbox" aria-label="游戏">{serviceTree.map((gameNode) => <button type="button" role="option" aria-selected={selectedGameId === gameNode.gameId} key={gameNode.gameId} className={`checkout-cascader__option${selectedGameId === gameNode.gameId ? ' is-selected' : ''}`} onClick={() => { setSelectedGameId(gameNode.gameId); setSelectedPlayName(''); setSelectedLevelName('') }}><span>{gameNode.gameName}</span><ChevronRight size={14} /></button>)}</div>
+              <div className="checkout-cascader__column" role="listbox" aria-label="玩法">{selectedGame?.plays.map((playNode) => <button type="button" role="option" aria-selected={selectedPlayName === playNode.playName} key={playNode.playName} className={`checkout-cascader__option${selectedPlayName === playNode.playName ? ' is-selected' : ''}`} onClick={() => { setSelectedPlayName(playNode.playName); setSelectedLevelName('') }}><span>{playNode.playName}</span><ChevronRight size={14} /></button>)}</div>
+              <div className="checkout-cascader__column" role="listbox" aria-label="等级">{selectedPlay?.levels.map((levelNode) => <button type="button" role="option" aria-selected={selectedLevelName === levelNode.levelName} key={levelNode.levelName} className={`checkout-cascader__option${selectedLevelName === levelNode.levelName ? ' is-selected' : ''}`} onClick={() => setSelectedLevelName(levelNode.levelName)}><span>{levelNode.levelName}</span><ChevronRight size={14} /></button>)}</div>
+              <div className="checkout-cascader__column" role="listbox" aria-label="服务">{selectedLevel?.services.map((item) => <button type="button" role="option" disabled={!item.canAcceptOrders} key={item.id} className="checkout-cascader__option checkout-cascader__option--service" onClick={() => selectService(item.id)}><span>服务 · {item.price} 钻石 / {item.unit}</span>{!item.canAcceptOrders && <small>暂不可接单</small>}</button>)}</div>
+            </div>}
           </div>}
         </div></div>
         <div className="checkout-service-unit-price"><span>服务单价</span><strong>{service.price} 钻石 / {service.unit}</strong></div>
-        <fieldset className="checkout-duration"><legend>选择服务时长</legend><div>{[1, 2, 3, 4].map((value) => <button type="button" key={value} className={`client-choice-button${quantity === value ? ' is-active' : ''}`} aria-pressed={quantity === value} onClick={() => setQuantity(value)}>{value} {service.unit}</button>)}</div></fieldset>
-        <label className="checkout-tip"><span>每位陪玩加价 <small>选填</small></span><div><input aria-label="每位陪玩加价金额，钻石" type="number" min="0" step="1" inputMode="numeric" value={tipInput} onChange={(event) => setTipInput(event.target.value)} /><span>钻石 / 人</span></div></label>
+        <div className="checkout-order-parameters"><fieldset className="checkout-duration"><legend>服务时长</legend><div className="checkout-duration__controls"><button type="button" className="checkout-duration__stepper" aria-label="减少服务时长" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}><span aria-hidden="true">−</span></button><label><input type="number" min="1" step="1" value={quantity} aria-label={`服务时长，${service.unit}`} onChange={(event) => { const value = Number(event.target.value); if (Number.isInteger(value) && value >= 1) setQuantity(value) }} /><span>{service.unit}</span></label><button type="button" className="checkout-duration__stepper" aria-label="增加服务时长" onClick={() => setQuantity((value) => value + 1)}><span aria-hidden="true">+</span></button></div>{service.unit === '小时' && <div className="checkout-duration__shortcuts">{[3, 6, 12].map((value) => <button type="button" key={value} className={`client-choice-button${quantity === value ? ' is-active' : ''}`} aria-pressed={quantity === value} onClick={() => setQuantity(value)}>{value} 小时</button>)}</div>}</fieldset>
+          <label className="checkout-tip"><span>每位陪玩加价 <small>选填</small></span><div><input aria-label="每位陪玩加价金额，钻石" type="number" min="0" step="1" inputMode="numeric" value={tipInput} onChange={(event) => setTipInput(event.target.value)} /><span>钻石 / 人</span></div></label>
+        </div>
         {!validTip && <p className="checkout-tip-error" role="alert">请输入不小于 0 的整数钻石。</p>}
         <label className="checkout-remark"><span>订单备注 <small>选填</small></span><textarea value={remark} maxLength={50} onChange={(event) => setRemark(event.target.value)} placeholder="告诉陪玩你的需求，最多50字" rows={3} /><small className="checkout-remark__count">{remark.length}/50</small></label>
       </section>
