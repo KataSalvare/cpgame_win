@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, ChevronDown, ChevronRight, Coins, MessageCircle } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, Coins, MessageCircle, Search, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { clubs, companions, games, servicesByCompanion } from '../data/mockData'
 import type { OnboardingSubmission } from '../data/onboardingApplicationMockData'
@@ -24,6 +24,8 @@ export function CompanionOnboarding({ balance, onBack, onChat, onRecharge, onPay
   const [play, setPlay] = useState('')
   const [level, setLevel] = useState('')
   const [error, setError] = useState('')
+  const [clubSearch, setClubSearch] = useState('')
+  const recruitingClubs = clubs.slice(0, 4).map((item, index) => ({ item, index })).filter(({ item }) => item.name.toLocaleLowerCase().includes(clubSearch.trim().toLocaleLowerCase()))
   const club = clubs.find(c => c.id === draft?.clubId)
   const game = games.find(g => g.id === draft?.gameId)
   const service = services.find(s => s.id === draft?.serviceId)
@@ -36,12 +38,12 @@ export function CompanionOnboarding({ balance, onBack, onChat, onRecharge, onPay
   const back = () => { reset(); onBack() }
   return <section className="personal-module companion-onboarding">
     <header className="client-section-heading"><h2>{stage === 'list' ? '俱乐部招聘' : '选择考核内容'}</h2><button type="button" className="client-button client-button--secondary" onClick={stage === 'list' ? back : reset}>返回</button></header>
-    {stage === 'list' ? <div className="recruitment-list">{clubs.slice(0, 4).map((item, index) => <article className="client-card recruitment-card" key={item.id}>
+    {stage === 'list' ? <><label className="personal-club-search recruitment-search"><Search size={16} /><input type="search" aria-label="搜索招聘俱乐部名称" placeholder="搜索俱乐部名称" value={clubSearch} onChange={event => setClubSearch(event.target.value)} />{clubSearch && <button type="button" aria-label="清空招聘俱乐部搜索" onClick={() => setClubSearch('')}><X size={15} /></button>}</label><div className="recruitment-list" aria-live="polite">{recruitingClubs.map(({ item, index }) => <article className="client-card recruitment-card" key={item.id}>
       <header><AvatarMark initials={item.initials} size="md" /><div><h3>{item.name}</h3><span>招聘 {item.gameIds.reduce((total, _, i) => total + 20 + index * 8 + i * 12, 0)} 人</span></div><button type="button" className="client-button client-button--secondary" onClick={() => { setRulesClubId(item.id); setDialog('rules') }}>查看店规<ChevronRight size={14} /></button></header>
       <div className="recruitment-games">{item.gameIds.map((id, i) => { const g = games.find(g => g.id === id)!; return <button type="button" key={id} onClick={() => { setDraft({ clubId: item.id, gameId: id, serviceId: '', examinerId: '' }); setAgreed(false); setDialog('notice') }}>
         <span className="recruitment-game-icon" role="img" aria-label={`${g.name}游戏图`}>{g.shortName}</span>
         <span className="recruitment-game-copy"><strong>{g.name}</strong><small>招聘 {20 + index * 8 + i * 12} 人</small></span></button> })}</div>
-    </article>)}</div> : <>
+    </article>)}{!recruitingClubs.length && <div className="client-card personal-setting-empty">未找到匹配的俱乐部</div>}</div></> : <>
       <section className="client-card assessment-content"><dl><div><dt>申请俱乐部</dt><dd>{club?.name}</dd></div><div><dt>申请游戏</dt><dd>{game?.name}</dd></div></dl>
       <label>考核服务</label><div className="checkout-service-picker assessment-service-picker"><button type="button" className="checkout-service-picker__trigger" aria-expanded={picker} onClick={() => { setPlay(service?.playName ?? plays[0] ?? ''); setLevel(service?.levelName ?? options[0]?.levelName ?? ''); setPicker(!picker) }}>{service ? `${service.playName} / ${service.levelName} / 按${service.unit}服务` : '选择玩法 / 等级 / 服务'}<ChevronDown size={16} /></button>
       {picker && <div className="checkout-service-picker__panel"><div className="checkout-cascader assessment-cascader">
