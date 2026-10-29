@@ -27,22 +27,24 @@ export function WorkbenchOrderActionDialog({ logic: w }: { logic: WorkbenchLogic
   if (!order || !action) return null
   const amount = Number(quantity)
   const valid = quantity.trim() !== '' && Number.isFinite(amount) && amount > 0 && Number.isSafeInteger(amount * 2)
-  const quantityStep = order.durationUnit === '局' ? 1 : 0.5
-  const validEarlyEndQuantity = quantity.trim() !== '' && Number.isFinite(amount) && amount > 0 && amount <= order.duration && Number.isSafeInteger(amount / quantityStep)
   const totalServiceMinutes = (order.serviceSegmentMinutes ?? []).reduce((sum, minutes) => sum + minutes, 0)
+  const earlyEndQuantity = order.durationUnit === '局' ? amount : totalServiceMinutes / 60
+  const validEarlyEndQuantity = order.durationUnit === '局'
+    ? quantity.trim() !== '' && Number.isFinite(amount) && amount > 0 && amount <= order.duration && Number.isInteger(amount)
+    : totalServiceMinutes > 0 && totalServiceMinutes <= order.duration * 60
   const message = action.action === '接收' ? '接收后订单将变为待服务。' : action.action === '取消' ? '取消后将自动退款并通知玩家。' : action.action === '开始服务' ? '确认后订单将进入服务中。' : action.action === '拒绝提前结束' ? '确认拒绝后，订单会继续服务中。' : '将通知玩家确认，24 小时未确认自动完成订单。'
   const actionTitle = action.action === '同意提前结束' ? '同意提前结束' : action.action === '拒绝提前结束' ? '拒绝提前结束' : action.action === '免单' ? '免单' : `确认${action.action}`
   return <div className="workbench-order-action-overlay" data-overlay="workbench-order-action" onClick={event => { if (event.target === event.currentTarget) w.setOrderAction(null) }}>
     <section ref={ref} tabIndex={-1} className="order-action-dialog" role="dialog" aria-modal="true" aria-labelledby="workbench-order-action-title">
       <header><h2 id="workbench-order-action-title">{actionTitle}</h2><button type="button" className="order-action-dialog__close" aria-label="关闭订单操作" onClick={() => w.setOrderAction(null)}><X size={17} /></button></header>
-      {action.action === '免单' ? <><label className="workbench-waiver-field">免单{order.durationUnit === '小时' ? '小时数' : '局数'}<input type="number" min="0.5" step="0.5" value={quantity} onChange={e => setQuantity(e.target.value)} aria-invalid={quantity !== '' && !valid} /><small>请输入大于 0 的数字，且为 0.5 的倍数</small></label><p>确认免单后，订单将变为已完成，并生成售后记录。</p></> : action.action === '同意提前结束' ? <><label className="workbench-waiver-field">{order.durationUnit === '小时' ? '已完成小时数' : '已完成局数'}<input type="number" min={quantityStep} max={order.duration} step={quantityStep} value={quantity} onChange={e => setQuantity(e.target.value)} aria-invalid={quantity !== '' && !validEarlyEndQuantity} aria-label={order.durationUnit === '小时' ? '已完成小时数' : '已完成局数'} /><small>请输入大于 0 且不超过 {order.duration} {order.durationUnit} 的已完成量{order.durationUnit === '小时' ? '（每次增加 0.5 小时）' : '（整数局）'}</small></label><div className="workbench-early-end-summary"><strong>多段服务时长合计</strong><span>{totalServiceMinutes ? formatServiceDuration(totalServiceMinutes) : '暂无记录'}{order.serviceSegmentMinutes?.length ? ` · ${order.serviceSegmentMinutes.length} 段` : ''}</span></div><p>确认后将结束服务并提交玩家确认，订单状态变为待玩家确认。</p></> : <p>{message}</p>}
-      <footer><button type="button" className="client-button client-button--secondary" onClick={() => w.setOrderAction(null)}>返回</button><button type="button" className="client-button client-button--primary" disabled={action.action === '免单' && (!valid || order.status !== '服务中') || action.action === '同意提前结束' && (!validEarlyEndQuantity || !order.earlyEndRequested || order.status !== '服务中') || action.action === '拒绝提前结束' && (!order.earlyEndRequested || order.status !== '服务中')} title={action.action === '免单' && !valid ? '请输入大于0且为0.5倍数的数量' : undefined} onClick={() => {
+      {action.action === '免单' ? <><label className="workbench-waiver-field">免单{order.durationUnit === '小时' ? '小时数' : '局数'}<input type="number" min="0.5" step="0.5" value={quantity} onChange={e => setQuantity(e.target.value)} aria-invalid={quantity !== '' && !valid} /><small>请输入大于 0 的数字，且为 0.5 的倍数</small></label><p>确认后将记录免单数量并生成售后记录{order.status === '服务中' ? '，订单将变为已完成' : ''}。</p></> : action.action === '同意提前结束' ? <>{order.durationUnit === '局' && <label className="workbench-waiver-field">已完成局数<input type="number" min="1" max={order.duration} step="1" value={quantity} onChange={e => setQuantity(e.target.value)} aria-invalid={quantity !== '' && !validEarlyEndQuantity} aria-label="已完成局数" /></label>}<div className="workbench-early-end-summary"><strong>已服务时长</strong><span>{totalServiceMinutes} 分钟</span></div></> : <p>{message}</p>}
+      <footer><button type="button" className="client-button client-button--secondary" onClick={() => w.setOrderAction(null)}>返回</button><button type="button" className="client-button client-button--primary" disabled={action.action === '免单' && (!valid || !['服务中', '已完成'].includes(order.status)) || action.action === '同意提前结束' && (!validEarlyEndQuantity || !order.earlyEndRequested || order.status !== '服务中') || action.action === '拒绝提前结束' && (!order.earlyEndRequested || order.status !== '服务中')} title={action.action === '免单' && !valid ? '请输入大于0且为0.5倍数的数量' : undefined} onClick={() => {
         if (action.action === '免单') {
           if (valid && w.recordOrderWaiver(order.id, amount)) w.setOrderAction(null)
           return
         }
         if (action.action === '同意提前结束') {
-          if (validEarlyEndQuantity && w.agreeEarlyEnd(order.id, amount)) w.setOrderAction(null)
+          if (validEarlyEndQuantity && w.agreeEarlyEnd(order.id, earlyEndQuantity)) w.setOrderAction(null)
           return
         }
         if (action.action === '拒绝提前结束') {
@@ -57,12 +59,4 @@ export function WorkbenchOrderActionDialog({ logic: w }: { logic: WorkbenchLogic
       }}>{action.action === '同意提前结束' ? '同意并结束服务' : action.action === '拒绝提前结束' ? '确认拒绝' : `确认${action.action}`}</button></footer>
     </section>
   </div>
-}
-
-function formatServiceDuration(totalMinutes: number) {
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  if (!hours) return `${minutes} 分钟`
-  if (!minutes) return `${hours} 小时`
-  return `${hours} 小时 ${minutes} 分钟`
 }

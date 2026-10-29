@@ -29,10 +29,15 @@ export function useWorkbenchLogic() {
   const [orders, setOrders] = useState<WorkOrder[]>(() => {
     const examples = ['待接单', '待服务', '服务中', '待玩家确认', '已完成'].map((status, i) => ({ id: `CW-1028-${100+i}`, player: ['晚风玩家', '小宇', '星河', '阿白', '奶糖'][i], playerInitials: ['晚风', '宇', '星河', '白', '糖'][i], serviceId: services[i % services.length]?.id ?? '', clubName: workbenchClubName, status, amount: 120 + i * 20 + (i === 0 ? 20 : 0), tipAmount: i === 0 ? 20 : 0, discountAmount: 0, paymentSource: '钻石钱包' as const, createdAt: `2026-10-28 ${String(14 - i).padStart(2, '0')}:20`, duration: 2, durationUnit: services[i % services.length]?.unit ?? '小时', unitPrice: (120 + i * 20) / 2, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) }))
     const hourlyService = services.find(service => service.unit === '小时')
+    const roundService = services.find(service => service.unit === '局')
     return [...examples, {
       id: 'CW-1028-105', player: '橘子汽水', playerInitials: '橘子', serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
       status: '服务中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 09:20', duration: 3,
       durationUnit: hourlyService?.unit ?? '小时', unitPrice: 80, startedAt: '2026-10-28 09:35', earlyEndRequested: true, serviceSegmentMinutes: [45, 35, 25],
+    }, {
+      id: 'CW-1028-106', player: '小满', playerInitials: '满', serviceId: roundService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
+      status: '服务中', amount: 400, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 08:20', duration: 5,
+      durationUnit: roundService?.unit ?? '局', unitPrice: 80, startedAt: '2026-10-28 08:25', earlyEndRequested: true, serviceSegmentMinutes: [18, 22, 15],
     }]
   })
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
@@ -75,11 +80,11 @@ export function useWorkbenchLogic() {
   }
   const recordOrderWaiver = (id: string, quantity: number) => {
     const order = orders.find(item => item.id === id)
-    if (!order || order.status !== '服务中' || !Number.isFinite(quantity) || quantity <= 0 || !Number.isSafeInteger(quantity * 2)) return false
+    if (!order || !['服务中', '已完成'].includes(order.status) || !Number.isFinite(quantity) || quantity <= 0 || !Number.isSafeInteger(quantity * 2)) return false
     const total = (order.waivedQuantity ?? 0) + quantity
     if (!Number.isSafeInteger(total * 2)) return false
     const record = { id: `${id}-waiver-${Date.now()}`, recordedAt: new Date().toISOString(), quantity, unit: order.durationUnit }
-    setOrders(items => items.map(item => item.id === id && item.status === '服务中' ? {
+    setOrders(items => items.map(item => item.id === id && ['服务中', '已完成'].includes(item.status) ? {
       ...item,
       status: '已完成',
       waivedQuantity: (item.waivedQuantity ?? 0) + quantity,
@@ -97,8 +102,7 @@ export function useWorkbenchLogic() {
   }
   const agreeEarlyEnd = (id: string, quantity: number) => {
     const order = orders.find(item => item.id === id)
-    const step = order?.durationUnit === '局' ? 1 : 0.5
-    if (!order || order.status !== '服务中' || !order.earlyEndRequested || !Number.isFinite(quantity) || quantity <= 0 || quantity > order.duration || !Number.isSafeInteger(quantity / step)) return false
+    if (!order || order.status !== '服务中' || !order.earlyEndRequested || !Number.isFinite(quantity) || quantity <= 0 || quantity > order.duration || (order.durationUnit === '局' && !Number.isInteger(quantity))) return false
     setOrders(items => items.map(item => item.id === id && item.earlyEndRequested ? {
       ...item,
       status: '待玩家确认',

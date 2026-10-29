@@ -27,7 +27,7 @@ export function WorkbenchPage({ logic: w, pageState, onRetry, balance, entries, 
   const confirmingAutomatic = confirm?.status === '开启自动抢单' || confirm?.status === '关闭自动抢单'
   const filteredOrders = w.orders.filter(o => filter === '全部' || (filter === '服务中' && ['服务中', '待玩家确认'].includes(o.status)) || o.status === filter)
   const serviceOrderCount = w.orders.filter(o => ['服务中', '待玩家确认'].includes(o.status)).length
-  const renderOrder = (o: WorkOrder) => <div className="workbench-order" key={o.id}><button className="workbench-order__identity" onClick={() => setSelected(o)}><strong><UserNameWithLevel name={o.player} identityId={o.player} /></strong><span>{o.id}</span></button><div>{w.serviceLabel(o.serviceId)}<small>{o.duration} {o.durationUnit} · {o.amount} 钻石</small></div><span>{o.status}</span><WorkbenchOrderActions logic={w} orderId={o.id} /></div>
+  const renderOrder = (o: WorkOrder) => <div className="workbench-order" key={o.id}><button className="workbench-order__identity" onClick={() => setSelected(o)}><strong><UserNameWithLevel name={o.player} identityId={o.player} /></strong><span>{o.id}</span></button><div>{w.serviceLabel(o.serviceId)}<small>{o.duration} {o.durationUnit} · {o.amount} 钻石</small></div><span>{o.earlyEndRequested ? '待陪玩确认' : o.status}</span><WorkbenchOrderActions logic={w} orderId={o.id} /></div>
   return <div className="client-content account-page personal-center-page workbench-page">
     <header className="client-page-heading account-page-heading"><h1>陪玩工作台</h1></header>
     <nav className="personal-center-tabs" role="tablist" aria-label="工作台模块">{[{ label: '总览', icon: LayoutDashboard }, { label: '匹配请求', icon: Swords }, { label: '订单', icon: ClipboardList }, { label: '服务管理', icon: SlidersHorizontal }, { label: '糖豆钱包', icon: WalletCards }].map(({ label, icon: Icon }) => <button type="button" role="tab" key={label} className={`personal-center-tab${tab === label ? ' is-active' : ''}`} aria-selected={tab === label} onClick={() => { setTab(label); setSelected(null) }}><Icon size={16} /><span>{label}</span></button>)}</nav>
@@ -44,13 +44,14 @@ export function WorkbenchPage({ logic: w, pageState, onRetry, balance, entries, 
           {filteredOrders.map(o => {
             const service = w.services.find(s => s.id === o.serviceId)
             const game = games.find(g => g.id === service?.gameId)
-            return <article className={`order-item workbench-order-table-row${selected?.id === o.id ? ' is-selected' : ''}`} key={o.id}><button type="button" className="order-item__main" aria-label={`查看订单 ${o.id}，${o.player}，所属俱乐部 ${o.clubName}，${o.status}`} onClick={() => setSelected(o)}>
+            const displayedStatus = o.earlyEndRequested ? '待陪玩确认' : o.status
+            return <article className={`order-item workbench-order-table-row${selected?.id === o.id ? ' is-selected' : ''}`} key={o.id}><button type="button" className="order-item__main" aria-label={`查看订单 ${o.id}，${o.player}，所属俱乐部 ${o.clubName}，${displayedStatus}`} onClick={() => setSelected(o)}>
               <span className="order-item__info"><strong>{o.id}</strong><small>{o.createdAt}</small></span>
               <span className="order-item__companion"><AvatarMark initials={o.playerInitials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={o.player} identityId={o.player} /></strong><small>{o.clubName}</small></span></span>
               <span className="order-item__service"><strong>{game?.name} · {service?.playName}</strong><small>{service?.levelName} · {service?.name}</small></span>
               <span className="order-item__duration">{o.duration} {o.durationUnit}</span>
               <span className="order-item__price"><strong>{o.unitPrice} 钻石 / {o.durationUnit}</strong><small>合计 {o.amount} 钻石</small></span>
-              <span className="workbench-order-table-row__status"><span className={`order-item__status order-item__status--${o.status === '已取消' ? 'cancelled' : o.status === '退款' ? 'refund' : o.status === '已完成' ? 'completed' : 'active'}`}>{o.status}</span>{o.earlyEndRequested && <small>玩家申请提前结束</small>}</span>
+              <span className="workbench-order-table-row__status"><span className={`order-item__status order-item__status--${o.status === '已取消' ? 'cancelled' : o.status === '退款' ? 'refund' : o.status === '已完成' ? 'completed' : 'active'}`}>{displayedStatus}</span></span>
             </button><WorkbenchOrderActions logic={w} orderId={o.id} /></article>
           })}
         </div> : <div className="account-empty-inline"><strong>没有符合条件的订单</strong></div>}

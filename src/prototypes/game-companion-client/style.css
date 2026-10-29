@@ -775,10 +775,11 @@
 .bean-payout-choice strong, .bean-payout-card strong { font-size: 13px; font-weight: 600; }
 .bean-payout-choice small, .bean-payout-card__details span { color: var(--client-muted); font-size: 11px; }
 .bean-withdraw-amount { display: grid; gap: 8px; }
-.bean-withdraw-amount > span, .bean-account-field > span { font-size: 12px; font-weight: 600; }
+.bean-withdraw-amount > label, .bean-account-field > span { font-size: 12px; font-weight: 600; }
 .bean-withdraw-amount > div { display: flex; height: 42px; align-items: center; gap: 10px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 12px; }
 .bean-withdraw-amount input, .bean-account-field input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--client-text); font: inherit; }
 .bean-withdraw-amount input { flex: 1; }
+.bean-withdraw-amount .client-text-button { flex: 0 0 auto; white-space: nowrap; }
 .bean-withdraw-amount input::-webkit-inner-spin-button, .bean-withdraw-amount input::-webkit-outer-spin-button { margin: 0; appearance: none; }
 .bean-withdraw-submit { justify-content: center; }
 .bean-payout-card { display: flex; min-height: 74px; align-items: center; gap: 12px; padding: 12px 14px; }
@@ -882,6 +883,7 @@
 .order-item__duration { color: var(--prototype-text-secondary, #4b5563); font-size: 11px; white-space: nowrap; }
 .order-item__price strong { color: var(--client-text); font-size: 11px; font-weight: 600; white-space: nowrap; }
 .order-item__status { display: inline-flex; width: fit-content; align-items: center; border: 1px solid var(--prototype-border, #e5e7eb); border-radius: 4px; padding: 3px 7px; color: var(--prototype-text-secondary, #4b5563); font-size: 10px; white-space: nowrap; }
+.order-item__status small, .order-detail-status-card__status small { display: block; margin-top: 3px; font-size: 10px; font-weight: 400; }
 .order-item__status--active { background: var(--prototype-canvas, #f3f4f6); }
 .order-item__status--completed { background: var(--prototype-surface, #fff); }
 .order-item__status--cancelled, .order-item__status--refund { color: var(--prototype-text-muted, #6b7280); background: var(--prototype-surface-muted, #f9fafb); }
@@ -921,6 +923,7 @@
 .order-action-dialog h2 { margin: 0; font-size: 14px; font-weight: 600; }
 .order-action-dialog p { margin: 12px 0 16px; color: var(--prototype-text-secondary, #4b5563); font-size: 11px; line-height: 1.6; }
 .order-action-dialog footer { display: flex; justify-content: flex-end; gap: 8px; }
+.workbench-order-action-overlay .workbench-early-end-summary + footer { margin-top: 16px; }
 .order-action-dialog__close { display: grid; width: 28px; height: 28px; place-items: center; border: 0; border-radius: 5px; background: transparent; color: var(--client-muted); cursor: pointer; }
 .order-action-dialog__close:hover { background: var(--prototype-canvas, #f3f4f6); color: var(--client-text); }
 .order-early-end-duration { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; border: 1px solid var(--client-border); border-radius: 6px; padding: 11px 12px; background: var(--prototype-surface-muted, #f9fafb); color: var(--client-muted); font-size: 12px; }
@@ -929,6 +932,9 @@
 .order-renew-order-id { margin: 7px 0 14px !important; color: var(--client-muted) !important; font-size: 10px !important; }
 .order-renew-quantity { display: grid; gap: 9px; margin-bottom: 14px; font-size: 12px; font-weight: 600; }
 .order-renew-quantity > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.order-renew-quantity__control { align-items: center; }
+.order-renew-quantity__control input { width: 86px; height: 36px; border: 1px solid var(--prototype-border, #e5e7eb); border-radius: 6px; padding: 0 8px; color: var(--prototype-text, #1f2937); text-align: center; font: inherit; }
+.order-renew-quantity__control > span { color: var(--prototype-text-secondary, #4b5563); }
 .order-renew-summary { display: grid; gap: 10px; border: 1px solid var(--client-border); border-radius: 6px; padding: 12px; background: var(--prototype-surface-muted, #f9fafb); }
 .order-renew-summary > div { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; color: var(--client-muted); font-size: 11px; }
 .order-renew-summary strong { color: var(--client-text); font-weight: 500; text-align: right; }
@@ -1692,3 +1698,49 @@
 .screen-recording-float__button { display: inline-grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border: 1px solid var(--client-border); border-radius: 6px; background: var(--client-surface); color: var(--client-text); cursor: pointer; touch-action: manipulation; }
 .screen-recording-float__button:hover { background: var(--prototype-canvas, #f3f4f6); }
 .game-companion-client .screen-recording-toast { z-index: 110; }
+
+.recruitment-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.recruitment-card { padding: 20px; }
+.recruitment-card header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.recruitment-card header > div { flex: 1; }
+.recruitment-card h3 { font-size: 15px; margin: 0 0 4px; }
+.recruitment-card header span, .recruitment-games small { color: var(--client-muted); font-size: 12px; }
+.recruitment-games { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.recruitment-games button { min-width: 0; display: flex; align-items: center; gap: 10px; border: 1px solid var(--client-border); border-radius: 6px; padding: 12px; background: var(--client-surface); text-align: left; color: var(--client-text); }
+.recruitment-games button:hover, .recruitment-games button:focus-visible { border-color: var(--client-text); }
+.recruitment-game-icon { display: flex; flex: 0 0 36px; width: 36px; height: 36px; align-items: center; justify-content: center; border-radius: 6px; background: var(--prototype-canvas, #f3f4f6); font-size: 9px; font-weight: 700; }
+.recruitment-game-copy { display: grid; min-width: 0; gap: 4px; }
+.recruitment-games strong { font-size: 13px; }
+.assessment-content { padding: 24px; }
+.assessment-content dl { display: flex; gap: 64px; margin: 0 0 24px; }
+.assessment-content dt { color: var(--client-muted); font-size: 12px; margin-bottom: 8px; }
+.assessment-content dd { margin: 0; font-weight: 600; }
+.assessment-content > label { display: block; margin-bottom: 8px; font-size: 13px; }
+.assessment-content > h3 { font-size: 15px; margin: 28px 0 12px; }
+.assessment-service-picker { width: 680px; }
+.assessment-service-picker .checkout-service-picker__panel { width: 680px; }
+.assessment-cascader.checkout-cascader { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.assessment-examiners { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.assessment-examiners article { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--client-border); border-radius: 6px; }
+.assessment-examiners article.is-selected { border-color: var(--client-text); }
+.assessment-examiners strong { flex: 1; }
+.assessment-payment { display: flex; align-items: center; gap: 24px; margin-top: 16px; padding: 20px 24px; }
+.assessment-payment strong { margin-left: 16px; font-size: 20px; }
+.assessment-payment > span:nth-child(2) { color: var(--client-muted); margin-left: auto; }
+.assessment-richtext { max-height: 440px; overflow-y: auto; line-height: 1.8; margin-bottom: 20px; }
+.assessment-richtext h2 { font-size: 20px; margin-bottom: 16px; }
+.assessment-richtext h3 { font-size: 15px; margin: 16px 0 8px; }
+
+.onboarding-records { margin-top: 24px; padding: 24px; }
+.onboarding-records h3 { margin: 0 0 16px; font-size: 16px; }
+.onboarding-records table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+.onboarding-records th { color: var(--client-muted); font-size: 12px; font-weight: 400; }
+.onboarding-records th, .onboarding-records td { padding: 14px 12px; border-bottom: 1px solid var(--client-border); }
+.onboarding-records td:nth-child(2) { width: 38%; }
+.onboarding-records td strong { font-weight: 600; }
+.onboarding-records td small { display: block; margin-top: 5px; color: var(--client-muted); }
+.onboarding-records tr:last-child td { border-bottom: 0; }
+.onboarding-record-detail { display: grid; gap: 16px; margin: 0; max-height: 540px; overflow-y: auto; }
+.onboarding-record-detail > div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; }
+.onboarding-record-detail dt { color: var(--client-muted); }
+.onboarding-record-detail dd { margin: 0; overflow-wrap: anywhere; }

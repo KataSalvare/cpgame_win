@@ -34,6 +34,29 @@ export function useAccountLogic() {
     setOrders((current) => current.map((order) => order.id === orderId ? { ...order, status } : order))
   }, [])
 
+  const payPendingOrder = useCallback((orderId: string) => {
+    const order = orders.find((item) => item.id === orderId)
+    if (!order || order.status !== '待支付' || order.amount <= 0) return false
+    const paymentSource = order.paymentSource ?? 'wallet'
+    const paymentCard = paymentSource === 'premium-card' ? premiumCards.find((card) => card.id === order.premiumCardId) : undefined
+    const availableBalance = paymentSource === 'wallet' ? diamondBalance : paymentCard ? premiumCardBalances[paymentCard.id] ?? 0 : 0
+    if (order.amount > availableBalance || (paymentSource === 'premium-card' && !paymentCard)) return false
+    const paidAt = new Date().toLocaleString('zh-CN', { hour12: false })
+    if (paymentSource === 'wallet') {
+      setDiamondBalance((balance) => balance - order.amount)
+      setDiamondTransactions((current) => [{ id: `order-payment-${order.id}`, title: `订单消费 · ${order.serviceName}`, date: paidAt, amount: -order.amount }, ...current])
+    } else if (paymentCard) {
+      setPremiumCardBalances((current) => ({ ...current, [paymentCard.id]: (current[paymentCard.id] ?? 0) - order.amount }))
+      setPremiumCardTransactions((current) => [{ id: `order-payment-${order.id}`, cardId: paymentCard.id, title: `服务订单支付 · ${order.serviceName}`, date: paidAt, amount: -order.amount }, ...current])
+    }
+    setOrders((current) => current.map((item) => item.id === orderId && item.status === '待支付' ? { ...item, status: '待接单', paymentSource } : item))
+    return true
+  }, [diamondBalance, orders, premiumCardBalances])
+
+  const requestEarlyEnd = useCallback((orderId: string) => {
+    setOrders((current) => current.map((order) => order.id === orderId && order.status === '服务中' ? { ...order, earlyEndPending: true } : order))
+  }, [])
+
   const pauseOrder = useCallback((orderId: string) => {
     const pausedAt = new Date().toLocaleString('zh-CN', { hour12: false })
     setOrders((current) => current.map((order) => {
@@ -85,6 +108,13 @@ export function useAccountLogic() {
     setDiamondTransactions((current) => [{ id: `recharge-${Date.now()}`, title: `钻石充值 · ¥${amount}`, date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: diamonds }, ...current])
     if (couponId) setCoupons((current) => current.map((coupon) => coupon.id === couponId ? { ...coupon, status: '已使用' } : coupon))
   }, [])
+
+  const payAssessment = useCallback((clubName: string, gameName: string) => {
+    if (diamondBalance < 500) return false
+    setDiamondBalance(balance => balance - 500)
+    setDiamondTransactions(current => [{ id: `assessment-${Date.now()}`, title: `入驻考核 · ${clubName} · ${gameName}`, date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -500 }, ...current])
+    return true
+  }, [diamondBalance])
 
   const payGift = useCallback((giftName: string, recipientName: string, amount: number) => {
     if (!Number.isInteger(amount) || amount <= 0 || amount > diamondBalance) return false
@@ -144,10 +174,13 @@ export function useAccountLogic() {
     completePayment,
     completeRecharge,
     payGift,
+    payAssessment,
     pauseOrder,
+    requestEarlyEnd,
     renewOrder,
     purchasePremiumCard,
     rechargePremiumCard,
     updateOrderStatus,
+    payPendingOrder,
   }
 }

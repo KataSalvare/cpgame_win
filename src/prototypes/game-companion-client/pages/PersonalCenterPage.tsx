@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 're
 import { BadgeCheck, BatteryCharging, Bookmark, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gem, Gift, HandHeart, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Orbit, Pencil, Settings2, Shield, ShieldCheck, Sparkles, Star, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { NotificationSettingsDialog } from '../components/NotificationSettingsDialog'
+import { CompanionOnboarding } from '../components/CompanionOnboarding'
+import { OnboardingApplicationRecords } from '../components/OnboardingApplicationRecords'
+import type { OnboardingApplication, OnboardingSubmission } from '../data/onboardingApplicationMockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
@@ -42,6 +45,12 @@ type PersonalCenterProps = {
   onUpdateNotifications: (preferences: NotificationPreferences) => void
   blockedProfiles: BlockedProfile[]
   onUnblockProfile: (profileId: string) => void
+  onAssessmentChat: (id: string) => void
+  onAssessmentRecharge: () => void
+  onAssessmentPay: (club: string, game: string) => boolean
+  onboardingApplications: OnboardingApplication[]
+  onSubmitOnboarding: (submission: OnboardingSubmission) => void
+  onNotify: (message: string) => void
   onLogout: () => void
 }
 
@@ -57,8 +66,9 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
 
 const personalGiftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 
-export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, notifications, onUpdateNotifications, blockedProfiles, onUnblockProfile, onLogout }: PersonalCenterProps) {
-  const [section, setSection] = useState<CenterSection>('profile')
+export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, notifications, onUpdateNotifications, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
+  const [section, setSection] = useState<CenterSection>(() => sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : 'profile')
+  const [recruitmentOpen, setRecruitmentOpen] = useState(() => Boolean(sessionStorage.getItem('companion-assessment-recharge-draft')))
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
   const [favoriteTab, setFavoriteTab] = useState<FavoriteTab>('clubs')
   const [visibleFavoriteClubs, setVisibleFavoriteClubs] = useState(favoriteClubs)
@@ -86,15 +96,19 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
   useEffect(() => {
     if (clubMembershipStatus === 'idle' || confirmCancelClubApplication) return
     const timer = window.setTimeout(() => {
-      if (clubMembershipStatus === 'joining') setFeedback('加入申请已通过')
+      if (clubMembershipStatus === 'joining') {
+        setFeedback('')
+        onNotify('加入申请已通过')
+      }
       if (clubMembershipStatus === 'leaving') {
         setJoinedClubId(null)
-        setFeedback('已退出俱乐部')
+        setFeedback('')
+        onNotify('已退出俱乐部')
       }
       setClubMembershipStatus('idle')
     }, 3000)
     return () => window.clearTimeout(timer)
-  }, [clubMembershipStatus, confirmCancelClubApplication])
+  }, [clubMembershipStatus, confirmCancelClubApplication, onNotify])
 
   const closeProfileEditor = () => {
     setEditingProfile(false)
@@ -113,6 +127,8 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
   const submitApplication = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (applicationKind === 'club') {
+      const labels: Record<ClubApplicationField, string> = { entityName: '经营主体名称', legalPhone: '法人手机号', applicationForm: '入驻申请表', businessLicense: '营业执照', legalIdFront: '法人身份证（人像面）', legalIdBack: '法人身份证（国徽面）', authorizationLetter: '授权委托书', servicePriceList: '服务价目表', afterSalesStandard: '售后服务标准', clubName: '俱乐部名称', monthlyTurnover: '当月流水（元）', managerName: '店长姓名', managerPhone: '店长手机号', managerWeChat: '店长微信', managerIdFront: '店长身份证（人像面）', managerIdBack: '店长身份证（国徽面）' }
+      onSubmitOnboarding({ kind: '俱乐部入驻', summary: clubApplication.clubName, status: '审核中', content: (Object.keys(labels) as ClubApplicationField[]).map(key => ({ label: labels[key], value: clubApplication[key] })) })
       setApplicationSubmitted((current) => ({ ...current, club: true }))
       setApplicationKind(null)
       setClubApplication(emptyClubApplication)
@@ -161,15 +177,15 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
           {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status">{clubMembershipStatus === 'idle' && <Check size={12} />}{clubMembershipStatus === 'joining' || clubMembershipStatus === 'leaving' ? '待审核' : '已加入'}</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(2)}</span><span><UsersRound size={13} />{joinedClub.companionCount} 位成员</span><span>{joinedClub.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions">{clubMembershipStatus === 'idle' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => { setClubMembershipStatus('leaving'); setFeedback('退出申请已提交，待审核') }}>退出俱乐部</button></> : <><button type="button" className="client-button client-button--secondary" disabled>待审核</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(true)}>取消申请</button></>}</div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => setChoosingClub(true)} />}
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
         </section>}
-        {section === 'onboarding' && <section className="personal-module">
-          <ModuleHeading title="入驻中心" description="选择申请身份，开始填写资料。" />
+        {section === 'onboarding' && (recruitmentOpen ? <CompanionOnboarding balance={diamondBalance} onBack={() => setRecruitmentOpen(false)} onChat={onAssessmentChat} onRecharge={onAssessmentRecharge} onPay={onAssessmentPay} onSubmitted={(submission) => { onSubmitOnboarding(submission); setRecruitmentOpen(false); setFeedback('支付成功，入驻申请已提交') }} /> : <section className="personal-module">
+          <ModuleHeading title="入驻中心" />
           <div className="onboarding-card-grid">
-            <OnboardingCard icon={<UserRound size={20} />} title="陪玩入驻" description="提交个人资料与擅长游戏，申请成为平台陪玩。" submitted={applicationSubmitted.companion} onApply={() => { setApplicationKind('companion'); setApplicationName(profile.nickname); setApplicationIntro('') }} />
+            <OnboardingCard icon={<UserRound size={20} />} title="陪玩入驻" description="选择俱乐部与游戏，报名入驻考核。" submitted={false} onApply={() => setRecruitmentOpen(true)} />
             <OnboardingCard icon={<Building2 size={20} />} title="俱乐部入驻" description="提交俱乐部资料，申请在平台展示和招募成员。" submitted={applicationSubmitted.club} onApply={() => { setApplicationKind('club'); setClubApplication(emptyClubApplication) }} />
           </div>
-          <p className="personal-demo-note">申请流程仅用于原型演示，不会提交到平台。</p>
+          <OnboardingApplicationRecords records={onboardingApplications} />
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
-        </section>}
+        </section>)}
         {section === 'visits' && <section className="personal-module">
           <ModuleHeading title="访问记录" />
           <div className="personal-record-tabs" role="tablist" aria-label="访问记录类型">{([{ id: 'footprints', label: '足迹', count: profileFootprints.length }, { id: 'visitors', label: '访客', count: profileVisitors.length }, { id: 'rooms', label: '进房记录', count: profileRoomVisits.length }] as const).map((tab) => <button type="button" role="tab" aria-selected={visitTab === tab.id} className={visitTab === tab.id ? 'is-active' : ''} key={tab.id} onClick={() => setVisitTab(tab.id)}>{tab.label}<span>{tab.count}</span></button>)}</div>
