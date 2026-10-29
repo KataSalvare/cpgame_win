@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Clock3, Search, Trash2, UsersRound, X } from 'lucide-react'
 import { AvatarMark } from './AvatarMark'
+import { ClubCard } from './ClubCard'
 import { UserNameWithLevel } from './UserNameWithLevel'
-import type { Club } from '../data/mockData'
+import { games, type Club } from '../data/mockData'
 import type { VoiceRoom } from '../data/socialMockData'
 
 export type GlobalSearchUser = {
@@ -48,6 +49,7 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
   const [query, setQuery] = useState('')
   const [history, setHistory] = useState(readHistory)
   const [activeTab, setActiveTab] = useState<ResultTab>('rooms')
+  const gamesById = useMemo(() => new Map(games.map((game) => [game.id, game])), [])
   const normalizedQuery = query.trim().toLocaleLowerCase()
 
   const results = useMemo(() => {
@@ -119,13 +121,13 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
           <div className="global-search-section__heading"><h2><Clock3 size={15} />历史搜索</h2>{history.length > 0 && <button type="button" className="global-search-text-button" onClick={() => setHistory([])}><Trash2 size={14} />清空</button>}</div>
           {history.length ? <div className="global-search-chips">{history.map((item) => <button type="button" key={item} onClick={() => { setQuery(item); selectFirstMatchingTab(item) }}>{item}</button>)}</div> : <p className="global-search-muted">暂无搜索记录</p>}
         </section>
-        <RecommendedClubs clubs={recommendedClubs} onSelect={(clubId) => openResult(() => onOpenClub(clubId))} />
+        <RecommendedClubs clubs={recommendedClubs} gamesById={gamesById} onSelect={(clubId) => openResult(() => onOpenClub(clubId))} />
       </div> : <>
         <nav className="global-search-tabs" aria-label="搜索结果分类">{tabItems.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? 'is-active' : ''} aria-pressed={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>{tab.label}<span>{counts[tab.id]}</span></button>)}</nav>
         <div className="global-search-content global-search-content--results">
           {totalResults === 0 ? <>
             <div className="global-search-empty"><Search size={20} /><strong>没有找到相关内容</strong><span>试试俱乐部名称、俱乐部 ID、用户昵称或用户 ID</span></div>
-            <RecommendedClubs clubs={recommendedClubs} onSelect={(clubId) => openResult(() => onOpenClub(clubId))} />
+            <RecommendedClubs clubs={recommendedClubs} gamesById={gamesById} onSelect={(clubId) => openResult(() => onOpenClub(clubId))} />
           </> : activeTab === 'rooms' ? counts.rooms ? results.rooms.map((room) => <button type="button" className="global-search-result" key={room.id} onClick={() => openResult(() => onOpenRoom(room.id))}><span className="global-search-result__icon"><UsersRound size={17} /></span><span className="global-search-result__text"><strong>{room.name}</strong><small>{room.privacy}语音房 · {room.channels.length} 个频道</small></span><span className="global-search-result__kind">语音房</span></button>) : <CategoryEmpty label="语音房" />
             : activeTab === 'clubs' ? counts.clubs ? results.clubs.map((club) => <button type="button" className="global-search-result" key={club.id} onClick={() => openResult(() => onOpenClub(club.id))}><AvatarMark initials={club.initials} size="md" /><span className="global-search-result__text"><strong>{club.name}</strong><small>ID：{clubPublicId(club.id)} · {club.companionCount} 位陪玩</small></span><span className="global-search-result__kind">俱乐部</span></button>) : <CategoryEmpty label="俱乐部" />
               : counts.users ? results.users.map((user) => <button type="button" className="global-search-result" key={user.id} onClick={() => openResult(() => onOpenUser(user))}><AvatarMark initials={user.initials} size="md" /><span className="global-search-result__text"><strong><UserNameWithLevel name={user.name} identityId={user.profileId} /></strong><small>ID：{user.profileId}</small></span><span className="global-search-result__kind">{user.kind}</span></button>) : <CategoryEmpty label="用户" />}
@@ -139,9 +141,9 @@ function CategoryEmpty({ label }: { label: string }) {
   return <div className="global-search-category-empty">没有找到相关{label}</div>
 }
 
-function RecommendedClubs({ clubs, onSelect }: { clubs: Club[]; onSelect: (clubId: string) => void }) {
+function RecommendedClubs({ clubs, gamesById, onSelect }: { clubs: Club[]; gamesById: Map<string, (typeof games)[number]>; onSelect: (clubId: string) => void }) {
   return <section className="global-search-section global-search-recommendations">
     <div className="global-search-section__heading"><h2>推荐俱乐部</h2></div>
-    <div className="global-search-club-list">{clubs.map((club) => <button type="button" className="global-search-club" key={club.id} onClick={() => onSelect(club.id)}><AvatarMark initials={club.initials} size="sm" /><span><strong>{club.name}</strong><small>{club.companionCount} 位陪玩 · {club.rating.toFixed(2)} 分</small></span></button>)}</div>
+    <div className="global-search-club-list">{clubs.map((club) => <ClubCard key={club.id} club={club} gamesById={gamesById} onOpen={() => onSelect(club.id)} onBrowse={() => {}} onSelfOrder={() => {}} showActions={false} />)}</div>
   </section>
 }

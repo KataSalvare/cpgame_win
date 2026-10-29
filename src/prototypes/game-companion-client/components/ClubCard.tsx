@@ -1,10 +1,11 @@
-import { Compass, Star } from 'lucide-react'
+import { Compass, Gamepad2, Star } from 'lucide-react'
 import type { Club, Game } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
 
-type ClubCardProps = { club: Club; gamesById: Map<string, Game>; onOpen: () => void; onBrowse: () => void; onSelfOrder: () => void }
+type ClubCardProps = { club: Club; gamesById: Map<string, Game>; onOpen: () => void; onBrowse: () => void; onSelfOrder: () => void; showActions?: boolean }
 
-export function ClubCard({ club, gamesById, onOpen, onBrowse, onSelfOrder }: ClubCardProps) {
+export function ClubCard({ club, gamesById, onOpen, onBrowse, onSelfOrder, showActions = true }: ClubCardProps) {
+  const clubGames = club.gameIds.map((id) => gamesById.get(id)).filter((game): game is Game => Boolean(game))
   return <article
     className="client-card club-card"
     tabIndex={0}
@@ -27,12 +28,12 @@ export function ClubCard({ club, gamesById, onOpen, onBrowse, onSelfOrder }: Clu
     <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
     <p className="club-card__intro">{club.intro}</p>
     <div className="club-card__meta">
-      <div><span className="client-muted">主营游戏</span><span>{club.gameIds.map((id) => gamesById.get(id)?.name).filter(Boolean).join(' · ')}</span></div>
+      <div><span className="client-muted">主营游戏</span><span className="club-card__game-list" aria-label={`主营游戏：${clubGames.map((game) => game.name).join('、')}`}>{clubGames.map((game) => <span className="club-card__game" key={game.id} title={game.name}><Gamepad2 size={12} aria-hidden="true" /><span>{game.shortName}</span></span>)}</span></div>
       <span>{club.companionCount} 位陪玩</span>
     </div>
-    <div className="club-card__actions">
+    {showActions && <div className="club-card__actions">
       <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onBrowse() }}><Compass size={15} />逛一逛</button>
       <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onSelfOrder() }}>自助下单</button>
-    </div>
+    </div>}
   </article>
 }

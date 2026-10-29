@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { Check, ChevronRight, ClipboardList, Coins, Copy, UserRound, WalletCards } from 'lucide-react'
+import { Check, Coins, Copy, WalletCards } from 'lucide-react'
 import type { PlayerProfile } from '../data/accountMockData'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 
-type QuickAction = 'profile' | 'wallet' | 'orders'
+type QuickAction = 'recharge' | 'withdraw' | 'exchange'
 
-export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, orderCount, onNavigate, children }: {
+export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavigate, children }: {
   profile: PlayerProfile
   diamondBalance: number
   beanBalance: number
-  orderCount: number
   onNavigate: (action: QuickAction) => void
   children: ReactNode
 }) {
@@ -64,11 +63,9 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, orderC
         <div><strong><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></strong><span className="client-profile-popover__meta"><button type="button" className="client-profile-popover__user-id" onClick={() => void copyUserId()} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{copyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{copyFeedback === '复制成功' && <Check size={12} />}{copyFeedback}</span>}</span></div>
       </div>
       <div className="client-profile-popover__stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} /><Metric label="粉丝" value={profile.followers} /></div>
-      <div className="client-profile-popover__balances"><span><Coins size={14} />钻石 <strong>{diamondBalance.toLocaleString()}</strong></span><span><WalletCards size={14} />糖豆 <strong>{beanBalance.toLocaleString()}</strong></span></div>
-      <div className="client-profile-popover__actions">
-        <QuickActionButton icon={<UserRound size={15} />} label="个人资料" detail="编辑资料" onClick={() => navigate('profile')} />
-        <QuickActionButton icon={<WalletCards size={15} />} label="我的钱包" detail="资产与明细" onClick={() => navigate('wallet')} />
-        <QuickActionButton icon={<ClipboardList size={15} />} label="我的订单" detail={`${orderCount} 笔订单`} onClick={() => navigate('orders')} />
+      <div className="client-profile-popover__balances">
+        <div className="client-profile-popover__asset"><span><Coins size={14} />钻石</span><strong>{diamondBalance.toLocaleString()}</strong><div><button type="button" onClick={() => navigate('recharge')}>充值</button></div></div>
+        <div className="client-profile-popover__asset"><span><WalletCards size={14} />糖豆</span><strong>{beanBalance.toLocaleString()}</strong><div><button type="button" onClick={() => navigate('withdraw')}>提现</button><button type="button" onClick={() => navigate('exchange')}>兑换</button></div></div>
       </div>
     </section>}
   </div>
@@ -78,6 +75,3 @@ function Metric({ label, value }: { label: string; value: number }) {
   return <span><strong>{value}</strong><small>{label}</small></span>
 }
 
-function QuickActionButton({ icon, label, detail, onClick }: { icon: ReactNode; label: string; detail: string; onClick: () => void }) {
-  return <button type="button" onClick={onClick}>{icon}<span><strong>{label}</strong><small>{detail}</small></span><ChevronRight size={14} /></button>
-}

@@ -4,6 +4,7 @@ import { useHomeLogic } from '../hooks/useHomeLogic'
 import { ClubCard } from '../components/ClubCard'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
+import { GameFilter } from '../components/GameFilter'
 
 type Props = {
   followedClubIds?: string[]
@@ -37,21 +38,22 @@ export function HomePage({ pageState, followedClubIds, onOpenClub, onBrowseClub,
 
     <section className="home-games" aria-labelledby="home-games-title">
       <div className="client-section-heading"><h2 id="home-games-title">游戏</h2></div>
-      <div className="home-game-list" role="group" aria-label="游戏筛选">
-        {games.map((game) => <button key={game.id} type="button" className={`game-choice${logic.gameId === game.id ? ' is-active' : ''}`} aria-pressed={logic.gameId === game.id} onClick={() => logic.setGameId(game.id)}>
-          <span className="game-choice__mark">{game.shortName}</span><span>{game.name}</span>
-        </button>)}
-      </div>
+      <GameFilter gameId={logic.gameId} onSelect={logic.setGameId} />
     </section>
 
     <section className="home-clubs" aria-labelledby="home-clubs-title">
       <div className="client-section-heading"><h2 id="home-clubs-title">俱乐部</h2><span className="client-count">{logic.visibleClubs.length} 个</span></div>
-      <div className="club-scope-row" role="group" aria-label="俱乐部范围筛选">
-        <button type="button" className={`client-filter-pill${logic.scope === 'featured' ? ' is-active' : ''}`} aria-pressed={logic.scope === 'featured'} onClick={() => logic.setScope('featured')}>推荐俱乐部</button>
-        <button type="button" className={`client-filter-pill${logic.scope === 'followed' ? ' is-active' : ''}`} aria-pressed={logic.scope === 'followed'} onClick={() => logic.setScope('followed')}>我关注的俱乐部</button>
+      <div className="club-scope-row">
+        <div className="club-filter-group" role="group" aria-label="俱乐部范围筛选">
+          <button type="button" className={`client-filter-pill${logic.scope === 'featured' ? ' is-active' : ''}`} aria-pressed={logic.scope === 'featured'} onClick={() => logic.setScope('featured')}>推荐俱乐部</button>
+          <button type="button" className={`client-filter-pill${logic.scope === 'followed' ? ' is-active' : ''}`} aria-pressed={logic.scope === 'followed'} onClick={() => logic.setScope('followed')}>我关注的俱乐部</button>
+        </div>
         <span className="club-scope-row__divider" />
         <span className="client-muted club-scope-row__label">俱乐部标签</span>
-        {clubTags.map((tag) => <button key={tag} type="button" className={`client-filter-pill${logic.scope === 'tag' && logic.tag === tag ? ' is-active' : ''}`} aria-pressed={logic.scope === 'tag' && logic.tag === tag} onClick={() => logic.setTagScope(tag)}>{tag}</button>)}
+        <div className="club-filter-group" role="group" aria-label="俱乐部标签筛选">
+          <button type="button" className={`client-filter-pill${logic.tag === null ? ' is-active' : ''}`} aria-pressed={logic.tag === null} onClick={() => logic.setTagScope(null)}>全部标签</button>
+          {clubTags.map((tag) => <button key={tag} type="button" className={`client-filter-pill${logic.tag === tag ? ' is-active' : ''}`} aria-pressed={logic.tag === tag} onClick={() => logic.setTagScope(tag)}>{tag}</button>)}
+        </div>
       </div>
 
       {logic.visibleClubs.length > 0 ? <div className="client-card-grid client-card-grid--clubs">

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Headphones, Maximize2, Minimize2, Plus, Search, Swords, UserRound, UsersRound, X } from 'lucide-react'
+import { Check, ChevronDown, Headphones, Maximize2, Minimize2, Plus, Search, Swords, UserRound, UsersRound, X } from 'lucide-react'
 import type { useMatchLogic } from '../hooks/useMatchLogic'
 import { companions, games } from '../data/mockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
+import { GameFilter } from '../components/GameFilter'
 import noticeImageOne from '../assets/profile-life-photo-city.svg'
 import noticeImageTwo from '../assets/profile-life-photo-cafe.svg'
 import noticeImageThree from '../assets/profile-life-photo-window.svg'
@@ -39,11 +40,8 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
   const [candidatesReady, setCandidatesReady] = useState(false)
   const [clubPickerOpen, setClubPickerOpen] = useState(false)
   const [clubSearch, setClubSearch] = useState('')
-  const [canScrollGamesLeft, setCanScrollGamesLeft] = useState(false)
-  const [canScrollGamesRight, setCanScrollGamesRight] = useState(true)
   const [miniPosition, setMiniPosition] = useState<{ left: number; top: number } | null>(null)
   const [miniDragging, setMiniDragging] = useState(false)
-  const gameListRef = useRef<HTMLDivElement>(null)
   const clubPickerRef = useRef<HTMLDivElement>(null)
   const matchHostRef = useRef<HTMLDivElement>(null)
   const miniDragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number; moved: boolean } | null>(null)
@@ -143,13 +141,6 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
     return () => window.clearTimeout(timeout)
   }, [matching])
 
-  const updateGameScrollButtons = () => {
-    const list = gameListRef.current
-    if (!list) return
-    setCanScrollGamesLeft(list.scrollLeft > 1)
-    setCanScrollGamesRight(list.scrollLeft + list.clientWidth < list.scrollWidth - 1)
-  }
-
   useEffect(() => {
     const closePickerOutside = (event: PointerEvent) => {
       if (clubPickerRef.current && !clubPickerRef.current.contains(event.target as Node)) setClubPickerOpen(false)
@@ -157,11 +148,6 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
     document.addEventListener('pointerdown', closePickerOutside)
     return () => document.removeEventListener('pointerdown', closePickerOutside)
   }, [])
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(updateGameScrollButtons)
-    return () => cancelAnimationFrame(frame)
-  }, [open, matching])
 
   const showMiniCard = !open && matching
 
@@ -203,10 +189,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <div className="match-panel__matching-actions"><button type="button" className="client-button client-button--secondary" onClick={() => setDialog('cancel')}>取消匹配</button><button type="button" className="client-button client-button--primary" disabled={!candidatesReady || selectedIds.length !== expectedCount} onClick={() => onChooseCompanions(selectedIds)}>确认下单</button></div>
       </div> : <div className="match-panel__form">
         <section className="match-field match-field--wide" aria-label="选择游戏">
-          <div className="match-game-heading"><span>游戏</span><div className="match-game-scroll-controls"><button type="button" aria-label="向左滚动游戏列表" disabled={!canScrollGamesLeft} onClick={() => gameListRef.current?.scrollBy({ left: -180, behavior: 'smooth' })}><ChevronLeft size={14} /></button><button type="button" aria-label="向右滚动游戏列表" disabled={!canScrollGamesRight} onClick={() => gameListRef.current?.scrollBy({ left: 180, behavior: 'smooth' })}><ChevronRight size={14} /></button></div></div>
-          <div className="match-game-list" ref={gameListRef} onScroll={updateGameScrollButtons} role="listbox" aria-label="游戏列表">
-            {games.filter((game) => game.id !== 'all').map((game) => <button type="button" role="option" aria-selected={logic.gameId === game.id} key={game.id} className={`match-game-option${logic.gameId === game.id ? ' is-selected' : ''}`} onClick={() => { logic.chooseGame(game.id); setClubSearch(''); setClubPickerOpen(false) }}><span>{game.shortName}</span><strong>{game.name}</strong></button>)}
-          </div>
+          <GameFilter gameId={logic.gameId} includeAll={false} label="匹配游戏筛选" onSelect={(gameId) => { logic.chooseGame(gameId); setClubSearch(''); setClubPickerOpen(false) }} />
         </section>
         <section className="match-field match-field--wide" aria-label="选择俱乐部" ref={clubPickerRef}>
           <span>俱乐部</span>

@@ -1,7 +1,8 @@
-import { games, regions } from '../data/mockData'
+import { regions } from '../data/mockData'
 import { useCompanionDirectoryLogic } from '../hooks/useClubDetailLogic'
 import { CompanionCard } from './CompanionCard'
 import { PageStatePanel } from './PageStatePanel'
+import { GameFilter } from './GameFilter'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 
@@ -39,13 +40,7 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
   }
 
   return <section className="club-members-section" aria-label="陪玩列表">
-    <div className="club-game-filter" role="group" aria-label="游戏筛选">
-      <div className="home-game-list club-game-list">
-        {games.map((game) => <button key={game.id} type="button" className={`game-choice${logic.gameId === game.id ? ' is-active' : ''}`} aria-pressed={logic.gameId === game.id} onClick={() => logic.setGameId(game.id)}>
-          <span className="game-choice__mark">{game.shortName}</span><span>{game.name}</span>
-        </button>)}
-      </div>
-    </div>
+    <div className="club-game-filter"><GameFilter gameId={logic.gameId} onSelect={logic.setGameId} /></div>
     <div className="club-filter-panel">
       <FilterSelect label="排序" value={logic.sort} onChange={(value) => logic.setSort(value as typeof logic.sort)} options={Object.entries(sortLabels).map(([value, label]) => ({ value, label }))} />
       <FilterSelect label="在线状态" value={logic.onlineStatus} onChange={logic.setOnlineStatus} options={['全部在线状态', '在线', '离线'].map((value) => ({ value, label: value }))} />
