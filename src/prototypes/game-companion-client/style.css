@@ -1744,3 +1744,11 @@
 .onboarding-record-detail > div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; }
 .onboarding-record-detail dt { color: var(--client-muted); }
 .onboarding-record-detail dd { margin: 0; overflow-wrap: anywhere; }
+
+.personal-club-search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 12px; margin-bottom: 16px; color: var(--client-muted); }
+.personal-club-search:focus-within { border-color: var(--client-text); outline: 2px solid var(--prototype-border, #e5e7eb); }
+.personal-club-search input { width: 100%; min-width: 0; height: 38px; border: 0; outline: none; background: transparent; color: var(--client-text); font-size: 13px; }
+.personal-club-search input::-webkit-search-cancel-button { display: none; }
+.personal-club-search button { display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--client-muted); padding: 4px; }
+
+.recruitment-search { width: 360px; max-width: 100%; }
