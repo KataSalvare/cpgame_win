@@ -2,6 +2,7 @@ import type { ClientOrder } from '../data/accountMockData'
 import { useMemo, useState } from 'react'
 import {
   currentSocialUser,
+  initialBlockedProfileIds,
   initialConversations,
   initialGroupJoinRequests,
   type FixedMessageFeed,
@@ -52,7 +53,7 @@ export function useSocialLogic() {
   const [followedChannelIds, setFollowedChannelIds] = useState<string[]>([])
   const toggleClubFollow = (clubId: string) => setFollowedClubIds((ids) => ids.includes(clubId) ? ids.filter((id) => id !== clubId) : [...ids, clubId])
   const toggleChannelFollow = (channelId: string) => setFollowedChannelIds((ids) => ids.includes(channelId) ? ids.filter((id) => id !== channelId) : [...ids, channelId])
-  const [blockedProfileIds, setBlockedProfileIds] = useState<string[]>([])
+  const [blockedProfileIds, setBlockedProfileIds] = useState<string[]>(initialBlockedProfileIds)
   const [profileNotes, setProfileNotes] = useState<Record<string, string>>({})
   const setProfileNote = (profileId: string, note: string) => setProfileNotes((items) => ({ ...items, [profileId]: note }))
   const [activeVoiceRoomId, setActiveVoiceRoomId] = useState(initialVoiceRooms[0].id)

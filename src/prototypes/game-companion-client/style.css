@@ -451,6 +451,40 @@
 .personal-setting-confirm { display: flex; align-items: flex-start; gap: 14px; padding: 12px 4px; color: var(--prototype-text-secondary, #374151); }
 .personal-setting-confirm strong { font-size: 14px; }
 .personal-setting-confirm p { margin: 8px 0 0; color: var(--client-muted); font-size: 12px; line-height: 1.6; }
+.personal-security-menu { display: grid; }
+.personal-security-menu__row { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 16px; border: 0; border-bottom: 1px solid var(--client-border); padding: 10px 4px; background: transparent; color: var(--client-text); text-align: left; cursor: pointer; }
+.personal-security-menu__row > span { display: grid; gap: 5px; }
+.personal-security-menu__row strong { font-size: 14px; font-weight: 600; }
+.personal-security-menu__row small { color: var(--client-muted); font-size: 12px; }
+.personal-security-menu__row > svg { color: var(--client-muted); }
+.personal-security-menu__row:hover { background: var(--prototype-surface-muted, #f9fafb); }
+.personal-security-menu__row.is-danger strong { color: var(--prototype-text-secondary, #4b5563); }
+.personal-security-form { display: grid; gap: 16px; }
+.personal-bound-phone { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--client-border); padding: 0 0 14px; color: var(--client-muted); font-size: 12px; }
+.personal-bound-phone strong { color: var(--client-text); font-size: 14px; }
+.personal-security-form .personal-setting-field input { box-sizing: border-box; }
+.personal-form-note { color: var(--client-muted); font-size: 11px; }
+.personal-closure-content { display: grid; gap: 18px; }
+.personal-closure-terms { max-height: 330px; overflow: auto; border: 1px solid var(--client-border); border-radius: 6px; padding: 16px 18px; color: var(--client-text); line-height: 1.65; }
+.personal-closure-terms h3 { margin: 0 0 10px; font-size: 16px; }
+.personal-closure-terms h4 { margin: 16px 0 5px; font-size: 13px; }
+.personal-closure-terms p { margin: 6px 0; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
+.personal-closure-check { display: flex; align-items: flex-start; gap: 8px; color: var(--client-text); font-size: 12px; line-height: 1.5; cursor: pointer; }
+.personal-closure-check input { width: 15px; height: 15px; flex: 0 0 auto; margin: 1px 0 0; accent-color: var(--prototype-primary, #374151); }
+.personal-closure-warning { border: 1px solid var(--client-border); border-radius: 6px; padding: 14px 16px; background: var(--prototype-surface-muted, #f9fafb); }
+.personal-closure-warning p { margin: 0 0 8px; color: var(--client-text); font-size: 14px; font-weight: 600; }
+.personal-closure-warning p strong { color: var(--prototype-text-secondary, #4b5563); }
+.personal-closure-warning ul { display: grid; gap: 7px; margin: 0; padding-left: 19px; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; line-height: 1.5; }
+.personal-closure-balance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.personal-closure-balance h3 { grid-column: 1 / -1; margin: 0; color: var(--client-text); font-size: 14px; }
+.personal-closure-balance > div { display: flex; min-height: 48px; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 12px; }
+.personal-closure-balance > div span { display: flex; align-items: center; gap: 7px; color: var(--client-muted); font-size: 12px; }
+.personal-closure-balance > div strong { color: var(--client-text); font-size: 14px; }
+.personal-closure-complete { display: grid; justify-items: center; padding: 22px 0; text-align: center; }
+.personal-closure-complete > span { display: grid; width: 48px; height: 48px; place-items: center; border: 1px solid var(--client-border); border-radius: 50%; color: var(--client-text); }
+.personal-closure-complete h3 { margin: 14px 0 4px; color: var(--client-text); font-size: 16px; }
+.personal-closure-complete p { margin: 0; color: var(--client-muted); font-size: 12px; }
+.windows-dialog-panel__footer .client-button:disabled { cursor: not-allowed; opacity: .45; }
 .personal-notification-row { min-height: 62px; }
 .personal-toggle { position: relative; width: 38px; height: 22px; flex: 0 0 auto; border: 1px solid var(--prototype-text-subtle, #9ca3af); border-radius: 999px; padding: 2px; background: var(--prototype-border, #e5e7eb); cursor: pointer; transition: background 140ms ease, border-color 140ms ease; }
 .personal-toggle span { display: block; width: 16px; height: 16px; border-radius: 50%; background: var(--prototype-surface, #fff); box-shadow: 0 1px 2px rgba(17, 24, 39, .18); transition: transform 140ms ease; }
@@ -644,8 +678,10 @@
 .bean-withdraw-result > p { margin: 0; color: var(--client-muted); font-size: 11px; }
 .store-benefit-dialog.wallet-recharge-dialog { display: flex; width: min(1120px, calc(100% - 48px)); height: min(850px, calc(100% - 48px)); max-height: calc(100% - 48px); flex-direction: column; gap: 0; overflow: hidden; padding: 0; }
 .store-benefit-dialog.wallet-recharge-dialog.is-completed { width: min(600px, calc(100% - 48px)); height: auto; }
+.store-benefit-dialog.wallet-recharge-dialog.is-payment { width: min(600px, calc(100% - 48px)); height: auto; }
 .wallet-recharge-dialog > header { position: static; flex: 0 0 auto; margin: 0; border-bottom: 1px solid var(--client-border); padding: 16px 24px; }
 .wallet-recharge-dialog > .client-content { width: 100%; min-height: 0; max-height: none; flex: 1 1 auto; overflow-y: auto; padding: 18px 24px 24px; }
+.wallet-recharge-dialog.is-payment > .client-content { flex: 0 1 auto; }
 .wallet-recharge-dialog > .wallet-recharge-success-content { box-sizing: border-box; min-height: 0; flex: 0 0 auto; gap: 0; padding: 24px; }
 .wallet-recharge-intro { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .wallet-recharge-intro > p { margin: 0; color: var(--client-muted); font-size: 12px; }
@@ -660,6 +696,11 @@
 .wallet-recharge-dialog .checkout-success-card h1 { font-size: 22px; }
 .wallet-recharge-dialog .checkout-success-card p { max-width: 420px; margin: 10px 0 0; line-height: 1.6; }
 .wallet-recharge-dialog .checkout-success-card__actions { flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 24px; }
+.wallet-recharge-payment { display: grid; justify-items: center; gap: 12px; width: min(520px, 100%); margin: 0 auto; padding: 28px; text-align: center; }
+.wallet-recharge-payment > h1 { margin: 0; font-size: 20px; }
+.wallet-recharge-payment__amount { font-size: 28px; font-weight: 600; }
+.wallet-recharge-payment__status { color: var(--client-muted); font-size: 12px; }
+.wallet-recharge-payment__actions { display: flex; justify-content: center; gap: 8px; margin-top: 4px; }
 .wallet-ledger-card { padding: 20px; }
 .wallet-ledger-card .client-section-heading { align-items: center; }
 .wallet-transaction-list { display: grid; margin-top: 8px; }

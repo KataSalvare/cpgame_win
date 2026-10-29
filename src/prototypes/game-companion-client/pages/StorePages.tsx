@@ -31,6 +31,7 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
   const [rechargeAmount, setRechargeAmount] = useState(String(rechargePackages[1].price))
   const [couponId, setCouponId] = useState<string | null>(null)
   const [payMethod, setPayMethod] = useState('微信支付')
+  const [paymentPending, setPaymentPending] = useState(false)
   const [completed, setCompleted] = useState(false)
   const parsedRechargeAmount = Number(rechargeAmount)
   const selectedPackage = rechargePackages.find((item) => item.price === parsedRechargeAmount)
@@ -51,7 +52,19 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
     return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className="store-benefit-dialog wallet-recharge-dialog is-completed" role="dialog" aria-modal="true" aria-label="充值结果"><header><div><span className="client-eyebrow">账户资产</span><h2>充值结果</h2></div><button type="button" className="client-icon-button" aria-label="关闭充值弹窗" onClick={onBack}><X size={17} /></button></header>{success}</section></div> : <div className="client-content account-page store-page"><div className="wallet-recharge-result">{successCard}</div></div>
   }
 
-  const content = <div className="client-content account-page store-page">
+  const content = paymentPending ? <div className="client-content account-page store-page">
+    {presentation === 'page' && <button type="button" className="client-back-link" onClick={() => setPaymentPending(false)}><ArrowLeft size={15} />返回修改</button>}
+    <section className="client-card wallet-recharge-payment">
+      <span className="client-eyebrow">{payMethod}</span>
+      <h1>支付确认</h1>
+      <strong className="wallet-recharge-payment__amount">¥{amount}</strong>
+      <span className="wallet-recharge-payment__status">等待支付</span>
+      <div className="wallet-recharge-payment__actions">
+        <button type="button" className="client-button client-button--secondary" onClick={() => setPaymentPending(false)}>返回修改</button>
+        <button type="button" className="client-button client-button--primary" onClick={() => { onComplete(rechargeDiamonds, amount, selectedCoupon?.id ?? null); setPaymentPending(false); setCompleted(true) }}>我已支付</button>
+      </div>
+    </section>
+  </div> : <div className="client-content account-page store-page">
     {presentation === 'page' && <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={15} />{backLabel}</button>}
     {presentation === 'modal' ? <div className="wallet-recharge-intro"><span className="store-balance-chip"><Coins size={15} />当前余额 {diamondBalance.toLocaleString()} 钻石</span></div> : <Heading eyebrow="账户资产" title="钻石充值"><span className="store-balance-chip"><Coins size={15} />当前余额 {diamondBalance.toLocaleString()} 钻石</span></Heading>}
     <div className="store-checkout-grid">
@@ -66,10 +79,10 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
         <div className="client-section-heading store-subheading"><div><h2>支付方式</h2></div></div>
         <div className="payment-method-list" role="group" aria-label="支付方式">{['微信支付', '支付宝', '苹果支付'].map((method) => <button type="button" key={method} className={`payment-method${payMethod === method ? ' is-active' : ''}`} aria-pressed={payMethod === method} onClick={() => setPayMethod(method)}><span className="payment-method__mark"><CreditCard size={17} /></span><strong>{method}</strong><span className="payment-method__radio" /></button>)}</div>
       </section>
-      <aside className="client-card store-summary-card"><h2>订单摘要</h2><div className="checkout-summary-line"><span>充值钻石</span><strong>{rechargeDiamonds.toLocaleString()} 钻石</strong></div><div className="checkout-summary-line"><span>充值金额</span><strong>¥{validRechargeAmount ? parsedRechargeAmount : 0}</strong></div><div className="checkout-summary-line"><span>优惠券</span><strong>{selectedCoupon ? `-¥${selectedCoupon.discount}` : '未使用'}</strong></div><div className="checkout-total"><span>实付金额</span><strong>¥{amount}</strong></div><div className="store-summary-payment"><CreditCard size={16} /><span>{payMethod}</span></div><button type="button" className="client-button client-button--primary store-submit-button" disabled={!validRechargeAmount} onClick={() => { onComplete(rechargeDiamonds, amount, selectedCoupon?.id ?? null); setCompleted(true) }}>确认充值</button></aside>
+      <aside className="client-card store-summary-card"><h2>订单摘要</h2><div className="checkout-summary-line"><span>充值钻石</span><strong>{rechargeDiamonds.toLocaleString()} 钻石</strong></div><div className="checkout-summary-line"><span>充值金额</span><strong>¥{validRechargeAmount ? parsedRechargeAmount : 0}</strong></div><div className="checkout-summary-line"><span>优惠券</span><strong>{selectedCoupon ? `-¥${selectedCoupon.discount}` : '未使用'}</strong></div><div className="checkout-total"><span>实付金额</span><strong>¥{amount}</strong></div><div className="store-summary-payment"><CreditCard size={16} /><span>{payMethod}</span></div><button type="button" className="client-button client-button--primary store-submit-button" disabled={!validRechargeAmount} onClick={() => setPaymentPending(true)}>确认充值</button></aside>
     </div>
   </div>
-  return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className="store-benefit-dialog wallet-recharge-dialog" role="dialog" aria-modal="true" aria-label={completed ? '充值结果' : '钻石充值'}><header><div><span className="client-eyebrow">账户资产</span><h2>{completed ? '充值结果' : '钻石充值'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭充值弹窗" onClick={onBack}><X size={17} /></button></header>{content}</section></div> : content
+  return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className={`store-benefit-dialog wallet-recharge-dialog${completed ? ' is-completed' : paymentPending ? ' is-payment' : ''}`} role="dialog" aria-modal="true" aria-label={completed ? '充值结果' : paymentPending ? '支付确认' : '钻石充值'}><header><div><span className="client-eyebrow">账户资产</span><h2>{completed ? '充值结果' : paymentPending ? '支付确认' : '钻石充值'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭充值弹窗" onClick={onBack}><X size={17} /></button></header>{content}</section></div> : content
 }
 
 export function CouponsPage({ pageState, onRetry, coupons, onBack }: StateProps & { coupons: RechargeCoupon[]; onBack: () => void }) {

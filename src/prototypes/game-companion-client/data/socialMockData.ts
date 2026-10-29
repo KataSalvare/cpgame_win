@@ -105,6 +105,9 @@ export const socialFriends: SocialFriend[] = [
   { id: 'friend-6', companionId: 'companion-005', name: '阿澈', initials: '澈', status: '昨天在线', online: false, role: '好友', gender: '男', age: 26, profileId: 'P-102866', rating: 4.92, tags: ['娱乐开黑', '声音好听'], intro: '主打轻松氛围和稳定配合。' },
 ]
 
+// 示例拉黑记录会在个人中心黑名单中展示，并同步影响对应陪玩资料卡。
+export const initialBlockedProfileIds = ['companion-003', 'companion-006']
+
 const seedMessages: SocialMessage[] = [
   { id: 'msg-1', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:42', kind: 'text', content: '今晚要不要一起打排位？' },
   { id: 'msg-2', senderId: 'player', senderName: '林小满', initials: '满', time: '19:43', kind: 'text', content: '好呀，我刚好有空。' },

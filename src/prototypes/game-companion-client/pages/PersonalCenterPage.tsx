@@ -154,7 +154,7 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
         <p className="personal-demo-note personal-field--full">申请状态仅在当前原型会话中展示，不代表正式审核结果。</p>
       </form>
     </DialogPanel>}
-    {activeSetting === 'security' && <AccountSecurityDialog phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} onClose={() => setActiveSetting(null)} />}
+    {activeSetting === 'security' && <AccountSecurityDialog phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'notifications' && <NotificationSettingsDialog preferences={notifications} onChange={onUpdateNotifications} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'blacklist' && <BlacklistDialog profiles={blockedProfiles} onRemove={onUnblockProfile} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'logout' && <DialogPanel overlayId="logout-confirmation-dialog" title="退出登录" description="确认退出当前账号并返回登录页？" onClose={() => setActiveSetting(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setActiveSetting(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={onLogout}>确认退出</button></>}><p className="social-dialog-copy">退出后将返回登录页面。本次原型不会清除或提交真实账号数据。</p></DialogPanel>}
@@ -214,19 +214,27 @@ function maskPhone(phone: string) {
   return phone.replace(/^(\d{3})\d{4}(\d{4})$/, '$1****$2')
 }
 
-function AccountSecurityDialog({ phone, onSavePhone, endedDeviceIds, onEndDevice, onClose }: {
+type SecurityView = 'overview' | 'phone' | 'devices' | 'closure-terms' | 'closure-warning' | 'closure-phone' | 'closure-complete'
+
+function AccountSecurityDialog({ phone, onSavePhone, endedDeviceIds, onEndDevice, diamondBalance, beanBalance, onClose }: {
   phone: string
   onSavePhone: (phone: string) => void
   endedDeviceIds: string[]
   onEndDevice: (deviceId: string) => void
+  diamondBalance: number
+  beanBalance: number
   onClose: () => void
 }) {
-  const [changingPhone, setChangingPhone] = useState(false)
+  const [view, setView] = useState<SecurityView>('overview')
   const [newPhone, setNewPhone] = useState('')
   const [code, setCode] = useState('')
   const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null)
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [warningAccepted, setWarningAccepted] = useState(false)
+  const [codeSent, setCodeSent] = useState(false)
   const [error, setError] = useState('')
   const [feedback, setFeedback] = useState('')
+  const backToOverview = () => { setView('overview'); setError(''); setFeedback('') }
   const changePhone = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
@@ -235,18 +243,43 @@ function AccountSecurityDialog({ phone, onSavePhone, endedDeviceIds, onEndDevice
     onSavePhone(newPhone)
     setNewPhone('')
     setCode('')
-    setChangingPhone(false)
+    setView('overview')
     setFeedback('手机号已更新')
   }
+  const completeClosure = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setError('')
+    if (!/^1\d{10}$/.test(newPhone)) { setError('请输入正确的 11 位手机号。'); return }
+    setView('closure-complete')
+  }
   const pendingDevice = mockDevices.find((device) => device.id === pendingDeviceId)
-  return <DialogPanel overlayId="account-security-dialog" title="账号安全" description="管理绑定手机号和登录设备。" onClose={onClose} width={600} footer={pendingDevice ? <><button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { onEndDevice(pendingDevice.id); setPendingDeviceId(null); setFeedback('已结束该设备的登录') }}>确认结束登录</button></> : <button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
-    {pendingDevice ? <div className="personal-setting-confirm"><Monitor size={22} /><div><strong>结束「{pendingDevice.name}」的登录？</strong><p>该设备将退出当前账号。此操作仅更新本次原型中的设备状态。</p></div></div> : <div className="personal-setting-content">
-      <section className="personal-setting-section"><header><div><span className="client-eyebrow">绑定手机</span><strong>{maskPhone(phone)}</strong></div><button type="button" className="client-button client-button--secondary" onClick={() => { setChangingPhone((value) => !value); setError('') }}>{changingPhone ? '取消更换' : '更换手机号'}</button></header>
-        {changingPhone && <form className="personal-phone-form" onSubmit={changePhone}><label className="personal-setting-field" htmlFor="personal-new-phone">新手机号<input id="personal-new-phone" type="tel" inputMode="numeric" maxLength={11} placeholder="请输入 11 位手机号" value={newPhone} onChange={(event) => setNewPhone(event.target.value.replace(/\D/g, ''))} /></label><div className="personal-setting-field"><label htmlFor="personal-phone-code">验证码</label><div className="personal-code-field"><input id="personal-phone-code" inputMode="numeric" maxLength={6} placeholder="输入验证码" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} /><button type="submit" className="client-button client-button--primary">验证并更换</button></div></div><small>请输入 6 位数字验证码（本地演示）</small>{error && <p className="personal-setting-error" role="alert">{error}</p>}</form>}
-      </section>
-      <section className="personal-setting-section"><header><div><span className="client-eyebrow">登录设备</span><strong>{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).length} 台设备</strong></div></header><div className="personal-device-list">{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).map((device) => <article key={device.id}><span className="personal-device-icon"><Monitor size={17} /></span><div><strong>{device.name}{device.current && <small>当前设备</small>}</strong><span>{device.detail}</span></div>{device.current ? <span className="personal-device-current">当前使用</span> : <button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(device.id)}>结束登录</button>}</article>)}{mockDevices.every((device) => endedDeviceIds.includes(device.id)) && <p className="personal-setting-empty">暂无其他登录设备</p>}</div></section>
-      {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
-    </div>}
+  const activeTitle = view === 'overview' ? '账号安全' : view === 'phone' ? '修改手机号' : view === 'devices' ? '登录设备' : view.startsWith('closure') ? '注销账号' : '结束登录'
+  const activeDescription = view === 'overview' ? '管理绑定手机号和登录设备。' : view === 'phone' ? '验证新手机号后更新绑定信息。' : view === 'devices' ? '查看并管理登录中的设备。' : view === 'closure-terms' ? '请阅读注销账号协议。' : view === 'closure-warning' ? '请确认注销后果及账户余额。' : view === 'closure-phone' ? '验证绑定手机号后完成注销。' : view === 'closure-complete' ? '账号注销申请流程已完成。' : '确认结束该设备登录。'
+  const footer = pendingDevice
+    ? <><button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { onEndDevice(pendingDevice.id); setPendingDeviceId(null); setFeedback('已结束该设备的登录') }}>确认结束登录</button></>
+    : view === 'overview' || view === 'devices' || view === 'closure-complete'
+      ? <button type="button" className="client-button client-button--secondary" onClick={view === 'overview' || view === 'closure-complete' ? onClose : backToOverview}>{view === 'devices' ? '返回' : '完成'}</button>
+      : view === 'phone'
+        ? <><button type="button" className="client-button client-button--secondary" onClick={backToOverview}>返回</button><button type="submit" form="personal-phone-form" className="client-button client-button--primary">确认更换</button></>
+        : view === 'closure-terms'
+          ? <><button type="button" className="client-button client-button--secondary" onClick={backToOverview}>返回</button><button type="button" className="client-button client-button--primary" disabled={!termsAccepted} onClick={() => { setView('closure-warning'); setError('') }}>下一步</button></>
+          : view === 'closure-warning'
+            ? <><button type="button" className="client-button client-button--secondary" onClick={() => setView('closure-terms')}>返回</button><button type="button" className="client-button client-button--primary" disabled={!warningAccepted} onClick={() => { setView('closure-phone'); setError('') }}>下一步</button></>
+            : <><button type="button" className="client-button client-button--secondary" onClick={() => setView('closure-warning')}>返回</button><button type="submit" form="account-closure-phone-form" className="client-button client-button--primary">确认注销</button></>
+  return <DialogPanel overlayId="account-security-dialog" title={activeTitle} description={activeDescription} onClose={onClose} width={600} footer={footer}>
+    {pendingDevice ? <div className="personal-setting-confirm"><Monitor size={22} /><div><strong>结束「{pendingDevice.name}」的登录？</strong><p>该设备将退出当前账号。此操作仅更新本次原型中的设备状态。</p></div></div>
+      : view === 'overview' ? <div className="personal-security-menu">
+        <button type="button" className="personal-security-menu__row" onClick={() => { setView('phone'); setError(''); setFeedback(''); setCodeSent(false); setNewPhone(''); setCode('') }}><span><strong>手机号</strong><small>{maskPhone(phone)}</small></span><ChevronRight size={17} /></button>
+        <button type="button" className="personal-security-menu__row" onClick={() => { setView('devices'); setError('') }}><span><strong>登录设备</strong><small>{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).length} 台设备</small></span><ChevronRight size={17} /></button>
+        <button type="button" className="personal-security-menu__row is-danger" onClick={() => { setView('closure-terms'); setTermsAccepted(false); setWarningAccepted(false); setNewPhone(''); setCode(''); setCodeSent(false); setError(''); setFeedback('') }}><span><strong>注销账号</strong><small>注销后账号相关信息将按协议处理</small></span><ChevronRight size={17} /></button>
+        {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
+      </div>
+      : view === 'phone' ? <form id="personal-phone-form" className="personal-security-form" onSubmit={changePhone}><div className="personal-bound-phone"><span>当前手机号</span><strong>{maskPhone(phone)}</strong></div><label className="personal-setting-field" htmlFor="personal-new-phone">新手机号<input id="personal-new-phone" type="tel" inputMode="numeric" maxLength={11} placeholder="请输入 11 位手机号" value={newPhone} onChange={(event) => { setNewPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setError('') }} /></label><div className="personal-setting-field"><label htmlFor="personal-phone-code">验证码</label><div className="personal-code-field"><input id="personal-phone-code" inputMode="numeric" maxLength={6} placeholder="输入 6 位验证码" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }} /><button type="button" className="client-button client-button--secondary" onClick={() => { if (!/^1\d{10}$/.test(newPhone)) { setError('请先输入正确的 11 位手机号。'); return } setCodeSent(true); setFeedback('验证码已发送（演示：任意 6 位数字均可通过）'); setError('') }}>{codeSent ? '重新获取' : '获取验证码'}</button></div></div>{error && <p className="personal-setting-error" role="alert">{error}</p>}{feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}</form>
+      : view === 'devices' ? <div className="personal-device-list">{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).map((device) => <article key={device.id}><span className="personal-device-icon"><Monitor size={17} /></span><div><strong>{device.name}{device.current && <small>当前设备</small>}</strong><span>{device.detail}</span></div>{device.current ? <span className="personal-device-current">当前使用</span> : <button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(device.id)}>结束登录</button>}</article>)}{mockDevices.every((device) => endedDeviceIds.includes(device.id)) && <p className="personal-setting-empty">暂无其他登录设备</p>}{feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}</div>
+      : view === 'closure-terms' ? <div className="personal-closure-content"><div className="personal-closure-terms"><h3>注销账号协议</h3><p>请在继续前仔细阅读。以下内容为原型演示文案，正式协议以平台公布内容为准。</p><h4>一、注销后的影响</h4><p>账号注销完成后，账号资料、历史数据及内容记录将按平台规则处理；注销操作不可撤回。</p><h4>二、注销前请确认</h4><p>请确认账号不存在未完成订单、待处理售后或其他未结束事项。注销后，已产生的权益及服务将无法继续使用。</p><h4>三、账户资产</h4><p>账户中的钻石、糖豆、优惠券及其他权益，请在注销前妥善处理。注销完成后，剩余资产将无法继续使用或找回。</p><h4>四、账号关联</h4><p>注销后，原手机号可按平台规则重新注册；账号历史信息无法恢复。</p></div><label className="personal-closure-check"><input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} /><span>我已阅读并同意《注销账号协议》</span></label></div>
+      : view === 'closure-warning' ? <div className="personal-closure-content"><div className="personal-closure-warning"><p>您即将注销账号，<strong>注销操作不可撤回</strong>。</p><ul><li>账号下的资料、历史数据与内容记录将按平台规则处理，无法恢复。</li><li>账号下资产及权益将失效，请提前妥善处理。</li><li>正在进行中的订单、服务或售后可能影响注销，请确认已处理完毕。</li></ul></div><section className="personal-closure-balance"><h3>钱包余额</h3><div><span><Coins size={17} />钻石</span><strong>{diamondBalance.toLocaleString('zh-CN')}</strong></div><div><span><WalletCards size={17} />糖豆</span><strong>{beanBalance.toLocaleString('zh-CN')}</strong></div></section><label className="personal-closure-check"><input type="checkbox" checked={warningAccepted} onChange={(event) => setWarningAccepted(event.target.checked)} /><span>我已阅读并理解注销带来的全部损失。</span></label></div>
+      : view === 'closure-phone' ? <form id="account-closure-phone-form" className="personal-security-form" onSubmit={completeClosure}><div className="personal-bound-phone"><span>绑定手机号</span><strong>{maskPhone(phone)}</strong></div><label className="personal-setting-field" htmlFor="account-closure-phone">手机号<input id="account-closure-phone" type="tel" inputMode="numeric" maxLength={11} placeholder="请输入绑定手机号" value={newPhone} onChange={(event) => setNewPhone(event.target.value.replace(/\D/g, '').slice(0, 11))} /></label><div className="personal-setting-field"><label htmlFor="account-closure-code">验证码</label><div className="personal-code-field"><input id="account-closure-code" inputMode="numeric" maxLength={6} placeholder="输入验证码" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))} /><button type="button" className="client-button client-button--secondary" onClick={() => { setCodeSent(true); setFeedback('验证码已发送（本地演示，不校验内容）') }}>{codeSent ? '已获取' : '获取验证码'}</button></div></div><small className="personal-form-note">仅校验手机号格式；验证码为演示字段，不进行校验。</small>{error && <p className="personal-setting-error" role="alert">{error}</p>}{feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}</form>
+      : <div className="personal-closure-complete"><span><Check size={24} /></span><h3>注销完成</h3><p>账号注销流程已完成（本地原型演示）。</p></div>}
   </DialogPanel>
 }
 
