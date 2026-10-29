@@ -1,4 +1,6 @@
-export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice'
+import { initialOrders, type ClientOrder } from './accountMockData'
+
+export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review'
 
 export interface SocialFriend {
   id: string
@@ -24,6 +26,8 @@ export interface SocialMessage {
   time: string
   kind: ChatMessageKind
   content: string
+  order?: { id: string; companion: string; service: string; duration: string; amount: number; status: string }
+  review?: { support: string; rating: number; submitted: boolean }
   duration?: number
   replyTo?: { senderName: string; content: string; kind: ChatMessageKind }
 }
@@ -36,6 +40,9 @@ export interface SocialConversation {
   members: string[]
   unread: number
   messages: SocialMessage[]
+  pinned?: boolean
+  self?: { id: string; name: string; initials: string }
+  supportAction?: 'order' | 'support-review'
   clubGroupId?: string
   ownerId?: string
   adminIds?: string[]
@@ -78,7 +85,10 @@ export interface VoiceInvitation {
   id: string
   roomId: string
   roomName: string
+  channelId?: string
+  channelName?: string
   inviter: string
+  inviterInitials?: string
   time: string
 }
 
@@ -100,7 +110,38 @@ const seedMessages: SocialMessage[] = [
   { id: 'msg-4', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:44', kind: 'voice', content: '语音消息', duration: 8 },
 ]
 
+export const orderMessageFromOrder = (order: ClientOrder): Pick<SocialMessage, 'kind' | 'content' | 'order'> => ({
+  kind: 'order', content: `[订单] ${order.gameName} · ${order.serviceName}`,
+  order: { id: order.id, companion: order.companionName, service: `${order.gameName} · ${order.levelName} · ${order.serviceName}`, duration: `${order.duration} ${order.durationUnit}`, amount: order.amount, status: order.status },
+})
+export const supportOrderSample = orderMessageFromOrder(initialOrders[2])
+export const supportReviewSample: Pick<SocialMessage, 'kind' | 'content' | 'review'> = {
+  kind: 'support-review', content: '[客服评价] 待评价',
+  review: { support: 'GM-客服', rating: 0, submitted: false },
+}
+const supportIdentity = { id: 'club-support', name: 'GM-客服', initials: 'GM' }
+const customerIdentity = { id: 'customer-kata', name: '卡塔', initials: '卡' }
+
 export const initialConversations: SocialConversation[] = [
+  {
+    id: 'direct-club-support', kind: 'direct', title: 'GM-客服', initials: 'GM', members: ['club-support'], unread: 0, supportAction: 'order',
+    messages: [
+      { id: 'support-1', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '14:20', kind: 'text', content: '你好，想咨询一下这笔订单。' },
+      { id: 'support-2', senderId: 'club-support', senderName: 'GM-客服', initials: 'GM', time: '14:21', kind: 'text', content: '您好，请发送订单，我帮您查看。' },
+      { id: 'support-3', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '14:22', ...supportOrderSample },
+      { id: 'support-4', senderId: 'club-support', senderName: 'GM-客服', initials: 'GM', time: '14:23', kind: 'text', content: '已为您核实，陪玩正在服务中，有其他问题随时联系我。' },
+      { id: 'support-5', senderId: supportIdentity.id, senderName: supportIdentity.name, initials: supportIdentity.initials, time: '14:25', ...supportReviewSample },
+    ],
+  },
+  {
+    id: 'direct-customer-kata', kind: 'direct', title: '卡塔', initials: '卡', members: ['customer-kata'], unread: 0, self: supportIdentity, supportAction: 'support-review',
+    messages: [
+      { id: 'kata-1', senderId: customerIdentity.id, senderName: '卡塔', initials: '卡', time: '15:10', kind: 'text', content: '你好，帮我看一下这笔订单。' },
+      { id: 'kata-2', senderId: customerIdentity.id, senderName: '卡塔', initials: '卡', time: '15:11', ...supportOrderSample },
+      { id: 'kata-3', senderId: supportIdentity.id, senderName: supportIdentity.name, initials: 'GM', time: '15:12', kind: 'text', content: '您好，已收到订单，我来为您处理。' },
+      { id: 'kata-4', senderId: supportIdentity.id, senderName: supportIdentity.name, initials: supportIdentity.initials, time: '15:16', ...supportReviewSample },
+    ],
+  },
   { id: 'direct-friend-1', kind: 'direct', title: '晚风', initials: '风', members: ['friend-1'], unread: 2, messages: seedMessages },
   {
     id: 'group-squad', kind: 'group', title: '周末五排小队', initials: '五', members: ['friend-1', 'friend-2', 'friend-3', 'friend-5'], unread: 1, ownerId: 'player', adminIds: ['friend-1'], joinApprovalRequired: true,
@@ -146,7 +187,7 @@ export const initialRoomMessagesByRoom: Record<string, SocialMessage[]> = {
 }
 
 export const initialVoiceInvitations: VoiceInvitation[] = [
-  { id: 'invite-1', roomId: 'room-friends', roomName: '分组C', inviter: '青柠汽水', time: '刚刚' },
+  { id: 'invite-1', roomId: 'room-friends', roomName: '分组C', channelId: 'channel-friends', channelName: '房间A', inviter: '青柠汽水', inviterInitials: '柠', time: '刚刚' },
 ]
 
 export type VoiceCallNotification = {

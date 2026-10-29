@@ -1,3 +1,4 @@
+import '@/themes/grayscale-prototype/palette.css'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DocDrawer from './components/DocDrawer'
@@ -43,6 +44,7 @@ function AppContent() {
     setPreviewContainer(node)
   }, [])
 
+  const [prototypePalette, setPrototypePalette] = useState<'grayscale' | 'color'>('grayscale')
   const [deviceMode, setDeviceMode] = useState<'mobile' | 'pc'>('pc')
   const { stageRef, scale: previewScale } = usePreviewScale()
   const fixedDesktopPreview = deviceMode === 'pc' && currentPage != null
@@ -150,6 +152,8 @@ function AppContent() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar
+          prototypePalette={prototypePalette}
+          onTogglePrototypePalette={() => setPrototypePalette(previous => previous === 'grayscale' ? 'color' : 'grayscale')}
           deviceMode={deviceMode}
           setDeviceMode={setDeviceMode}
           showToast={showToast}
@@ -195,6 +199,7 @@ function AppContent() {
                       <div
                         ref={previewRef}
                         id="preview-container"
+                        data-prototype-palette={currentPage ? prototypePalette : undefined}
                         className={`w-full h-full bg-white ${
                           deviceMode === 'mobile' ? 'rounded-[2.5rem]' : 'rounded-2xl'
                         }`}

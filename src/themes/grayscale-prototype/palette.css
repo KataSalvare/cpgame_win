@@ -1,0 +1,29 @@
+/* Palette scope is supplied by the preview tool, never by the tool shell. */
+[data-prototype-palette="color"] {
+  --prototype-text: #1D2129;
+  --prototype-text-secondary: #4E5969;
+  --prototype-text-muted: #86909C;
+  --prototype-text-disabled: #D4D7DE;
+  --prototype-canvas: #FFFFFF;
+  --prototype-surface: #FFFFFF;
+  --prototype-brand: #FFD60A;
+  --prototype-blue: #2F66C5;
+  --prototype-pink: #B84A76;
+  --prototype-danger: #C9362B;
+  --prototype-success: #287A4B;
+  --prototype-orange: #B9610D;
+  --prototype-primary: var(--prototype-brand);
+  --prototype-primary-hover: #E6B800;
+  --prototype-on-primary: var(--prototype-text);
+  --prototype-border: #E5E6EB;
+  --prototype-border-strong: #C9CDD4;
+  --prototype-text-subtle: #86909C;
+  --prototype-surface-muted: #FFFFFF;
+  --prototype-gradient-orange: linear-gradient(135deg, #FF9C35, #FF4638);
+  --prototype-gradient-yellow: linear-gradient(135deg, #FFD60A, #F2C400);
+  --prototype-gradient-pink: linear-gradient(135deg, #F342F5, #FF4D9B);
+  --prototype-gradient-blue: linear-gradient(135deg, #8455FF, #268BEB);
+  --prototype-gradient-membership: linear-gradient(135deg, #FFD60A, #FF9800);
+  --prototype-gradient-green: linear-gradient(135deg, rgb(111 232 6 / 80%), rgb(39 134 24 / 80%));
+  --prototype-gradient-pale-yellow: linear-gradient(180deg, #1D2129, #FFD60A);
+}

@@ -1,10 +1,10 @@
 .windows-client-frame {
-  --wc-canvas: #f3f4f6;
-  --wc-surface: #fff;
-  --wc-border: #e5e7eb;
-  --wc-text: #1f2937;
-  --wc-muted: #6b7280;
-  --wc-primary: #374151;
+  --wc-canvas: var(--prototype-canvas, #f3f4f6);
+  --wc-surface: var(--prototype-surface, #fff);
+  --wc-border: var(--prototype-border, #e5e7eb);
+  --wc-text: var(--prototype-text, #1f2937);
+  --wc-muted: var(--prototype-text-muted, #6b7280);
+  --wc-primary: var(--prototype-primary, #374151);
   --wc-shadow: 0 1px 3px rgba(17, 24, 39, .06);
   position: relative;
   display: grid;
@@ -44,10 +44,10 @@
 .windows-sidebar__group + .windows-sidebar__group { margin-top: 12px; border-top: 1px solid var(--wc-border); padding-top: 12px; }
 .windows-sidebar__group-title { margin: 0 8px 4px; color: var(--wc-muted); font-size: 11px; font-weight: 600; }
 .windows-sidebar__item { display: flex; min-height: 36px; align-items: center; gap: 10px; border: 0; border-radius: 6px; padding: 0 10px; background: transparent; color: var(--wc-muted); font: inherit; text-align: left; cursor: pointer; }
-.windows-sidebar__item:hover, .windows-sidebar__item.is-active { background: #f3f4f6; color: var(--wc-text); }
+.windows-sidebar__item:hover, .windows-sidebar__item.is-active { background: var(--prototype-canvas, #f3f4f6); color: var(--wc-text); }
 .windows-sidebar__item.is-active { font-weight: 600; box-shadow: inset 2px 0 var(--wc-primary); }
 .windows-sidebar__icon { display: inline-flex; width: 16px; align-items: center; justify-content: center; }
-.windows-sidebar__badge { display: inline-flex; min-width: 18px; height: 18px; align-items: center; justify-content: center; margin-left: auto; border-radius: 9px; padding: 0 5px; background: #374151; color: #fff; font-size: 10px; font-weight: 600; line-height: 1; }
+.windows-sidebar__badge { display: inline-flex; min-width: 18px; height: 18px; align-items: center; justify-content: center; margin-left: auto; border-radius: 9px; padding: 0 5px; background: var(--prototype-primary, #374151); color: var(--prototype-on-primary, var(--prototype-surface, #fff)); font-size: 10px; font-weight: 600; line-height: 1; }
 .windows-sidebar__footer { margin-top: auto; padding: 16px 8px 0; border-top: 1px solid var(--wc-border); color: var(--wc-muted); font-size: 12px; }
 .windows-floating-panel { position: absolute; z-index: 20; border: 1px solid var(--wc-border); border-radius: 8px; padding: 16px; background: var(--wc-surface); box-shadow: 0 8px 24px rgba(17, 24, 39, .12); }
 .windows-floating-panel--bottom-start { top: calc(100% + 8px); left: 0; }
@@ -69,14 +69,14 @@
 .windows-right-drawer__header { position: sticky; top: 0; z-index: 2; flex: 0 0 auto; background: var(--wc-surface); }
 .windows-right-drawer__content { min-height: 0; flex: 1; overflow: auto; padding: 20px 24px; }
 .windows-notification-toast { position: absolute; z-index: 50; top: 56px; right: 24px; display: flex; width: 360px; max-width: calc(100% - 48px); align-items: flex-start; gap: 12px; border: 1px solid var(--wc-border); border-radius: 8px; padding: 14px 12px 14px 16px; background: var(--wc-surface); box-shadow: 0 8px 24px rgba(17, 24, 39, .12); }
-.windows-notification-toast__marker { width: 3px; min-height: 32px; flex: 0 0 auto; border-radius: 2px; background: #9ca3af; }
-.windows-notification-toast--success .windows-notification-toast__marker { background: #6b7280; }
-.windows-notification-toast--warning .windows-notification-toast__marker { background: #4b5563; }
-.windows-notification-toast--error .windows-notification-toast__marker { background: #1f2937; }
+.windows-notification-toast__marker { width: 3px; min-height: 32px; flex: 0 0 auto; border-radius: 2px; background: var(--prototype-text-subtle, #9ca3af); }
+.windows-notification-toast--success .windows-notification-toast__marker { background: var(--prototype-success, var(--prototype-text-muted, #6b7280)); }
+.windows-notification-toast--warning .windows-notification-toast__marker { background: var(--prototype-orange, var(--prototype-text-secondary, #4b5563)); }
+.windows-notification-toast--error .windows-notification-toast__marker { background: var(--prototype-danger, var(--prototype-text, #1f2937)); }
 .windows-notification-toast__body { min-width: 0; flex: 1; }
 .windows-notification-toast__label { font-size: 13px; font-weight: 600; }
 .windows-notification-toast__body p { margin: 3px 0 0; color: var(--wc-muted); font-size: 12px; }
 .windows-icon-button { display: inline-grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--wc-muted); cursor: pointer; }
-.windows-icon-button:hover { background: #f3f4f6; color: var(--wc-text); }
-.windows-client-frame button:focus-visible { outline: 2px solid #6b7280; outline-offset: 2px; }
+.windows-icon-button:hover { background: var(--prototype-canvas, #f3f4f6); color: var(--wc-text); }
+.windows-client-frame button:focus-visible { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) { .windows-client-frame button { transition: background-color 140ms ease, color 140ms ease; } }

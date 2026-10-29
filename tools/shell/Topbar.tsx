@@ -15,6 +15,7 @@ import {
   MousePointer,
   XIcon,
   PanelLeft,
+  Palette,
 } from 'lucide-react'
 import { TooltipButton } from './TooltipButton'
 import { PreviewStateBar } from './PreviewStateBar'
@@ -32,6 +33,8 @@ import { pages } from '../config/pages'
 import type { AnnotationControllerActions, AnnotationControllerState } from '../tools/AnnotationController'
 
 interface TopbarProps {
+  prototypePalette: 'grayscale' | 'color'
+  onTogglePrototypePalette: () => void
   deviceMode: 'mobile' | 'pc'
   setDeviceMode: (mode: 'mobile' | 'pc') => void
   showToast: (message: string, type?: 'success' | 'error') => void
@@ -62,6 +65,8 @@ const FigmaIcon = ({ className }: { className?: string }) => (
 )
 
 export const Topbar = ({
+  prototypePalette,
+  onTogglePrototypePalette,
   deviceMode,
   setDeviceMode,
   showToast,
@@ -210,6 +215,19 @@ export const Topbar = ({
             <span className="hidden min-[1180px]:inline">PC端</span>
           </TooltipButton>
           </div>
+
+          {currentPage && (
+            <TooltipButton
+              tooltip={prototypePalette === 'grayscale' ? '切换为上色原型' : '切换为灰阶原型'}
+              aria-label="原型调色：灰阶原型 / 上色原型"
+              aria-pressed={prototypePalette === 'color'}
+              onClick={onTogglePrototypePalette}
+              className={prototypePalette === 'color' ? activeGhostBtn : ghostBtn}
+            >
+              <Palette size={14} />
+              <span>{prototypePalette === 'grayscale' ? '灰阶原型' : '上色原型'}</span>
+            </TooltipButton>
+          )}
 
           <PreviewStateBar
             states={previewStates}

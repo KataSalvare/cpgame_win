@@ -13,20 +13,46 @@
     "brand": "灰阶原型",
     "titleZh": "灰阶原型",
     "titleEn": "Grayscale Prototype",
-    "descriptionZh": "面向 Windows 客户端产品原型的低保真灰阶设计规范，采用固定 1920×1080 画布。",
+    "descriptionZh": "面向 Windows 客户端的原型设计规范，提供灰阶与上色两套调色方案，采用固定 1920×1080 画布。",
     "descriptionEn": "A compact grayscale low-fidelity design system for Windows client application prototypes."
   },
   "tags": {
     "sourceTags": [],
-    "generatedTags": ["windows-client", "low-fidelity", "grayscale", "prototype"],
-    "designTags": ["简洁规整", "低保真", "灰阶"],
-    "distributionTags": ["Windows 客户端", "低保真原型", "灰阶界面", "桌面应用"]
+    "generatedTags": [
+      "windows-client",
+      "low-fidelity",
+      "grayscale",
+      "prototype"
+    ],
+    "designTags": [
+      "简洁规整",
+      "低保真",
+      "灰阶"
+    ],
+    "distributionTags": [
+      "Windows 客户端",
+      "低保真原型",
+      "灰阶界面",
+      "桌面应用"
+    ]
   },
   "assets": {
-    "designMd": { "path": "DESIGN.md", "method": "project_custom" },
-    "tailwind": { "path": "tw.css", "method": "project_custom" },
-    "tokens": { "path": "assets/tokens.json", "method": "derived_from_design_md" },
-    "cover": { "status": "local_preview", "path": "assets/grayscale-prototype-preview.svg" },
+    "designMd": {
+      "path": "DESIGN.md",
+      "method": "project_custom"
+    },
+    "tailwind": {
+      "path": "tw.css",
+      "method": "project_custom"
+    },
+    "tokens": {
+      "path": "assets/tokens.json",
+      "method": "derived_from_design_md"
+    },
+    "cover": {
+      "status": "local_preview",
+      "path": "assets/grayscale-prototype-preview.svg"
+    },
     "previewHtml": {
       "type": "local-preview",
       "path": "assets/grayscale-prototype-preview.svg",
@@ -35,12 +61,276 @@
     }
   },
   "tokens": {
-    "palette": ["#F3F4F6", "#FFFFFF", "#E5E7EB", "#1F2937", "#6B7280", "#374151"],
+    "palette": [
+      "#F3F4F6",
+      "#FFFFFF",
+      "#E5E7EB",
+      "#1F2937",
+      "#6B7280",
+      "#374151"
+    ],
     "typography": {
       "display": "Segoe UI",
       "body": "Segoe UI",
       "mono": "ui-monospace",
-      "hints": ["Segoe UI", "Arial", "sans-serif"]
+      "hints": [
+        "Segoe UI",
+        "Arial",
+        "sans-serif"
+      ]
+    },
+    "radius": {
+      "control": "6px",
+      "card": "8px",
+      "preview": "8px",
+      "pill": "9999px",
+      "source": "DESIGN.md"
+    },
+    "spacing": {
+      "xxs": "4px",
+      "xs": "8px",
+      "sm": "12px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "section": "32px",
+      "source": "DESIGN.md"
+    },
+    "modes": {
+      "grayscale": {
+        "palette": [
+          "#F3F4F6",
+          "#FFFFFF",
+          "#E5E7EB",
+          "#1F2937",
+          "#6B7280",
+          "#374151"
+        ]
+      },
+      "color": {
+        "colors": {
+          "text": "#1D2129",
+          "text-secondary": "#4E5969",
+          "text-muted": "#86909C",
+          "text-disabled": "#D4D7DE",
+          "canvas": "#FFFFFF",
+          "surface": "#FFFFFF",
+          "brand": "#FFD60A",
+          "blue": "#2F66C5",
+          "pink": "#B84A76",
+          "danger": "#C9362B",
+          "success": "#287A4B",
+          "orange": "#B9610D"
+        },
+        "gradients": {
+          "orange": "linear-gradient(135deg, #FF9C35, #FF4638)",
+          "yellow": "linear-gradient(135deg, #FFD60A, #F2C400)",
+          "pink": "linear-gradient(135deg, #F342F5, #FF4D9B)",
+          "blue": "linear-gradient(135deg, #8455FF, #268BEB)",
+          "membership": "linear-gradient(135deg, #FFD60A, #FF9800)",
+          "green": "linear-gradient(135deg, rgb(111 232 6 / 80%), rgb(39 134 24 / 80%))",
+          "pale-yellow": "linear-gradient(180deg, #1D2129, #FFD60A)"
+        },
+        "gradientSource": "Extension: screenshot does not expose gradient stops.",
+        "semantic": {
+          "primary": "#FFD60A",
+          "primary-hover": "#E6B800",
+          "on-primary": "#1D2129",
+          "border": "#E5E6EB",
+          "border-strong": "#C9CDD4",
+          "surface-muted": "#FFFFFF",
+          "text-subtle": "#86909C"
+        }
+      }
+    }
+  },
+  "previewImages": [
+    {
+      "type": "local-preview",
+      "path": "assets/grayscale-prototype-preview.svg"
+    }
+  ],
+  "display": {
+    "brand": "灰阶原型",
+    "brandAlias": "Grayscale Prototype",
+    "description": "同一套桌面布局，支持灰阶评审与品牌上色预览。",
+    "descriptionEn": "A clean white interface with black typography and focused yellow accents for Windows client prototypes.",
+    "variant": "windows-client-low-fidelity",
+    "distributionTags": [
+      "Windows 客户端",
+      "低保真原型",
+      "灰阶界面",
+      "桌面应用"
+    ],
+    "fontStylesheets": [],
+    "palette": [
+      {
+        "color": "#FFFFFF",
+        "labelZh": "画布背景",
+        "labelEn": "Canvas",
+        "textColor": "#1F2937"
+      },
+      {
+        "color": "#FFFFFF",
+        "labelZh": "卡片表面",
+        "labelEn": "Surface",
+        "textColor": "#1F2937"
+      },
+      {
+        "color": "#E5E7EB",
+        "labelZh": "细边框",
+        "labelEn": "Border",
+        "textColor": "#1F2937"
+      },
+      {
+        "color": "#1F2937",
+        "labelZh": "主文字",
+        "labelEn": "Primary Text",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#6B7280",
+        "labelZh": "次级文字",
+        "labelEn": "Muted Text",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#374151",
+        "labelZh": "主按钮",
+        "labelEn": "Primary Action",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#1D2129",
+        "labelZh": "重要正文",
+        "labelEn": "text",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#4E5969",
+        "labelZh": "次级正文",
+        "labelEn": "text-secondary",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#86909C",
+        "labelZh": "提示、次要信息",
+        "labelEn": "text-muted",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#D4D7DE",
+        "labelZh": "占位、禁用文字",
+        "labelEn": "text-disabled",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#FFFFFF",
+        "labelZh": "全局底色",
+        "labelEn": "canvas",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#FFFFFF",
+        "labelZh": "白色背景",
+        "labelEn": "surface",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#FFD60A",
+        "labelZh": "品牌色",
+        "labelEn": "brand",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#2F66C5",
+        "labelZh": "辅助蓝",
+        "labelEn": "blue",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#B84A76",
+        "labelZh": "辅助粉红",
+        "labelEn": "pink",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#C9362B",
+        "labelZh": "红点提示",
+        "labelEn": "danger",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#287A4B",
+        "labelZh": "绿色",
+        "labelEn": "success",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#B9610D",
+        "labelZh": "橙色",
+        "labelEn": "orange",
+        "textColor": "#FFFFFF"
+      }
+    ],
+    "shadows": [
+      {
+        "label": "卡片轻阴影",
+        "value": "0 1px 3px rgba(17, 24, 39, 0.06)",
+        "cssValue": "0 1px 3px rgba(17, 24, 39, 0.06)",
+        "description": "用于轻微区分白色卡片与浅灰画布。"
+      }
+    ],
+    "borders": [
+      {
+        "label": "默认细边框",
+        "value": "#E5E7EB",
+        "cssValue": "1px solid #E5E7EB",
+        "description": "用于卡片边界、输入框和内容分隔。"
+      }
+    ],
+    "typography": [
+      "Segoe UI",
+      "Arial",
+      "sans-serif"
+    ],
+    "previewImages": [
+      {
+        "type": "local-preview",
+        "path": "assets/grayscale-prototype-preview.svg"
+      }
+    ],
+    "panels": [
+      {
+        "eyebrow": "窗口布局",
+        "title": "面向 Windows 客户端",
+        "body": "以 1920×1080 画布、40px 标题栏和 240px 左侧导航组织应用界面。"
+      },
+      {
+        "eyebrow": "视觉层级",
+        "title": "用灰阶表达结构",
+        "body": "浅灰画布、白色卡片和淡灰边框构成清晰、克制的低保真界面。"
+      },
+      {
+        "eyebrow": "原型用途",
+        "title": "聚焦流程与信息",
+        "body": "适合评审页面结构和交互流程，不依赖品牌色或装饰性视觉效果。"
+      }
+    ],
+    "usageGuidance": {
+      "do": [
+        "使用固定 1920×1080 画布，并保留 40px 标题栏与 240px 左侧导航。",
+        "使用浅灰画布、白色卡片和 1px 淡灰边框建立层级。",
+        "保持内容区留白 24px、卡片间距 16px，适配紧凑桌面界面。",
+        "通过图标、文字和灰阶边框表达成功、警告与错误状态。",
+        "通过工具栏切换灰阶原型 / 上色原型；上色主按钮使用品牌黄与深色文字。"
+      ],
+      "dont": [
+        "灰阶模式不引入彩色；上色模式仅使用规范内的语义色。",
+        "渐变仅用于上色模式的运营展示与会员视觉，不用于正文和普通卡片。",
+        "不要把固定桌面布局改为移动端断点重排。",
+        "不要使用厚重阴影、大圆角或夸张动效。"
+      ]
     },
     "radius": {
       "control": "6px",
@@ -59,62 +349,5 @@
       "section": "32px",
       "source": "DESIGN.md"
     }
-  },
-  "previewImages": [{ "type": "local-preview", "path": "assets/grayscale-prototype-preview.svg" }],
-  "display": {
-    "brand": "灰阶原型",
-    "brandAlias": "Grayscale Prototype",
-    "description": "为 Windows 客户端低保真原型提供简洁、规整的灰阶界面规范。",
-    "descriptionEn": "A clean grayscale interface system for low-fidelity Windows client prototypes.",
-    "variant": "windows-client-low-fidelity",
-    "distributionTags": ["Windows 客户端", "低保真原型", "灰阶界面", "桌面应用"],
-    "fontStylesheets": [],
-    "palette": [
-      { "color": "#F3F4F6", "labelZh": "画布背景", "labelEn": "Canvas", "textColor": "#1F2937" },
-      { "color": "#FFFFFF", "labelZh": "卡片表面", "labelEn": "Surface", "textColor": "#1F2937" },
-      { "color": "#E5E7EB", "labelZh": "细边框", "labelEn": "Border", "textColor": "#1F2937" },
-      { "color": "#1F2937", "labelZh": "主文字", "labelEn": "Primary Text", "textColor": "#FFFFFF" },
-      { "color": "#6B7280", "labelZh": "次级文字", "labelEn": "Muted Text", "textColor": "#FFFFFF" },
-      { "color": "#374151", "labelZh": "主按钮", "labelEn": "Primary Action", "textColor": "#FFFFFF" }
-    ],
-    "shadows": [
-      {
-        "label": "卡片轻阴影",
-        "value": "0 1px 3px rgba(17, 24, 39, 0.06)",
-        "cssValue": "0 1px 3px rgba(17, 24, 39, 0.06)",
-        "description": "用于轻微区分白色卡片与浅灰画布。"
-      }
-    ],
-    "borders": [
-      {
-        "label": "默认细边框",
-        "value": "#E5E7EB",
-        "cssValue": "1px solid #E5E7EB",
-        "description": "用于卡片边界、输入框和内容分隔。"
-      }
-    ],
-    "typography": ["Segoe UI", "Arial", "sans-serif"],
-    "previewImages": [{ "type": "local-preview", "path": "assets/grayscale-prototype-preview.svg" }],
-    "panels": [
-      { "eyebrow": "窗口布局", "title": "面向 Windows 客户端", "body": "以 1920×1080 画布、40px 标题栏和 240px 左侧导航组织应用界面。" },
-      { "eyebrow": "视觉层级", "title": "用灰阶表达结构", "body": "浅灰画布、白色卡片和淡灰边框构成清晰、克制的低保真界面。" },
-      { "eyebrow": "原型用途", "title": "聚焦流程与信息", "body": "适合评审页面结构和交互流程，不依赖品牌色或装饰性视觉效果。" }
-    ],
-    "usageGuidance": {
-      "do": [
-        "使用固定 1920×1080 画布，并保留 40px 标题栏与 240px 左侧导航。",
-        "使用浅灰画布、白色卡片和 1px 淡灰边框建立层级。",
-        "保持内容区留白 24px、卡片间距 16px，适配紧凑桌面界面。",
-        "通过图标、文字和灰阶边框表达成功、警告与错误状态。"
-      ],
-      "dont": [
-        "不要引入彩色状态色或额外品牌强调色。",
-        "不要使用渐变、玻璃效果、纹理、发光或装饰性插画。",
-        "不要把固定桌面布局改为移动端断点重排。",
-        "不要使用厚重阴影、大圆角或夸张动效。"
-      ]
-    },
-    "radius": { "control": "6px", "card": "8px", "preview": "8px", "pill": "9999px", "source": "DESIGN.md" },
-    "spacing": { "xxs": "4px", "xs": "8px", "sm": "12px", "md": "16px", "lg": "24px", "xl": "32px", "section": "32px", "source": "DESIGN.md" }
   }
 }
