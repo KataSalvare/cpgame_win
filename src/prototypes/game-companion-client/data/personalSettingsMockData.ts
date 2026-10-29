@@ -8,7 +8,7 @@ export const notificationSounds = [
   { id: 'double', label: '双音.wav', src: doubleTone },
 ] as const
 
-export type NotificationChannel = 'privateMessages' | 'groupMessages' | 'orderUpdates' | 'announcements' | 'calls' | 'matches' | 'roomEntry'
+export type NotificationChannel = 'privateMessages' | 'groupMessages' | 'orderUpdates' | 'calls' | 'matches' | 'roomEntry'
 export type NotificationPreference = { text: boolean; sound: boolean; soundId: string; volume: number }
 export type NotificationPreferences = Record<NotificationChannel, NotificationPreference>
 
@@ -17,7 +17,6 @@ export const initialNotificationPreferences: NotificationPreferences = {
   privateMessages: defaultPreference(),
   groupMessages: defaultPreference(),
   orderUpdates: defaultPreference(),
-  announcements: defaultPreference(),
   calls: defaultPreference(),
   matches: defaultPreference(),
   roomEntry: defaultPreference(),

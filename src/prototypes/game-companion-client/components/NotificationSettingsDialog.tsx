@@ -6,7 +6,6 @@ const options: { key: NotificationChannel; label: string }[] = [
   { key: 'privateMessages', label: '私聊消息' },
   { key: 'groupMessages', label: '群聊消息' },
   { key: 'orderUpdates', label: '订单消息' },
-  { key: 'announcements', label: '平台公告' },
   { key: 'calls', label: '呼叫通知' },
   { key: 'matches', label: '匹配通知' },
   { key: 'roomEntry', label: '进房提示' },
