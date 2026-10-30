@@ -178,7 +178,7 @@ export function useSocialLogic() {
     setConversations((items) => {
       let next = [...items]
       recipients.forEach((friend) => {
-        const message: SocialMessage = { id: createId('companion-share'), senderId: currentSocialUser.id, senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }), kind: 'companion-share', content: `[陪玩名片] ${companion.name}`, companionShare: { id: companion.id, clubId: companion.clubId, name: companion.name, initials: companion.initials, intro: companion.intro } }
+        const message: SocialMessage = { id: createId('companion-share'), senderId: currentSocialUser.id, senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }), kind: 'companion-share', content: `[陪玩名片] ${companion.name}`, companionShare: { id: companion.id, clubId: companion.clubId, name: companion.name, initials: companion.initials, gender: companion.gender, age: companion.age, intro: companion.intro } }
         const existing = next.find((item) => item.kind === 'direct' && !item.self && item.members.length === 1 && item.members[0] === friend.id)
         if (existing) next = next.map((item) => item.id === existing.id ? { ...item, messages: [...item.messages, message] } : item)
         else next = [{ id: createId('direct'), kind: 'direct', title: friend.name, initials: friend.initials, members: [friend.id], unread: 0, messages: [message] }, ...next]

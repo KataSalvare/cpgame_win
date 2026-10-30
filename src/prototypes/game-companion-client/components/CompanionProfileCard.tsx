@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { Flag, ImagePlus, MoreHorizontal, Pencil, Shield, Share2, Star, X } from 'lucide-react'
+import { Flag, MoreHorizontal, Pencil, Shield, Share2, Star } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import type { ProfileCardData } from './profileCardData'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { VoiceMessageButton } from './VoiceMessageButton'
 import { CompanionShareDialog } from './CompanionShareDialog'
+import { UserReportDialog } from './UserReportDialog'
 
 type Props = {
   onShare?: (friendIds: string[]) => void
@@ -20,11 +21,6 @@ type Props = {
   onSaveNote?: (note: string) => void
 }
 
-const REPORT_TYPES = ['政治', '诈骗', '侮辱诽谤', '色情暴力', '侵权', '广告拉人', '其他原因']
-const MAX_REPORT_IMAGES = 5
-const MAX_REPORT_REASON_LENGTH = 500
-type ReportImage = { id: string; name: string; url: string }
-
 export function CompanionProfileCard({ profile, className = '', followed = false, blocked = false, onToggleFollow, onBlock, note = '', onSaveNote, onShare }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
@@ -32,60 +28,18 @@ export function CompanionProfileCard({ profile, className = '', followed = false
   const [noteDialogOpen, setNoteDialogOpen] = useState(false)
   const [reportDialogOpen, setReportDialogOpen] = useState(false)
   const [noteDraft, setNoteDraft] = useState(note)
-  const [reportType, setReportType] = useState('')
-  const [reportReason, setReportReason] = useState('')
-  const [reportImages, setReportImages] = useState<ReportImage[]>([])
   const [feedback, setFeedback] = useState('')
   const [localFollowed, setLocalFollowed] = useState(false)
   const [localBlocked, setLocalBlocked] = useState(false)
   const [localNote, setLocalNote] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
-  const reportImageInputRef = useRef<HTMLInputElement>(null)
-  const reportImageUrlsRef = useRef(new Set<string>())
   const isFollowed = onToggleFollow ? followed : localFollowed
   const isBlocked = onBlock ? blocked : localBlocked
   const visibleNote = onSaveNote ? note : localNote
 
-  useEffect(() => () => {
-    reportImageUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
-    reportImageUrlsRef.current.clear()
-  }, [])
-
-  const clearReportImages = () => {
-    reportImageUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
-    reportImageUrlsRef.current.clear()
-    setReportImages([])
-  }
-
-  const closeReportDialog = () => {
-    setReportDialogOpen(false)
-    clearReportImages()
-  }
-
   const openReportDialog = () => {
-    setReportType('')
-    setReportReason('')
-    clearReportImages()
     setReportDialogOpen(true)
     setMenuOpen(false)
-  }
-
-  const addReportImages = (files: FileList | null) => {
-    if (!files) return
-    const remaining = MAX_REPORT_IMAGES - reportImages.length
-    const selectedFiles = Array.from(files).filter((file) => file.type.startsWith('image/')).slice(0, remaining)
-    const nextImages = selectedFiles.map((file) => {
-      const url = URL.createObjectURL(file)
-      reportImageUrlsRef.current.add(url)
-      return { id: `${file.name}-${url}`, name: file.name, url }
-    })
-    setReportImages((current) => [...current, ...nextImages])
-  }
-
-  const removeReportImage = (image: ReportImage) => {
-    URL.revokeObjectURL(image.url)
-    reportImageUrlsRef.current.delete(image.url)
-    setReportImages((current) => current.filter((item) => item.id !== image.id))
   }
 
   useEffect(() => {
@@ -149,24 +103,6 @@ export function CompanionProfileCard({ profile, className = '', followed = false
     {blockConfirmationOpen && <DialogPanel overlayId={`companion-block-${profile.userId}`} title="确认拉黑" description={`确定拉黑「${profile.name}」吗？`} onClose={() => setBlockConfirmationOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBlockConfirmationOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBlock}>确认拉黑</button></>}><p className="social-dialog-copy">确认后，该陪玩会标记为已拉黑。</p></DialogPanel>}
     {shareOpen && onShare && <CompanionShareDialog profile={profile} onShare={onShare} onClose={() => setShareOpen(false)} />}
     {noteDialogOpen && <DialogPanel overlayId={`companion-note-${profile.userId}`} title="设置备注" onClose={() => setNoteDialogOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setNoteDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { if (onSaveNote) onSaveNote(noteDraft.trim()); else setLocalNote(noteDraft.trim()); setNoteDialogOpen(false) }}>保存备注</button></>}><label className="companion-note-field"><span>备注</span><input autoFocus maxLength={20} value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="输入备注名称" /></label></DialogPanel>}
-    {reportDialogOpen && <DialogPanel overlayId={`companion-report-${profile.userId}`} title="举报用户" onClose={closeReportDialog} width={640} className="companion-report-dialog" footer={<><button type="button" className="client-button client-button--secondary" onClick={closeReportDialog}>取消</button><button type="button" className="client-button client-button--primary" disabled={!reportType || !reportReason.trim()} onClick={() => { setFeedback('举报已提交（仅演示）'); closeReportDialog() }}>提交举报</button></>}>
-      <fieldset className="companion-report-types">
-        <legend>选择举报类型</legend>
-        <div className="companion-report-types__options" role="radiogroup" aria-label="选择举报类型">{REPORT_TYPES.map((type) => {
-          const selected = reportType === type
-          return <button key={type} type="button" role="radio" aria-checked={selected} className={selected ? 'is-selected' : ''} onClick={() => setReportType(type)}>{type}</button>
-        })}</div>
-      </fieldset>
-      <label className="companion-report-description"><span>描述举报原因<strong>*</strong></span><textarea value={reportReason} maxLength={MAX_REPORT_REASON_LENGTH} onChange={(event) => setReportReason(event.target.value)} placeholder="请描述举报原因，帮助我们更好地为您解决问题" /><small>{reportReason.length}/{MAX_REPORT_REASON_LENGTH}</small></label>
-      <section className="companion-report-upload" aria-labelledby={`companion-report-upload-title-${profile.userId}`}>
-        <h3 id={`companion-report-upload-title-${profile.userId}`}>上传凭证</h3>
-        <p>可上传图片佐证，最多可传 5 张图片</p>
-        <div className="companion-report-upload__list">
-          {reportImages.map((image) => <div key={image.id} className="companion-report-upload__image"><img src={image.url} alt={image.name} /><button type="button" aria-label={`移除${image.name}`} onClick={() => removeReportImage(image)}><X size={13} /></button></div>)}
-          {reportImages.length < MAX_REPORT_IMAGES && <button type="button" className="companion-report-upload__add" onClick={() => reportImageInputRef.current?.click()}><ImagePlus size={19} /><span>上传图片</span></button>}
-        </div>
-        <input ref={reportImageInputRef} className="companion-report-upload__input" type="file" accept="image/*" multiple onChange={(event) => { addReportImages(event.target.files); event.target.value = '' }} aria-label="选择举报凭证图片" />
-      </section>
-    </DialogPanel>}
+    {reportDialogOpen && <UserReportDialog overlayId={`companion-report-${profile.userId}`} onClose={() => setReportDialogOpen(false)} onSubmit={() => { setFeedback('举报已提交（仅演示）'); setReportDialogOpen(false) }} />}
   </>
 }

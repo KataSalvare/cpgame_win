@@ -90,10 +90,6 @@
 .message-context-menu button:hover{background:var(--prototype-canvas, #f3f4f6)}
 .message-context-menu button.is-danger{color:#b42318}
 .message-context-menu__divider{display:block;height:1px;margin:3px 4px;background:var(--client-border)}
-.message-report-reasons{display:grid;gap:4px}
-.message-report-reasons label{display:flex;align-items:center;gap:9px;border-radius:5px;padding:9px 8px;color:var(--client-text);font-size:13px;cursor:pointer}
-.message-report-reasons label:hover{background:var(--prototype-canvas, #f3f4f6)}
-.message-report-reasons input{accent-color:var(--prototype-text-secondary, #374151)}
 .chat-composer__toolbar{display:flex;align-items:center;justify-content:space-between}
 .chat-composer__tools{display:flex;gap:3px}
 .chat-send-button{min-height:30px}
@@ -101,6 +97,14 @@
 .social-quick-replies button{min-height:32px;border:0;border-radius:5px;padding:0 9px;background:transparent;color:var(--client-text);font:inherit;font-size:12px;text-align:left;cursor:pointer}
 .social-quick-replies button:hover,.social-quick-replies button:focus-visible{outline:0;background:var(--prototype-canvas, #f3f4f6)}
 .chat-quick-replies{bottom:55px;left:62px}
+.voice-recording-panel{position:absolute;z-index:10;bottom:55px;left:62px;width:min(330px,calc(100% - 80px));border:1px solid var(--client-border);border-radius:8px;padding:12px;background:var(--prototype-surface,#fff);box-shadow:0 8px 22px rgba(17,24,39,.14)}
+.voice-recording-panel__status,.voice-recording-panel__status>div{display:flex;align-items:center;gap:9px}
+.voice-recording-panel__status>div{flex:1}
+.voice-recording-panel__status strong{font-size:12px;font-weight:600}
+.voice-recording-panel__status time{color:var(--client-muted);font-size:12px;font-variant-numeric:tabular-nums}
+.voice-recording-panel__indicator{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:var(--prototype-text-secondary,#4b5563)}
+.voice-recording-panel__actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.voice-recording-panel__actions .client-button{min-height:30px;font-size:11px}
 .room-quick-replies{right:42px;bottom:38px;width:230px}
 .voice-support-call{display:flex;min-height:36px;align-items:center;justify-content:center;gap:6px;border:1px solid var(--client-border);border-radius:6px;padding:0 12px;background:var(--prototype-surface, #fff);color:var(--prototype-text-secondary, #4b5563);font:inherit;font-size:12px;cursor:pointer}
 .voice-support-call:hover{background:var(--prototype-canvas, #f3f4f6);color:var(--client-text)}
@@ -552,7 +556,10 @@
 
 .companion-share-message { display: block; color: var(--client-text); text-decoration: none; }
 .companion-share-message:focus-visible { outline: 2px solid var(--client-primary); outline-offset: 2px; }
-.companion-share-message footer { display: flex; justify-content: space-between; align-items: center; }
+.companion-share-message header { justify-content: flex-start; }
+.companion-share-message header > .client-avatar { flex: 0 0 auto; margin-left: 0; }
+.companion-share-message header > strong { min-width: 0; }
+.companion-share-message__facts { color: var(--prototype-text-secondary,#4b5563); font-size: 12px; }
 
 [data-prototype-palette="color"] .voice-room-heading-row:hover,
 [data-prototype-palette="color"] .voice-subchannel > .voice-subchannel__heading-row:hover,

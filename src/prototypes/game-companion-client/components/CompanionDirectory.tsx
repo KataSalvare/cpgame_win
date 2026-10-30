@@ -12,7 +12,6 @@ type Props = {
   onRetry: () => void
   onOpenCompanion: (companionId: string) => void
   onChatWithCompanion: (companionId: string) => void
-  onOrderWithCompanion: (companionId: string) => void
 }
 
 const ages = ['全部年龄', '18-25岁', '26-30岁', '31-35岁', '36-40岁', '40岁以上']
@@ -26,7 +25,7 @@ const sortLabels: Record<string, string> = {
   'rating-asc': '好评从低到高',
 }
 
-export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion }: Props) {
+export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion }: Props) {
   const logic = useCompanionDirectoryLogic(clubId)
 
   if (pageState !== 'normal') {
@@ -56,7 +55,6 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
         companion={person}
         onOpen={() => onOpenCompanion(person.id)}
         onChat={() => onChatWithCompanion(person.id)}
-        onOrder={() => onOrderWithCompanion(person.id)}
       />)}
     </div> : <div className="client-inline-empty"><p>没有符合筛选条件的陪玩</p><button type="button" className="client-button client-button--secondary" onClick={logic.resetFilters}>清除筛选</button></div>}
   </section>

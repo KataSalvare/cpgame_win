@@ -5,10 +5,9 @@ type Props = {
   onRetry: () => void
   onOpenCompanion: (companionId: string) => void
   onChatWithCompanion: (companionId: string) => void
-  onOrderWithCompanion: (companionId: string) => void
 }
 
-export function TalentsPage({ pageState, onRetry, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion }: Props) {
+export function TalentsPage({ pageState, onRetry, onOpenCompanion, onChatWithCompanion }: Props) {
   return <div className="client-content talents-page">
     <h1 className="client-visually-hidden">大神</h1>
     <CompanionDirectory
@@ -16,7 +15,6 @@ export function TalentsPage({ pageState, onRetry, onOpenCompanion, onChatWithCom
       onRetry={onRetry}
       onOpenCompanion={onOpenCompanion}
       onChatWithCompanion={onChatWithCompanion}
-      onOrderWithCompanion={onOrderWithCompanion}
     />
   </div>
 }

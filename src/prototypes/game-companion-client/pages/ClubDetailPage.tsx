@@ -17,7 +17,6 @@ type Props = {
   onBack: () => void
   onOpenCompanion: (companionId: string) => void
   onChatWithCompanion: (companionId: string) => void
-  onOrderWithCompanion: (companionId: string) => void
   onOpenVoiceRoom: () => void
   onOpenClubGroups: () => void
   onOpenMatch: () => void
@@ -29,7 +28,7 @@ type Props = {
   onRetry: () => void
 }
 
-export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, onOpenClubReviews, social, orders, onRetry }: Props) {
+export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, onOpenClubReviews, social, orders, onRetry }: Props) {
   const [supportChatOpen, setSupportChatOpen] = useState(false)
   const [supportSelectionOpen, setSupportSelectionOpen] = useState(false)
   const [clubInfoTab, setClubInfoTab] = useState<ClubInfoTab | null>(null)
@@ -77,7 +76,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
       </div>
     </section>
 
-    <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} onOrderWithCompanion={onOrderWithCompanion} />
+    <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
     {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
     {supportSelectionOpen && <ClubSupportSelectionDialog onClose={() => setSupportSelectionOpen(false)} onConsult={() => { social.markConversationRead('direct-club-support'); setSupportChatOpen(true) }} />}
     {supportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={orders} onClose={() => setSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}

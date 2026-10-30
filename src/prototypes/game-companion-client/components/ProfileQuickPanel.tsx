@@ -4,7 +4,7 @@ import type { PlayerProfile } from '../data/accountMockData'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 
-type QuickAction = 'recharge' | 'withdraw' | 'exchange'
+type QuickAction = 'profile' | 'recharge' | 'withdraw' | 'exchange'
 
 export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavigate, children }: {
   profile: PlayerProfile
@@ -59,7 +59,9 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavi
     </button>
     {open && <section className="client-profile-popover" aria-label="个人资料快捷面板">
       <div className="client-profile-popover__identity">
-        {profile.avatarDataUrl ? <img className="client-profile-popover__avatar" src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" />}
+        <button type="button" className="client-profile-popover__avatar-button" aria-label="进入个人中心" title="进入个人中心" onClick={() => navigate('profile')}>
+          {profile.avatarDataUrl ? <img className="client-profile-popover__avatar" src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" />}
+        </button>
         <div><strong><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></strong><span className="client-profile-popover__meta"><button type="button" className="client-profile-popover__user-id" onClick={() => void copyUserId()} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{copyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{copyFeedback === '复制成功' && <Check size={12} />}{copyFeedback}</span>}</span></div>
       </div>
       <div className="client-profile-popover__stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} /><Metric label="粉丝" value={profile.followers} /></div>

@@ -4,7 +4,7 @@ import { DialogPanel } from '@/components/WindowsClient'
 
 type VerificationStep = 'notice' | 'phone' | 'identity' | 'qr' | 'success' | 'closed'
 
-export function IdentityVerificationFlow() {
+export function IdentityVerificationFlow({ onClose }: { onClose?: () => void } = {}) {
   const [step, setStep] = useState<VerificationStep>('notice')
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
@@ -54,9 +54,10 @@ export function IdentityVerificationFlow() {
     setError('')
     setStep('identity')
   }
+  const closeFlow = () => { setStep('closed'); onClose?.() }
 
   return <>
-    {step === 'notice' && <DialogPanel overlayId="identity-verification-notice" title="需要完成实名认证" width={480} className="identity-flow-dialog" onClose={() => setStep('closed')}>
+    {step === 'notice' && <DialogPanel overlayId="identity-verification-notice" title="需要完成实名认证" width={480} className="identity-flow-dialog" onClose={closeFlow}>
       <div className="identity-flow__body">
         <span className="identity-flow__icon"><ShieldCheck size={23} /></span>
         <p>按照国家法律法规规定，请先完成实名认证。</p>
@@ -64,7 +65,7 @@ export function IdentityVerificationFlow() {
       </div>
     </DialogPanel>}
 
-    {step === 'phone' && <DialogPanel overlayId="identity-verification-phone" title="绑定手机号" width={480} className="identity-flow-dialog" onClose={() => setStep('closed')} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setError(''); setStep('notice') }}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={bindPhone}>完成绑定</button></>}>
+    {step === 'phone' && <DialogPanel overlayId="identity-verification-phone" title="绑定手机号" width={480} className="identity-flow-dialog" onClose={closeFlow} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setError(''); setStep('notice') }}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={bindPhone}>完成绑定</button></>}>
       <div className="identity-flow__form">
         <label className="identity-flow__field"><span>手机号</span><input id="identity-phone-input" autoComplete="off" inputMode="numeric" maxLength={11} placeholder="请输入11位手机号" value={phone} onChange={(event) => { setPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setCode(''); setCodeSent(false); setError('') }} /></label>
         <div className="identity-flow__field"><span className="identity-flow__label"><label htmlFor="identity-code-input">验证码</label></span><span className="identity-flow__code"><input id="identity-code-input" autoComplete="off" inputMode="numeric" maxLength={6} placeholder="6 位验证码" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }} /><button type="button" className="client-button client-button--secondary" onClick={sendCode} disabled={codeSent}>{codeSent ? '已获取' : '获取验证码'}</button></span></div>
@@ -72,7 +73,7 @@ export function IdentityVerificationFlow() {
       </div>
     </DialogPanel>}
 
-    {step === 'identity' && <DialogPanel overlayId="identity-verification-info" title="实名认证" width={480} className="identity-flow-dialog" onClose={() => setStep('closed')} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setError(''); setStep('phone') }}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={continueToQr}>继续</button></>}>
+    {step === 'identity' && <DialogPanel overlayId="identity-verification-info" title="实名认证" width={480} className="identity-flow-dialog" onClose={closeFlow} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setError(''); setStep('phone') }}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={continueToQr}>继续</button></>}>
       <div className="identity-flow__form">
         <label className="identity-flow__field"><span>真实姓名</span><input autoComplete="off" placeholder="请输入真实姓名" value={name} onChange={(event) => { setName(event.target.value); setError('') }} /></label>
         <label className="identity-flow__field"><span>身份证号</span><input autoComplete="off" maxLength={18} placeholder="请输入18位身份证号" value={idNumber} onChange={(event) => { setIdNumber(event.target.value.slice(0, 18)); setError('') }} /></label>
@@ -80,14 +81,14 @@ export function IdentityVerificationFlow() {
       </div>
     </DialogPanel>}
 
-    {step === 'qr' && <DialogPanel overlayId="identity-verification-qr" title="人脸核验" width={440} className="identity-flow-dialog" onClose={() => setStep('closed')} footer={<><button type="button" className="client-button client-button--secondary" onClick={returnToIdentity}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={() => setStep('success')}>我已认证</button></>}>
+    {step === 'qr' && <DialogPanel overlayId="identity-verification-qr" title="人脸核验" width={440} className="identity-flow-dialog" onClose={closeFlow} footer={<><button type="button" className="client-button client-button--secondary" onClick={returnToIdentity}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={() => setStep('success')}>我已认证</button></>}>
       <div className="identity-flow__qr-panel">
         <DemoQrCode />
         <strong><QrCode size={16} />请使用手机扫码进行人脸核验</strong>
       </div>
     </DialogPanel>}
 
-    {step === 'success' && <DialogPanel overlayId="identity-verification-success" title="认证成功" width={420} className="identity-flow-dialog" onClose={() => setStep('closed')} footer={<button type="button" className="client-button client-button--primary" onClick={() => setStep('closed')}>完成</button>}>
+    {step === 'success' && <DialogPanel overlayId="identity-verification-success" title="认证成功" width={420} className="identity-flow-dialog" onClose={closeFlow} footer={<button type="button" className="client-button client-button--primary" onClick={closeFlow}>完成</button>}>
       <div className="identity-flow__success" role="status"><span><CheckCircle2 size={34} /></span></div>
     </DialogPanel>}
   </>

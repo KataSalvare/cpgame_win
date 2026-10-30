@@ -26,7 +26,7 @@ export interface SocialMessage {
   time: string
   kind: ChatMessageKind
   content: string
-  companionShare?: { id: string; clubId: string; name: string; initials: string; intro: string }
+  companionShare?: { id: string; clubId: string; name: string; initials: string; gender: '女' | '男'; age: number; intro: string }
   recalled?: boolean
   systemNotice?: boolean
   order?: { id: string; companion: string; service: string; duration: string; amount: number; status: string }
@@ -121,7 +121,7 @@ const seedMessages: SocialMessage[] = [
   { id: 'msg-2', senderId: 'player', senderName: '林小满', initials: '满', time: '19:43', kind: 'text', content: '好呀，我刚好有空。' },
   { id: 'msg-3', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:43', kind: 'emoji', content: '收到，房间里见' },
   { id: 'msg-4', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:44', kind: 'voice', content: '语音消息', duration: 8 },
-  { id: 'msg-5-shared-friend', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:45', kind: 'companion-share', content: '[陪玩名片] 北纬三十度', companionShare: { id: 'companion-002', clubId: 'club-001', name: '北纬三十度', initials: '北纬', intro: '熟悉多种地图点位，重视沟通和复盘。' } },
+  { id: 'msg-5-shared-friend', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:45', kind: 'companion-share', content: '[陪玩名片] 北纬三十度', companionShare: { id: 'companion-002', clubId: 'club-001', name: '北纬三十度', initials: '北纬', gender: '男', age: 27, intro: '熟悉多种地图点位，重视沟通和复盘。' } },
 ]
 
 export const orderMessageFromOrder = (order: ClientOrder): Pick<SocialMessage, 'kind' | 'content' | 'order'> => ({
