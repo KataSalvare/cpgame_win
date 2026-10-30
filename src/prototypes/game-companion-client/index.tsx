@@ -70,6 +70,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [pageState, setPageState] = usePrototypeState<ClientPageState>('normal', props)
   const [windowSessionState, setWindowSessionState] = useState<'open' | 'minimized' | 'exited'>('open')
   const [windowCloseDialogOpen, setWindowCloseDialogOpen] = useState(false)
+  const [pendingVoiceRoomEntry, setPendingVoiceRoomEntry] = useState<{ source: 'personal' | 'club'; roomId: string; channelId: string; clubName: string } | null>(null)
   const [windowCloseChoice, setWindowCloseChoice] = useState<WindowCloseChoice>('minimize')
   const [skipWindowClosePromptToday, setSkipWindowClosePromptToday] = useState(false)
   const systemSettingsReturnHash = useRef<string | null>(null)
@@ -147,6 +148,33 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [voiceCallDialogOpen, setVoiceCallDialogOpen] = useState(false)
   const [selectedVoiceCallId, setSelectedVoiceCallId] = useState(initialVoiceCallNotifications[0]?.id ?? '')
   const social = useSocialLogic()
+  const requestVoiceRoomEntry = (source: 'personal' | 'club') => {
+    if (voiceRoomMinimized) {
+      const targetRoom = source === 'club'
+        ? social.voiceRooms.find((room) => room.clubId === navigation.clubId && !room.isUngrouped) ?? social.activeVoiceRoom
+        : social.activeVoiceRoom
+      const targetChannel = targetRoom?.channels.find((channel) => channel.isDefault) ?? targetRoom?.channels[0]
+      if (targetRoom && targetChannel) {
+        setPendingVoiceRoomEntry({
+          source,
+          roomId: targetRoom.id,
+          channelId: targetChannel.id,
+          clubName: clubs.find((club) => club.id === targetRoom.clubId)?.name ?? navigation.club.name,
+        })
+      }
+      return
+    }
+    navigation.goToVoiceRoom(source)
+  }
+  const confirmVoiceRoomEntry = () => {
+    if (!pendingVoiceRoomEntry) return
+    const { source, roomId, channelId } = pendingVoiceRoomEntry
+    setPendingVoiceRoomEntry(null)
+    social.disconnectVoiceAndSelectSubchannel(roomId, channelId)
+    setVoiceRoomMinimized(false)
+    window.sessionStorage.removeItem('voice-room-minimized')
+    navigation.goToVoiceRoom(source)
+  }
   const chatCompanion = companions.find((item) => item.id === chatCompanionId)
   const companionChatConversation = social.selectedConversation?.kind === 'direct' && (chatCompanion || chatConversationOverride)
     ? { ...social.selectedConversation, title: chatCompanion?.name ?? chatConversationOverride!.title, initials: chatCompanion?.initials ?? chatConversationOverride!.initials }
@@ -289,7 +317,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         { id: 'club-admin', label: '俱乐部后台', icon: <LayoutDashboard size={16} />, group: 'workbench' },
       ]}
       activeId={matchPanelOpen || isMatching ? 'quick-match' : activeNavId}
-      onSelect={(id) => id === 'club-admin' ? setClubAdminPreviewOpen(true) : id === 'quick-match' ? setMatchPanelOpen(true) : id === 'home' ? navigation.goHome() : id === 'voice-room' ? navigation.goToVoiceRoom('personal') : navigation.goToPage(id as 'workbench' | 'talents' | 'profile' | 'wallet' | 'orders' | 'messages' | 'announcements')}
+      onSelect={(id) => id === 'club-admin' ? setClubAdminPreviewOpen(true) : id === 'quick-match' ? setMatchPanelOpen(true) : id === 'home' ? navigation.goHome() : id === 'voice-room' ? requestVoiceRoomEntry('personal') : navigation.goToPage(id as 'workbench' | 'talents' | 'profile' | 'wallet' | 'orders' | 'messages' | 'announcements')}
       footer={<>{voiceRoomMinimized && <button type="button" className="voice-minimized-float" onClick={() => { setVoiceRoomMinimized(false); window.sessionStorage.removeItem('voice-room-minimized'); navigation.goToPage('voice-room') }}><Headphones size={17} /><span>语音聊天中</span><small>点击返回语音房</small><span className="voice-minimized-float__wave" aria-hidden="true"><i /><i /><i /><i /></span></button>}<ProfileQuickPanel profile={profile} diamondBalance={account.diamondBalance} beanBalance={account.beanBalance} onNavigate={(action) => { if (action === 'profile') navigation.goToPage('profile'); else if (action === 'recharge') { setRechargeReturnLabel('返回'); setCheckoutRechargeOpen(true) } else if (action === 'withdraw') navigation.openBeanWithdraw(); else setBeanExchangeOpen(true) }}>{profile.avatarDataUrl ? <img src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" />}</ProfileQuickPanel></>}
     />}
     rightPanel={selectedSearchProfile ? <RightDrawer mode="inline" title={selectedSearchProfile.name} onClose={() => setSelectedSearchUser(null)} className="game-companion-drawer" width="100%"><div className="client-content companion-detail-page companion-detail-page--panel"><CompanionProfileCard profile={selectedSearchProfile} /></div></RightDrawer> : navigation.page === 'workbench' && pageState === 'normal' && workbench.selectedOrder ? <RightDrawer mode="inline" title="订单详情" description={workbench.selectedOrder.id} onClose={() => workbench.setSelectedOrderId(null)} className="game-order-drawer" width="100%"><WorkbenchOrderDetailPanel logic={workbench} onChat={(order) => { setChatCompanionId(null); setChatConversationOverride({ title: order.player, initials: order.playerInitials }); social.startDirectMessageToUser(`workbench-player-${order.player}`, order.player, order.playerInitials); setCompanionChatOpen(true) }} /></RightDrawer> : navigation.panel === 'club-reviews' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部评价" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><ClubReviewsPanel /></RightDrawer> : navigation.panel === 'club-announcements' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部公告" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} presentation="panel" /></RightDrawer> : navigation.panel === 'club-groups' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部群聊" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><ClubGroupsPanel groups={social.clubGroups.filter((group) => group.clubId === navigation.clubId)} onApply={social.applyToClubGroup} onOpenChat={(groupId) => { social.openClubGroupChat(groupId); navigation.goToPage('messages') }} /></RightDrawer> : navigation.panel === 'diamond-ledger' ? <RightDrawer mode="inline" title="钻石明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.diamondTransactions} /></RightDrawer> : navigation.panel === 'bean-ledger' ? <RightDrawer mode="inline" title="糖豆明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.beanTransactions} /></RightDrawer> : premiumCardsDrawer ? premiumCardsDrawer : navigation.panel === 'coupons' ? <RightDrawer mode="inline" title="我的优惠券" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><CouponsPage pageState={pageState} onRetry={() => setPageState('normal')} coupons={account.coupons} onBack={navigation.closePanel} /></RightDrawer> : (navigation.page === 'club-detail' || navigation.page === 'talents') && navigation.companion ? <RightDrawer
@@ -340,6 +368,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         </div>
         <label className="window-close-skip"><input type="checkbox" checked={skipWindowClosePromptToday} onChange={(event) => setSkipWindowClosePromptToday(event.target.checked)} /><span>今日不再提示</span></label>
       </DialogPanel>}
+      {pendingVoiceRoomEntry && <DialogPanel overlayId="voice-room-entry-confirm" title="切换语音房" onClose={() => setPendingVoiceRoomEntry(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setPendingVoiceRoomEntry(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmVoiceRoomEntry}>确认</button></>}><p className="social-dialog-copy">你当前正在 <strong>{clubs.find((club) => club.id === social.activeVoiceRoom?.clubId)?.name ?? navigation.club.name}</strong> 的语音房，切换至 <strong>{pendingVoiceRoomEntry.clubName}</strong> 会<strong>离开当前语音房、断开语音连接</strong>，是否确认切换？</p></DialogPanel>}
       {premiumCardToast && <NotificationToast variant="success" message={premiumCardToast} onDismiss={() => setPremiumCardToast(null)} />}
       {workbench.orderAction && <WorkbenchOrderActionDialog key={`${workbench.orderAction.id}-${workbench.orderAction.action}`} logic={workbench} />}
       {clubAdminPreviewOpen && <DialogPanel overlayId="club-admin-dashboard-preview" title="俱乐部后台" onClose={() => setClubAdminPreviewOpen(false)} width={1680} className="club-admin-preview-dialog">
@@ -535,7 +564,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         social.startDirectMessageWithCompanion(companionId)
         navigation.goToPage('messages')
       }}
-      onOpenVoiceRoom={() => navigation.goToVoiceRoom('club')}
+      onOpenVoiceRoom={() => requestVoiceRoomEntry('club')}
       onOpenClubGroups={navigation.openClubGroups}
       onOpenMatch={() => { match.chooseClub(navigation.clubId); setMatchPanelOpen(true) }}
       onOpenPremiumCards={() => navigation.goToPage('club-cards')}
@@ -548,7 +577,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       followedClubIds={social.followedClubIds}
       pageState={pageState}
       onOpenClub={navigation.openClub}
-      onBrowseClub={() => navigation.goToVoiceRoom('club')}
+      onBrowseClub={() => requestVoiceRoomEntry('club')}
       onSelfOrderClub={(clubId) => { match.chooseClub(clubId); setMatchPanelOpen(true) }}
       onRetry={() => setPageState('normal')}
     />}

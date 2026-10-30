@@ -558,6 +558,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [deleteVoiceRoomId, setDeleteVoiceRoomId] = useState<string | null>(null)
   const [deleteVoiceRoomWithChannels, setDeleteVoiceRoomWithChannels] = useState(false)
   const [draggedVoiceChannel, setDraggedVoiceChannel] = useState<{ roomId: string; channelId: string } | null>(null)
+  const [draggedVoiceGroupId, setDraggedVoiceGroupId] = useState<string | null>(null)
   const [batchMoveDialog, setBatchMoveDialog] = useState<{ roomId: string; channelId: string } | null>(null)
   const [batchMoveMemberIds, setBatchMoveMemberIds] = useState<string[]>([])
   const [batchMoveTargetRoomId, setBatchMoveTargetRoomId] = useState('')
@@ -994,6 +995,12 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     else if (draggedVoiceChannel.roomId !== targetRoomId) setFeedback('房间已移动到目标分组。')
     setDraggedVoiceChannel(null)
   }
+  const moveDraggedVoiceGroup = (targetRoomId: string, insertAfter: boolean) => {
+    if (!draggedVoiceGroupId) return
+    const moved = logic.moveVoiceRoom(draggedVoiceGroupId, targetRoomId, insertAfter)
+    if (moved) setFeedback('分组顺序已更新。')
+    setDraggedVoiceGroupId(null)
+  }
 
   const collapseAllVoiceChannels = () => {
     setCollapsedChannelIds(logic.voiceRooms.flatMap((item) => item.channels.map((subchannel) => subchannel.id)))
@@ -1063,9 +1070,9 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           <button type="button" className="voice-create-group-entry" onClick={openCreateRoom}><Plus size={14} />创建分组</button>
           <button type="button" className="voice-create-group-entry" onClick={() => openChannelDialog('create', undefined, UNASSIGNED_VOICE_ROOM_ID)}><Plus size={14} />创建房间</button>
         </div>
-        <div className="voice-room-list">{searchableVoiceRooms.map((item) => <section className={`voice-room-group${selectedVoiceChannel.roomId === item.id ? ' is-active' : ''}${draggedVoiceChannel && item.id !== draggedVoiceChannel.roomId && item.currentRole !== 'member' ? ' is-channel-drop-target' : ''}`} key={item.id}>
-          <div className="voice-room-heading-row" onContextMenu={(event) => openRoomContextMenu(event, item.id)} onDragOver={(event) => { if (draggedVoiceChannel && item.currentRole !== 'member' && draggedVoiceChannel.roomId !== item.id) event.preventDefault() }} onDrop={(event) => { if (event.dataTransfer.types.includes('application/x-voice-room-channel')) { event.preventDefault(); event.stopPropagation(); moveDraggedVoiceChannel(item.id) } }}>
-            <button type="button" className="voice-room-heading" aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span>{item.isUngrouped ? <Volume2 size={15} /> : <Users size={15} />}</span><strong>{item.name}</strong><small className="voice-room-heading__count">{item.isUngrouped ? `${item.channels.length} 个房间` : `${item.channels.reduce((total, roomChannel) => total + roomChannel.members.length, 0)}/${item.capacity}`}</small></button>
+        <div className="voice-room-list">{searchableVoiceRooms.map((item) => <section className={`voice-room-group${selectedVoiceChannel.roomId === item.id ? ' is-active' : ''}${draggedVoiceChannel && item.id !== draggedVoiceChannel.roomId && item.currentRole !== 'member' ? ' is-channel-drop-target' : ''}${draggedVoiceGroupId && draggedVoiceGroupId !== item.id && !item.isUngrouped && item.currentRole !== 'member' ? ' is-group-drop-target' : ''}${draggedVoiceGroupId === item.id ? ' is-group-dragging' : ''}`} key={item.id}>
+          <div className="voice-room-heading-row" onContextMenu={(event) => openRoomContextMenu(event, item.id)} onDragOver={(event) => { if (event.dataTransfer.types.includes('application/x-voice-room-group') && draggedVoiceGroupId !== item.id && !item.isUngrouped && item.currentRole !== 'member') event.preventDefault(); else if (event.dataTransfer.types.includes('application/x-voice-room-channel') && item.currentRole !== 'member' && draggedVoiceChannel?.roomId !== item.id) event.preventDefault() }} onDrop={(event) => { if (event.dataTransfer.types.includes('application/x-voice-room-group')) { event.preventDefault(); event.stopPropagation(); const bounds = event.currentTarget.getBoundingClientRect(); moveDraggedVoiceGroup(item.id, event.clientY >= bounds.top + bounds.height / 2); return } if (event.dataTransfer.types.includes('application/x-voice-room-channel')) { event.preventDefault(); event.stopPropagation(); moveDraggedVoiceChannel(item.id) } }}>
+            <button type="button" className="voice-room-heading" draggable={!item.isUngrouped && item.currentRole !== 'member'} onDragStart={(event) => { if (item.isUngrouped || item.currentRole === 'member') { event.preventDefault(); return } event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('application/x-voice-room-group', item.id); setDraggedVoiceGroupId(item.id) }} onDragEnd={() => setDraggedVoiceGroupId(null)} aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span>{item.isUngrouped ? <Volume2 size={15} /> : <Users size={15} />}</span><strong>{item.name}</strong><small className="voice-room-heading__count">{item.isUngrouped ? `${item.channels.length} 个房间` : `${item.channels.reduce((total, roomChannel) => total + roomChannel.members.length, 0)}/${item.capacity}`}</small></button>
             {!item.isUngrouped && <button type="button" className="voice-create-child-channel" aria-label={`在${item.name}创建房间`} title="新增房间" onClick={() => openChannelDialog('create', undefined, item.id)}><Plus size={13} /></button>}
             {!item.isUngrouped && <button type="button" className="windows-icon-button voice-tree-manage" aria-label={`编辑${item.name}分组`} title="编辑分组" onClick={() => openEditRoom(item)}><Pencil size={13} /></button>}
           </div>

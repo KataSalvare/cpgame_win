@@ -5,6 +5,15 @@ import cityLifePhoto from '../assets/profile-life-photo-city.svg'
 
 export type OrderStatus = '待支付' | '待接单' | '待服务' | '服务中' | '待用户确认' | '已完成' | '已取消' | '退款'
 
+export type WalletTransaction = {
+  id: string
+  title: string
+  type: string
+  date: string
+  amount: number
+  relatedOrderId?: string
+}
+
 export type OrderTimeSegment = {
   id: string
   startAt: string | null
@@ -71,14 +80,14 @@ export const initialPendingBeanSettlementBalance = 3000
 
 export const walletEntries = {
   diamonds: [
-    { id: 'diamond-001', title: '订单消费', date: '2026-10-22 20:16', amount: -160 },
-    { id: 'diamond-002', title: '活动赠送', date: '2026-10-21 12:30', amount: 200 },
-    { id: 'diamond-003', title: '订单消费', date: '2026-10-19 22:05', amount: -240 },
+    { id: 'diamond-001', title: '充值', type: '充值', date: '2026-10-22 20:16', amount: -160, relatedOrderId: 'GC-20261022-0182' },
+    { id: 'diamond-002', title: '服务订单', type: '服务订单', date: '2026-10-21 12:30', amount: 200 },
+    { id: 'diamond-003', title: '购买尊享卡', type: '购买尊享卡', date: '2026-10-19 22:05', amount: -240 },
   ],
   beans: [
-    { id: 'bean-001', title: '每日签到', date: '2026-10-23 09:10', amount: 20 },
-    { id: 'bean-002', title: '礼物兑换', date: '2026-10-22 18:44', amount: -300 },
-    { id: 'bean-003', title: '活动奖励', date: '2026-10-20 14:12', amount: 500 },
+    { id: 'bean-001', title: '订单分账', type: '订单分账', date: '2026-10-23 09:10', amount: 20 },
+    { id: 'bean-002', title: '礼物分账', type: '礼物分账', date: '2026-10-22 18:44', amount: -300 },
+    { id: 'bean-003', title: '人工冻结', type: '人工冻结', date: '2026-10-20 14:12', amount: 500 },
   ],
 }
 

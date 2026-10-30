@@ -9,8 +9,9 @@ import { WorkbenchMatchesPanel } from '../components/WorkbenchMatchesPanel'
 import { WorkbenchOrderActions } from '../components/WorkbenchOrderDetailPanel'
 import { WorkbenchServicesPanel } from '../components/WorkbenchServicesPanel'
 import { BeanWithdrawPanel, WalletLedgerPanel } from './AccountPages'
+import type { WalletTransaction } from '../data/accountMockData'
 
-type Props = { logic: WorkbenchLogic; pageState: 'normal' | 'loading' | 'empty' | 'error'; onRetry: () => void; balance: number; availableBeanBalance: number; pendingBeanSettlementBalance: number; entries: readonly { id: string; title: string; date: string; amount: number }[]; onWithdraw: (amount: number) => boolean; onOpenExchange: () => void }
+type Props = { logic: WorkbenchLogic; pageState: 'normal' | 'loading' | 'empty' | 'error'; onRetry: () => void; balance: number; availableBeanBalance: number; pendingBeanSettlementBalance: number; entries: readonly WalletTransaction[]; onWithdraw: (amount: number) => boolean; onOpenExchange: () => void }
 export function WorkbenchPage({ logic: w, pageState, onRetry, balance, availableBeanBalance, pendingBeanSettlementBalance, entries, onWithdraw, onOpenExchange }: Props) {
   const [tab, setTab] = useState('总览')
   const [matchFilter, setMatchFilter] = useState('全部')

@@ -525,6 +525,14 @@ export function useSocialLogic() {
     setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoom.id ? room : { ...room, channels: room.channels.map((channel) => ({ ...channel, members: channel.members.filter((member) => member.id !== currentSocialUser.id) })) }))
   }
 
+  const disconnectVoiceAndSelectSubchannel = (roomId: string, channelId: string) => {
+    if (!voiceRooms.some((room) => room.id === roomId && room.channels.some((channel) => channel.id === channelId))) return false
+    setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoomId ? room : { ...room, channels: room.channels.map((channel) => ({ ...channel, members: channel.members.filter((member) => member.id !== currentSocialUser.id) })) }))
+    setActiveVoiceRoomId(roomId)
+    setActiveSubchannelId(channelId)
+    return true
+  }
+
   const toggleMic = () => {
     if (!isInVoice) return
     setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoomId ? room : { ...room, channels: room.channels.map((channel) => {
@@ -560,6 +568,24 @@ export function useSocialLogic() {
     if (!Number.isInteger(nextCapacity) || nextCapacity < Math.max(voiceRoomMemberCount(room), ...room.channels.map((channel) => channel.capacity)) || nextCapacity > MAX_VOICE_GROUP_MEMBERS) return room
     return { ...room, name: name.trim(), capacity: nextCapacity }
   }))
+
+  const moveVoiceRoom = (sourceRoomId: string, targetRoomId: string, insertAfter: boolean) => {
+    const sourceRoom = voiceRooms.find((room) => room.id === sourceRoomId)
+    const targetRoom = voiceRooms.find((room) => room.id === targetRoomId)
+    if (!sourceRoom || !targetRoom || sourceRoomId === targetRoomId || sourceRoom.isUngrouped || targetRoom.isUngrouped || sourceRoom.currentRole === 'member' || targetRoom.currentRole === 'member') return false
+    setVoiceRooms((rooms) => {
+      const groups = rooms.filter((room) => !room.isUngrouped)
+      const ungrouped = rooms.filter((room) => room.isUngrouped)
+      const sourceIndex = groups.findIndex((room) => room.id === sourceRoomId)
+      const targetIndex = groups.findIndex((room) => room.id === targetRoomId)
+      if (sourceIndex < 0 || targetIndex < 0) return rooms
+      const [source] = groups.splice(sourceIndex, 1)
+      const adjustedTargetIndex = groups.findIndex((room) => room.id === targetRoomId)
+      groups.splice(adjustedTargetIndex + (insertAfter ? 1 : 0), 0, source)
+      return [...groups, ...ungrouped]
+    })
+    return true
+  }
 
   const setDefaultVoiceSubchannel = (roomId: string, channelId: string) => {
     if (!voiceRooms.some((room) => room.id === roomId && room.channels.some((channel) => channel.id === channelId))) return false
@@ -758,7 +784,7 @@ export function useSocialLogic() {
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms, nextVoiceChannelName: getNextVoiceChannelName(voiceRooms),
     roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
     setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, recallRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,
-    joinVoice, leaveVoice, toggleMic, setVoiceMemberMic, toggleSelfMute, createVoiceRoom, renameVoiceRoom, updateVoiceRoom, setDefaultVoiceSubchannel, moveVoiceSubchannel, deleteVoiceRoom, createSubchannel,
+    joinVoice, leaveVoice, disconnectVoiceAndSelectSubchannel, toggleMic, setVoiceMemberMic, toggleSelfMute, createVoiceRoom, renameVoiceRoom, updateVoiceRoom, moveVoiceRoom, setDefaultVoiceSubchannel, moveVoiceSubchannel, deleteVoiceRoom, createSubchannel,
     deleteSubchannel, removeVoiceMember, setVoiceMemberMuted, blockVoiceMember, setVoiceMemberRole, inviteFriendsToRoom,
     updateSubchannel,
     acceptVoiceInvitation, ignoreVoiceInvitation,

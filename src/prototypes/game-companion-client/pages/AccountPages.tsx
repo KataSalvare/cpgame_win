@@ -3,7 +3,7 @@ import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, Cred
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
-import { type ClientOrder, type OrderStatus } from '../data/accountMockData'
+import { type ClientOrder, type OrderStatus, type WalletTransaction } from '../data/accountMockData'
 import { clubs, companions, games, type Companion, type Service } from '../data/mockData'
 
 export { PersonalCenterPage } from './PersonalCenterPage'
@@ -167,7 +167,7 @@ export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBa
   </section></div>
 }
 
-export function WalletLedgerPanel({ entries }: { entries: readonly { id: string; title: string; date: string; amount: number }[] }) {
+export function WalletLedgerPanel({ entries }: { entries: readonly WalletTransaction[] }) {
   const [filter, setFilter] = useState<'全部' | '收入' | '支出'>('全部')
   const filteredEntries = entries.filter((entry) => filter === '全部' || (filter === '收入' ? entry.amount > 0 : entry.amount < 0))
   return <div className="client-content account-page wallet-ledger-panel">
@@ -375,8 +375,11 @@ function PageHeading({ eyebrow, title, description }: { eyebrow?: string; title:
   return <header className="client-page-heading account-page-heading"><div>{eyebrow && <span className="client-eyebrow">{eyebrow}</span>}<h1>{title}</h1>{description && <p>{description}</p>}</div></header>
 }
 
-function TransactionList({ entries }: { entries: readonly { id: string; title: string; date: string; amount: number }[] }) {
-  return <div className="wallet-transaction-list">{entries.map((entry) => <div className="wallet-transaction" key={entry.id}><span className="wallet-transaction__icon"><History size={16} /></span><div><strong>{entry.title}</strong><small>{entry.date}</small></div><strong className={entry.amount > 0 ? 'is-income' : ''}>{entry.amount > 0 ? '+' : ''}{entry.amount.toLocaleString()}</strong></div>)}</div>
+function TransactionList({ entries }: { entries: readonly WalletTransaction[] }) {
+  return <div className="wallet-transaction-list">{entries.map((entry) => <article className="wallet-transaction" key={entry.id}>
+    <header><span>{entry.type}</span><strong className={entry.amount > 0 ? 'is-income' : ''}>{entry.amount > 0 ? '+' : ''}{entry.amount.toLocaleString()}</strong></header>
+    <dl><div><dt>流水号</dt><dd>{entry.id}</dd></div><div><dt>关联订单号</dt><dd>{entry.relatedOrderId ?? '—'}</dd></div><div><dt>时间</dt><dd>{entry.date}</dd></div></dl>
+  </article>)}</div>
 }
 
 function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onPauseOrder, onRenewOrder, onOpenRecharge }: { order: ClientOrder; selected: boolean; diamondBalance: number; onSelect: () => void; onReorder: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string) => void; onPauseOrder: (orderId: string) => void; onRenewOrder: (orderId: string, quantity: number) => boolean; onOpenRecharge: () => void }) {

@@ -232,6 +232,10 @@
 .voice-room-heading{display:flex;width:auto;min-width:0;min-height:36px;flex:1;align-items:center;gap:8px;border:0;border-radius:6px;padding:0 7px;background:transparent;color:var(--prototype-text-secondary, #4b5563);text-align:left;cursor:pointer}
 .voice-room-heading-row:hover{background:var(--prototype-border, #e5e7eb)}
 .voice-room-group.is-channel-drop-target .voice-room-heading-row{outline:1px dashed var(--prototype-text-muted, #6b7280);outline-offset:-2px}
+.voice-room-group.is-group-drop-target .voice-room-heading-row{outline:1px dashed var(--prototype-text-muted, #6b7280);outline-offset:-2px;background:var(--prototype-surface, #fff)}
+.voice-room-group.is-group-dragging{opacity:.45}
+.voice-room-heading[draggable="true"]{cursor:grab}
+.voice-room-heading[draggable="true"]:active{cursor:grabbing}
 .voice-room-heading-row:hover .voice-room-heading{color:var(--client-text)}
 .voice-room-heading>span{display:inline-flex}
 .voice-room-chevron{flex:0 0 auto;color:var(--prototype-text-subtle, #9ca3af);transition:transform .15s ease}
