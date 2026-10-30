@@ -279,6 +279,8 @@
 .voice-channel-member:focus-visible{outline:2px solid var(--prototype-text-subtle, #9ca3af);outline-offset:1px}
 .voice-channel-member>span:not(.client-avatar){overflow:hidden;flex:1;text-overflow:ellipsis;white-space:nowrap}
 .voice-channel-member .client-avatar--sm{width:24px;height:24px;flex:0 0 24px;border-radius:50%;font-size:10px}
+.voice-channel-member__avatar{display:grid;flex:0 0 24px;place-items:center;border:0;border-radius:50%;padding:0;background:transparent;cursor:pointer}
+.voice-channel-member__avatar:focus-visible{outline:2px solid var(--prototype-text-subtle, #9ca3af);outline-offset:2px}
 .voice-channel-context-menu{position:absolute;z-index:40;display:grid;width:240px;max-height:calc(100% - 16px);gap:2px;overflow-y:auto;border:1px solid var(--client-border);border-radius:8px;padding:8px;background:var(--prototype-surface, #fff);color:var(--client-text);box-shadow:0 8px 20px rgba(17,24,39,.14);font-size:14px}
 .voice-channel-context-menu>button,.voice-channel-context-submenu>button{display:flex;min-height:36px;align-items:center;gap:10px;border:0;border-radius:6px;padding:0 8px;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}
 .voice-channel-context-menu>button:hover:not(:disabled),.voice-channel-context-submenu>button:hover:not(:disabled){background:var(--prototype-canvas, #f3f4f6)}
@@ -447,7 +449,8 @@
 .voice-seat.is-occupied{border-style:solid;border-color:var(--prototype-border, #e5e7eb);background:var(--prototype-surface, #fff);color:var(--client-text)}
 .voice-seat.is-speaking{border-color:var(--prototype-text-subtle, #9ca3af);box-shadow:inset 0 0 0 1px var(--prototype-border-strong, #d1d5db)}
 .voice-seat__empty{display:grid;width:42px;height:42px;place-items:center;border:1px solid var(--prototype-border, #e5e7eb);border-radius:50%;background:var(--prototype-canvas, #f3f4f6)}
-.voice-seat__avatar{position:relative;display:grid;place-items:center;border:0;border-radius:50%;padding:0;background:transparent}
+.voice-seat__avatar{position:relative;display:grid;place-items:center;border:0;border-radius:50%;padding:0;background:transparent;cursor:pointer}
+.voice-seat__avatar:focus-visible{outline:2px solid var(--prototype-text-subtle, #9ca3af);outline-offset:3px}
 .voice-seat__avatar .client-avatar--lg{width:48px;height:48px;border-radius:50%}
 .voice-seat__mic{position:absolute;right:-3px;bottom:-1px;display:grid;width:20px;height:20px;place-items:center;border:2px solid var(--prototype-surface, #fff);border-radius:50%;background:var(--prototype-border, #e5e7eb);color:var(--prototype-text-secondary, #4b5563)}
 .voice-seat>strong{max-width:100%;overflow:hidden;font-size:11px;text-overflow:ellipsis;white-space:nowrap}

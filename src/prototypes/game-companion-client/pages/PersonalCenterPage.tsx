@@ -9,7 +9,7 @@ import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { clubs, games } from '../data/mockData'
 import { type ClientOrder, type PlayerProfile } from '../data/accountMockData'
-import { favoriteClubs, favoriteUsers, favoriteVoiceRooms } from '../data/personalFavoritesMockData'
+import { favoriteClubs, favoriteUsers, favoriteVoiceRooms, personalFans } from '../data/personalFavoritesMockData'
 import { personalGiftInventory, profileFootprints, profileRoomVisits, profileVisitors } from '../data/personalCenterMockData'
 import { type BlockedProfile } from '../data/personalSettingsMockData'
 import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
@@ -18,7 +18,7 @@ import { IdentityVerificationFlow } from './IdentityVerificationFlow'
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 type CenterSection = 'profile' | 'clubs' | 'onboarding' | 'visits' | 'gifts' | 'favorites' | 'wealth'
 type VisitTab = 'footprints' | 'visitors' | 'rooms'
-type FavoriteTab = 'clubs' | 'users' | 'rooms'
+type FavoriteTab = 'clubs' | 'users' | 'rooms' | 'fans'
 type ApplicationKind = 'companion' | 'club'
 type ClubApplicationField = 'entityName' | 'legalPhone' | 'applicationForm' | 'businessLicense' | 'legalIdFront' | 'legalIdBack' | 'authorizationLetter' | 'servicePriceList' | 'afterSalesStandard' | 'clubName' | 'monthlyTurnover' | 'managerName' | 'managerPhone' | 'managerWeChat' | 'managerIdFront' | 'managerIdBack'
 
@@ -28,6 +28,8 @@ const emptyClubApplication: Record<ClubApplicationField, string> = {
 
 type PersonalCenterProps = {
   pageState: PageState
+  initialSection: 'profile' | 'wealth' | 'favorites'
+  initialSocialTab: FavoriteTab
   onRetry: () => void
   profile: PlayerProfile
   onSaveProfile: (profile: PlayerProfile) => void
@@ -58,21 +60,21 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
   { id: 'clubs', label: '我的俱乐部', icon: Building2 },
   { id: 'onboarding', label: '入驻中心', icon: FileBadge2 },
   { id: 'gifts', label: '我的礼物', icon: Gift },
-  { id: 'favorites', label: '我的收藏', icon: Bookmark },
+  { id: 'favorites', label: '我的社交', icon: Bookmark },
   { id: 'visits', label: '访问记录', icon: Footprints },
 ]
 
 const personalGiftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 
-export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
-  const [section, setSection] = useState<CenterSection>(() => sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : 'profile')
+export function PersonalCenterPage({ pageState, initialSection, initialSocialTab, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
+  const [section, setSection] = useState<CenterSection>(() => initialSection === 'wealth' || initialSection === 'favorites' ? initialSection : sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : initialSection)
   const [recruitmentOpen, setRecruitmentOpen] = useState(() => Boolean(sessionStorage.getItem('companion-assessment-recharge-draft')))
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
   const [footprints, setFootprints] = useState(profileFootprints)
   const [visitors, setVisitors] = useState(profileVisitors)
   const [roomVisits, setRoomVisits] = useState(profileRoomVisits)
   const [confirmClearVisitRecords, setConfirmClearVisitRecords] = useState(false)
-  const [favoriteTab, setFavoriteTab] = useState<FavoriteTab>('clubs')
+  const [favoriteTab, setFavoriteTab] = useState<FavoriteTab>(initialSocialTab)
   const [visibleFavoriteClubs, setVisibleFavoriteClubs] = useState(favoriteClubs)
   const [visibleFavoriteUsers, setVisibleFavoriteUsers] = useState(favoriteUsers)
   const [visibleFavoriteVoiceRooms, setVisibleFavoriteVoiceRooms] = useState(favoriteVoiceRooms)
@@ -87,6 +89,7 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
   const [clubSearch, setClubSearch] = useState('')
   const normalizedClubSearch = clubSearch.trim().toLocaleLowerCase()
   const filteredJoiningClubs = clubs.filter(club => club.name.toLocaleLowerCase().includes(normalizedClubSearch))
+
   const [clubApplicationId, setClubApplicationId] = useState<string | null>(null)
   const [clubJoinReason, setClubJoinReason] = useState('')
   const [confirmCancelClubApplication, setConfirmCancelClubApplication] = useState(false)
@@ -182,7 +185,7 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
       {sectionItems.map(({ id, label, icon: Icon }) => <button type="button" role="tab" key={id} className={`personal-center-tab${section === id ? ' is-active' : ''}`} aria-selected={section === id} onClick={() => { setSection(id); setFeedback('') }}><Icon size={16} /><span>{label}</span></button>)}
     </nav>
     <main className="personal-center-content" aria-live="polite">
-        {section === 'profile' && <ProfileOverview profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
+        {section === 'profile' && <ProfileOverview profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} onOpenFollowing={() => { setSection('favorites'); setFavoriteTab('users') }} onOpenFans={() => { setSection('favorites'); setFavoriteTab('fans') }} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
         {section === 'clubs' && <section className="personal-module">
           <ModuleHeading title="我的俱乐部" />
           {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status">{clubMembershipStatus === 'idle' && <Check size={12} />}{clubMembershipStatus === 'joining' || clubMembershipStatus === 'leaving' ? '待审核' : '已加入'}</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(1)}</span><span><UsersRound size={13} />{joinedClub.companionCount} 位成员</span><span>{joinedClub.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions">{clubMembershipStatus === 'idle' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => { setClubMembershipStatus('leaving'); setFeedback('退出申请已提交，待审核') }}>退出俱乐部</button></> : <><button type="button" className="client-button client-button--secondary" disabled>待审核</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(true)}>取消申请</button></>}</div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => { setClubSearch(''); setChoosingClub(true) }} />}
@@ -214,13 +217,14 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
           })}</div> : <EmptyPanel icon={<Gift size={22} />} title="还没有收到礼物" />}
         </section>}
         {section === 'favorites' && <section className="personal-module personal-favorites-module">
-          <ModuleHeading title="我的收藏" />
-          <div className="personal-record-tabs" role="tablist" aria-label="我的收藏类型">
-            {([{ id: 'clubs', label: '关注的俱乐部', count: visibleFavoriteClubs.length }, { id: 'users', label: '关注的用户', count: visibleFavoriteUsers.length }, { id: 'rooms', label: '收藏的语音房', count: visibleFavoriteVoiceRooms.length }] as const).map((tab) => <button type="button" role="tab" aria-selected={favoriteTab === tab.id} className={favoriteTab === tab.id ? 'is-active' : ''} key={tab.id} onClick={() => setFavoriteTab(tab.id)}>{tab.label}<span>{tab.count}</span></button>)}
+          <ModuleHeading title="我的社交" />
+          <div className="personal-record-tabs" role="tablist" aria-label="我的社交类型">
+            {([{ id: 'clubs', label: '关注的俱乐部', count: visibleFavoriteClubs.length }, { id: 'users', label: '关注的用户', count: visibleFavoriteUsers.length }, { id: 'fans', label: '我的粉丝', count: personalFans.length }, { id: 'rooms', label: '收藏的语音房', count: visibleFavoriteVoiceRooms.length }] as const).map((tab) => <button type="button" role="tab" aria-selected={favoriteTab === tab.id} className={favoriteTab === tab.id ? 'is-active' : ''} key={tab.id} onClick={() => setFavoriteTab(tab.id)}>{tab.label}<span>{tab.count}</span></button>)}
           </div>
           <div className="personal-favorite-panel" role="tabpanel">
-            {favoriteTab === 'clubs' && (visibleFavoriteClubs.length ? <div className="personal-favorite-grid personal-favorite-grid--clubs">{visibleFavoriteClubs.map((club) => <article className="client-card personal-favorite-card" key={club.id}><AvatarMark initials={club.initials} size="md" /><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong>{club.name}</strong><button type="button" className="personal-favorite-remove" onClick={() => setVisibleFavoriteClubs((current) => current.filter((item) => item.id !== club.id))}>取消关注</button></div><span>{club.game}</span><small><UsersRound size={13} />{club.members} 位成员</small><div className="personal-favorite-tags">{club.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div></article>)}</div> : <EmptyPanel icon={<Building2 size={22} />} title="暂无关注的俱乐部" />)}
+            {favoriteTab === 'clubs' && (visibleFavoriteClubs.length ? <div className="personal-favorite-grid personal-favorite-grid--clubs">{visibleFavoriteClubs.map((club) => <article className="client-card personal-favorite-card" key={club.id}><AvatarMark initials={club.initials} size="md" /><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong>{club.name}</strong><button type="button" className="personal-favorite-remove" onClick={() => setVisibleFavoriteClubs((current) => current.filter((item) => item.id !== club.id))}>取消关注</button></div><small><UsersRound size={13} />{club.members} 位成员</small><div className="personal-favorite-tags">{club.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div></article>)}</div> : <EmptyPanel icon={<Building2 size={22} />} title="暂无关注的俱乐部" />)}
             {favoriteTab === 'users' && (visibleFavoriteUsers.length ? <div className="personal-favorite-grid personal-favorite-grid--users">{visibleFavoriteUsers.map((user) => <article className="client-card personal-favorite-card" key={user.id}><AvatarMark initials={user.initials} size="md" /><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong><UserNameWithLevel name={user.name} identityId={user.name} /></strong><button type="button" className="personal-favorite-remove" onClick={() => setVisibleFavoriteUsers((current) => current.filter((item) => item.id !== user.id))}>取消关注</button></div><span>{user.detail}</span><small><span className={`personal-favorite-status${user.status === '接单中' ? ' is-available' : ''}`} />{user.status}</small></div></article>)}</div> : <EmptyPanel icon={<UsersRound size={22} />} title="暂无关注的用户" />)}
+            {favoriteTab === 'fans' && (personalFans.length ? <div className="personal-favorite-grid personal-favorite-grid--users">{personalFans.map((fan) => <article className="client-card personal-favorite-card" key={fan.id}><AvatarMark initials={fan.initials} size="md" /><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong><UserNameWithLevel name={fan.name} identityId={fan.id} /></strong></div><span>{fan.detail}</span><small>{fan.followedAt}</small></div></article>)}</div> : <EmptyPanel icon={<UsersRound size={22} />} title="暂无粉丝" />)}
             {favoriteTab === 'rooms' && (visibleFavoriteVoiceRooms.length ? <div className="personal-favorite-grid personal-favorite-grid--rooms">{visibleFavoriteVoiceRooms.map((room) => <article className="client-card personal-favorite-room" key={room.id}><div className="personal-favorite-room__icon"><Headphones size={19} /></div><div className="personal-favorite-card__body"><div className="personal-favorite-card__heading"><strong>{room.name}</strong><button type="button" className="personal-favorite-remove" onClick={() => setVisibleFavoriteVoiceRooms((current) => current.filter((item) => item.id !== room.id))}>取消收藏</button></div><span>{room.category}</span><small><UserNameWithLevel name={room.owner} identityId={room.owner} /><span>{room.occupants}</span></small></div></article>)}</div> : <EmptyPanel icon={<Headphones size={22} />} title="暂无收藏的语音房" />)}
           </div>
         </section>}
@@ -279,7 +283,7 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
   </div>
 }
 
-function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, feedback, onFeedback, onOpenSetting }: {
+function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenFollowing, onOpenFans, feedback, onFeedback, onOpenSetting }: {
   profile: PlayerProfile
   onEdit: () => void
   orders: ClientOrder[]
@@ -287,6 +291,8 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
   beanBalance: number
   onOpenWallet: () => void
   onOpenOrders: () => void
+  onOpenFollowing: () => void
+  onOpenFans: () => void
   feedback: string
   onFeedback: (feedback: string) => void
   onOpenSetting: (setting: 'security' | 'blacklist' | 'logout') => void
@@ -314,7 +320,7 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
   ]
   return <section className="personal-module personal-profile-module">
     <ModuleHeading title="个人资料" action={<button type="button" className="client-button client-button--secondary" onClick={onEdit}><Pencil size={14} />编辑资料</button>} />
-    <section className="client-card account-profile-card personal-profile-card"><ProfileAvatar profile={profile} size="lg" /><div className="account-profile-card__identity"><div className="personal-profile-name"><h2><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></h2></div><div className="personal-profile-meta"><span aria-label={`${profile.gender}，${calculateAge(profile.birthday)}岁`}>{profile.gender === '女' ? '♀' : profile.gender === '男' ? '♂' : profile.gender}{calculateAge(profile.birthday)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div><div className="personal-user-id"><button type="button" className="client-profile-popover__user-id" onClick={() => { void (async () => { try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(profile.userId); setPlayerIdCopyFeedback('复制成功') } catch { setPlayerIdCopyFeedback('复制失败，请重试') } })() }} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{playerIdCopyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{playerIdCopyFeedback === '复制成功' && <Check size={12} />}{playerIdCopyFeedback}</span>}</div><p className="personal-profile-signature">{profile.signature || '暂无签名'}</p></div><div className="account-social-stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} /><Metric label="粉丝" value={profile.followers} /></div></section>
+    <section className="client-card account-profile-card personal-profile-card"><ProfileAvatar profile={profile} size="lg" /><div className="account-profile-card__identity"><div className="personal-profile-name"><h2><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></h2></div><div className="personal-profile-meta"><span aria-label={`${profile.gender}，${calculateAge(profile.birthday)}岁`}>{profile.gender === '女' ? '♀' : profile.gender === '男' ? '♂' : profile.gender}{calculateAge(profile.birthday)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div><div className="personal-user-id"><button type="button" className="client-profile-popover__user-id" onClick={() => { void (async () => { try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(profile.userId); setPlayerIdCopyFeedback('复制成功') } catch { setPlayerIdCopyFeedback('复制失败，请重试') } })() }} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{playerIdCopyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{playerIdCopyFeedback === '复制成功' && <Check size={12} />}{playerIdCopyFeedback}</span>}</div><p className="personal-profile-signature">{profile.signature || '暂无签名'}</p></div><div className="account-social-stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} onClick={onOpenFollowing} /><Metric label="粉丝" value={profile.followers} onClick={onOpenFans} /></div></section>
     <div className="personal-account-overview">
       <section className="client-card personal-life-photos"><header><h3>生活照</h3><div className="personal-life-photo-controls"><span>{lifePhotoCount ? `${visibleLifePhotoIndex + 1} / ${lifePhotoCount}` : '0 张'}</span><button type="button" aria-label="上一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex - 1 + lifePhotoCount) % lifePhotoCount)}><ChevronLeft size={15} /></button><button type="button" aria-label="下一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex + 1) % lifePhotoCount)}><ChevronRight size={15} /></button></div></header>{lifePhotoCount ? <div className="personal-life-photo-stage"><img src={profile.lifePhotoDataUrls[visibleLifePhotoIndex]} alt={`生活照 ${visibleLifePhotoIndex + 1}`} /></div> : <p>暂无生活照</p>}</section>
       <div className="personal-summary-stack">
@@ -464,8 +470,9 @@ function ModuleHeading({ title, description, count, action }: { title: string; d
   return <header className="personal-module-heading"><div><h2>{title}</h2>{description && <p>{description}</p>}</div><div className="personal-module-heading__actions">{count && <span className="client-eyebrow">{count}</span>}{action}</div></header>
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
-  return <div className="account-metric"><strong>{value}</strong><span>{label}</span></div>
+function Metric({ label, value, onClick }: { label: string; value: number; onClick?: () => void }) {
+  const content = <><strong>{value}</strong><span>{label}</span></>
+  return onClick ? <button type="button" className="account-metric" aria-label={`查看${label}列表，共 ${value} 人`} onClick={onClick}>{content}</button> : <div className="account-metric">{content}</div>
 }
 
 function BalanceMini({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {

@@ -454,9 +454,21 @@
 .client-profile-popover__user-id:hover { background: var(--prototype-canvas, #f3f4f6); color: var(--client-text); }
 .client-profile-popover__copy-feedback { display: inline-flex; align-items: center; gap: 3px; color: var(--client-text); font-size: 10px; white-space: nowrap; }
 .client-profile-popover__avatar { width: 40px; height: 40px; flex: 0 0 auto; border: 1px solid var(--client-border); border-radius: 50%; object-fit: cover; }
+.client-profile-popover__wealth { display: grid; width: 100%; gap: 7px; border: 1px solid var(--client-border); border-radius: 6px; padding: 9px 10px; background: var(--prototype-surface, #fff); color: var(--client-text); text-align: left; cursor: pointer; }
+.client-profile-popover__wealth:hover { border-color: var(--prototype-text-subtle, #9ca3af); background: var(--prototype-surface-muted, #f9fafb); }
+.client-profile-popover__wealth:focus-visible { outline: 2px solid var(--client-primary); outline-offset: 2px; }
+.client-profile-popover__wealth-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.client-profile-popover__wealth-heading > span { display: inline-flex; align-items: center; gap: 6px; color: var(--client-muted); font-size: 11px; }
+.client-profile-popover__wealth-heading strong { font-size: 12px; }
+.client-profile-popover__wealth-progress { display: block; height: 6px; overflow: hidden; border-radius: 4px; background: var(--prototype-canvas, #f3f4f6); }
+.client-profile-popover__wealth-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--prototype-primary, #374151); }
+.client-profile-popover__wealth-caption { overflow: hidden; color: var(--client-muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .client-profile-popover__stats { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--client-border); padding: 10px 0; }
-.client-profile-popover__stats > span { display: grid; gap: 2px; justify-items: center; border-left: 1px solid var(--client-border); }
+.client-profile-popover__stats > span, .client-profile-popover__stats > button { display: grid; gap: 2px; justify-items: center; border: 0; border-left: 1px solid var(--client-border); padding: 0; background: transparent; color: var(--client-text); font: inherit; }
 .client-profile-popover__stats > span:first-child { border-left: 0; }
+.client-profile-popover__stats > button { cursor: pointer; }
+.client-profile-popover__stats > button:hover small { color: var(--client-text); text-decoration: underline; text-underline-offset: 2px; }
+.client-profile-popover__stats > button:focus-visible { outline: 2px solid var(--client-primary); outline-offset: 2px; }
 .client-profile-popover__stats strong { font-size: 14px; font-weight: 600; }
 .client-profile-popover__stats small { color: var(--client-muted); font-size: 10px; }
 .client-profile-popover__balances { display: grid; gap: 8px; }
@@ -508,7 +520,10 @@
 .account-profile-card__identity h2 { margin: 0; font-size: 18px; font-weight: 600; }
 .account-profile-card__identity > span { display: inline-block; margin-top: 6px; color: var(--client-muted); font-size: 12px; }
 .account-social-stats { display: flex; align-items: center; gap: 0; }
-.account-metric { display: grid; min-width: 96px; gap: 3px; justify-items: center; border-left: 1px solid var(--client-border); }
+.account-metric { display: grid; min-width: 96px; gap: 3px; justify-items: center; border: 0; border-left: 1px solid var(--client-border); padding: 0; background: transparent; color: inherit; font: inherit; }
+button.account-metric { cursor: pointer; }
+button.account-metric:hover span { color: var(--client-text); text-decoration: underline; text-underline-offset: 2px; }
+button.account-metric:focus-visible { outline: 2px solid var(--client-primary); outline-offset: 3px; }
 .account-metric strong { font-size: 17px; font-weight: 600; }
 .account-metric span { color: var(--client-muted); font-size: 11px; }
 .account-overview-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; }
