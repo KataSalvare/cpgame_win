@@ -30,14 +30,22 @@ type Props = {
 }
 
 type DetailTab = 'services' | 'reviews' | 'gifts'
+type ReviewFilter = 'all' | 'images' | 'latest' | 'good' | 'middle' | 'poor'
 const tabNames: Record<DetailTab, string> = { services: '服务', reviews: '评价', gifts: '礼物' }
 const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 const receivedGiftCount = gifts.reduce((total, gift) => total + gift.count, 0)
 
 export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, onGift, followed, blocked, onToggleFollow, onBlock, note, onSaveNote, onShare }: Props) {
   const [activeTab, setActiveTab] = useState<DetailTab>('services')
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all')
   const logic = useCompanionDetailLogic(companion.id)
   const totalServiceCount = servicesByCompanion[companion.id]?.length ?? 0
+  const goodReviewCount = reviews.filter((review) => review.rating >= 4).length
+  const middleReviewCount = reviews.filter((review) => review.rating >= 3 && review.rating < 4).length
+  const poorReviewCount = reviews.filter((review) => review.rating < 3).length
+  const visibleReviews = (reviewFilter === 'images' ? reviews.filter((review) => review.images?.length) : reviewFilter === 'good' ? reviews.filter((review) => review.rating >= 4) : reviewFilter === 'middle' ? reviews.filter((review) => review.rating >= 3 && review.rating < 4) : reviewFilter === 'poor' ? reviews.filter((review) => review.rating < 3) : reviews)
+    .slice()
+    .sort((a, b) => reviewFilter === 'latest' ? b.date.localeCompare(a.date) : 0)
 
   if (pageState !== 'normal') {
     return <div className={`client-content client-content--narrow-state${presentation === 'panel' ? ' companion-detail-page--panel' : ''}`}>
@@ -94,11 +102,23 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
         </section>}
 
         {activeTab === 'reviews' && <section className="detail-list-section" aria-labelledby="reviews-title">
-          <div className="client-section-heading"><h2 id="reviews-title">评价</h2><span className="client-count">{reviews.length} 条</span></div>
-          <div className="review-list">{reviews.map((review) => <article className="review-item" key={review.id}>
+          <h2 id="reviews-title" className="sr-only">评价筛选</h2>
+          <div className="review-filters" role="group" aria-label="评价筛选">
+            <button type="button" aria-pressed={reviewFilter === 'all'} className={reviewFilter === 'all' ? 'is-active' : ''} onClick={() => setReviewFilter('all')}>全部</button>
+            <button type="button" aria-pressed={reviewFilter === 'images'} className={reviewFilter === 'images' ? 'is-active' : ''} onClick={() => setReviewFilter('images')}>带图评价</button>
+            <button type="button" aria-pressed={reviewFilter === 'latest'} className={reviewFilter === 'latest' ? 'is-active' : ''} onClick={() => setReviewFilter('latest')}>最新</button>
+            <button type="button" aria-pressed={reviewFilter === 'good'} className={reviewFilter === 'good' ? 'is-active' : ''} onClick={() => setReviewFilter('good')}>好评（{goodReviewCount}）</button>
+            <button type="button" aria-pressed={reviewFilter === 'middle'} className={reviewFilter === 'middle' ? 'is-active' : ''} onClick={() => setReviewFilter('middle')}>中评（{middleReviewCount}）</button>
+            <button type="button" aria-pressed={reviewFilter === 'poor'} className={reviewFilter === 'poor' ? 'is-active' : ''} onClick={() => setReviewFilter('poor')}>差评（{poorReviewCount}）</button>
+          </div>
+          {visibleReviews.length ? <div className="review-list">{visibleReviews.map((review) => <article className="review-item" key={review.id}>
             <AvatarMark initials={review.initials} size="sm" />
-            <div className="review-item__body"><div className="review-item__heading"><strong>{review.author}</strong><span className="client-muted">{review.date}</span></div><div className="review-item__meta"><span className="rating-mark"><Star size={13} />{review.rating.toFixed(1)}</span><span>{review.game}</span></div><p>{review.content}</p></div>
-          </article>)}</div>
+            <div className="review-item__body">
+              <div className="review-item__heading"><strong>{review.author}</strong><span className="rating-mark"><Star size={13} />{review.rating.toFixed(1)}</span><time className="client-muted" dateTime={review.date}>{review.date}</time></div>
+              <p>{review.content}</p>
+              {review.images?.length ? <div className="review-item__images" aria-label="评价图片">{review.images.map((image, index) => <img key={`${review.id}-${image}`} src={image} alt={`${review.author}的评价图片 ${index + 1}`} loading="lazy" />)}</div> : null}
+            </div>
+          </article>)}</div> : <div className="client-inline-empty"><p>暂无符合条件的评价</p><button type="button" className="client-button client-button--secondary" onClick={() => setReviewFilter('all')}>查看全部评价</button></div>}
         </section>}
 
         {activeTab === 'gifts' && <section className="detail-list-section" aria-label="礼物墙">

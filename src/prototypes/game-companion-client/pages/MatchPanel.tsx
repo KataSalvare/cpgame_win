@@ -43,9 +43,12 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
   const [clubSearch, setClubSearch] = useState('')
   const [miniPosition, setMiniPosition] = useState<{ left: number; top: number } | null>(null)
   const [miniDragging, setMiniDragging] = useState(false)
+  const [matchPanelPosition, setMatchPanelPosition] = useState<{ left: number; top: number } | null>(null)
+  const [matchPanelDragging, setMatchPanelDragging] = useState(false)
   const clubPickerRef = useRef<HTMLDivElement>(null)
   const matchHostRef = useRef<HTMLDivElement>(null)
   const miniDragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number; moved: boolean } | null>(null)
+  const matchPanelDragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number; scaleX: number; scaleY: number } | null>(null)
   const selectedGame = games.find((game) => game.id === logic.gameId)
   const club = logic.availableClubs.find((item) => item.id === logic.clubId)
   const filteredClubs = logic.availableClubs.filter((item) => item.name.toLocaleLowerCase().includes(clubSearch.trim().toLocaleLowerCase()))
@@ -90,6 +93,48 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
     const drag = miniDragRef.current
     if (drag?.pointerId === event.pointerId && event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
     setMiniDragging(false)
+  }
+
+  const startMatchPanelDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    if (event.button !== 0 || (event.target as HTMLElement).closest('button')) return
+    const host = matchHostRef.current
+    const panel = event.currentTarget.parentElement
+    if (!host || !panel) return
+    const hostRect = host.getBoundingClientRect()
+    const panelRect = panel.getBoundingClientRect()
+    const left = matchPanelPosition?.left ?? panelRect.left - hostRect.left
+    const top = matchPanelPosition?.top ?? panelRect.top - hostRect.top
+    matchPanelDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      left,
+      top,
+      scaleX: hostRect.width / host.clientWidth || 1,
+      scaleY: hostRect.height / host.clientHeight || 1,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setMatchPanelPosition({ left, top })
+    setMatchPanelDragging(true)
+  }
+
+  const moveMatchPanel = (event: ReactPointerEvent<HTMLElement>) => {
+    const drag = matchPanelDragRef.current
+    const host = matchHostRef.current
+    const panel = event.currentTarget.parentElement
+    if (!drag || drag.pointerId !== event.pointerId || !host || !panel) return
+    const maxLeft = Math.max(0, host.clientWidth - panel.offsetWidth)
+    const maxTop = Math.max(0, host.clientHeight - panel.offsetHeight)
+    setMatchPanelPosition({
+      left: Math.min(maxLeft, Math.max(0, drag.left + (event.clientX - drag.startX) / drag.scaleX)),
+      top: Math.min(maxTop, Math.max(0, drag.top + (event.clientY - drag.startY) / drag.scaleY)),
+    })
+  }
+
+  const finishMatchPanelDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    if (matchPanelDragRef.current?.pointerId === event.pointerId && event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+    matchPanelDragRef.current = null
+    setMatchPanelDragging(false)
   }
 
   const activateMiniCard = () => {
@@ -177,8 +222,8 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
       <span className="match-mini-card__content"><strong>{hasCandidateList ? '等待选人' : '匹配中'}</strong>{hasCandidateList && <small>已匹配 {candidates.length} 位 · 已选 {selectedIds.length}/{expectedCount}</small>}</span>
       <Maximize2 className="match-mini-card__restore" size={15} aria-hidden="true" />
     </div>}
-    {open && <section className="match-panel" aria-label={matching ? '匹配中' : '一键匹配'}>
-      <header className="match-panel__header">
+    {open && <section className={`match-panel${matchPanelDragging ? ' is-dragging' : ''}`} style={matchPanelPosition ? { left: matchPanelPosition.left, top: matchPanelPosition.top, right: 'auto' } : undefined} aria-label={matching ? '匹配中' : '一键匹配'}>
+      <header className="match-panel__header is-draggable" onPointerDown={startMatchPanelDrag} onPointerMove={moveMatchPanel} onPointerUp={finishMatchPanelDrag} onPointerCancel={finishMatchPanelDrag}>
         <div className="match-panel__title-icon"><Swords size={18} /></div>
         <div className="match-panel__heading"><h2>{matching ? '匹配中' : '一键匹配'}</h2></div>
         <button type="button" className="windows-icon-button" aria-label="最小化匹配面板" title="最小化" onClick={onMinimize}><Minimize2 size={16} /></button>

@@ -50,26 +50,28 @@ export interface WindowsTitleBarProps {
   leading?: ReactNode
   actions?: ReactNode
   showWindowControls?: boolean
+  onClose?: () => void
   className?: string
 }
 
-export function WindowsTitleBar({ title, leading, actions, showWindowControls = true, className = '' }: WindowsTitleBarProps) {
+export function WindowsTitleBar({ title, leading, actions, showWindowControls = true, onClose, className = '' }: WindowsTitleBarProps) {
   return <header className={`windows-titlebar ${className}`.trim()}>
     <div className="windows-titlebar__identity">{leading}<span>{title}</span></div>
     {actions && <div className="windows-titlebar__actions">{actions}</div>}
-    {showWindowControls && <WindowsControlButtons />}
+    {showWindowControls && <WindowsControlButtons onClose={onClose} />}
   </header>
 }
 
 export interface WindowsControlButtonsProps {
+  onClose?: () => void
   className?: string
 }
 
-export function WindowsControlButtons({ className = '' }: WindowsControlButtonsProps) {
-  return <div className={`windows-control-buttons ${className}`.trim()} aria-label="窗口控制按钮（仅示意）">
+export function WindowsControlButtons({ onClose, className = '' }: WindowsControlButtonsProps) {
+  return <div className={`windows-control-buttons ${className}`.trim()} aria-label="窗口控制按钮">
     <span className="windows-control-buttons__button" aria-label="最小化"><Minus size={14} strokeWidth={1.5} /></span>
     <span className="windows-control-buttons__button" aria-label="最大化"><Square size={11} strokeWidth={1.5} /></span>
-    <span className="windows-control-buttons__button windows-control-buttons__button--close" aria-label="关闭"><X size={14} strokeWidth={1.5} /></span>
+    <button type="button" className="windows-control-buttons__button windows-control-buttons__button--close" aria-label="关闭" onClick={onClose}><X size={14} strokeWidth={1.5} /></button>
   </div>
 }
 

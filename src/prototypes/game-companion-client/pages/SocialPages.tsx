@@ -464,7 +464,7 @@ function GroupMemberRemoveDialog({ friends, onClose, onSubmit }: { friends: type
   </DialogPanel>
 }
 
-export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeVoice, onExitVoice, onOpenClubSupport, onOpenGift, ownerSource = 'personal' }: PageStateProps & { logic: SocialLogic; onOrder: (serviceId: string, companionId: string) => void; onMinimizeVoice: () => void; onExitVoice: () => void; onOpenClubSupport: () => void; onOpenGift: (recipients: GiftRecipient[], fixedRecipient?: GiftRecipient, anchor?: HTMLButtonElement) => void; ownerSource?: 'personal' | 'club' }) {
+export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeVoice, onExitVoice, onOpenClubSupport, onOpenGift, onChatWithCompanion, ownerSource = 'personal' }: PageStateProps & { logic: SocialLogic; onOrder: (serviceId: string, companionId: string) => void; onMinimizeVoice: () => void; onExitVoice: () => void; onOpenClubSupport: () => void; onOpenGift: (recipients: GiftRecipient[], fixedRecipient?: GiftRecipient, anchor?: HTMLButtonElement) => void; onChatWithCompanion: (companionId: string) => void; ownerSource?: 'personal' | 'club' }) {
   const voicePageRef = useRef<HTMLDivElement>(null)
   const channelMenuRef = useRef<HTMLDivElement>(null)
   const memberMenuRef = useRef<HTMLDivElement>(null)
@@ -487,11 +487,15 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [invitees, setInvitees] = useState<string[]>([])
   const [deleteChannelId, setDeleteChannelId] = useState<string | null>(null)
   const [memberAction, setMemberAction] = useState<{ type: VoiceMemberAction; member: VoiceMember } | null>(null)
-  const [memberContextMenu, setMemberContextMenu] = useState<{ member: VoiceMember; x: number; y: number; moveOpen: boolean } | null>(null)
+  const [memberContextMenu, setMemberContextMenu] = useState<{ member: VoiceMember; x: number; y: number } | null>(null)
+  const [singleMoveDialog, setSingleMoveDialog] = useState<{ member: VoiceMember; roomId: string; channelId: string } | null>(null)
+  const [singleMoveTargetRoomId, setSingleMoveTargetRoomId] = useState('')
+  const [singleMoveTargetChannelId, setSingleMoveTargetChannelId] = useState('')
   const [voiceProfileId, setVoiceProfileId] = useState<string | null>(null)
   const [membersDrawerOpen, setMembersDrawerOpen] = useState(false)
   const [roomChatCollapsed, setRoomChatCollapsed] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
+  const [roomSearch, setRoomSearch] = useState('')
   const [voiceModes, setVoiceModes] = useState<Record<string, VoiceMode>>({})
   const [micQueueCountdown, setMicQueueCountdown] = useState<{ memberId: string; seconds: number } | null>(null)
   const [voiceModeOpen, setVoiceModeOpen] = useState(false)
@@ -500,7 +504,12 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false)
   const [collapsedRoomIds, setCollapsedRoomIds] = useState<string[]>([])
   const [collapsedChannelIds, setCollapsedChannelIds] = useState<string[]>([])
-  const [channelContextMenu, setChannelContextMenu] = useState<{ roomId: string; channelId: string; x: number; y: number; moveOpen: boolean } | null>(null)
+  const [channelContextMenu, setChannelContextMenu] = useState<{ roomId: string; channelId: string; x: number; y: number } | null>(null)
+  const [batchMoveDialog, setBatchMoveDialog] = useState<{ roomId: string; channelId: string } | null>(null)
+  const [batchMoveMemberIds, setBatchMoveMemberIds] = useState<string[]>([])
+  const [batchMoveTargetRoomId, setBatchMoveTargetRoomId] = useState('')
+  const [batchMoveTargetChannelId, setBatchMoveTargetChannelId] = useState('')
+  const [batchMoveMemberPage, setBatchMoveMemberPage] = useState(0)
   const [recording, setRecording] = useState(false)
   const [recordingPromptOpen, setRecordingPromptOpen] = useState(false)
   const recordingStartButton = useRef<HTMLButtonElement>(null)
@@ -671,6 +680,26 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const filteredMembers = members.filter((member) => member.name.toLocaleLowerCase().includes(normalizedMemberSearch))
   const contextRoom = channelContextMenu ? logic.voiceRooms.find((item) => item.id === channelContextMenu.roomId) : undefined
   const contextChannel = contextRoom?.channels.find((item) => item.id === channelContextMenu?.channelId)
+  const batchMoveSourceRoom = batchMoveDialog ? logic.voiceRooms.find((item) => item.id === batchMoveDialog.roomId) : undefined
+  const batchMoveSourceChannel = batchMoveSourceRoom?.channels.find((item) => item.id === batchMoveDialog?.channelId)
+  const batchMoveTargetRoom = logic.voiceRooms.find((item) => item.id === batchMoveTargetRoomId)
+  const batchMoveTargetGroups = logic.voiceRooms.filter((item) => item.channels.some((target) => item.id !== batchMoveSourceRoom?.id || target.id !== batchMoveDialog?.channelId))
+  const batchMoveTargets = batchMoveTargetRoom?.channels.filter((item) => batchMoveTargetRoom.id !== batchMoveSourceRoom?.id || item.id !== batchMoveDialog?.channelId) ?? []
+  const batchMoveTarget = batchMoveTargets.find((item) => item.id === batchMoveTargetChannelId)
+  const batchMoveTargetRoomCount = batchMoveTargetRoom?.channels.reduce((total, item) => total + item.members.length, 0) ?? 0
+  const batchMoveGroupFits = batchMoveTargetRoom?.id === batchMoveSourceRoom?.id || Boolean(batchMoveTargetRoom && batchMoveTargetRoom.capacity - batchMoveTargetRoomCount >= batchMoveMemberIds.length)
+  const batchMovePageSize = 6
+  const batchMovePageCount = Math.max(1, Math.ceil((batchMoveSourceChannel?.members.length ?? 0) / batchMovePageSize))
+  const batchMovePageMembers = batchMoveSourceChannel?.members.slice(batchMoveMemberPage * batchMovePageSize, (batchMoveMemberPage + 1) * batchMovePageSize) ?? []
+  const singleMoveSourceRoom = singleMoveDialog ? logic.voiceRooms.find((item) => item.id === singleMoveDialog.roomId) : undefined
+  const singleMoveSourceChannel = singleMoveSourceRoom?.channels.find((item) => item.id === singleMoveDialog?.channelId)
+  const singleMoveTargetRoom = logic.voiceRooms.find((item) => item.id === singleMoveTargetRoomId)
+  const singleMoveTargetGroups = logic.voiceRooms.filter((item) => item.channels.some((target) => item.id !== singleMoveSourceRoom?.id || target.id !== singleMoveSourceChannel?.id))
+  const singleMoveTargets = singleMoveTargetRoom?.channels.filter((item) => singleMoveTargetRoom.id !== singleMoveSourceRoom?.id || item.id !== singleMoveSourceChannel?.id) ?? []
+  const singleMoveTarget = singleMoveTargets.find((item) => item.id === singleMoveTargetChannelId)
+  const singleMoveRoomCount = singleMoveTargetRoom?.channels.reduce((total, item) => total + item.members.length, 0) ?? 0
+  const singleMoveMemberInTargetRoom = Boolean(singleMoveTargetRoom?.channels.some((item) => item.members.some((member) => member.id === singleMoveDialog?.member.id)))
+  const singleMoveCanConfirm = Boolean(singleMoveDialog && singleMoveTargetRoom && singleMoveTarget && !singleMoveMemberInTargetRoom && singleMoveTarget.members.length < singleMoveTarget.capacity && (singleMoveTargetRoom.id === singleMoveSourceRoom?.id || singleMoveRoomCount < singleMoveTargetRoom.capacity))
   const deletingChannel = room?.channels.find((item) => item.id === deleteChannelId)
   const deleteAvailableCapacity = room?.channels
     .filter((item) => item.id !== deleteChannelId)
@@ -779,19 +808,25 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     if (!root) return
     const bounds = root.getBoundingClientRect()
     const scale = bounds.width / root.clientWidth || 1
-    setMemberContextMenu({ member, x: (event.clientX - bounds.left) / scale, y: (event.clientY - bounds.top) / scale, moveOpen: false })
+    setMemberContextMenu({ member, x: (event.clientX - bounds.left) / scale, y: (event.clientY - bounds.top) / scale })
   }
 
-  const moveMemberToRoom = (targetRoomId: string, targetChannelId: string) => {
-    if (!memberContextMenu) return
-    const targetRoom = logic.voiceRooms.find((item) => item.id === targetRoomId)
-    const targetChannel = targetRoom?.channels.find((item) => item.id === targetChannelId)
-    const member = memberContextMenu.member
-    const moved = logic.moveVoiceMember(member.id, targetRoomId, targetChannelId)
-    setFeedback(moved && targetRoom && targetChannel
-      ? `已将「${member.name}」移动到「${targetRoom.name} · ${targetChannel.name}」。`
-      : '目标房间剩余人数不足，无法移动成员。')
+  const openSingleMoveDialog = () => {
+    if (!memberContextMenu || !room) return
+    const sourceChannel = room.channels.find((item) => item.members.some((member) => member.id === memberContextMenu.member.id))
+    if (!sourceChannel) return
+    setSingleMoveDialog({ member: memberContextMenu.member, roomId: room.id, channelId: sourceChannel.id })
+    setSingleMoveTargetRoomId('')
+    setSingleMoveTargetChannelId('')
     setMemberContextMenu(null)
+  }
+  const confirmSingleMove = () => {
+    if (!singleMoveDialog || !singleMoveTargetRoom || !singleMoveTarget) return
+    const moved = logic.moveVoiceMember(singleMoveDialog.member.id, singleMoveTargetRoom.id, singleMoveTarget.id)
+    setFeedback(moved
+      ? `已将「${singleMoveDialog.member.name}」移动到「${singleMoveTargetRoom.name} · ${singleMoveTarget.name}」。`
+      : '目标房间剩余人数不足，无法移动成员。')
+    setSingleMoveDialog(null)
   }
 
   const openChannelContextMenu = (event: ReactMouseEvent, roomId: string, channelId: string) => {
@@ -801,7 +836,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     if (!root) return
     const bounds = root.getBoundingClientRect()
     const scale = bounds.width / root.clientWidth || 1
-    setChannelContextMenu({ roomId, channelId, x: (event.clientX - bounds.left) / scale, y: (event.clientY - bounds.top) / scale, moveOpen: false })
+    setChannelContextMenu({ roomId, channelId, x: (event.clientX - bounds.left) / scale, y: (event.clientY - bounds.top) / scale })
   }
 
   const collapseAllVoiceChannels = () => {
@@ -828,14 +863,32 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     })
   }
 
-  const moveChannelMembers = (targetChannelId: string) => {
+  const openBatchMoveDialog = () => {
     if (!contextRoom || !contextChannel) return
-    const movingIds = contextChannel.members.map((member) => member.id)
-    const movedCount = logic.moveMembers(contextRoom.id, movingIds, targetChannelId)
-    if (movingIds.includes(currentSocialUser.id)) logic.selectVoiceSubchannel(contextRoom.id, targetChannelId)
-    setFeedback(movedCount ? `已将 ${movedCount} 位成员移动到其他房间。` : '目标房间剩余人数不足。')
+    setBatchMoveDialog({ roomId: contextRoom.id, channelId: contextChannel.id })
+    setBatchMoveMemberIds([])
+    setBatchMoveTargetRoomId('')
+    setBatchMoveTargetChannelId('')
+    setBatchMoveMemberPage(0)
     setChannelContextMenu(null)
   }
+  const setBatchMoveSelection = (next: string[]) => {
+    if (batchMoveTargetChannelId && (!next.length || next.length > (batchMoveTarget?.capacity ?? 0) - (batchMoveTarget?.members.length ?? 0) || (batchMoveTargetRoom?.id !== batchMoveSourceRoom?.id && next.length > (batchMoveTargetRoom?.capacity ?? 0) - batchMoveTargetRoomCount))) setBatchMoveTargetChannelId('')
+    setBatchMoveMemberIds(next)
+  }
+  const toggleBatchMoveMember = (memberId: string) => setBatchMoveSelection(batchMoveMemberIds.includes(memberId) ? batchMoveMemberIds.filter((id) => id !== memberId) : [...batchMoveMemberIds, memberId])
+  const confirmBatchMove = () => {
+    if (!batchMoveDialog || !batchMoveTargetRoomId || !batchMoveTargetChannelId || !batchMoveMemberIds.length) return
+    const movedCount = logic.moveMembers(batchMoveDialog.roomId, batchMoveDialog.channelId, batchMoveMemberIds, batchMoveTargetRoomId, batchMoveTargetChannelId)
+    if (movedCount && batchMoveMemberIds.includes(currentSocialUser.id)) logic.selectVoiceSubchannel(batchMoveTargetRoomId, batchMoveTargetChannelId)
+    setFeedback(movedCount ? `已将 ${movedCount} 位成员移动到「${batchMoveTargetRoom?.name ?? '目标分组'} · ${batchMoveTarget?.name ?? '目标房间'}」。` : '目标房间剩余人数不足，未能移动成员。')
+    setBatchMoveDialog(null)
+  }
+  const roomQuery = roomSearch.trim().toLocaleLowerCase()
+  const searchableVoiceRooms = logic.visibleVoiceRooms.map((item) => {
+    const groupMatches = item.name.toLocaleLowerCase().includes(roomQuery)
+    return { ...item, channels: !roomQuery || groupMatches ? item.channels : item.channels.filter((voiceChannel) => voiceChannel.name.toLocaleLowerCase().includes(roomQuery)) }
+  }).filter((item) => !roomQuery || item.name.toLocaleLowerCase().includes(roomQuery) || item.channels.length > 0)
 
   return <div className="social-page voice-page" ref={voicePageRef}>
     <div className="voice-workspace">
@@ -845,16 +898,15 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           <div className="voice-owner-card__identity">{roomClub ? <strong>{roomClub.name}</strong> : <strong><UserNameWithLevel name={roomOwner?.name ?? currentSocialUser.name} identityId={roomOwner?.id ?? currentSocialUser.profileId} /></strong>}<span>ID：{roomClub?.id ?? roomOwner?.profileId ?? currentSocialUser.profileId}</span></div>
           {roomClub && <button type="button" className="voice-owner-card__support" aria-label="联系俱乐部客服" onClick={() => setClubSupportSelectionOpen(true)}><Headphones size={14} />客服</button>}
         </section>
-        <label className="social-search"><Search size={16} /><input value={logic.roomSearch} onChange={(event) => logic.setRoomSearch(event.target.value)} placeholder="搜索语音房" aria-label="搜索语音房" /></label>
-        <button type="button" className="voice-invite-entry" onClick={() => room && openInviteForChannel(room.name, channel?.name ?? '房间A')} disabled={!room}><UserPlus size={15} />邀请好友</button>
+        <label className="voice-room-search"><Search size={15} /><input type="search" value={roomSearch} onChange={(event) => setRoomSearch(event.target.value)} placeholder="搜索房间" aria-label="搜索房间" /></label>
         <div className="voice-tree-section-title"><span>语音分组</span><button type="button" className="voice-create-group-entry" onClick={openCreateRoom}><Plus size={14} />创建分组</button></div>
-        <div className="voice-room-list">{logic.visibleVoiceRooms.map((item) => <section className={`voice-room-group${room?.id === item.id ? ' is-active' : ''}`} key={item.id}>
+        <div className="voice-room-list">{searchableVoiceRooms.map((item) => <section className={`voice-room-group${room?.id === item.id ? ' is-active' : ''}`} key={item.id}>
           <div className="voice-room-heading-row">
             <button type="button" className="voice-room-heading" aria-expanded={!collapsedRoomIds.includes(item.id)} onClick={() => { logic.selectVoiceRoom(item.id); setCollapsedRoomIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id]) }}><ChevronRight size={14} className={`voice-room-chevron${collapsedRoomIds.includes(item.id) ? '' : ' is-expanded'}`} /><span><Users size={15} /></span><strong>{item.name}</strong><small className="voice-room-heading__count">{item.channels.reduce((total, roomChannel) => total + roomChannel.members.length, 0)}/{item.capacity}</small></button>
             {item.currentRole !== 'member' && <button type="button" className="voice-create-child-channel" aria-label={`在${item.name}创建房间`} title="新增房间" onClick={() => openChannelDialog('create', undefined, item.id)}><Plus size={13} /></button>}
             {item.currentRole !== 'member' && <button type="button" className="windows-icon-button voice-tree-manage" aria-label={`编辑${item.name}分组`} title="编辑分组" onClick={() => openEditRoom(item)}><Pencil size={13} /></button>}
           </div>
-          {!collapsedRoomIds.includes(item.id) && <div className="voice-subchannel-list">{item.channels.map((subchannel) => <div className={`voice-subchannel${channel?.id === subchannel.id && room?.id === item.id ? ' is-active' : ''}${logic.draggedMemberId && room?.id === item.id && logic.draggedMemberId !== currentSocialUser.id ? ' is-drop-target' : ''}`} key={subchannel.id} onContextMenu={(event) => openChannelContextMenu(event, item.id, subchannel.id)} onDragOver={(event) => { if (room?.id === item.id && canManage) event.preventDefault() }} onDrop={(event) => { event.preventDefault(); if (room?.id === item.id) onDropMember(subchannel.id) }}>
+          {(!roomQuery && collapsedRoomIds.includes(item.id)) ? null : <div className="voice-subchannel-list">{item.channels.map((subchannel) => <div className={`voice-subchannel${channel?.id === subchannel.id && room?.id === item.id ? ' is-active' : ''}${logic.draggedMemberId && room?.id === item.id && logic.draggedMemberId !== currentSocialUser.id ? ' is-drop-target' : ''}`} key={subchannel.id} onContextMenu={(event) => openChannelContextMenu(event, item.id, subchannel.id)} onDragOver={(event) => { if (room?.id === item.id && canManage) event.preventDefault() }} onDrop={(event) => { event.preventDefault(); if (room?.id === item.id) onDropMember(subchannel.id) }}>
             <div className="voice-subchannel__heading-row">
               <button type="button" className="voice-subchannel__heading" onClick={() => logic.selectVoiceSubchannel(item.id, subchannel.id)}>{subchannel.privacy === '私密' ? <LockKeyhole size={14} /> : <Volume2 size={14} />}<span>{subchannel.name}</span><small>{subchannel.members.length}/{subchannel.capacity}</small></button>
               <div className="voice-subchannel__tools">
@@ -867,7 +919,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           </div>)}
         </div>}
         </section>)}
-          {logic.visibleVoiceRooms.length === 0 && <div className="social-empty-inline">没有匹配的语音房</div>}
+          {searchableVoiceRooms.length === 0 && <div className="social-empty-inline">{roomQuery ? '没有匹配的房间' : '暂无可发现的语音房'}</div>}
         </div>
         <section className="voice-device-panel" aria-label="语音设备控制">
           <div className="voice-device-panel__heading"><span><i className={`voice-status-dot${logic.isInVoice ? ' is-connected' : ''}`} />{channel?.name ?? '未选择房间'}</span><button type="button" className="voice-leave-button" onClick={() => setLeaveDialogOpen(true)} disabled={!logic.isInVoice} aria-label="退出房间" data-tooltip="退出房间"><PhoneOff size={15} /></button></div>
@@ -952,7 +1004,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           onShare={(friendIds) => logic.shareCompanionToFriends(linkedCompanion.id, friendIds)}
           onToggleFollow={() => logic.toggleProfileFollow(linkedCompanion.id)}
           onBlock={() => logic.blockProfile(linkedCompanion.id)}
-          onChat={() => logic.startDirectMessage(selectedProfile.id)}
+          onChat={() => onChatWithCompanion(linkedCompanion.id)}
           onGift={(anchor) => onOpenGift([], { id: linkedCompanion.id, name: linkedCompanion.name, initials: linkedCompanion.initials, profileId: linkedCompanion.id.replace('companion-', 'P-') }, anchor)}
         /> : selectedProfileCard ? <CompanionProfileCard profile={selectedProfileCard} /> : null}
       </aside>}
@@ -962,11 +1014,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     {channelContextMenu && contextRoom && contextChannel && <div ref={channelMenuRef} className="voice-channel-context-menu" role="menu" aria-label={`${contextChannel.name}房间操作`} style={{ left: channelContextMenu.x, top: channelContextMenu.y }} onContextMenu={(event) => event.preventDefault()}>
       <button type="button" role="menuitem" onClick={() => { openInviteForChannel(contextRoom.name, contextChannel.name); setChannelContextMenu(null) }}><UserPlus size={15} />邀请</button>
       {contextRoom.currentRole !== 'member' && <>
-        <button type="button" role="menuitem" className="has-submenu" aria-expanded={channelContextMenu.moveOpen} disabled={!contextChannel.members.length || !contextRoom.channels.some((item) => item.id !== contextChannel.id)} onClick={() => setChannelContextMenu((current) => current ? { ...current, moveOpen: !current.moveOpen } : null)}>批量移动用户至<ChevronRight size={14} /></button>
-        {channelContextMenu.moveOpen && <div className="voice-channel-context-submenu" role="group" aria-label="选择目标房间">{contextRoom.channels.filter((item) => item.id !== contextChannel.id).map((target) => {
-          const fitsMembers = target.capacity - target.members.length >= contextChannel.members.length
-          return <button type="button" key={target.id} disabled={!fitsMembers} title={fitsMembers ? `移动到${target.name}` : '目标房间剩余人数不足'} onClick={() => moveChannelMembers(target.id)}>{target.name}<small>{target.members.length}/{target.capacity}</small></button>
-        })}</div>}
+        <button type="button" role="menuitem" disabled={!contextChannel.members.length || !contextRoom.channels.some((item) => item.id !== contextChannel.id)} onClick={openBatchMoveDialog}>批量移动用户至</button>
       </>}
       <button type="button" role="menuitemcheckbox" aria-checked={collapsedChannelIds.includes(contextChannel.id)} onClick={() => { setCollapsedChannelIds((ids) => ids.includes(contextChannel.id) ? ids.filter((id) => id !== contextChannel.id) : [...ids, contextChannel.id]); setChannelContextMenu(null) }}><span>收起该房间</span><i className={collapsedChannelIds.includes(contextChannel.id) ? 'is-checked' : ''} /></button>
       <button type="button" role="menuitem" onClick={collapseAllVoiceChannels}>收起所有房间</button>
@@ -993,14 +1041,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id} onClick={() => { setMemberAction({ type: 'block', member: memberContextMenu.member }); setMemberContextMenu(null) }}><Flag size={15} />拉黑</button>
       {isOwner && memberContextMenu.member.id !== currentSocialUser.id && <button type="button" role="menuitem" onClick={() => { setMemberAction({ type: 'role', member: memberContextMenu.member }); setMemberContextMenu(null) }}><Users size={15} />{memberContextMenu.member.role === 'admin' ? '撤销管理员' : '设为管理员'}</button>}
       <div className="voice-channel-context-separator" />
-      <button type="button" role="menuitem" className="has-submenu" aria-expanded={memberContextMenu.moveOpen} disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id || !logic.voiceRooms.some((voiceRoom) => voiceRoom.id !== room?.id && voiceRoom.channels.length > 0)} onClick={() => setMemberContextMenu((current) => current ? { ...current, moveOpen: !current.moveOpen } : null)}>移动至其他房间<ChevronRight size={14} /></button>
-      {memberContextMenu.moveOpen && <div className="voice-channel-context-submenu voice-member-context-submenu" role="group" aria-label="选择其他分组和房间">{logic.voiceRooms.filter((voiceRoom) => voiceRoom.id !== room?.id).flatMap((voiceRoom) => voiceRoom.channels.map((target) => {
-        const alreadyJoined = target.members.some((member) => member.id === memberContextMenu.member.id)
-        const alreadyInRoom = voiceRoom.channels.some((subchannel) => subchannel.members.some((member) => member.id === memberContextMenu.member.id))
-        const alreadyInAnotherChannel = alreadyInRoom && !alreadyJoined
-        const isFull = target.members.length >= target.capacity && !alreadyJoined
-        return <button type="button" key={`${voiceRoom.id}-${target.id}`} disabled={isFull || alreadyInAnotherChannel} title={isFull ? '目标房间已满' : alreadyInAnotherChannel ? `成员已在${voiceRoom.name}的其他房间` : alreadyJoined ? `成员已在${voiceRoom.name} · ${target.name}，移动后将离开当前房间` : `移动至${voiceRoom.name} · ${target.name}`} onClick={() => moveMemberToRoom(voiceRoom.id, target.id)}><span>{voiceRoom.name} · {target.name}</span><small>{target.members.length}/{target.capacity}</small></button>
-      }))}</div>}
+      <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id || !logic.voiceRooms.some((voiceRoom) => voiceRoom.channels.some((target) => voiceRoom.id !== room?.id || target.id !== channel?.id))} onClick={openSingleMoveDialog}>移动至其他房间<ChevronRight size={14} /></button>
     </div>}
 
     {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' ? `添加到「${channelDialogRoom?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || (channelMessageFrequency.trim() !== '' && (!Number.isSafeInteger(Number(channelMessageFrequency)) || Number(channelMessageFrequency) < 1)) || !Number.isSafeInteger(Number(channelMicQueueDuration)) || Number(channelMicQueueDuration) < 1 || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > channelCapacityLimit}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>
@@ -1012,6 +1053,39 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
         <label className="social-form-field">麦序时长（秒）<input type="number" min={1} step={1} value={channelMicQueueDuration} onChange={(event) => setChannelMicQueueDuration(event.target.value)} aria-label="麦序时长秒数" /></label>
         <fieldset className="voice-privacy-choice"><legend>房间权限</legend><div className="voice-privacy-choice__options"><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '公开'} onChange={() => { setChannelPrivacy('公开'); setChannelPassword('') }} /><Globe2 size={17} /><span><strong>公开房间</strong><small>可在房间列表中浏览</small></span></label><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '私密'} onChange={() => setChannelPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密房间</strong><small>可选设置进入密码</small></span></label></div></fieldset>
         {channelPrivacy === '私密' && <label className="social-form-field">房间密码<input type="password" value={channelPassword} onChange={(event) => setChannelPassword(event.target.value)} maxLength={32} placeholder="设置房间密码（可选）" autoComplete="new-password" /></label>}
+      </div>
+    </DialogPanel>}
+
+    {singleMoveDialog && <DialogPanel overlayId="voice-single-move-dialog" title={`移动「${singleMoveDialog.member.name}」`} onClose={() => setSingleMoveDialog(null)} width={480} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setSingleMoveDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmSingleMove} disabled={!singleMoveCanConfirm}>确认移动</button></>}>
+      <div className="voice-move-selects">
+        <label className="social-form-field">分组<select value={singleMoveTargetRoomId} onChange={(event) => { setSingleMoveTargetRoomId(event.target.value); setSingleMoveTargetChannelId('') }}><option value="">选择分组</option>{singleMoveTargetGroups.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+        <label className="social-form-field">房间<select value={singleMoveTargetChannelId} disabled={!singleMoveTargetRoomId} onChange={(event) => setSingleMoveTargetChannelId(event.target.value)}><option value="">选择房间</option>{singleMoveTargets.map((target) => {
+          const alreadyInRoom = Boolean(singleMoveTargetRoom?.channels.some((item) => (singleMoveTargetRoom.id !== singleMoveSourceRoom?.id || item.id !== singleMoveSourceChannel?.id) && item.members.some((member) => member.id === singleMoveDialog.member.id)))
+          const full = target.members.length >= target.capacity || (singleMoveTargetRoom?.id !== singleMoveSourceRoom?.id && singleMoveRoomCount >= (singleMoveTargetRoom?.capacity ?? 0))
+          return <option key={target.id} value={target.id} disabled={alreadyInRoom || full}>{target.name}（{target.members.length}/{target.capacity}）{alreadyInRoom ? ' · 成员已在此分组' : full ? ' · 已满' : ''}</option>
+        })}</select></label>
+      </div>
+    </DialogPanel>}
+
+    {batchMoveDialog && batchMoveSourceChannel && <DialogPanel overlayId="voice-batch-move-dialog" title="批量移动成员" description={`从「${batchMoveSourceRoom?.name ?? ''} · ${batchMoveSourceChannel.name}」选择成员和目标位置。`} onClose={() => setBatchMoveDialog(null)} width={520} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBatchMoveDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBatchMove} disabled={!batchMoveMemberIds.length || !batchMoveTarget || !batchMoveGroupFits || batchMoveTarget.capacity - batchMoveTarget.members.length < batchMoveMemberIds.length}>确认移动（{batchMoveMemberIds.length}）</button></>}>
+      <div className="voice-batch-move-form">
+        <fieldset className="voice-batch-move-section">
+          <legend>选择成员（{batchMoveMemberIds.length}/{batchMoveSourceChannel.members.length}）</legend>
+          <div className="voice-batch-move-tools"><button type="button" className="client-text-button" onClick={() => setBatchMoveSelection(batchMoveSourceChannel.members.map((member) => member.id))}>全选</button><button type="button" className="client-text-button" onClick={() => setBatchMoveSelection(batchMoveSourceChannel.members.filter((member) => !batchMoveMemberIds.includes(member.id)).map((member) => member.id))}>反选</button></div>
+          <div className="voice-batch-move-members">{batchMovePageMembers.map((member) => <label className="voice-batch-move-member" key={member.id}><input type="checkbox" checked={batchMoveMemberIds.includes(member.id)} onChange={() => toggleBatchMoveMember(member.id)} /><AvatarMark initials={member.initials} size="sm" /><span><UserNameWithLevel name={member.name} identityId={member.id} /></span></label>)}</div>
+          {batchMovePageCount > 1 && <nav className="voice-batch-move-pagination" aria-label="成员分页"><button type="button" className="client-button client-button--secondary" disabled={batchMoveMemberPage === 0} onClick={() => setBatchMoveMemberPage((page) => Math.max(0, page - 1))}>上一页</button><span>第 {batchMoveMemberPage + 1} / {batchMovePageCount} 页</span><button type="button" className="client-button client-button--secondary" disabled={batchMoveMemberPage >= batchMovePageCount - 1} onClick={() => setBatchMoveMemberPage((page) => Math.min(batchMovePageCount - 1, page + 1))}>下一页</button></nav>}
+        </fieldset>
+        <fieldset className="voice-batch-move-section">
+          <legend>选择目标房间</legend>
+          <div className="voice-move-selects">
+            <label className="social-form-field">分组<select value={batchMoveTargetRoomId} onChange={(event) => { setBatchMoveTargetRoomId(event.target.value); setBatchMoveTargetChannelId('') }}><option value="">选择分组</option>{batchMoveTargetGroups.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+            <label className="social-form-field">房间<select value={batchMoveTargetChannelId} disabled={!batchMoveTargetRoomId} onChange={(event) => setBatchMoveTargetChannelId(event.target.value)}><option value="">选择房间</option>{batchMoveTargets.map((target) => {
+              const fitsSelection = batchMoveMemberIds.length > 0 && target.capacity - target.members.length >= batchMoveMemberIds.length && batchMoveGroupFits
+              return <option key={target.id} value={target.id} disabled={!fitsSelection}>{target.name}（{target.members.length}/{target.capacity}）{!fitsSelection ? ' · 容量不足' : ''}</option>
+            })}</select></label>
+          </div>
+          {!batchMoveTargetGroups.length && <p className="voice-batch-move-empty">没有可移动到的其他房间。</p>}
+        </fieldset>
       </div>
     </DialogPanel>}
 

@@ -23,12 +23,13 @@ type Props = {
   onOpenMatch: () => void
   onOpenPremiumCards: () => void
   onOpenAnnouncements: () => void
+  onOpenClubReviews: () => void
   social: ReturnType<typeof useSocialLogic>
   orders: ClientOrder[]
   onRetry: () => void
 }
 
-export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, social, orders, onRetry }: Props) {
+export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOrderWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, onOpenClubReviews, social, orders, onRetry }: Props) {
   const [supportChatOpen, setSupportChatOpen] = useState(false)
   const [supportSelectionOpen, setSupportSelectionOpen] = useState(false)
   const [clubInfoTab, setClubInfoTab] = useState<ClubInfoTab | null>(null)
@@ -53,7 +54,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
         <AvatarMark initials={club.initials} size="lg" />
         <div className="club-profile-card__body">
           <div className="club-card__name-row"><h1>{club.name}</h1>{club.selfOperated && <span className="client-badge"><ShieldCheck size={13} /> 自营</span>}</div>
-          <div className="club-profile-card__subline"><span>ID：{club.id.replace('club-', 'C-')}</span><span className="rating-mark"><Star size={14} />{club.rating.toFixed(2)}</span><span className="client-inline-meta"><UsersRound size={14} />{club.companionCount} 位陪玩</span></div>
+          <div className="club-profile-card__subline"><span>ID：{club.id.replace('club-', 'C-')}</span><span className="client-inline-meta"><UsersRound size={14} />{club.companionCount} 位陪玩</span><button type="button" className="rating-mark club-profile-rating-button" onClick={onOpenClubReviews} aria-label={`查看俱乐部评价，评分 ${club.rating.toFixed(2)}`}><Star size={14} />{club.rating.toFixed(2)}</button></div>
           <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
           <p>{club.intro}</p>
         </div>

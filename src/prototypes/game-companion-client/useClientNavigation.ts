@@ -3,7 +3,7 @@ import { clubs, companions, servicesByCompanion } from './data/mockData'
 
 export type ClientPage = 'system-settings' | 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements'
 
-type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | null
+type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | 'club-reviews' | null
 type OrderSelectionMode = 'locked' | 'service' | 'cascade'
 type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; orderSelectionMode: OrderSelectionMode; returnTo: ClientPage | null; panel: StorePanel; voiceRoomSource: 'personal' | 'club' }
 
@@ -37,6 +37,7 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   if (page === 'club-detail' && requestedPanel === 'club-cards') panel = 'club-cards'
   if (page === 'club-detail' && requestedPanel === 'club-groups') panel = 'club-groups'
   if (page === 'club-detail' && requestedPanel === 'club-announcements') panel = 'club-announcements'
+  if (page === 'club-detail' && requestedPanel === 'club-reviews') panel = 'club-reviews'
   if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger' || requestedPanel === 'bean-withdraw' || requestedPanel === 'diamond-recharge')) panel = requestedPanel
   const voiceRoomSource = params.get('voiceFrom') === 'club' || (!params.has('voiceFrom') && page === 'voice-room' && params.has('club')) ? 'club' : 'personal'
   const requestedOrderMode = params.get('orderMode')
@@ -94,6 +95,7 @@ export function useClientNavigation(entryView?: string) {
   }, [route.clubId, route.companionId])
   const openClubGroups = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-groups'), [route.clubId])
   const openClubAnnouncements = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-announcements'), [route.clubId])
+  const openClubReviews = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-reviews'), [route.clubId])
   const beginOrder = useCallback((serviceId: string, companionId: string, orderSelectionMode: OrderSelectionMode = 'service') => {
     const companionClubId = companions.find((item) => item.id === companionId)?.clubId ?? route.clubId
     const companionIds = route.page === 'checkout' && route.companionIds.includes(companionId) ? route.companionIds : undefined
@@ -123,6 +125,7 @@ export function useClientNavigation(entryView?: string) {
     openDiamondRecharge,
     openClubGroups,
     openClubAnnouncements,
+    openClubReviews,
     beginOrder,
     beginMatchOrder,
   }

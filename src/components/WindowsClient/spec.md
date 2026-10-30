@@ -24,9 +24,9 @@ import {
 | 组件 | 主要属性 | 默认尺寸 / 行为 |
 | --- | --- | --- |
 | `WindowsClientFrame` | `titleBar`、`sidebar`、`navigationPanel`、`navigationPanelWidth`、`children`、`contentMaxWidth`、`rightPanel`、`rightPanelWidth`、`overlayLayer`、`className` | 填满父容器；标题栏 40px，左导航 240px；可选列表栏默认 240px、右侧详情栏默认 360px；内容区独立滚动并留白 24px，可设置内容最大宽度并居中 |
-| `WindowsTitleBar` | `title`、`leading`、`actions`、`showWindowControls` | 高 40px；默认显示控制按钮 |
+| `WindowsTitleBar` | `title`、`leading`、`actions`、`showWindowControls`、`onClose` | 高 40px；默认显示控制按钮；关闭事件由调用方处理 |
 | `WindowsSidebar` | `items`、`activeId`、`onSelect`、`heading`、`footer` | 选中项由调用方控制；项目可提供 `id`、`label`、`icon`、`group` |
-| `WindowsControlButtons` | `className` | 只绘制最小化、最大化和关闭图标，不绑定系统窗口操作 |
+| `WindowsControlButtons` | `onClose`、`className` | 绘制最小化、最大化和关闭图标；关闭按钮可选转发调用方事件，不执行原生窗口操作 |
 | `FloatingPanel` | `children`、`placement`、`width`、`className`、`style` | 默认宽 320px；绝对定位在调用方提供的相对定位锚点内；显示状态由调用方控制，可由按钮 hover / focus 或点击触发 |
 | `DialogPanel` | `overlayId`、`children`、`title`、`description`、`footer`、`onClose`、`width` | 默认宽 560px；overlayId 必填；调用方条件渲染以控制显隐 |
 | `RightDrawer` | `mode`、`overlayId`、`children`、`title`、`description`、`onClose`、`width` | 默认宽 360px；overlay 模式必须提供 overlayId；inline 模式作为内容区第三栏；标题和关闭操作固定，内容区独立滚动 |

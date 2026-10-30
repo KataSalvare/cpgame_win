@@ -1,3 +1,5 @@
+import reviewMatchImage from '../assets/mock-review-match.svg'
+
 export type Game = { id: string; name: string; shortName: string }
 
 export type Banner = {
@@ -64,6 +66,7 @@ export type Review = {
   date: string
   game: string
   content: string
+  images?: string[]
 }
 
 export type Gift = { id: string; name: string; initials: string; count: number; description: string; price: number }
@@ -138,10 +141,19 @@ export const servicesByCompanion: Record<string, Service[]> = Object.fromEntries
 )
 
 export const reviews: Review[] = [
-  { id: 'review-01', author: '一颗小行星', initials: '星', rating: 5, date: '2026-10-20', game: '无畏契约', content: '沟通很顺畅，战术思路清楚，整场节奏很舒服。' },
+  { id: 'review-01', author: '一颗小行星', initials: '星', rating: 5, date: '2026-10-20', game: '无畏契约', content: '沟通很顺畅，战术思路清楚，整场节奏很舒服。', images: [reviewMatchImage] },
   { id: 'review-02', author: '白日做梦', initials: '白', rating: 5, date: '2026-10-18', game: '绝地求生', content: '配合很默契，也会及时交流信息，体验不错。' },
-  { id: 'review-03', author: '橘子海', initials: '橘', rating: 4.9, date: '2026-10-16', game: '无畏契约', content: '耐心又细致，复盘建议对我很有帮助。' },
+  { id: 'review-03', author: '橘子海', initials: '橘', rating: 3, date: '2026-10-16', game: '无畏契约', content: '耐心又细致，复盘建议对我很有帮助。' },
   { id: 'review-04', author: '北方来信', initials: '北', rating: 5, date: '2026-10-12', game: '无畏契约', content: '氛围轻松，沟通清晰，下次还会一起玩。' },
+  { id: 'review-05', author: '山野来客', initials: '山', rating: 2, date: '2026-10-08', game: '绝地求生', content: '本次配合和沟通没有达到预期。' },
+]
+
+export const clubReviews: Review[] = [
+  { id: 'club-review-01', author: '一颗小行星', initials: '星', rating: 5, date: '2026-10-20', game: '无畏契约', content: '沟通很顺畅，战术思路清楚，整场节奏很舒服。', images: [reviewMatchImage] },
+  { id: 'club-review-02', author: '白日做梦', initials: '白', rating: 5, date: '2026-10-18', game: '绝地求生', content: '配合很默契，也会及时交流信息，体验不错。' },
+  { id: 'club-review-03', author: '橘子海', initials: '橘', rating: 3, date: '2026-10-16', game: '无畏契约', content: '耐心又细致，复盘建议对我很有帮助。' },
+  { id: 'club-review-04', author: '北方来信', initials: '北', rating: 5, date: '2026-10-12', game: '无畏契约', content: '氛围轻松，沟通清晰，下次还会一起玩。' },
+  { id: 'club-review-05', author: '山野来客', initials: '山', rating: 2, date: '2026-10-08', game: '绝地求生', content: '本次配合和沟通没有达到预期。' },
 ]
 
 export const gifts: Gift[] = [
