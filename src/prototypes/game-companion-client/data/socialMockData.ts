@@ -247,9 +247,8 @@ export const initialSupportQueue = [
   { id: 'support-user-3', name: '小熊饼干', initials: '熊' },
 ]
 
-export type FixedMessageFeed = 'activities' | 'system' | 'groups'
+export type FixedMessageFeed = 'system' | 'groups'
 export const fixedMessageFeeds: { id: FixedMessageFeed; title: string; summary: string }[] = [
-  { id: 'activities', title: '活动公告', summary: '查看平台与俱乐部最新活动' },
   { id: 'system', title: '系统通知', summary: '服务规范、维护及账号消息' },
   { id: 'groups', title: '群通知', summary: '入群申请与处理结果' },
 ]

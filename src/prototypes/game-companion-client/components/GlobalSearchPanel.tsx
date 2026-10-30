@@ -27,6 +27,7 @@ type Props = {
 }
 
 type ResultTab = 'rooms' | 'clubs' | 'users'
+type RoomSearchResult = { id: string; name: string; description: string; targetRoomId: string }
 const HISTORY_KEY = 'game-companion-global-search-history'
 const clubPublicId = (id: string) => id.replace(/^club-(\d+)$/i, 'C-$1')
 const tabItems: { id: ResultTab; label: string }[] = [
@@ -55,7 +56,20 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
   const results = useMemo(() => {
     const includes = (value: string) => value.toLocaleLowerCase().includes(normalizedQuery)
     return {
-      rooms: rooms.filter((room) => includes(room.name)),
+      rooms: [
+        ...rooms.filter((room) => includes(room.name)).map((room): RoomSearchResult => ({
+          id: room.id,
+          name: room.name,
+          description: `语音分组 · ${room.channels.length} 个房间`,
+          targetRoomId: room.id,
+        })),
+        ...(normalizedQuery === '11' ? [{
+          id: 'search-room-11',
+          name: '房间A',
+          description: '北境战术俱乐部 · 4/8 人 · ID：VR-0011',
+          targetRoomId: 'room-ranked',
+        }] : []),
+      ],
       clubs: clubs.filter((club) => includes(club.name) || includes(club.id) || includes(clubPublicId(club.id))),
       users: users.filter((user) => includes(user.name) || includes(user.profileId) || includes(user.id)),
     }
@@ -67,7 +81,7 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
   const selectFirstMatchingTab = (value: string) => {
     const term = value.trim().toLocaleLowerCase()
     if (!term) { setActiveTab('rooms'); return }
-    if (rooms.some((room) => room.name.toLocaleLowerCase().includes(term))) setActiveTab('rooms')
+    if (term === '11' || rooms.some((room) => room.name.toLocaleLowerCase().includes(term))) setActiveTab('rooms')
     else if (clubs.some((club) => club.name.toLocaleLowerCase().includes(term) || club.id.toLocaleLowerCase().includes(term) || clubPublicId(club.id).toLocaleLowerCase().includes(term))) setActiveTab('clubs')
     else setActiveTab('users')
   }
@@ -128,7 +142,7 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
           {totalResults === 0 ? <>
             <div className="global-search-empty"><Search size={20} /><strong>没有找到相关内容</strong><span>试试俱乐部名称、俱乐部 ID、用户昵称或用户 ID</span></div>
             <RecommendedClubs clubs={recommendedClubs} gamesById={gamesById} onSelect={(clubId) => openResult(() => onOpenClub(clubId))} />
-          </> : activeTab === 'rooms' ? counts.rooms ? results.rooms.map((room) => <button type="button" className="global-search-result" key={room.id} onClick={() => openResult(() => onOpenRoom(room.id))}><span className="global-search-result__icon"><UsersRound size={17} /></span><span className="global-search-result__text"><strong>{room.name}</strong><small>语音分组 · {room.channels.length} 个房间</small></span><span className="global-search-result__kind">语音房</span></button>) : <CategoryEmpty label="语音房" />
+          </> : activeTab === 'rooms' ? counts.rooms ? results.rooms.map((room) => <button type="button" className="global-search-result" key={room.id} onClick={() => openResult(() => onOpenRoom(room.targetRoomId))}><span className="global-search-result__icon"><UsersRound size={17} /></span><span className="global-search-result__text"><strong>{room.name}</strong><small>{room.description}</small></span><span className="global-search-result__kind">语音房</span></button>) : <CategoryEmpty label="语音房" />
             : activeTab === 'clubs' ? counts.clubs ? results.clubs.map((club) => <button type="button" className="global-search-result" key={club.id} onClick={() => openResult(() => onOpenClub(club.id))}><AvatarMark initials={club.initials} size="md" /><span className="global-search-result__text"><strong>{club.name}</strong><small>ID：{clubPublicId(club.id)} · {club.companionCount} 位陪玩</small></span><span className="global-search-result__kind">俱乐部</span></button>) : <CategoryEmpty label="俱乐部" />
               : counts.users ? results.users.map((user) => <button type="button" className="global-search-result" key={user.id} onClick={() => openResult(() => onOpenUser(user))}><AvatarMark initials={user.initials} size="md" /><span className="global-search-result__text"><strong><UserNameWithLevel name={user.name} identityId={user.profileId} /></strong><small>ID：{user.profileId}</small></span><span className="global-search-result__kind">{user.kind}</span></button>) : <CategoryEmpty label="用户" />}
         </div>

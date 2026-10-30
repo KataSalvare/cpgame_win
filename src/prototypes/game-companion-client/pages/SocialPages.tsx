@@ -1,7 +1,7 @@
 import type { ClientOrder } from '../data/accountMockData'
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
-  Bell, Megaphone, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText,
+  Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText,
   Gift, ImagePlus, LockKeyhole, MessageCircle, Mic, MicOff, MoreHorizontal, Pencil,
   PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, Undo2, UserPlus, Users, PanelRightClose, PanelRightOpen,
   Volume2, VolumeX, X,
@@ -280,7 +280,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
           {kindFilter === 'group' && <button type="button" className="conversation-create-group" onClick={() => { setGroupDialog(true); setFeedback('') }}><Users size={15} />创建群聊</button>}
           <div className="conversation-list">
             {fixedMessageFeeds.filter((item) => !logic.chatSearch.trim() || item.title.includes(logic.chatSearch.trim())).map((item) => {
-              const Icon = item.id === 'activities' ? Megaphone : item.id === 'system' ? Bell : Users
+              const Icon = item.id === 'system' ? Bell : Users
               return <button type="button" key={item.id} className={`conversation-row${logic.activeFixedFeed === item.id ? ' is-active' : ''}`} onClick={() => { logic.setActiveFixedFeed(item.id); logic.setSelectedProfileId(null); setGroupSettingsOpen(false) }}><span className="fixed-notification-icon"><Icon size={22} /></span><span className="conversation-row__copy"><span className="conversation-row__title"><strong>{item.title}</strong></span><small>{item.summary}</small></span></button>
             })}
 
@@ -307,7 +307,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
         friend={logic.selectedFriend}
         onMessage={() => logic.startDirectMessage(logic.selectedFriend!.id)}
         onOpenProfile={() => showFriendProfile(logic.selectedFriend!.id)}
-      /> : <section className="chat-empty-state"><Users size={28} /><h2>选择一位好友</h2></section> : logic.activeFixedFeed ? <FixedMessageFeedPanel feed={logic.activeFixedFeed} requests={logic.groupJoinRequests} onResolve={logic.resolveGroupJoinRequest} readIds={logic.readActivityIds} onRead={logic.readActivity} /> : conversation ? <section className="chat-panel" aria-label={`${conversation.title}聊天`}>
+      /> : <section className="chat-empty-state"><Users size={28} /><h2>选择一位好友</h2></section> : logic.activeFixedFeed ? <FixedMessageFeedPanel feed={logic.activeFixedFeed} requests={logic.groupJoinRequests} onResolve={logic.resolveGroupJoinRequest} /> : conversation ? <section className="chat-panel" aria-label={`${conversation.title}聊天`}>
         <header className="chat-panel__header">
           <div className="chat-panel__identity">
             <button type="button" className="chat-avatar-trigger" aria-expanded={conversation.kind === 'group' ? groupSettingsOpen : Boolean(logic.selectedProfile)} onClick={() => conversation.kind === 'direct' ? showFriendProfile(conversation.members[0]) : openGroupSettings()} aria-label={conversation.kind === 'group' ? `打开${conversation.title}群设置` : `查看${conversation.title}资料`}><AvatarMark initials={conversation.initials} imageUrl={conversation.avatarDataUrl} size="md" /></button>

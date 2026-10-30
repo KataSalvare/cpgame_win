@@ -56,8 +56,6 @@ const updateMicQueue = (channel: VoiceSubchannel, memberId: string, micOn: boole
 export function useSocialLogic() {
   const [activeFixedFeed, setActiveFixedFeed] = useState<FixedMessageFeed | null>(null)
   const [groupJoinRequests, setGroupJoinRequests] = useState(initialGroupJoinRequests)
-  const [readActivityIds, setReadActivityIds] = useState<string[]>([])
-  const readActivity = (id: string) => setReadActivityIds((ids) => ids.includes(id) ? ids : [...ids, id])
   const resolveGroupJoinRequest = (requestId: string, status: 'approved' | 'rejected') => {
     const request = groupJoinRequests.find((item) => item.id === requestId)
     const target = conversations.find((item) => item.id === request?.conversationId)
@@ -779,7 +777,7 @@ export function useSocialLogic() {
     conversations, selectedConversation, selectedFriend, selectedProfile, visibleConversations, visibleFriends, clubGroups,
     followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile, unblockProfile, profileNotes, setProfileNote,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
-    activeFixedFeed, setActiveFixedFeed, groupJoinRequests, resolveGroupJoinRequest, readActivityIds, readActivity,
+    activeFixedFeed, setActiveFixedFeed, groupJoinRequests, resolveGroupJoinRequest,
     selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageToUser, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, updateGroupAvatar, setGroupAdmin, removeGroupMember, setGroupJoinApproval, setGroupMuted, leaveGroup, dissolveGroup, sendChatMessage, sendChatMessageToConversation, recallChatMessage, sendSupportCard, sendSupportCardToConversation, updateSupportReview, updateSupportReviewInConversation, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms, nextVoiceChannelName: getNextVoiceChannelName(voiceRooms),
     roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,

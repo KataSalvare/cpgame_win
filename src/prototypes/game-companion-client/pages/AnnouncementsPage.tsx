@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, CalendarDays } from 'lucide-react'
+import { Bell, CalendarDays, CheckCheck } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { Announcement, AnnouncementCategory } from '../data/announcementMockData'
@@ -14,11 +14,12 @@ type Props = {
   presentation?: 'page' | 'panel'
   readIds: string[]
   onRead: (id: string) => void
+  onReadAll: () => void
   onRetry: () => void
   onBack?: () => void
 }
 
-export function AnnouncementsPage({ kind, clubName, announcements, categories, pageState, readIds, onRead, onRetry, onBack, presentation = 'page' }: Props) {
+export function AnnouncementsPage({ kind, clubName, announcements, categories, pageState, readIds, onRead, onReadAll, onRetry, onBack, presentation = 'page' }: Props) {
   const [activeCategory, setActiveCategory] = useState<AnnouncementCategory | '全部'>('全部')
   const [selected, setSelected] = useState<Announcement | null>(null)
   const dialogHost = document.querySelector('.windows-client-frame.game-companion-client')
@@ -32,7 +33,7 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
 
   return <div className={`client-content announcement-page${presentation === 'panel' ? ' announcement-page--panel' : ''}`}>
     {presentation === 'page' && onBack && <button type="button" className="client-back-link" onClick={onBack}>返回俱乐部</button>}
-    {presentation === 'page' && <header className="client-page-heading"><div><span className="client-eyebrow">{kind === 'platform' ? '平台消息' : clubName}</span><h1>{title}</h1></div><span className="client-heading-mark"><Bell size={15} />{announcements.length} 条公告</span></header>}
+    {presentation === 'page' && <header className="client-page-heading"><div><span className="client-eyebrow">{kind === 'platform' ? '平台消息' : clubName}</span><h1>{title}</h1></div><button type="button" className="client-button client-button--secondary client-button--small" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button></header>}
     <section className="announcement-card client-card" aria-label={`${title}列表`}>
       <div className="announcement-filters" role="tablist" aria-label="公告分类">
         {(['全部', ...categories] as const).map((category) => <button key={category} type="button" role="tab" aria-selected={activeCategory === category} className={`announcement-filter${activeCategory === category ? ' is-active' : ''}`} onClick={() => setActiveCategory(category)}>{category}</button>)}
