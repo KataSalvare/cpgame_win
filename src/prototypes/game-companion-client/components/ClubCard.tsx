@@ -23,7 +23,7 @@ export function ClubCard({ club, gamesById, onOpen, onBrowse, onSelfOrder, showA
         <div className="club-card__name-row"><h3>{club.name}</h3>{club.selfOperated && <span className="client-badge">自营</span>}</div>
         <span className="client-muted">ID：{club.id.replace('club-', 'C-')}</span>
       </div>
-      <span className="rating-mark"><Star size={14} />{club.rating.toFixed(2)}</span>
+      <span className="rating-mark"><Star size={14} />{club.rating.toFixed(1)}</span>
     </div>
     <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
     <p className="club-card__intro">{club.intro}</p>

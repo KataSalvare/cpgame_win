@@ -146,7 +146,9 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   }
   const account = useAccountLogic()
   const workbench = useWorkbenchLogic()
-  const [noticesOpen, setNoticesOpen] = useState(false)
+  const [noticeMode, setNoticeMode] = useState<'closed' | 'panel' | 'all'>('closed')
+  const [nextNoticeMode, setNextNoticeMode] = useState<'panel' | 'all'>('panel')
+  const [notificationsRead, setNotificationsRead] = useState(false)
   const [voiceCallNotifications, setVoiceCallNotifications] = useState<VoiceCallNotification[]>(initialVoiceCallNotifications)
   const [voiceCallDialogOpen, setVoiceCallDialogOpen] = useState(false)
   const [selectedVoiceCallId, setSelectedVoiceCallId] = useState(initialVoiceCallNotifications[0]?.id ?? '')
@@ -208,12 +210,12 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     social.selectVoiceSubchannel(notification.roomId, notification.channelId)
     setVoiceCallNotifications((items) => items.filter((item) => item.id !== notificationId))
     setVoiceCallDialogOpen(false)
-    setNoticesOpen(false)
+    setNoticeMode('closed')
     navigation.goToPage('voice-room')
   }
   const acceptRoomInvitation = (invitation: (typeof social.voiceInvitations)[number]) => {
     if (!social.acceptVoiceInvitation(invitation)) return
-    setNoticesOpen(false)
+    setNoticeMode('closed')
     navigation.goToPage('voice-room')
   }
   const blockedProfiles = useMemo<BlockedProfile[]>(() => social.blockedProfileIds.map((id) => {
@@ -230,7 +232,15 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const orderService = account.findOrderService(navigation.companionId, navigation.serviceId)
   const selectedPremiumCard = premiumCards.find((card) => card.id === selectedPremiumCardId && account.ownedPremiumCardIds.includes(card.id)) ?? null
   const showPremiumCardDetail = Boolean(selectedPremiumCard && (navigation.panel === 'club-cards' || navigation.panel === 'my-cards'))
-  const pendingNotificationCount = workbench.pending + voiceCallNotifications.length + social.voiceInvitations.length
+  const pendingNotificationCount = notificationsRead ? 0 : workbench.pending + voiceCallNotifications.length + social.voiceInvitations.length + 1
+  const toggleClientNotifications = () => {
+    if (noticeMode !== 'closed') {
+      setNoticeMode('closed')
+      return
+    }
+    setNoticeMode(nextNoticeMode)
+    setNextNoticeMode(nextNoticeMode === 'panel' ? 'all' : 'panel')
+  }
   const premiumCardsDrawer = navigation.panel === 'club-cards' || navigation.panel === 'my-cards'
     ? <RightDrawer mode="inline" title={showPremiumCardDetail ? '尊享卡明细' : navigation.panel === 'club-cards' ? `${navigation.club.name} · 尊享卡` : '我的尊享卡'} description={showPremiumCardDetail ? selectedPremiumCard?.name : undefined} onClose={() => { setSelectedPremiumCardId(null); navigation.closePanel() }} className="game-companion-drawer" width="100%">{showPremiumCardDetail && selectedPremiumCard ? <PremiumCardDetailPage transactions={account.premiumCardTransactions.filter((entry) => entry.cardId === selectedPremiumCard.id)} onBack={() => setSelectedPremiumCardId(null)} /> : <PremiumCardsPage pageState={pageState} onRetry={() => setPageState('normal')} clubId={navigation.clubId} ownedOnly={navigation.panel === 'my-cards'} balance={account.diamondBalance} ownedIds={account.ownedPremiumCardIds} cardBalances={account.premiumCardBalances} onBack={navigation.closePanel} onRecharge={() => navigation.goToPage('recharge', navigation.panel === 'my-cards' ? 'my-cards' : 'club-cards')} onPurchase={account.purchasePremiumCard} onTopUp={account.rechargePremiumCard} onOpenDetails={setSelectedPremiumCardId} onNotify={setPremiumCardToast} />}</RightDrawer>
     : null
@@ -304,7 +314,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
 
   return <WindowsClientFrame
     className="game-companion-client"
-    titleBar={<WindowsTitleBar title="超速电竞" leading={<Gamepad2 size={16} />} onClose={requestWindowClose} actions={<><button type="button" className="client-titlebar-search" onClick={() => setGlobalSearchOpen(true)} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><ScreenRecordingFeature /><button type="button" className="client-titlebar-support" onClick={() => setHelpCenterOpen(true)} aria-label="帮助中心" data-tooltip="帮助中心"><CircleHelp size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => { if (navigation.page !== 'system-settings') { systemSettingsReturnHash.current = window.location.hash; setSelectedSearchUser(null); navigation.goToPage('system-settings', navigation.page) } }} aria-label="系统设置" data-tooltip="系统设置"><Settings size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => setPlatformSupportOpen(true)} aria-label="平台客服" data-tooltip="平台客服"><Headphones size={16} /></button><button type="button" className="workbench-notice-button" aria-label="客户端通知" data-tooltip="客户端通知" aria-expanded={noticesOpen} aria-controls="workbench-notifications" onClick={() => setNoticesOpen(value => !value)}><Bell size={16} /><span className="workbench-notice-count">{pendingNotificationCount}</span></button></>} />}
+    titleBar={<WindowsTitleBar title="超速电竞" leading={<Gamepad2 size={16} />} onClose={requestWindowClose} actions={<><button type="button" className="client-titlebar-search" onClick={() => setGlobalSearchOpen(true)} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><ScreenRecordingFeature /><button type="button" className="client-titlebar-support" onClick={() => setHelpCenterOpen(true)} aria-label="帮助中心" data-tooltip="帮助中心"><CircleHelp size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => { if (navigation.page !== 'system-settings') { systemSettingsReturnHash.current = window.location.hash; setSelectedSearchUser(null); navigation.goToPage('system-settings', navigation.page) } }} aria-label="系统设置" data-tooltip="系统设置"><Settings size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => setPlatformSupportOpen(true)} aria-label="平台客服" data-tooltip="平台客服"><Headphones size={16} /></button><button type="button" className="workbench-notice-button" aria-label="客户端通知" data-tooltip="客户端通知" aria-expanded={noticeMode !== 'closed'} aria-controls="workbench-notifications" onClick={toggleClientNotifications}><Bell size={16} /><span className="workbench-notice-count">{pendingNotificationCount}</span></button></>} />}
     sidebar={<WindowsSidebar
       items={[
         { id: 'quick-match', label: isMatching ? '匹配中' : '一键匹配', icon: <Swords size={16} />, group: 'quick-match', groupTitle: '', variant: 'primary' },
@@ -426,7 +436,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       {beanExchangeOpen && <BeanExchangePanel beanBalance={account.availableBeanBalance} onExchange={account.exchangeBeans} onClose={() => setBeanExchangeOpen(false)} />}
       {isRechargeModalOpen && <RechargePage presentation="modal" pageState={pageState} onRetry={() => setPageState('normal')} diamondBalance={account.diamondBalance} coupons={account.coupons} onBack={closeRechargeModal} backLabel={rechargeReturnLabel} onComplete={account.completeRecharge} />}
       <GiftPanel key={giftPanelKey} open={giftPanelOpen} recipients={giftRecipients} fixedRecipient={fixedGiftRecipient} anchor={giftAnchor} balance={account.diamondBalance} onClose={() => setGiftPanelOpen(false)} onPay={(gift, quantity, recipient, amount) => account.payGift(`${gift.name} × ${quantity}`, recipient.name, amount)} onRecharge={() => { setGiftPanelOpen(false); setRechargeReturnLabel('返回送礼'); setCheckoutRechargeOpen(true) }} />
-      <WorkbenchNotifications logic={workbench} open={noticesOpen} voiceCallNotifications={voiceCallNotifications} voiceInvitations={social.voiceInvitations} onOpenVoiceCall={openVoiceCallNotification} onIgnoreVoiceCall={() => setVoiceCallNotifications([])} onIgnoreVoiceInvitation={social.ignoreVoiceInvitation} onAcceptVoiceInvitation={acceptRoomInvitation} />
+      <WorkbenchNotifications logic={workbench} mode={noticeMode} voiceCallNotifications={voiceCallNotifications} voiceInvitations={social.voiceInvitations} onMarkAllRead={() => setNotificationsRead(true)} onClose={() => setNoticeMode('closed')} onOpenVoiceCall={openVoiceCallNotification} onIgnoreVoiceCall={() => setVoiceCallNotifications([])} onIgnoreVoiceInvitation={social.ignoreVoiceInvitation} onAcceptVoiceInvitation={acceptRoomInvitation} />
       {voiceCallDialogOpen && voiceCallNotifications.length > 0 && <DialogPanel overlayId="voice-call-notification" title="呼叫通知" onClose={() => setVoiceCallDialogOpen(false)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setVoiceCallDialogOpen(false)}>稍后</button><button type="button" className="client-button client-button--primary" onClick={() => enterVoiceCallRoom(selectedVoiceCallId)}>加入房间</button></>}>
         <div className="support-queue-summary"><Headphones size={18} /><strong>{voiceCallNotifications.length} 位好友邀请你加入语音房</strong></div>
         <div className="voice-call-invite-list" role="radiogroup" aria-label="选择要加入的用户房间">{voiceCallNotifications.map((invite) => <label className={`voice-call-invite${selectedVoiceCallId === invite.id ? ' is-selected' : ''}`} key={invite.id}>

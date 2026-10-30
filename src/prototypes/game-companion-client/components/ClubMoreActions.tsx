@@ -31,7 +31,7 @@ export function ClubMoreActions({ club, followed, onToggleFollow, onOpenInfo }: 
     </div>
     {dialog && <DialogPanel overlayId={`club-${dialog}-${club.id}`} title="营业资质" onClose={() => setDialog(null)} width={560}>
       <div className="club-qualification">
-        <section className="club-qualification__identity"><AvatarMark initials={club.initials} size="lg" /><div><h3>{club.name}</h3><span className="rating-mark"><Star size={14} />{club.rating.toFixed(2)}</span></div><button type="button" className="client-button client-button--secondary" aria-pressed={followed} onClick={onToggleFollow}>{followed ? '已关注' : '关注'}</button></section>
+        <section className="club-qualification__identity"><AvatarMark initials={club.initials} size="lg" /><div><h3>{club.name}</h3><span className="rating-mark"><Star size={14} />{club.rating.toFixed(1)}</span></div><button type="button" className="client-button client-button--secondary" aria-pressed={followed} onClick={onToggleFollow}>{followed ? '已关注' : '关注'}</button></section>
         <section className="club-qualification__ratings" aria-label="俱乐部评分">{['服务态度', '游戏体验', '接单效率'].map((label) => <div key={label}><span>{label}</span><strong>4.9</strong><meter min="0" max="5" value="4.9" aria-label={`${label}4.9分`} /><span>高</span></div>)}</section>
         <div className="club-qualification__date"><span>开店时间</span><time dateTime="2026-10-12">2026.10.12</time></div>
         <section className="club-qualification__license"><h3>营业执照</h3><svg viewBox="0 0 760 440" role="img" aria-label={`${club.name}营业执照展示图`}>

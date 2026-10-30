@@ -250,7 +250,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
           {clubPickerOpen && <div className="match-club-dropdown">
             <label className="match-club-search"><Search size={14} /><input autoFocus type="search" value={clubSearch} onChange={(event) => setClubSearch(event.target.value)} placeholder="搜索俱乐部名称" aria-label="搜索俱乐部名称" /></label>
             <div className="match-club-list" role="listbox" aria-label="俱乐部列表">
-              {filteredClubs.map((item) => <button type="button" role="option" aria-selected={logic.clubId === item.id} key={item.id} className={`match-club-option${logic.clubId === item.id ? ' is-selected' : ''}`} onClick={() => { logic.chooseClub(item.id); setClubPickerOpen(false); setClubSearch('') }}><strong>{item.name}</strong><small>{item.rating.toFixed(2)} 分 · {item.companionCount} 位陪玩</small></button>)}
+              {filteredClubs.map((item) => <button type="button" role="option" aria-selected={logic.clubId === item.id} key={item.id} className={`match-club-option${logic.clubId === item.id ? ' is-selected' : ''}`} onClick={() => { logic.chooseClub(item.id); setClubPickerOpen(false); setClubSearch('') }}><strong>{item.name}</strong><small>{item.rating.toFixed(1)} 分 · {item.companionCount} 位陪玩</small></button>)}
               {filteredClubs.length === 0 && <p className="match-club-empty">没有找到相关俱乐部</p>}
             </div>
           </div>}

@@ -71,6 +71,22 @@
 .workbench-notice-actions .client-button { min-height:30px; padding:0 10px; }
 .workbench-global-notice button:focus-visible { outline:2px solid var(--prototype-text-muted, #6b7280); outline-offset:2px; }
 .workbench-global-notice__message { margin:8px 0 12px; color:var(--client-muted); font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+.workbench-notification-center { width:380px; padding:0; background:var(--client-surface,#fff); border:1px solid var(--client-border); border-radius:8px; box-shadow:0 8px 24px rgba(17,24,39,.16); pointer-events:auto; }
+.workbench-notification-center__header { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:14px; min-height:48px; padding:0 14px; border-bottom:1px solid var(--client-border); background:var(--client-surface,#fff); }
+.workbench-notification-center__header > strong { font-size:14px; }
+.workbench-notification-center__header .client-text-button { margin-left:auto; }
+.workbench-notification-center__close { display:grid; place-items:center; width:26px; height:26px; padding:0; border:0; background:transparent; color:var(--client-muted); cursor:pointer; }
+.workbench-notification-center__tabs { position:sticky; top:48px; z-index:1; display:flex; gap:18px; padding:0 14px; border-bottom:1px solid var(--client-border); background:var(--client-surface,#fff); }
+.workbench-notification-center__tabs button { position:relative; min-height:40px; padding:0 2px; border:0; background:transparent; color:var(--client-muted); font:inherit; font-size:12px; cursor:pointer; }
+.workbench-notification-center__tabs button[aria-selected=true] { color:var(--client-text); font-weight:600; }
+.workbench-notification-center__tabs button[aria-selected=true]::after { position:absolute; right:0; bottom:-1px; left:0; height:2px; background:var(--client-text); content:""; }
+.workbench-notification-center__content { display:flex; flex-direction:column; gap:8px; padding:10px; }
+.workbench-notification-center__empty { margin:0; padding:20px 8px; color:var(--client-muted); font-size:12px; text-align:center; }
+.workbench-notification-center .workbench-global-notice { width:100%; }
+.workbench-notification-center .workbench-notice-heading { padding-right:40px; }
+.workbench-notice-footer--compact { flex-direction:row; align-items:center; justify-content:space-between; gap:8px; }
+.workbench-notice-prices--compact { flex:1; min-width:0; }
+.workbench-notice-actions--compact { justify-content:flex-end; }
 
 .workbench-orders-table .order-list-header,
 .workbench-orders-table .order-item {

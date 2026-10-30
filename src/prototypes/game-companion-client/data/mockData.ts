@@ -99,12 +99,12 @@ export const banners: Banner[] = [
 export const clubTags = ['竞技强队', '轻松娱乐', '语音开黑', '周末组队', '赛事陪练', '新手友好']
 
 export const clubs: Club[] = [
-  { id: 'club-001', name: '北境战术俱乐部', initials: '北境', selfOperated: true, rating: 4.98, tags: ['竞技强队', '语音开黑'], intro: '专注团队协作与战术复盘，寻找稳定队友一起提升。', gameIds: ['valorant', 'pubg', 'cs2', 'dota2', 'overwatch', 'delta-force'], companionCount: 28, featured: true, followed: true },
-  { id: 'club-002', name: '月光游戏社', initials: '月光', selfOperated: true, rating: 4.96, tags: ['轻松娱乐', '新手友好'], intro: '轻松组队，友好交流，让每一局都更有趣。', gameIds: ['lol', 'apex', 'genshin', 'wow', 'starcraft2'], companionCount: 36, featured: true, followed: false },
-  { id: 'club-003', name: '破晓竞技公会', initials: '破晓', selfOperated: false, rating: 4.93, tags: ['赛事陪练', '竞技强队'], intro: '多赛季竞技经验，提供清晰有效的配合建议。', gameIds: ['valorant', 'naraka', 'fortnite', 'rainbow6'], companionCount: 19, featured: true, followed: true },
-  { id: 'club-004', name: '像素漫游俱乐部', initials: '像素', selfOperated: false, rating: 4.91, tags: ['周末组队', '轻松娱乐'], intro: '周末固定车队，喜欢探索地图与分享游戏乐趣。', gameIds: ['pubg', 'apex', 'minecraft'], companionCount: 24, featured: true, followed: false },
-  { id: 'club-005', name: '星火集结地', initials: '星火', selfOperated: true, rating: 4.89, tags: ['语音开黑', '新手友好'], intro: '欢迎不同水平的玩家，一起熟悉玩法和团队节奏。', gameIds: ['lol', 'naraka', 'genshin', 'minecraft'], companionCount: 31, featured: false, followed: false },
-  { id: 'club-006', name: '雾港战队', initials: '雾港', selfOperated: false, rating: 4.87, tags: ['赛事陪练', '周末组队'], intro: '稳定在线的多人开黑团队，重视沟通与协作。', gameIds: ['valorant', 'apex', 'cs2', 'overwatch', 'rainbow6'], companionCount: 16, featured: false, followed: false },
+  { id: 'club-001', name: '北境战术俱乐部', initials: '北境', selfOperated: true, rating: 4.9, tags: ['竞技强队', '语音开黑'], intro: '专注团队协作与战术复盘，寻找稳定队友一起提升。', gameIds: ['valorant', 'pubg', 'cs2', 'dota2', 'overwatch', 'delta-force'], companionCount: 28, featured: true, followed: true },
+  { id: 'club-002', name: '月光游戏社', initials: '月光', selfOperated: true, rating: 4.8, tags: ['轻松娱乐', '新手友好'], intro: '轻松组队，友好交流，让每一局都更有趣。', gameIds: ['lol', 'apex', 'genshin', 'wow', 'starcraft2'], companionCount: 36, featured: true, followed: false },
+  { id: 'club-003', name: '破晓竞技公会', initials: '破晓', selfOperated: false, rating: 4.8, tags: ['赛事陪练', '竞技强队'], intro: '多赛季竞技经验，提供清晰有效的配合建议。', gameIds: ['valorant', 'naraka', 'fortnite', 'rainbow6'], companionCount: 19, featured: true, followed: true },
+  { id: 'club-004', name: '像素漫游俱乐部', initials: '像素', selfOperated: false, rating: 4.7, tags: ['周末组队', '轻松娱乐'], intro: '周末固定车队，喜欢探索地图与分享游戏乐趣。', gameIds: ['pubg', 'apex', 'minecraft'], companionCount: 24, featured: true, followed: false },
+  { id: 'club-005', name: '星火集结地', initials: '星火', selfOperated: true, rating: 4.7, tags: ['语音开黑', '新手友好'], intro: '欢迎不同水平的玩家，一起熟悉玩法和团队节奏。', gameIds: ['lol', 'naraka', 'genshin', 'minecraft'], companionCount: 31, featured: false, followed: false },
+  { id: 'club-006', name: '雾港战队', initials: '雾港', selfOperated: false, rating: 4.6, tags: ['赛事陪练', '周末组队'], intro: '稳定在线的多人开黑团队，重视沟通与协作。', gameIds: ['valorant', 'apex', 'cs2', 'overwatch', 'rainbow6'], companionCount: 16, featured: false, followed: false },
 ]
 
 export const companions: Companion[] = [
