@@ -1,4 +1,5 @@
 import type { Companion, VoiceMessage } from '../data/mockData'
+import { clubs } from '../data/mockData'
 
 export type ProfileCardData = {
   name: string
@@ -8,6 +9,7 @@ export type ProfileCardData = {
   age: number
   userId: string
   rating: number
+  club?: { id: string; name: string; initials: string }
   realNameVerified?: boolean
   friendCount?: number
   followingCount?: number
@@ -18,6 +20,7 @@ export type ProfileCardData = {
 }
 
 export function companionToProfileCard(companion: Companion): ProfileCardData {
+  const club = clubs.find((item) => item.id === companion.clubId)
   const socialCounts: Record<string, [number, number, number]> = {
     'companion-001': [28, 136, 284],
     'companion-002': [42, 98, 516],
@@ -38,6 +41,7 @@ export function companionToProfileCard(companion: Companion): ProfileCardData {
     age: companion.age,
     userId: companion.id.replace('companion-', 'P-'),
     rating: companion.rating,
+    club: club ? { id: club.id, name: club.name, initials: club.initials } : undefined,
     realNameVerified: companion.realNameVerified,
     friendCount,
     followingCount,

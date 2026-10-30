@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import { BadgeCheck, BatteryCharging, Bookmark, Building2, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gem, Gift, HandHeart, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Orbit, Pencil, Search, Settings2, Shield, ShieldCheck, Sparkles, Star, Trash2, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { BadgeCheck, BatteryCharging, Bookmark, Building2, CalendarDays, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gem, Gift, HandHeart, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Orbit, Pencil, Search, Shield, ShieldCheck, Sparkles, Star, Trash2, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
-import { NotificationSettingsDialog } from '../components/NotificationSettingsDialog'
 import { CompanionOnboarding } from '../components/CompanionOnboarding'
 import { OnboardingApplicationRecords } from '../components/OnboardingApplicationRecords'
 import type { OnboardingApplication, OnboardingSubmission } from '../data/onboardingApplicationMockData'
@@ -12,7 +11,7 @@ import { clubs, games } from '../data/mockData'
 import { type ClientOrder, type PlayerProfile } from '../data/accountMockData'
 import { favoriteClubs, favoriteUsers, favoriteVoiceRooms } from '../data/personalFavoritesMockData'
 import { personalGiftInventory, profileFootprints, profileRoomVisits, profileVisitors } from '../data/personalCenterMockData'
-import { type BlockedProfile, type NotificationPreferences } from '../data/personalSettingsMockData'
+import { type BlockedProfile } from '../data/personalSettingsMockData'
 import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
@@ -41,8 +40,6 @@ type PersonalCenterProps = {
   onSaveBoundPhone: (phone: string) => void
   endedDeviceIds: string[]
   onEndDevice: (deviceId: string) => void
-  notifications: NotificationPreferences
-  onUpdateNotifications: (preferences: NotificationPreferences) => void
   blockedProfiles: BlockedProfile[]
   onUnblockProfile: (profileId: string) => void
   onAssessmentChat: (id: string) => void
@@ -66,7 +63,7 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
 
 const personalGiftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 
-export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, notifications, onUpdateNotifications, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
+export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
   const [section, setSection] = useState<CenterSection>(() => sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : 'profile')
   const [recruitmentOpen, setRecruitmentOpen] = useState(() => Boolean(sessionStorage.getItem('companion-assessment-recharge-draft')))
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
@@ -80,6 +77,8 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
   const [visibleFavoriteVoiceRooms, setVisibleFavoriteVoiceRooms] = useState(favoriteVoiceRooms)
   const [editingProfile, setEditingProfile] = useState(false)
   const [profileDraft, setProfileDraft] = useState(profile)
+  const [nicknameEditsRemaining, setNicknameEditsRemaining] = useState(3)
+  const birthdayInputRef = useRef<HTMLInputElement>(null)
   const [feedback, setFeedback] = useState('')
   const [joinedClubId, setJoinedClubId] = useState<string | null>('club-001')
   const [clubMembershipStatus, setClubMembershipStatus] = useState<'idle' | 'joining' | 'leaving'>('idle')
@@ -96,7 +95,7 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
   const [applicationIntro, setApplicationIntro] = useState('')
   const [clubApplication, setClubApplication] = useState(emptyClubApplication)
   const [applicationSubmitted, setApplicationSubmitted] = useState<Record<ApplicationKind, boolean>>({ companion: false, club: false })
-  const [activeSetting, setActiveSetting] = useState<'security' | 'notifications' | 'blacklist' | 'logout' | null>(null)
+  const [activeSetting, setActiveSetting] = useState<'security' | 'blacklist' | 'logout' | null>(null)
 
   const joinedClub = useMemo(() => clubs.find((club) => club.id === joinedClubId) ?? null, [joinedClubId])
 
@@ -126,7 +125,9 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
     event.preventDefault()
     const nickname = profileDraft.nickname.trim()
     if (!nickname) return
+    if (nickname !== profile.nickname && nicknameEditsRemaining <= 0) return
     onSaveProfile({ ...profileDraft, nickname, initials: nickname.slice(0, 2) })
+    if (nickname !== profile.nickname) setNicknameEditsRemaining((remaining) => Math.max(0, remaining - 1))
     setFeedback('资料已更新（仅保存在本次原型会话）')
     setEditingProfile(false)
   }
@@ -232,8 +233,8 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
     {editingProfile && <DialogPanel overlayId="edit-player-profile-dialog" title="编辑个人资料" onClose={closeProfileEditor} width={560} footer={<><button type="button" className="client-button client-button--secondary" onClick={closeProfileEditor}>取消</button><button type="submit" form="edit-player-profile" className="client-button client-button--primary" disabled={!profileDraft.nickname.trim()}>保存资料</button></>}>
       <form id="edit-player-profile" className="personal-profile-form" onSubmit={submitProfile}>
         <div className="personal-avatar-editor"><ProfileAvatar profile={profileDraft} size="lg" /><label className="client-button client-button--secondary personal-upload-button"><ImagePlus size={15} />更换头像<input type="file" accept="image/*" aria-label="上传头像图片" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => setProfileDraft((current) => ({ ...current, avatarDataUrl: String(reader.result) })); reader.readAsDataURL(file) }} /></label></div>
-        <label className="personal-field">昵称<input required maxLength={20} value={profileDraft.nickname} onChange={(event) => setProfileDraft((current) => ({ ...current, nickname: event.target.value }))} /></label>
-        <label className="personal-field">生日<input type="date" value={profileDraft.birthday} onChange={(event) => setProfileDraft((current) => ({ ...current, birthday: event.target.value }))} /></label>
+        <label className="personal-field">昵称<input required maxLength={20} disabled={nicknameEditsRemaining === 0} value={profileDraft.nickname} onChange={(event) => setProfileDraft((current) => ({ ...current, nickname: event.target.value }))} /><small className="personal-field__hint">剩余修改次数 {nicknameEditsRemaining} 次</small></label>
+        <label className="personal-field">生日<span className="personal-date-picker"><input ref={birthdayInputRef} type="date" value={profileDraft.birthday} onChange={(event) => setProfileDraft((current) => ({ ...current, birthday: event.target.value }))} aria-label="生日" /><button type="button" aria-label="选择生日" title="选择生日" onClick={() => birthdayInputRef.current?.showPicker?.()}><CalendarDays size={15} /></button></span></label>
         <label className="personal-field personal-field--full">签名<textarea rows={3} value={profileDraft.signature} onChange={(event) => setProfileDraft((current) => ({ ...current, signature: event.target.value }))} placeholder="写一句介绍自己" /></label>
         <section className="personal-life-photo-editor personal-field--full" aria-label="编辑生活照"><div className="personal-life-photo-editor__heading"><strong>生活照</strong><label className="client-button client-button--secondary personal-upload-button"><ImagePlus size={14} />添加照片<input type="file" accept="image/*" multiple aria-label="添加生活照，可多选" onChange={(event) => { const files = Array.from(event.currentTarget.files ?? []); event.currentTarget.value = ''; void Promise.all(files.map(readImageFile)).then((images) => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: [...current.lifePhotoDataUrls, ...images] }))).catch(() => setFeedback('部分生活照无法读取，请重新选择')) }} /></label></div><div className="personal-life-photo-grid">{profileDraft.lifePhotoDataUrls.map((image, index) => <div className="personal-life-photo" key={`${index}-${image.slice(-24)}`}><img src={image} alt={`生活照 ${index + 1}`} /><button type="button" aria-label={`移除第 ${index + 1} 张生活照`} onClick={() => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: current.lifePhotoDataUrls.filter((_, photoIndex) => photoIndex !== index) }))}><X size={13} /></button></div>)}</div><small>可一次选择多张，图片只在当前原型会话中预览</small></section>
       </form>
@@ -269,7 +270,6 @@ export function PersonalCenterPage({ pageState, onRetry, profile, onSaveProfile,
       </form>}
     </DialogPanel>}
     {activeSetting === 'security' && <AccountSecurityDialog phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} onClose={() => setActiveSetting(null)} />}
-    {activeSetting === 'notifications' && <NotificationSettingsDialog preferences={notifications} onChange={onUpdateNotifications} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'blacklist' && <BlacklistDialog profiles={blockedProfiles} onRemove={onUnblockProfile} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'logout' && <DialogPanel overlayId="logout-confirmation-dialog" title="退出登录" description="确认退出当前账号并返回登录页？" onClose={() => setActiveSetting(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setActiveSetting(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={onLogout}>确认退出</button></>}><p className="social-dialog-copy">退出后将返回登录页面。本次原型不会清除或提交真实账号数据。</p></DialogPanel>}
   </div>
@@ -285,7 +285,7 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
   onOpenOrders: () => void
   feedback: string
   onFeedback: (feedback: string) => void
-  onOpenSetting: (setting: 'security' | 'notifications' | 'blacklist' | 'logout') => void
+  onOpenSetting: (setting: 'security' | 'blacklist' | 'logout') => void
 }) {
   const [playerIdCopyFeedback, setPlayerIdCopyFeedback] = useState('')
   const [lifePhotoIndex, setLifePhotoIndex] = useState(0)
@@ -305,7 +305,6 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
   const activeOrderCount = orders.filter((order) => order.status === '服务中').length
   const settings = [
     { id: 'security', label: '账号安全', icon: LockKeyhole },
-    { id: 'notifications', label: '通知设置', icon: Settings2 },
     { id: 'blacklist', label: '黑名单', icon: ShieldCheck },
     { id: 'logout', label: '退出登录', icon: LogOut },
   ]
@@ -319,7 +318,7 @@ function ProfileOverview({ profile, onEdit, orders, diamondBalance, beanBalance,
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><span className="client-eyebrow">服务订单</span><h2>订单</h2></div><button type="button" className="client-text-button" onClick={onOpenOrders}>全部订单 <ChevronRight size={15} /></button></div><div className="personal-order-stats"><button type="button" onClick={onOpenOrders}><span>全部订单</span><strong>{orders.length}</strong></button><button type="button" onClick={onOpenOrders}><span>待处理</span><strong>{pendingOrderCount}</strong></button><button type="button" onClick={onOpenOrders}><span>服务中</span><strong>{activeOrderCount}</strong></button></div></section>
       </div>
     </div>
-    <section className="client-card account-settings-card"><div className="client-section-heading"><div><span className="client-eyebrow">账户偏好</span><h2>常用设置</h2></div><UserRound size={18} className="client-muted" /></div><div className="account-settings-list">{settings.map((item) => <button type="button" key={item.id} onClick={() => onOpenSetting(item.id as 'security' | 'notifications' | 'blacklist' | 'logout')}><item.icon size={17} /><span>{item.label}</span><ChevronRight size={16} /></button>)}</div>{feedback && <FeedbackMessage>{feedback}<button type="button" onClick={() => onFeedback('')} aria-label="关闭提示"><X size={14} /></button></FeedbackMessage>}</section>
+    <section className="client-card account-settings-card"><div className="client-section-heading"><div><span className="client-eyebrow">账户偏好</span><h2>常用设置</h2></div><UserRound size={18} className="client-muted" /></div><div className="account-settings-list">{settings.map((item) => <button type="button" key={item.id} onClick={() => onOpenSetting(item.id as 'security' | 'blacklist' | 'logout')}><item.icon size={17} /><span>{item.label}</span><ChevronRight size={16} /></button>)}</div>{feedback && <FeedbackMessage>{feedback}<button type="button" onClick={() => onFeedback('')} aria-label="关闭提示"><X size={14} /></button></FeedbackMessage>}</section>
   </section>
 }
 

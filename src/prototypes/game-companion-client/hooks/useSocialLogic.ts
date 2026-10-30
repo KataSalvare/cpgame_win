@@ -1,5 +1,5 @@
 import type { ClientOrder } from '../data/accountMockData'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   currentSocialUser,
   initialBlockedProfileIds,
@@ -29,6 +29,13 @@ import { clubGroups as initialClubGroups } from '../data/clubGroupMockData'
 
 const createId = (prefix: string) => `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`
 const voiceRoomMemberCount = (room: VoiceRoom) => room.channels.reduce((total, channel) => total + channel.members.length, 0)
+const updateMicQueue = (channel: VoiceSubchannel, memberId: string, micOn: boolean): VoiceSubchannel => {
+  const currentQueue = channel.micQueueMemberIds ?? channel.members.filter((member) => member.micOn).map((member) => member.id)
+  const micQueueMemberIds = micOn
+    ? [...currentQueue.filter((id) => id !== memberId), memberId]
+    : currentQueue.filter((id) => id !== memberId)
+  return { ...channel, micQueueMemberIds, members: channel.members.map((member) => member.id === memberId ? { ...member, micOn } : member) }
+}
 
 export function useSocialLogic() {
   const [activeFixedFeed, setActiveFixedFeed] = useState<FixedMessageFeed | null>(null)
@@ -62,6 +69,7 @@ export function useSocialLogic() {
   const [activeVoiceRoomId, setActiveVoiceRoomId] = useState(initialVoiceRooms[0].id)
   const [activeSubchannelId, setActiveSubchannelId] = useState(initialVoiceRooms[0].channels[0].id)
   const [roomMessagesByRoom, setRoomMessagesByRoom] = useState(initialRoomMessagesByRoom)
+  const roomMessageLastSentAt = useRef<Record<string, number>>({})
   const [voiceInvitations, setVoiceInvitations] = useState(initialVoiceInvitations)
   const [roomSearch, setRoomSearch] = useState('')
   const [draggedMemberId, setDraggedMemberId] = useState<string | null>(null)
@@ -92,7 +100,7 @@ export function useSocialLogic() {
     return voiceRooms.filter((room) => {
       const isMember = room.channels.some((channel) => channel.members.some((member) => member.id === currentSocialUser.id))
       const hasInvitation = voiceInvitations.some((invitation) => invitation.roomId === room.id)
-      const canDiscover = room.privacy === '公开' || isMember || hasInvitation
+      const canDiscover = room.channels.some((channel) => channel.privacy === '公开') || isMember || hasInvitation
       return canDiscover && (!query || room.name.toLocaleLowerCase().includes(query))
     })
   }, [roomSearch, voiceRooms, voiceInvitations])
@@ -376,8 +384,13 @@ export function useSocialLogic() {
   }
 
   const sendRoomMessage = (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => {
-    if (!content.trim()) return
+    if (!content.trim() || !activeVoiceRoom || !activeSubchannel) return false
+    const interval = activeSubchannel.messageFrequencySeconds
+    const lastSentAt = roomMessageLastSentAt.current[activeSubchannel.id] ?? 0
+    if (interval > 0 && Date.now() - lastSentAt < interval * 1000) return false
+    roomMessageLastSentAt.current[activeSubchannel.id] = Date.now()
     setRoomMessagesByRoom((items) => ({ ...items, [activeVoiceRoomId]: [...(items[activeVoiceRoomId] ?? []), { id: createId('room-message'), senderId: currentSocialUser.id, senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '现在', kind, content, duration, replyTo }] }))
+    return true
   }
 
   const recallRoomMessage = (messageId: string) => {
@@ -481,7 +494,7 @@ export function useSocialLogic() {
     if (activeVoiceRoom.channels.some((channel) => channel.members.some((member) => member.id === currentSocialUser.id))) return
     if (activeSubchannel.members.length >= activeSubchannel.capacity || voiceRoomMemberCount(activeVoiceRoom) >= activeVoiceRoom.capacity) return
     const self: VoiceMember = { ...currentSocialUser, role: activeVoiceRoom.currentRole, micOn: true, muted: false }
-    setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoom.id ? room : { ...room, channels: room.channels.map((channel) => channel.id === activeSubchannel.id ? { ...channel, members: [...channel.members, self] } : channel) }))
+    setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoom.id ? room : { ...room, channels: room.channels.map((channel) => channel.id === activeSubchannel.id ? { ...channel, members: [...channel.members, self], micQueueMemberIds: [...(channel.micQueueMemberIds ?? channel.members.filter((member) => member.micOn).map((member) => member.id)), self.id] } : channel) }))
   }
 
   const leaveVoice = () => {
@@ -491,7 +504,15 @@ export function useSocialLogic() {
 
   const toggleMic = () => {
     if (!isInVoice) return
-    setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoomId ? room : { ...room, channels: room.channels.map((channel) => ({ ...channel, members: channel.members.map((member) => member.id === currentSocialUser.id ? { ...member, micOn: !member.micOn } : member) })) }))
+    setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoomId ? room : { ...room, channels: room.channels.map((channel) => {
+      if (!channel.members.some((member) => member.id === currentSocialUser.id)) return channel
+      const self = channel.members.find((member) => member.id === currentSocialUser.id)!
+      return updateMicQueue(channel, currentSocialUser.id, !self.micOn)
+    }) }))
+  }
+
+  const setVoiceMemberMic = (memberId: string, micOn: boolean) => {
+    setVoiceRooms((rooms) => rooms.map((room) => room.id !== activeVoiceRoomId ? room : { ...room, channels: room.channels.map((channel) => channel.id !== activeSubchannelId || !channel.members.some((member) => member.id === memberId) ? channel : updateMicQueue(channel, memberId, micOn)) }))
   }
 
   const toggleSelfMute = () => {
@@ -502,7 +523,7 @@ export function useSocialLogic() {
     if (!Number.isInteger(capacity) || capacity < 1 || capacity > MAX_VOICE_GROUP_MEMBERS) return
     const roomId = createId('room')
     const channelId = createId('channel')
-    const room: VoiceRoom = { id: roomId, name: name.trim(), capacity, privacy: '公开', currentRole: 'owner', channels: [{ id: channelId, name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ ...currentSocialUser, role: 'owner', micOn: true, muted: false }] }] }
+    const room: VoiceRoom = { id: roomId, name: name.trim(), capacity, currentRole: 'owner', channels: [{ id: channelId, name: '房间A', capacity: Math.min(MAX_VOICE_CHANNEL_MEMBERS, capacity), messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [{ ...currentSocialUser, role: 'owner', micOn: true, muted: false }] }] }
     setVoiceRooms((items) => [room, ...items])
     setActiveVoiceRoomId(roomId)
     setActiveSubchannelId(channelId)
@@ -510,17 +531,17 @@ export function useSocialLogic() {
 
   const renameVoiceRoom = (name: string) => setVoiceRooms((rooms) => rooms.map((room) => room.id === activeVoiceRoomId ? { ...room, name: name.trim() } : room))
 
-  const updateVoiceRoom = (name: string, privacy: VoiceRoom['privacy'], roomId = activeVoiceRoomId, capacity?: number) => setVoiceRooms((rooms) => rooms.map((room) => {
+  const updateVoiceRoom = (name: string, roomId = activeVoiceRoomId, capacity?: number) => setVoiceRooms((rooms) => rooms.map((room) => {
     if (room.id !== roomId) return room
     const nextCapacity = capacity ?? room.capacity
-    if (!Number.isInteger(nextCapacity) || nextCapacity < voiceRoomMemberCount(room) || nextCapacity > MAX_VOICE_GROUP_MEMBERS) return room
-    return { ...room, name: name.trim(), privacy, capacity: nextCapacity }
+    if (!Number.isInteger(nextCapacity) || nextCapacity < Math.max(voiceRoomMemberCount(room), ...room.channels.map((channel) => channel.capacity)) || nextCapacity > MAX_VOICE_GROUP_MEMBERS) return room
+    return { ...room, name: name.trim(), capacity: nextCapacity }
   }))
 
   const createSubchannel = (details: Omit<VoiceSubchannel, 'id' | 'members'>, roomId?: string) => {
     const targetRoomId = roomId ?? activeVoiceRoomId
     const targetRoom = voiceRooms.find((room) => room.id === targetRoomId)
-    if (!targetRoom || targetRoom.currentRole !== 'owner' || !Number.isInteger(details.capacity) || details.capacity < 1 || details.capacity > MAX_VOICE_CHANNEL_MEMBERS || details.capacity > targetRoom.capacity) return
+    if (!targetRoom || targetRoom.currentRole !== 'owner' || !Number.isInteger(details.capacity) || details.capacity < 1 || details.capacity > targetRoom.capacity || !Number.isSafeInteger(details.messageFrequencySeconds) || details.messageFrequencySeconds < 0 || !Number.isSafeInteger(details.micQueueDurationSeconds) || details.micQueueDurationSeconds < 1) return
     const channelId = createId('channel')
     setVoiceRooms((rooms) => rooms.map((room) => room.id !== targetRoomId ? room : { ...room, channels: [...room.channels, { ...details, id: channelId, name: details.name.trim(), password: details.privacy === '私密' ? details.password : '', members: [] }] }))
     setActiveVoiceRoomId(targetRoomId)
@@ -529,7 +550,7 @@ export function useSocialLogic() {
 
   const updateSubchannel = (roomId: string | undefined, channelId: string, details: Omit<VoiceSubchannel, 'id' | 'members'>) => {
     const targetRoom = voiceRooms.find((item) => item.id === (roomId ?? activeVoiceRoomId))
-    if (!targetRoom || targetRoom.currentRole !== 'owner' || details.capacity < 1 || details.capacity > MAX_VOICE_CHANNEL_MEMBERS) return
+    if (!targetRoom || targetRoom.currentRole !== 'owner' || !Number.isInteger(details.capacity) || details.capacity < 1 || details.capacity > targetRoom.capacity || !Number.isSafeInteger(details.messageFrequencySeconds) || details.messageFrequencySeconds < 0 || !Number.isSafeInteger(details.micQueueDurationSeconds) || details.micQueueDurationSeconds < 1) return
     const targetChannel = targetRoom.channels.find((item) => item.id === channelId)
     if (!targetChannel || details.capacity < targetChannel.members.length) return
     setVoiceRooms((rooms) => rooms.map((room) => room.id !== targetRoom.id ? room : { ...room, channels: room.channels.map((channel) => channel.id === channelId ? { ...channel, ...details, name: details.name.trim(), password: details.privacy === '私密' ? details.password : '' } : channel) }))
@@ -631,7 +652,7 @@ export function useSocialLogic() {
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms,
     roomSearch, setRoomSearch, roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
     setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, recallRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,
-    joinVoice, leaveVoice, toggleMic, toggleSelfMute, createVoiceRoom, renameVoiceRoom, updateVoiceRoom, createSubchannel,
+    joinVoice, leaveVoice, toggleMic, setVoiceMemberMic, toggleSelfMute, createVoiceRoom, renameVoiceRoom, updateVoiceRoom, createSubchannel,
     deleteSubchannel, removeVoiceMember, setVoiceMemberMuted, blockVoiceMember, setVoiceMemberRole, inviteFriendsToRoom,
     updateSubchannel,
     acceptVoiceInvitation, ignoreVoiceInvitation,

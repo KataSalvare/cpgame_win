@@ -4,7 +4,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, CircleHelp, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Sparkles, Swords, UserRound, WalletCards } from 'lucide-react'
+import { Bell, Building2, CircleHelp, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Settings, Sparkles, Swords, UserRound, WalletCards } from 'lucide-react'
 import { DialogPanel, NotificationToast, RightDrawer, WindowsClientFrame, WindowsSidebar, WindowsTitleBar } from '@/components/WindowsClient'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 import { playerProfile, type PlayerProfile } from './data/accountMockData'
@@ -36,6 +36,8 @@ import { AnnouncementsPage } from './pages/AnnouncementsPage'
 import { PlatformSupportDialog } from './components/PlatformSupportDialog'
 import { HelpCenterDialog } from './components/HelpCenterDialog'
 import { ScreenRecordingFeature } from './components/ScreenRecordingFeature'
+import { SystemSettingsPage } from './pages/SystemSettingsPage'
+import { defaultSystemSettings, type ClientSystemSettings } from './data/systemSettingsMockData'
 import { companionToProfileCard } from './components/profileCardData'
 import { CompanionProfileCard } from './components/CompanionProfileCard'
 import type { ProfileCardData } from './components/profileCardData'
@@ -55,6 +57,8 @@ type ClientPageState = 'normal' | 'loading' | 'empty' | 'error'
 export default function GameCompanionClient(props: PrototypePreviewProps<ClientPageState>) {
   const navigate = useNavigate()
   const [pageState, setPageState] = usePrototypeState<ClientPageState>('normal', props)
+  const systemSettingsReturnHash = useRef<string | null>(null)
+  const [systemSettings, setSystemSettings] = useState<ClientSystemSettings>(defaultSystemSettings)
   const [profile, setProfile] = useState<PlayerProfile>(playerProfile)
   const [boundPhone, setBoundPhone] = useState('13800138600')
   const [endedDeviceIds, setEndedDeviceIds] = useState<string[]>([])
@@ -193,7 +197,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     })),
     { id: currentSocialUser.id, name: currentSocialUser.name, initials: currentSocialUser.initials, profileId: currentSocialUser.profileId, kind: '玩家' as const },
   ]
-  const searchableVoiceRooms = social.voiceRooms.filter((room) => room.privacy === '公开'
+  const searchableVoiceRooms = social.voiceRooms.filter((room) => room.channels.some((channel) => channel.privacy === '公开')
     || room.channels.some((channel) => channel.members.some((member) => member.id === currentSocialUser.id))
     || social.voiceInvitations.some((invitation) => invitation.roomId === room.id))
   const selectedSearchFriend = selectedSearchUser?.friendId ? socialFriends.find((friend) => friend.id === selectedSearchUser.friendId) : undefined
@@ -218,7 +222,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     tags: currentSocialUser.tags,
     intro: currentSocialUser.intro,
   } : null : null
-  const activeNavId = navigation.page === 'workbench' ? 'workbench' : navigation.page === 'talents' ? 'talents'
+  const activeNavId = navigation.page === 'system-settings' ? '' : navigation.page === 'workbench' ? 'workbench' : navigation.page === 'talents' ? 'talents'
     : navigation.page === 'profile' || navigation.page === 'wallet' || navigation.page === 'orders' || props.entryView === 'wallet-recharge'
     ? navigation.page
     : navigation.page === 'messages' || navigation.page === 'voice-room'
@@ -230,7 +234,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
 
   return <WindowsClientFrame
     className="game-companion-client"
-    titleBar={<WindowsTitleBar title="超速电竞" leading={<Gamepad2 size={16} />} actions={<><button type="button" className="client-titlebar-search" onClick={() => setGlobalSearchOpen(true)} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><ScreenRecordingFeature /><button type="button" className="client-titlebar-support" onClick={() => setPlatformSupportOpen(true)} aria-label="平台客服" data-tooltip="平台客服"><Headphones size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => setHelpCenterOpen(true)} aria-label="帮助中心" data-tooltip="帮助中心"><CircleHelp size={16} /></button><button type="button" className="workbench-notice-button" aria-label="客户端通知" data-tooltip="客户端通知" aria-expanded={noticesOpen} aria-controls="workbench-notifications" onClick={() => setNoticesOpen(value => !value)}><Bell size={16} /><span className="workbench-notice-count">{pendingNotificationCount}</span></button></>} />}
+    titleBar={<WindowsTitleBar title="超速电竞" leading={<Gamepad2 size={16} />} actions={<><button type="button" className="client-titlebar-search" onClick={() => setGlobalSearchOpen(true)} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><ScreenRecordingFeature /><button type="button" className="client-titlebar-support" onClick={() => setHelpCenterOpen(true)} aria-label="帮助中心" data-tooltip="帮助中心"><CircleHelp size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => { if (navigation.page !== 'system-settings') { systemSettingsReturnHash.current = window.location.hash; setSelectedSearchUser(null); navigation.goToPage('system-settings', navigation.page) } }} aria-label="系统设置" data-tooltip="系统设置"><Settings size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => setPlatformSupportOpen(true)} aria-label="平台客服" data-tooltip="平台客服"><Headphones size={16} /></button><button type="button" className="workbench-notice-button" aria-label="客户端通知" data-tooltip="客户端通知" aria-expanded={noticesOpen} aria-controls="workbench-notifications" onClick={() => setNoticesOpen(value => !value)}><Bell size={16} /><span className="workbench-notice-count">{pendingNotificationCount}</span></button></>} />}
     sidebar={<WindowsSidebar
       heading="陪玩平台"
       items={[
@@ -358,7 +362,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     </>}
   >
     <>
-    {navigation.page === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} onOpenExchange={() => setBeanExchangeOpen(true)} /> : navigation.page === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} /> : navigation.page === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : navigation.page === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onOpenGift={openGiftPanel} /> : navigation.page === 'voice-room' ? <VoiceRoomsPage logic={social} ownerSource={navigation.voiceRoomSource} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} onOpenClubSupport={openClubSupportChat} onOpenGift={(recipients, fixedRecipient, anchor) => openGiftPanel(recipients, fixedRecipient, anchor)} /> : navigation.page === 'profile' ? <PersonalCenterPage
+    {navigation.page === 'system-settings' ? <SystemSettingsPage settings={systemSettings} onSave={setSystemSettings} notifications={notificationPreferences} onUpdateNotifications={setNotificationPreferences} onBack={() => { if (systemSettingsReturnHash.current) { window.location.hash = systemSettingsReturnHash.current; systemSettingsReturnHash.current = null } else navigation.goToPage(navigation.returnTo && navigation.returnTo !== 'system-settings' ? navigation.returnTo : 'home') }} /> : navigation.page === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} onOpenExchange={() => setBeanExchangeOpen(true)} /> : navigation.page === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} /> : navigation.page === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : navigation.page === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onOpenGift={openGiftPanel} /> : navigation.page === 'voice-room' ? <VoiceRoomsPage logic={social} ownerSource={navigation.voiceRoomSource} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} onOpenClubSupport={openClubSupportChat} onOpenGift={(recipients, fixedRecipient, anchor) => openGiftPanel(recipients, fixedRecipient, anchor)} /> : navigation.page === 'profile' ? <PersonalCenterPage
       pageState={pageState}
       onRetry={() => setPageState('normal')}
       profile={profile}
@@ -373,8 +377,6 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onSaveBoundPhone={setBoundPhone}
       endedDeviceIds={endedDeviceIds}
       onEndDevice={(deviceId) => setEndedDeviceIds((ids) => ids.includes(deviceId) ? ids : [...ids, deviceId])}
-      notifications={notificationPreferences}
-      onUpdateNotifications={setNotificationPreferences}
       blockedProfiles={blockedProfiles}
       onUnblockProfile={social.unblockProfile}
       onAssessmentChat={(id) => { setChatCompanionId(id); social.startDirectMessageWithCompanion(id); setCompanionChatOpen(true) }}

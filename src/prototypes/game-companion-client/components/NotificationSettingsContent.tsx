@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { DialogPanel } from '@/components/WindowsClient'
 import { notificationSounds, type NotificationChannel, type NotificationPreference, type NotificationPreferences } from '../data/personalSettingsMockData'
 
 const options: { key: NotificationChannel; label: string }[] = [
@@ -11,7 +10,7 @@ const options: { key: NotificationChannel; label: string }[] = [
   { key: 'roomEntry', label: '进房提示' },
 ]
 
-export function NotificationSettingsDialog({ preferences, onChange, onClose }: { preferences: NotificationPreferences; onChange: (preferences: NotificationPreferences) => void; onClose: () => void }) {
+export function NotificationSettingsContent({ preferences, onChange }: { preferences: NotificationPreferences; onChange: (preferences: NotificationPreferences) => void }) {
   const audio = useRef<HTMLAudioElement | null>(null)
   const [playing, setPlaying] = useState<NotificationChannel | null>(null)
   const [error, setError] = useState('')
@@ -43,7 +42,7 @@ export function NotificationSettingsDialog({ preferences, onChange, onClose }: {
     }
   }
 
-  return <DialogPanel overlayId="notification-settings-dialog" title="通知设置" onClose={onClose} width={820} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
+  return <>
     <table className="personal-notification-table">
       <thead><tr><th scope="col">通知类型</th><th scope="col">文字提醒</th><th scope="col">音效提醒</th><th scope="col">声音文件</th><th scope="col">音量</th></tr></thead>
       <tbody>{options.map(({ key, label }) => {
@@ -58,5 +57,5 @@ export function NotificationSettingsDialog({ preferences, onChange, onClose }: {
       })}</tbody>
     </table>
     {error && <p className="personal-setting-error" role="alert">{error}</p>}
-  </DialogPanel>
+  </>
 }

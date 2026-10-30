@@ -28,6 +28,7 @@ export interface SocialMessage {
   content: string
   companionShare?: { id: string; clubId: string; name: string; initials: string; intro: string }
   recalled?: boolean
+  systemNotice?: boolean
   order?: { id: string; companion: string; service: string; duration: string; amount: number; status: string }
   review?: { support: string; rating: number; submitted: boolean }
   duration?: number
@@ -57,7 +58,6 @@ export type VoiceRole = 'owner' | 'admin' | 'member'
 export const MAX_VOICE_CHANNEL_MEMBERS = 8
 export const MAX_VOICE_GROUP_MEMBERS = 100
 export const DEFAULT_VOICE_GROUP_CAPACITY = 25
-
 export interface VoiceMember {
   id: string
   name: string
@@ -72,6 +72,9 @@ export interface VoiceSubchannel {
   name: string
   imageDataUrl?: string
   capacity: number
+  messageFrequencySeconds: number
+  micQueueDurationSeconds: number
+  micQueueMemberIds?: string[]
   privacy: '公开' | '私密'
   password: string
   members: VoiceMember[]
@@ -81,7 +84,6 @@ export interface VoiceRoom {
   id: string
   name: string
   capacity: number
-  privacy: '公开' | '私密'
   currentRole: VoiceRole
   ownerType?: 'club' | 'personal'
   clubId?: string
@@ -177,19 +179,19 @@ const voiceMember = (friend: SocialFriend, role: VoiceRole = 'member'): VoiceMem
 
 export const initialVoiceRooms: VoiceRoom[] = [
   {
-    id: 'room-ranked', name: '分组A', capacity: DEFAULT_VOICE_GROUP_CAPACITY, privacy: '公开', currentRole: 'owner', ownerType: 'club', clubId: 'club-001',
+    id: 'room-ranked', name: '分组A', capacity: DEFAULT_VOICE_GROUP_CAPACITY, currentRole: 'owner', ownerType: 'club', clubId: 'club-001',
     channels: [
-      { id: 'channel-main', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), voiceMember(socialFriends[4])] },
-      { id: 'channel-warmup', name: '房间B', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
+      { id: 'channel-main', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, micQueueMemberIds: ['player', 'friend-1', 'friend-3'], privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), { ...voiceMember(socialFriends[4]), micOn: false }] },
+      { id: 'channel-warmup', name: '房间B', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
     ],
   },
   {
-    id: 'room-weekend', name: '分组B', capacity: DEFAULT_VOICE_GROUP_CAPACITY, privacy: '公开', currentRole: 'admin', ownerType: 'personal', ownerId: 'friend-1',
-    channels: [{ id: 'channel-weekend', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
+    id: 'room-weekend', name: '分组B', capacity: DEFAULT_VOICE_GROUP_CAPACITY, currentRole: 'admin', ownerType: 'personal', ownerId: 'friend-1',
+    channels: [{ id: 'channel-weekend', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] }],
   },
   {
-    id: 'room-friends', name: '分组C', capacity: DEFAULT_VOICE_GROUP_CAPACITY, privacy: '私密', currentRole: 'member', ownerType: 'personal', ownerId: 'friend-2',
-    channels: [{ id: 'channel-friends', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
+    id: 'room-friends', name: '分组C', capacity: DEFAULT_VOICE_GROUP_CAPACITY, currentRole: 'member', ownerType: 'personal', ownerId: 'friend-2',
+    channels: [{ id: 'channel-friends', name: '房间A', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] }],
   },
 ]
 
@@ -200,7 +202,11 @@ export const initialRoomMessages: SocialMessage[] = [
 ]
 
 export const initialRoomMessagesByRoom: Record<string, SocialMessage[]> = {
-  'room-ranked': initialRoomMessages,
+  'room-ranked': [
+    { id: 'room-entry-order', senderId: 'system', senderName: '系统', initials: '', time: '20:05', kind: 'text', content: '南蛮 通过接单 进入房间', systemNotice: true },
+    { id: 'room-entry', senderId: 'system-2', senderName: '系统', initials: '', time: '20:05', kind: 'text', content: '北夷 进入房间', systemNotice: true },
+    ...initialRoomMessages,
+  ],
   'room-weekend': [{ id: 'weekend-msg-1', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '19:58', kind: 'text', content: '先在这里等两位队友。' }],
   'room-friends': [{ id: 'friends-msg-1', senderId: 'friend-2', senderName: '青柠汽水', initials: '柠', time: '20:02', kind: 'text', content: '进来后去房间A吧。' }],
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { clubs, companions, servicesByCompanion } from './data/mockData'
 
-export type ClientPage = 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements'
+export type ClientPage = 'system-settings' | 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements'
 
 type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | null
 type OrderSelectionMode = 'locked' | 'service' | 'cascade'
@@ -9,7 +9,7 @@ type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | n
 
 const DEFAULT_CLUB_ID = 'club-001'
 const DEFAULT_COMPANION_ID = 'companion-001'
-const clientPages: ClientPage[] = ['workbench', 'home', 'talents', 'club-detail', 'checkout', 'profile', 'wallet', 'orders', 'messages', 'voice-room', 'recharge', 'coupons', 'club-cards', 'my-cards', 'announcements', 'club-announcements']
+const clientPages: ClientPage[] = ['system-settings', 'workbench', 'home', 'talents', 'club-detail', 'checkout', 'profile', 'wallet', 'orders', 'messages', 'voice-room', 'recharge', 'coupons', 'club-cards', 'my-cards', 'announcements', 'club-announcements']
 
 const readRoute = (entryView: string | undefined): RouteSnapshot => {
   const params = new URLSearchParams(window.location.hash.slice(1))

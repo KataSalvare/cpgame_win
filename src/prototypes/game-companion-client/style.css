@@ -267,6 +267,9 @@
 .companion-profile-card { display: grid; grid-template-columns: 64px minmax(0, 1fr) 32px; align-items: flex-start; gap: 12px; padding: 22px; }
 .companion-profile-card > .client-avatar { width: 64px; height: 64px; }
 .companion-profile-card__body { min-width: 0; }
+.companion-profile-card__club { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
+.companion-profile-card__club .client-avatar { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 4px; font-size: 8px; }
+.companion-profile-card__club > span:last-child { overflow-wrap: anywhere; }
 .companion-profile-card__more { position: relative; grid-column: 3; grid-row: 1; }
 .companion-profile-card__more > .client-icon-button { width: 30px; height: 30px; }
 .companion-profile-card__menu { position: absolute; z-index: 20; top: 36px; right: 0; display: grid; width: 148px; gap: 2px; border: 1px solid var(--client-border); border-radius: 8px; padding: 5px; background: var(--client-surface); box-shadow: 0 4px 14px rgba(17, 24, 39, .12); }
@@ -498,7 +501,7 @@
 .account-order-entry > svg { color: var(--prototype-text-subtle, #9ca3af); }
 .account-settings-card { padding: 20px; }
 .account-settings-card .client-section-heading { align-items: center; }
-.account-settings-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.account-settings-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
 .account-settings-list button { display: flex; min-height: 48px; align-items: center; gap: 9px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 11px; background: var(--prototype-surface, #fff); color: var(--prototype-text-secondary, #4b5563); font: inherit; font-size: 12px; cursor: pointer; }
 .account-settings-list button:hover { border-color: var(--prototype-text-subtle, #9ca3af); background: var(--prototype-surface-muted, #f9fafb); }
 .account-settings-list button span { flex: 1; text-align: left; }
@@ -730,6 +733,12 @@
 .personal-field { display: grid; gap: 7px; color: var(--client-text); font-size: 12px; font-weight: 600; }
 .personal-field--full { grid-column: 1 / -1; }
 .personal-field input, .personal-field select, .personal-field textarea { box-sizing: border-box; width: 100%; min-height: 38px; border: 1px solid var(--client-border); border-radius: 6px; outline: none; background: var(--prototype-surface, #fff); padding: 8px 10px; color: var(--client-text); font: inherit; font-size: 13px; font-weight: 400; }
+.personal-field__hint { color: var(--client-muted); font-size: 11px; font-weight: 400; }
+.personal-date-picker { position: relative; display: block; }
+.personal-date-picker > input { padding-right: 38px; }
+.personal-date-picker > input::-webkit-calendar-picker-indicator { display: none; }
+.personal-date-picker > button { position: absolute; top: 1px; right: 1px; display: grid; width: 36px; height: 36px; place-items: center; border: 0; border-radius: 0 5px 5px 0; background: transparent; color: var(--client-muted); cursor: pointer; }
+.personal-date-picker > button:hover, .personal-date-picker > button:focus-visible { color: var(--client-text); background: var(--prototype-canvas, #f3f4f6); outline: none; }
 .personal-field textarea { resize: vertical; }
 .personal-field input:focus, .personal-field select:focus, .personal-field textarea:focus { border-color: var(--prototype-text-muted, #6b7280); box-shadow: 0 0 0 2px rgba(107,114,128,.16); }
 .personal-profile-form .personal-demo-note { grid-column: 1 / -1; }
@@ -1767,3 +1776,32 @@
 .personal-club-search button { display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--client-muted); padding: 4px; }
 
 .recruitment-search { width: 360px; max-width: 100%; }
+
+.system-settings-page { max-width: 1040px; width: 100%; }
+.system-settings-page > .client-section-heading { margin: 16px 0 24px; }
+.system-settings-page h1 { font-size: 20px; font-weight: 600; }
+.system-settings-card { padding: 24px; margin-bottom: 16px; }
+.system-settings-card h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 24px; font-size: 15px; font-weight: 600; }
+.system-settings-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); align-items: center; gap: 24px; margin-top: 20px; }
+.system-settings-row > label { font-size: 14px; }
+.system-settings-row input { width: 100%; height: 38px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 12px; background: var(--client-surface); color: var(--client-text); font-size: 14px; }
+.system-settings-row input:focus-visible { outline: 2px solid var(--prototype-border-strong, #d1d5db); border-color: var(--client-text); }
+.system-settings-row small { display: inline-block; margin-left: 12px; color: var(--client-muted); font-size: 12px; }
+.system-shortcut { min-width: 180px; font-variant-numeric: tabular-nums; }
+.system-shortcut.is-capturing { border-color: var(--client-text); outline: 2px solid var(--prototype-border-strong, #d1d5db); }
+.system-settings-footer { display: flex; justify-content: flex-end; margin-top: 24px; }
+.system-settings-row > select { width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--client-border); border-radius: 6px; background: var(--client-surface); color: var(--client-text); font-size: 14px; }
+.system-settings-row > select:focus-visible { outline: 2px solid var(--prototype-border-strong, #d1d5db); border-color: var(--client-text); }
+.system-audio-volume { display: flex; align-items: center; gap: 16px; }
+.system-audio-volume input[type="range"] { flex: 1; height: 20px; padding: 0; accent-color: var(--client-text); border: 0; background: transparent; }
+.system-audio-volume output { min-width: 40px; text-align: right; font-size: 13px; color: var(--client-muted); }
+.system-mic-test { display: flex; align-items: center; gap: 16px; }
+.system-mic-test > button { min-width: 100px; }
+.system-mic-test > span { min-width: 84px; font-size: 12px; color: var(--client-muted); }
+.system-mic-meter { display: flex; flex: 1; gap: 4px; height: 22px; }
+.system-mic-meter > span { flex: 1; border-radius: 2px; background: var(--client-border); }
+.system-mic-meter > span.is-active { background: var(--client-text); }
+
+.system-settings-path { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.system-settings-path > input { flex: 1; min-width: 0; }
+.system-folder-button { flex: 0 0 38px; width: 38px; height: 38px; padding: 0; }
