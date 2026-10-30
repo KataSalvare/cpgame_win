@@ -44,14 +44,32 @@ export const saveTheme = (theme: Theme) => {
 
 export interface ShortcutConfig {
   copyToFigma: string
+  copyToAxure: string
   openDoc: string
   selectElement: string
 }
 
 export const DEFAULT_SHORTCUTS: ShortcutConfig = {
   copyToFigma: 'ctrl+cmd+c',
+  copyToAxure: 'ctrl+cmd+x',
   openDoc: 'ctrl+cmd+e',
   selectElement: 'ctrl+cmd+s',
+}
+
+export const AXURE_BRIDGE_URL = 'http://127.0.0.1:32767'
+
+export const checkAxureBridge = async (): Promise<boolean> => {
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 3000)
+    const response = await fetch(`${AXURE_BRIDGE_URL}/available`, {
+      signal: controller.signal,
+    })
+    clearTimeout(timer)
+    return response.ok
+  } catch {
+    return false
+  }
 }
 
 export const loadShortcuts = (): ShortcutConfig => {

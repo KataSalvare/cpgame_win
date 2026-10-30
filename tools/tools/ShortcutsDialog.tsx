@@ -79,6 +79,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
 
   const shortcutLabels: Record<keyof ShortcutConfig, string> = {
     copyToFigma: '复制到 Figma',
+    copyToAxure: '复制到 Axure',
     openDoc: '查看文档',
     selectElement: '批注选择元素',
   }
