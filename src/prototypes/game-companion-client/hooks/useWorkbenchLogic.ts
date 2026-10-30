@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { clubs, companions, games, servicesByCompanion } from '../data/mockData'
+import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
 export type WorkOrderAction = '接收' | '取消' | '开始服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
 export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
@@ -7,18 +7,24 @@ const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all)
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
 const initialServiceIds = services.filter(s => s.canAcceptOrders).map(s => s.id)
 const workbenchClubName = clubs.find(club => club.id === companions.find(companion => companion.id === 'companion-001')?.clubId)?.name ?? '所属俱乐部'
-const serviceGroups = games.filter(game => services.some(s => s.gameId === game.id)).map(game => ({
+type WorkbenchService = Service & { name: string; applicationStatus?: '待审核' }
+const buildServiceGroups = (items: WorkbenchService[]) => games.filter(game => items.some(s => s.gameId === game.id)).map(game => ({
   ...game,
-  plays: [...new Set(services.filter(s => s.gameId === game.id).map(s => s.playName))].map(name => ({
+  plays: [...new Set(items.filter(s => s.gameId === game.id).map(s => s.playName))].map(name => ({
     name,
-    levels: [...new Set(services.filter(s => s.gameId === game.id && s.playName === name).map(s => s.levelName))].map(level => ({
+    levels: [...new Set(items.filter(s => s.gameId === game.id && s.playName === name).map(s => s.levelName))].map(level => ({
       name: level,
       key: levelKey({ gameId: game.id, playName: name, levelName: level }),
-      services: services.filter(s => s.gameId === game.id && s.playName === name && s.levelName === level),
+      services: items.filter(s => s.gameId === game.id && s.playName === name && s.levelName === level),
     })),
   })),
 }))
+const applicationTemplates = Object.values(servicesByCompanion).flat().filter((service, index, all) => all.findIndex(other => other.playName === service.playName && other.levelName === service.levelName && other.unit === service.unit) === index)
+const serviceApplicationOptions: WorkbenchService[] = games.filter(game => game.id !== 'all').flatMap(game => applicationTemplates.map((template, index) => ({ ...template, id: `apply-${game.id}-${index}`, gameId: game.id, name: template.unit === '局' ? '按局服务' : '按小时服务', canAcceptOrders: false })))
 export function useWorkbenchLogic() {
+  const [serviceApplications, setServiceApplications] = useState<WorkbenchService[]>([])
+  const allWorkbenchServices: WorkbenchService[] = [...services, ...serviceApplications]
+  const serviceGroups = buildServiceGroups(allWorkbenchServices)
   const [serviceSelections, setServiceSelections] = useState<string[]>(initialServiceIds)
   const [enabledLevelKeys, setEnabledLevelKeys] = useState<string[]>(() => [...new Set(services.filter(s => initialServiceIds.includes(s.id)).map(levelKey))])
   const [expandedLevelKeys, setExpandedLevelKeys] = useState<string[]>([])
@@ -74,6 +80,21 @@ export function useWorkbenchLogic() {
       return items.map(r => r.id === next?.id ? { ...r, status: '已加入候选名单' } : r)
     })
   }
+  const applyService = (optionId: string) => {
+    const option = serviceApplicationOptions.find(item => item.id === optionId)
+    if (!option) return false
+    if (allWorkbenchServices.some(item => item.gameId === option.gameId && item.playName === option.playName && item.levelName === option.levelName && item.unit === option.unit)) {
+      setFeedback('这项服务已在列表中，无需重复申请')
+      return false
+    }
+    const application: WorkbenchService = { ...option, id: `service-application-${Date.now()}`, applicationStatus: '待审核', canAcceptOrders: false }
+    setServiceApplications(items => [...items, application])
+    const key = levelKey(application)
+    setExpandedLevelKeys(items => items.includes(key) ? items : [...items, key])
+    setSelectedServiceGameId(application.gameId)
+    setFeedback('服务申请已提交，审核通过前不可开启接单')
+    return true
+  }
   const updateOrder = (id: string, status: string) => {
     setOrders(items => items.map(o => o.id === id ? { ...o, status, ...(status === '服务中' ? { startedAt: new Date().toLocaleString('zh-CN') } : {}), ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000, completionRequestedAt: new Date().toLocaleString('zh-CN') } : {}) } : o))
     setFeedback(status === '已取消' ? '订单已取消，已退款并通知玩家' : status === '待玩家确认' ? '已通知玩家确认，24 小时后自动完成' : `订单已变更为${status}`)
@@ -114,7 +135,7 @@ export function useWorkbenchLogic() {
     setFeedback(`已同意提前结束，确认完成 ${quantity} ${order.durationUnit}，等待玩家确认`)
     return true
   }
-  return { selectedOrderId, setSelectedOrderId, selectedOrder: orders.find(o => o.id === selectedOrderId) ?? null, orderAction, setOrderAction, services, serviceGroups, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder, recordOrderWaiver,
+  return { selectedOrderId, setSelectedOrderId, selectedOrder: orders.find(o => o.id === selectedOrderId) ?? null, orderAction, setOrderAction, services: allWorkbenchServices, serviceGroups, serviceApplicationOptions, applyService, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder, recordOrderWaiver,
     rejectEarlyEnd, agreeEarlyEnd,
     toggleLevel: (key: string) => {
       const opening = !enabledLevelKeys.includes(key)
@@ -122,7 +143,7 @@ export function useWorkbenchLogic() {
       setExpandedLevelKeys(items => opening ? [...items.filter(x => x !== key), key] : items.filter(x => x !== key))
     },
     toggleLevelExpanded: (key: string) => {
-      if (!enabledLevelKeys.includes(key)) return
+      if (!enabledLevelKeys.includes(key) && !serviceApplications.some(service => levelKey(service) === key)) return
       setExpandedLevelKeys(items => items.includes(key) ? items.filter(x => x !== key) : [...items, key])
     },
     toggleService: (id: string) => {

@@ -797,6 +797,8 @@
 .wallet-balance-card__heading p { margin: 3px 0 0; color: var(--client-muted); font-size: 11px; }
 .wallet-balance-card__amount { margin-top: 5px; font-size: 28px; font-weight: 600; letter-spacing: -.02em; }
 .wallet-balance-card__amount small { color: var(--client-muted); font-size: 13px; font-weight: 400; }
+.wallet-balance-card__breakdown { display:flex; gap:16px; margin-top:6px; color:var(--client-muted); font-size:12px; }
+.wallet-balance-card__breakdown strong { color:var(--client-text); font-size:12px; font-weight:500; }
 .wallet-balance-card__actions { display: flex; gap: 8px; margin-top: auto; padding-top: 17px; }
 .wallet-balance-card__actions .client-button--primary { min-width: 104px; justify-content: center; }
 .wallet-balance-card__actions { flex-wrap: wrap; }

@@ -25,6 +25,8 @@ function PageState({ pageState, onRetry }: StateProps) {
 type WalletPageProps = StateProps & {
   diamondBalance: number
   beanBalance: number
+  availableBeanBalance: number
+  pendingBeanSettlementBalance: number
   availableCouponCount: number
   ownedPremiumCardCount: number
   onOpenRecharge: () => void
@@ -36,7 +38,7 @@ type WalletPageProps = StateProps & {
   onOpenPremiumCards: () => void
 }
 
-export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, availableCouponCount, ownedPremiumCardCount, onOpenRecharge, onOpenDiamondDetails, onOpenBeanDetails, onWithdrawBeans, onExchangeBeans, onOpenCoupons, onOpenPremiumCards }: WalletPageProps) {
+export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, availableBeanBalance, pendingBeanSettlementBalance, availableCouponCount, ownedPremiumCardCount, onOpenRecharge, onOpenDiamondDetails, onOpenBeanDetails, onWithdrawBeans, onExchangeBeans, onOpenCoupons, onOpenPremiumCards }: WalletPageProps) {
   if (pageState !== 'normal') return <div className="client-content account-page"><PageState pageState={pageState} onRetry={onRetry} /></div>
 
   return <div className="client-content account-page wallet-page">
@@ -55,6 +57,7 @@ export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, av
         title="糖豆钱包"
         amount={beanBalance}
         unit="糖豆"
+        balanceBreakdown={{ available: availableBeanBalance, pending: pendingBeanSettlementBalance }}
         icon={<WalletCards size={20} />}
         onToggle={onOpenBeanDetails}
         onWithdraw={onWithdrawBeans}
@@ -67,12 +70,13 @@ export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, av
   </div>
 }
 
-function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, onRecharge, onWithdraw, onExchange, actionLabel = '收支明细' }: {
-  title: string; description?: string; amount: number; unit: string; icon: React.ReactNode; expanded?: boolean; onToggle: () => void; onRecharge?: () => void; onWithdraw?: () => void; onExchange?: () => void; actionLabel?: string
+function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, onRecharge, onWithdraw, onExchange, actionLabel = '收支明细', balanceBreakdown }: {
+  title: string; description?: string; amount: number; unit: string; icon: React.ReactNode; expanded?: boolean; onToggle: () => void; onRecharge?: () => void; onWithdraw?: () => void; onExchange?: () => void; actionLabel?: string; balanceBreakdown?: { available: number; pending: number }
 }) {
   return <section className="client-card wallet-balance-card">
     <div className="wallet-balance-card__heading"><span className="wallet-balance-card__icon">{icon}</span><div><h2>{title}</h2>{description && <p>{description}</p>}</div></div>
     <span className="client-eyebrow">{title === '优惠券' || title === '我的尊享卡' ? '当前数量' : '当前余额'}</span><strong className="wallet-balance-card__amount">{amount.toLocaleString()} <small>{unit}</small></strong>
+    {balanceBreakdown && <div className="wallet-balance-card__breakdown"><span>可提现 <strong>{balanceBreakdown.available.toLocaleString()}</strong></span><span>待结算 <strong>{balanceBreakdown.pending.toLocaleString()}</strong></span></div>}
     <div className="wallet-balance-card__actions">{onRecharge && <button type="button" className="client-button client-button--primary" onClick={onRecharge}><CreditCard size={15} />充值</button>}{onWithdraw && <button type="button" className="client-button client-button--primary" onClick={onWithdraw}>提现</button>}{onExchange && <button type="button" className="client-button client-button--secondary" onClick={onExchange}>兑换钻石</button>}<button type="button" className={`client-button ${onRecharge || onWithdraw || onExchange ? 'client-button--secondary' : 'client-button--primary'}`} onClick={onToggle}>{(onRecharge || onWithdraw || onExchange) && <History size={15} />}{actionLabel}</button></div>
   </section>
 }

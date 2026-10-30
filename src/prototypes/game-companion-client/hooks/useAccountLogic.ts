@@ -3,6 +3,7 @@ import { games, companions, servicesByCompanion, type Companion, type Service } 
 import {
   initialBeanBalance,
   initialDiamondBalance,
+  initialPendingBeanSettlementBalance,
   initialOrders,
   makeClientOrder,
   walletEntries,
@@ -13,6 +14,7 @@ import { initialCoupons, initialOwnedPremiumCardIds, initialPremiumCardBalances,
 export function useAccountLogic() {
   const [diamondBalance, setDiamondBalance] = useState(initialDiamondBalance)
   const [beanBalance, setBeanBalance] = useState(initialBeanBalance)
+  const availableBeanBalance = beanBalance - initialPendingBeanSettlementBalance
   const [orders, setOrders] = useState(initialOrders)
   const [diamondTransactions, setDiamondTransactions] = useState(walletEntries.diamonds)
   const [beanTransactions, setBeanTransactions] = useState(walletEntries.beans)
@@ -146,6 +148,8 @@ export function useAccountLogic() {
   return {
     diamondBalance,
     beanBalance,
+    availableBeanBalance,
+    pendingBeanSettlementBalance: initialPendingBeanSettlementBalance,
     orders,
     diamondTransactions,
     coupons,
@@ -153,13 +157,13 @@ export function useAccountLogic() {
     premiumCardBalances,
     premiumCardTransactions,
     withdrawBeans: (amount: number) => {
-      if (!Number.isInteger(amount) || amount <= 0 || amount > beanBalance) return false
+      if (!Number.isInteger(amount) || amount <= 0 || amount > availableBeanBalance) return false
       setBeanBalance((balance) => balance - amount)
       setBeanTransactions((current) => [{ id: `bean-withdraw-${Date.now()}`, title: '糖豆提现申请', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: -amount }, ...current])
       return true
     },
     exchangeBeans: (amount: number) => {
-      if (!Number.isInteger(amount) || amount <= 0 || amount > beanBalance) return false
+      if (!Number.isInteger(amount) || amount <= 0 || amount > availableBeanBalance) return false
       const id = `bean-exchange-${Date.now()}`
       const date = new Date().toLocaleString('zh-CN', { hour12: false })
       setBeanBalance((balance) => balance - amount)

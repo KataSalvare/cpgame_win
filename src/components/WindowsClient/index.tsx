@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { X, Minus, Square } from 'lucide-react'
 import './style.css'
 
@@ -142,12 +142,42 @@ export interface DialogPanelProps {
   onClose?: () => void
   width?: number | string
   className?: string
+  draggable?: boolean
 }
 
-export function DialogPanel({ overlayId, children, title, description, footer, onClose, width = 560, className = '' }: DialogPanelProps) {
+export function DialogPanel({ overlayId, children, title, description, footer, onClose, width = 560, className = '', draggable = false }: DialogPanelProps) {
+  const panelRef = useRef<HTMLElement>(null)
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
+  const dragStartRef = useRef<{ pointerId: number; pointerX: number; pointerY: number; rect: DOMRect; bounds: DOMRect; scaleX: number; scaleY: number; x: number; y: number } | null>(null)
+  const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
+    if (!draggable || event.button !== 0 || (event.target as HTMLElement).closest('button, input, textarea, a, select, [data-no-drag]')) return
+    const panel = panelRef.current
+    if (!panel) return
+    const bounds = panel.closest<HTMLElement>('.game-companion-client') ?? panel.parentElement
+    if (!bounds) return
+    const boundsRect = bounds.getBoundingClientRect()
+    const rect = panel.getBoundingClientRect()
+    const scaleX = bounds.offsetWidth ? boundsRect.width / bounds.offsetWidth : 1
+    const scaleY = bounds.offsetHeight ? boundsRect.height / bounds.offsetHeight : 1
+    dragStartRef.current = { pointerId: event.pointerId, pointerX: event.clientX, pointerY: event.clientY, rect, bounds: boundsRect, scaleX: scaleX || 1, scaleY: scaleY || 1, ...dragPosition }
+    event.currentTarget.setPointerCapture(event.pointerId)
+    event.preventDefault()
+  }
+  const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+    const start = dragStartRef.current
+    if (!draggable || !start || start.pointerId !== event.pointerId) return
+    const left = Math.min(Math.max(start.rect.left + event.clientX - start.pointerX, start.bounds.left), start.bounds.right - start.rect.width)
+    const top = Math.min(Math.max(start.rect.top + event.clientY - start.pointerY, start.bounds.top), start.bounds.bottom - start.rect.height)
+    setDragPosition({ x: start.x + (left - start.rect.left) / start.scaleX, y: start.y + (top - start.rect.top) / start.scaleY })
+  }
+  const handlePointerUp = (event: ReactPointerEvent<HTMLElement>) => {
+    if (dragStartRef.current?.pointerId !== event.pointerId) return
+    dragStartRef.current = null
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+  }
   return <div className="windows-dialog-overlay" data-overlay={overlayId}>
-    <section className={`windows-dialog-panel ${className}`.trim()} style={{ width }} role="dialog" aria-modal="true" aria-labelledby={title ? `${overlayId}-title` : undefined}>
-      {(title || onClose) && <header className="windows-dialog-panel__header">
+    <section ref={panelRef} className={`windows-dialog-panel ${className}`.trim()} style={{ width, ...(draggable ? { transform: `translate3d(${dragPosition.x}px, ${dragPosition.y}px, 0)` } : {}) }} role="dialog" aria-modal="true" aria-labelledby={title ? `${overlayId}-title` : undefined}>
+      {(title || onClose) && <header className={`windows-dialog-panel__header${draggable ? ' is-draggable' : ''}`} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp}>
         <div>{title && <h2 id={`${overlayId}-title`}>{title}</h2>}{description && <p>{description}</p>}</div>
         {onClose && <button type="button" className="windows-icon-button" aria-label="关闭弹窗" onClick={onClose}><X size={16} /></button>}
       </header>}

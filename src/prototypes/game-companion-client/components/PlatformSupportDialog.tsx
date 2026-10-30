@@ -91,6 +91,7 @@ export function PlatformSupportDialog({ open, onClose }: { open: boolean; onClos
     onClose={onClose}
     width={720}
     className="client-support-dialog-panel"
+    draggable
   >
     <section className="client-support-dialog" ref={dialogRef} aria-label="平台客服对话">
       <div className="client-support-dialog__notice"><ShieldAlert size={16} aria-hidden="true" /><p>请勿向他人提供验证码或账户密码；交易请在平台内完成。</p></div>

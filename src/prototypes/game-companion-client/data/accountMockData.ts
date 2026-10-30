@@ -67,6 +67,7 @@ export const playerProfile: PlayerProfile = {
 
 export const initialDiamondBalance = 260
 export const initialBeanBalance = 12800
+export const initialPendingBeanSettlementBalance = 3000
 
 export const walletEntries = {
   diamonds: [
