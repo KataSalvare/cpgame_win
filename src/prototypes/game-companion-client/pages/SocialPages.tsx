@@ -1,7 +1,7 @@
 import type { ClientOrder } from '../data/accountMockData'
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
-  Bell, Megaphone, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Globe2, Headphones, MessageSquareText,
+  Bell, Megaphone, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText,
   Gift, ImagePlus, LockKeyhole, MessageCircle, Mic, MicOff, MoreHorizontal, Pencil,
   PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, Undo2, UserPlus, Users, PanelRightClose, PanelRightOpen,
   Volume2, VolumeX, X,
@@ -1112,7 +1112,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
 
       <section className="voice-stage" aria-label="语音房麦位">
         <header className="voice-stage__header">
-          <div className="voice-stage__room-identity"><AvatarMark initials={channel?.name.slice(0, 1) ?? '房'} imageUrl={channel?.imageDataUrl} size="md" /><div><div className="voice-stage__breadcrumbs"><span>{room?.name}</span><ChevronRight size={14} /><strong>{channel?.name}</strong></div><small>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人 · {channel?.privacy ?? '公开'}房间</small></div></div>
+          <div className="voice-stage__room-identity"><AvatarMark initials={channel?.name.slice(0, 1) ?? '房'} imageUrl={channel?.imageDataUrl} size="md" /><div className="voice-stage__room-copy"><strong className="voice-stage__room-name">{channel?.name ?? '语音房'}</strong><div className="voice-stage__room-meta"><span>ID：{channel?.id ?? '—'}</span><span>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人</span><span><Flame size={12} />热度 {channel?.heat ?? 0}</span></div></div></div>
           <div className="voice-stage__header-actions">
             {room && channel && <FollowIconButton followed={logic.followedChannelIds.includes(`${room.id}:${channel.id}`)} name={`${room.name}${channel.name}`} onToggle={() => logic.toggleChannelFollow(`${room.id}:${channel.id}`)} />}
             <button type="button" className="voice-support-call" onClick={() => setSupportDialogOpen(true)}><Headphones size={14} />{supportQueued ? `排队中 · 第 ${initialSupportQueue.length + 1} 位` : '呼叫客服'}</button>

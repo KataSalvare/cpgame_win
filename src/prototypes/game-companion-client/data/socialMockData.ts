@@ -71,6 +71,7 @@ export interface VoiceMember {
 export interface VoiceSubchannel {
   id: string
   name: string
+  heat?: number
   isDefault?: boolean
   imageDataUrl?: string
   capacity: number
@@ -184,22 +185,22 @@ export const initialVoiceRooms: VoiceRoom[] = [
   {
     id: 'room-ranked', name: '分组A', capacity: DEFAULT_VOICE_GROUP_CAPACITY, currentRole: 'owner', ownerType: 'club', clubId: 'club-001',
     channels: [
-      { id: 'channel-main', name: '房间A', isDefault: true, capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, micQueueMemberIds: ['player', 'friend-1', 'friend-3'], privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), { ...voiceMember(socialFriends[4]), micOn: false }] },
-      { id: 'channel-warmup', name: '房间B', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '私密', password: '1111', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
+      { id: 'channel-main', name: '房间A', heat: 328, isDefault: true, capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, micQueueMemberIds: ['player', 'friend-1', 'friend-3'], privacy: '公开', password: '', members: [{ id: 'player', name: '林小满', initials: '满', role: 'owner', micOn: true, muted: false }, voiceMember(socialFriends[0], 'admin'), voiceMember(socialFriends[2]), { ...voiceMember(socialFriends[4]), micOn: false }] },
+      { id: 'channel-warmup', name: '房间B', heat: 186, capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '私密', password: '1111', members: [voiceMember(socialFriends[1]), voiceMember(socialFriends[3])] },
     ],
   },
   {
     id: 'room-weekend', name: '分组B', capacity: DEFAULT_VOICE_GROUP_CAPACITY, currentRole: 'admin', ownerType: 'personal', ownerId: 'friend-1',
     channels: [
-      { id: 'channel-weekend', name: '房间C', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] },
-      { id: 'channel-weekend-2', name: '房间D', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [] },
+      { id: 'channel-weekend', name: '房间C', heat: 142, capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [voiceMember(socialFriends[0], 'owner'), { id: 'player', name: '林小满', initials: '满', role: 'admin', micOn: true, muted: false }, voiceMember(socialFriends[2]), voiceMember(socialFriends[5])] },
+      { id: 'channel-weekend-2', name: '房间D', heat: 96, capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [] },
     ],
   },
   {
     id: 'room-friends', name: '分组C', capacity: DEFAULT_VOICE_GROUP_CAPACITY, currentRole: 'member', ownerType: 'personal', ownerId: 'friend-2',
     channels: [
-      { id: 'channel-friends', name: '房间E', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] },
-      { id: 'channel-friends-2', name: '房间F', capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [] },
+      { id: 'channel-friends', name: '房间E', heat: 87, capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '私密', password: '', members: [voiceMember(socialFriends[1], 'owner'), voiceMember(socialFriends[3], 'admin')] },
+      { id: 'channel-friends-2', name: '房间F', heat: 54, capacity: MAX_VOICE_CHANNEL_MEMBERS, messageFrequencySeconds: 5, micQueueDurationSeconds: 60, privacy: '公开', password: '', members: [] },
     ],
   },
 ]

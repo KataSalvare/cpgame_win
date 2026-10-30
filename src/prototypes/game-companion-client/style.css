@@ -1839,3 +1839,78 @@
 .system-settings-path { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .system-settings-path > input { flex: 1; min-width: 0; }
 .system-folder-button { flex: 0 0 38px; width: 38px; height: 38px; padding: 0; }
+
+
+/* 啄木鸟工单 */
+.woodpecker-page { gap: 18px; }
+.woodpecker-page__heading { align-items: center; }
+.woodpecker-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 220px)); border-bottom: 1px solid var(--client-border); }
+.woodpecker-tabs button { position: relative; min-height: 48px; border: 0; background: transparent; color: var(--client-muted); font: inherit; font-size: 14px; cursor: pointer; }
+.woodpecker-tabs button.is-active { color: var(--client-text); font-weight: 600; }
+.woodpecker-tabs button.is-active::after { position: absolute; right: 24px; bottom: -1px; left: 24px; height: 2px; background: var(--client-primary); content: ''; }
+.woodpecker-panel { display: grid; gap: 16px; }
+.woodpecker-filter-row { display: flex; align-items: center; gap: 8px; }
+.woodpecker-filter { min-height: 32px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 12px; background: var(--client-surface); color: var(--client-muted); font: inherit; font-size: 13px; cursor: pointer; }
+.woodpecker-filter.is-active { border-color: var(--client-text); background: #e5e7eb; color: var(--client-text); font-weight: 600; }
+.woodpecker-count { margin-left: auto; color: var(--client-muted); font-size: 12px; }
+.woodpecker-ticket-list { display: grid; gap: 12px; }
+.woodpecker-ticket { display: grid; gap: 14px; padding: 18px 20px; }
+.woodpecker-ticket__header { display: flex; align-items: center; gap: 12px; }
+.woodpecker-ticket__header > strong { font-size: 14px; }
+.woodpecker-ticket__header time, .woodpecker-ticket__time { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; color: var(--client-muted); font-size: 12px; }
+.woodpecker-status { border: 1px solid var(--client-border); border-radius: 4px; padding: 2px 7px; color: var(--client-muted); font-size: 11px; }
+.woodpecker-status--done { border-color: #9ca3af; color: var(--client-text-secondary, #4b5563); }
+.woodpecker-status--pending { background: #f9fafb; }
+.woodpecker-ticket__fields { display: grid; gap: 8px; margin: 0; }
+.woodpecker-ticket__fields > div { display: grid; grid-template-columns: 98px minmax(0, 1fr); gap: 12px; line-height: 1.5; }
+.woodpecker-ticket__fields dt { color: var(--client-muted); }
+.woodpecker-ticket__fields dd { min-width: 0; margin: 0; color: var(--client-text); }
+.woodpecker-ticket__attachments { display: flex; gap: 8px; }
+.woodpecker-ticket__attachments > span { display: grid; width: 96px; height: 72px; place-items: center; border: 1px solid var(--client-border); border-radius: 6px; background: #f9fafb; color: var(--client-muted); font-size: 11px; }
+.woodpecker-response { display: grid; gap: 8px; border: 1px solid var(--client-border); border-radius: 8px; background: #f9fafb; padding: 14px 16px; }
+.woodpecker-response h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.woodpecker-response p { margin: 0; line-height: 1.6; }
+.woodpecker-response__feedback { display: flex; justify-content: flex-end; gap: 16px; }
+.woodpecker-response__feedback button { display: inline-flex; align-items: center; gap: 6px; border: 0; padding: 3px; background: transparent; color: var(--client-muted); font: inherit; cursor: pointer; }
+.woodpecker-response__feedback button[aria-pressed="true"] { color: var(--client-text); font-weight: 600; }
+.woodpecker-ticket__footer { display: flex; justify-content: space-between; align-items: center; color: var(--client-muted); font-size: 12px; }
+.woodpecker-submitter, .woodpecker-user-identity { display: inline-flex; align-items: center; gap: 8px; }
+.woodpecker-submitter > strong { font-size: 13px; font-weight: 500; }
+.woodpecker-user-identity__id { color: var(--client-muted); }
+.woodpecker-search { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 8px; align-items: center; }
+.woodpecker-search label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+.woodpecker-search input, .woodpecker-form__field input, .woodpecker-form__field select, .woodpecker-form__field textarea { width: 100%; min-width: 0; border: 1px solid var(--client-border); border-radius: 6px; background: var(--client-surface); color: var(--client-text); font: inherit; }
+.woodpecker-search input, .woodpecker-form__field input, .woodpecker-form__field select { min-height: 40px; padding: 0 12px; }
+.woodpecker-user-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.woodpecker-user-search > button { display: inline-flex; align-items: center; gap: 6px; }
+.woodpecker-user-result { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--client-text); }
+.woodpecker-user-result > span:last-child { color: var(--client-muted); }
+.woodpecker-user-not-found { margin: 0; color: var(--client-muted); font-size: 12px; }
+.woodpecker-search input::placeholder, .woodpecker-form__field input::placeholder, .woodpecker-form__field textarea::placeholder { color: #9ca3af; }
+.woodpecker-search input:focus, .woodpecker-form__field input:focus, .woodpecker-form__field select:focus, .woodpecker-form__field textarea:focus { border-color: #6b7280; outline: 2px solid rgba(107,114,128,.16); }
+.woodpecker-empty { display: grid; min-height: 280px; align-content: center; justify-items: center; gap: 12px; border: 1px solid var(--client-border); border-radius: 8px; background: var(--client-surface); color: var(--client-muted); }
+.woodpecker-empty strong { color: var(--client-text); font-size: 14px; }
+.woodpecker-form { display: grid; gap: 20px; }
+.woodpecker-form__fieldset { min-width: 0; margin: 0; border: 0; padding: 0; }
+.woodpecker-form__fieldset legend, .woodpecker-form__field > span, .woodpecker-form__field > label, .woodpecker-attachments > div:first-child { margin-bottom: 10px; font-size: 14px; }
+.woodpecker-form__fieldset legend > span, .woodpecker-form__field b { margin-right: 6px; color: #4b5563; font-weight: 600; }
+.woodpecker-choice-row { display: flex; gap: 10px; }
+.woodpecker-choice-row label { display: inline-flex; min-height: 38px; align-items: center; gap: 7px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 12px; color: var(--client-muted); cursor: pointer; }
+.woodpecker-choice-row label.is-selected { border-color: #6b7280; background: #f3f4f6; color: var(--client-text); }
+.woodpecker-choice-row input { accent-color: #374151; }
+.woodpecker-form__field { position: relative; display: grid; gap: 8px; }
+.woodpecker-form__field > span { margin: 0; }
+.woodpecker-form__field textarea { min-height: 150px; resize: vertical; padding: 12px; }
+.woodpecker-form__field > small { position: absolute; right: 12px; bottom: 10px; color: var(--client-muted); font-size: 12px; }
+.woodpecker-attachments { display: grid; gap: 8px; }
+.woodpecker-attachments__list { display: flex; flex-wrap: wrap; gap: 10px; }
+.woodpecker-attachments__add { display: grid; width: 112px; height: 104px; align-content: center; justify-items: center; gap: 8px; border: 1px solid var(--client-border); border-radius: 8px; background: #f9fafb; color: var(--client-muted); font: inherit; cursor: pointer; }
+.woodpecker-attachment { display: inline-flex; max-width: 260px; min-height: 36px; align-items: center; gap: 6px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 8px; font-size: 12px; }
+.woodpecker-attachment button { display: grid; width: 22px; height: 22px; place-items: center; border: 0; background: transparent; color: var(--client-muted); cursor: pointer; }
+.woodpecker-file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.woodpecker-anonymous { display: inline-flex; align-items: center; gap: 8px; color: var(--client-text); cursor: pointer; }
+.woodpecker-anonymous input { accent-color: var(--client-primary); }
+.woodpecker-anonymous-group { display: grid; justify-items: start; gap: 8px; }
+.woodpecker-anonymous-group > p { max-width: 560px; margin: 0; color: var(--client-muted); font-size: 12px; line-height: 1.6; }
+.woodpecker-dialog > .windows-dialog-panel__footer > .client-button:disabled { opacity: .5; cursor: not-allowed; }
+.woodpecker-state { justify-content: flex-start; }
