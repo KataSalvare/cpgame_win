@@ -33,7 +33,7 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingLabel, setEditingLabel] = useState('')
   const contextRef = useRef<HTMLDivElement>(null)
-  const pointerDrag = useRef<{ id: string; pointerId: number; startX: number; startY: number; active: boolean } | null>(null)
+  const pointerDrag = useRef<{ id: string; pointerId: number; startX: number; startY: number; active: boolean; authorizationPending: boolean } | null>(null)
   const suppressClick = useRef(false)
   const pagesById = useMemo(() => new Map(pages.map(page => [page.path, page])), [])
   const allowedIds = useMemo(() => new Set(filteredPages.map(page => page.path)), [filteredPages])
@@ -92,20 +92,31 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
             event.preventDefault()
             setContextMenu({ id: node.id, x: Math.min(event.clientX, window.innerWidth - 190), y: Math.min(event.clientY, window.innerHeight - 360) })
           }}
-          onPointerDown={async (event) => {
+          onPointerDown={(event) => {
             if (!dragEnabled || event.button !== 0 || (event.target as HTMLElement).closest('button')) return
-            const { clientX, clientY, pointerId } = event
-            if (!await requestAuthorization()) return
-            pointerDrag.current = { id: node.id, pointerId, startX: clientX, startY: clientY, active: false }
+            pointerDrag.current = { id: node.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false, authorizationPending: false }
           }}
-          onPointerMove={(event) => {
+          onPointerMove={async (event) => {
             const drag = pointerDrag.current
             if (!drag || drag.pointerId !== event.pointerId) return
             if (!drag.active && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 5) return
             if (!drag.active) {
+              if (drag.authorizationPending) return
+              drag.authorizationPending = true
+              const row = event.currentTarget
+              const pointerId = event.pointerId
+              const clientX = event.clientX
+              const clientY = event.clientY
+              if (!await requestAuthorization()) {
+                if (pointerDrag.current === drag) clearPointerDrag()
+                return
+              }
+              if (pointerDrag.current !== drag) return
               drag.active = true
               suppressClick.current = true
-              event.currentTarget.setPointerCapture(event.pointerId)
+              row.setPointerCapture(pointerId)
+              setDropTarget(getDropTarget(clientX, clientY, drag.id))
+              return
             }
             event.preventDefault()
             setDropTarget(getDropTarget(event.clientX, event.clientY, drag.id))
