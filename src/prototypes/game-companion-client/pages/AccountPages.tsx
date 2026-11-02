@@ -671,8 +671,7 @@ export function OrderDetailPanel({ order, companion, diamondBalance, onContact, 
 
     <section className="order-detail-section">
       <div className="order-detail-section__heading"><span className="client-eyebrow">陪玩信息</span>{!order.earlyEndPending && <button type="button" className="client-button client-button--secondary" onClick={onContact}><MessageCircle size={15} />聊一聊</button>}</div>
-      <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong><span>{companion ? `${companion.gender} · ${companion.age} 岁 · ${companion.region}` : '陪玩资料'}</span><span>所属俱乐部 · {getOrderClubName(order)}</span></div></div>
-      {companion && <div className="order-detail-facts"><span>陪玩 ID</span><strong>{companion.id}</strong></div>}
+      <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong><span>{companion ? `${companion.gender} · ${companion.age} 岁` : '陪玩资料'}</span><span>ID · {companion?.id ?? order.companionId}</span><span>所属俱乐部 · {getOrderClubName(order)}</span></div></div>
     </section>
 
     <section className="order-detail-section">

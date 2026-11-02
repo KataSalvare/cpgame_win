@@ -197,12 +197,16 @@ function annotationsPlugin() {
 export default defineConfig({
   plugins: [react(), tailwindcss(), annotationsPlugin(), menuTreeApiPlugin(), specApiPlugin()],
   server: {
+    host: '0.0.0.0',
     port: 1045,
     strictPort: true,
     watch: {
       // 批注保存会直接写入该文件，忽略监听以避免开发时整页刷新
       ignored: ['**/src/resources/annotations.json', '**/tools/config/menu-tree.json'],
     },    
+  },
+  preview: {
+    host: '0.0.0.0',
   },
   resolve: {
     alias: {

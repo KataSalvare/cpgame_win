@@ -7,9 +7,10 @@ type Props = {
   filter: string
   onFilterChange: (status: string) => void
   onCancel: (id: string) => void
+  onContactMatch: (request: WorkbenchLogic['requests'][number]) => void
 }
 
-export function WorkbenchMatchesPanel({ logic: w, filter, onFilterChange, onCancel }: Props) {
+export function WorkbenchMatchesPanel({ logic: w, filter, onFilterChange, onCancel, onContactMatch }: Props) {
   const requests = w.requests.filter(r => filter === '全部' || r.status === filter)
   return <section className="client-card orders-list-card workbench-matches-table">
     <div className="orders-list-card__toolbar"><span className="client-count">{requests.length} 条匹配请求</span></div>
@@ -27,7 +28,7 @@ export function WorkbenchMatchesPanel({ logic: w, filter, onFilterChange, onCanc
           <div className="order-item__price"><strong>{request.matchPrice} 钻石 / {service?.unit ?? '小时'}</strong><small>加价 {request.tipAmount} 钻石</small></div>
           <span className="order-item__status">{request.status}</span>
           <div className="workbench-match-actions">
-            {request.status === '待响应' ? <><button type="button" className="client-button client-button--secondary" onClick={() => w.respond(request.id, false)}>忽略</button><button type="button" className="client-button client-button--primary" disabled={Boolean(w.activeMatch) || unavailable} title={w.activeMatch ? '请先取消当前匹配' : unavailable ? '请先开启该等级和服务的接单' : undefined} onClick={() => w.respond(request.id, true)}>接受匹配</button></> : request.status === '已加入候选名单' ? <button type="button" className="client-button client-button--secondary" onClick={() => onCancel(request.id)}>取消匹配</button> : <span className="client-muted">—</span>}
+            {request.status === '待响应' ? <><button type="button" className="client-button client-button--secondary" onClick={() => w.respond(request.id, false)}>忽略</button><button type="button" className="client-button client-button--primary" disabled={Boolean(w.activeMatch) || unavailable} title={w.activeMatch ? '请先取消当前匹配' : unavailable ? '请先开启该等级和服务的接单' : undefined} onClick={() => w.respond(request.id, true)}>接受匹配</button></> : request.status === '已加入候选名单' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onContactMatch(request)}>联系老板</button><button type="button" className="client-button client-button--secondary" onClick={() => onCancel(request.id)}>取消匹配</button></> : <span className="client-muted">—</span>}
           </div>
           <div className="workbench-match-note"><strong>备注</strong><span>{request.note || '无'}</span></div>
         </article>

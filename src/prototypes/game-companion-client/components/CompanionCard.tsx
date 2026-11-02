@@ -26,7 +26,7 @@ export function CompanionCard({ companion, onOpen, onChat }: CompanionCardProps)
       <AvatarMark initials={companion.initials} size="lg" />
       <div className="companion-card__identity">
         <h3><UserNameWithLevel name={companion.name} identityId={companion.id} /></h3>
-        <span className="client-muted">{companion.gender} · {companion.age} 岁 · {companion.region}</span>
+        <span className="client-muted">{companion.gender} · {companion.age} 岁</span>
       </div>
       <div className="companion-card__controls">
         <span className={`client-status ${companion.status === '接单中' ? 'is-available' : ''}`}>{companion.status}</span>

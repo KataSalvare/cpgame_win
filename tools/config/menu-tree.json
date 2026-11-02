@@ -2,15 +2,10 @@
   "frontend": [
     {
       "id": "/game-companion-login",
-      "label": "登录",
       "children": []
     },
     {
       "id": "/game-companion-identity-verification",
-      "children": []
-    },
-    {
-      "id": "/game-companion-search",
       "children": []
     },
     {
@@ -164,6 +159,10 @@
           "children": []
         }
       ]
+    },
+    {
+      "id": "/game-companion-search",
+      "children": []
     }
   ],
   "admin": [

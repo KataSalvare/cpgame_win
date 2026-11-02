@@ -169,14 +169,14 @@ export function useSocialLogic() {
     setSelectedFriendId(null)
   }
 
-  const startDirectMessageToUser = (userId: string, name: string, initials: string) => {
+  const startDirectMessageToUser = (userId: string, name: string, initials: string, openingMessage = '你好，我想和你确认一下这笔订单。') => {
     setActiveFixedFeed(null)
     const existing = conversations.find((item) => item.kind === 'direct' && item.members[0] === userId)
     if (existing) openConversation(existing)
     else {
       const conversation: SocialConversation = {
         id: createId('direct'), kind: 'direct', title: name, initials, members: [userId], unread: 0,
-        messages: [{ id: createId('message'), senderId: userId, senderName: name, initials, time: '14:20', kind: 'text', content: '你好，我想和你确认一下这笔订单。' }],
+        messages: [{ id: createId('message'), senderId: userId, senderName: name, initials, time: '14:20', kind: 'text', content: openingMessage }],
       }
       setConversations((items) => [conversation, ...items])
       setSelectedConversationId(conversation.id)
