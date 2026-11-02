@@ -28,7 +28,9 @@ const emptyClubApplication: Record<ClubApplicationField, string> = {
 
 type PersonalCenterProps = {
   pageState: PageState
-  initialSection: 'profile' | 'wealth' | 'favorites'
+  initialSection: 'profile' | 'wealth' | 'favorites' | 'clubs' | 'onboarding' | 'visits'
+  initialRecruitmentOpen?: boolean
+  initialSecurityView?: SecurityView
   initialSocialTab: FavoriteTab
   onRetry: () => void
   profile: PlayerProfile
@@ -66,9 +68,9 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
 
 const personalGiftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 
-export function PersonalCenterPage({ pageState, initialSection, initialSocialTab, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
-  const [section, setSection] = useState<CenterSection>(() => initialSection === 'wealth' || initialSection === 'favorites' ? initialSection : sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : initialSection)
-  const [recruitmentOpen, setRecruitmentOpen] = useState(() => Boolean(sessionStorage.getItem('companion-assessment-recharge-draft')))
+export function PersonalCenterPage({ pageState, initialSection, initialRecruitmentOpen = false, initialSecurityView, initialSocialTab, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
+  const [section, setSection] = useState<CenterSection>(() => initialSection === 'wealth' || initialSection === 'favorites' || initialSection === 'clubs' || initialSection === 'onboarding' || initialSection === 'visits' ? initialSection : sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : initialSection)
+  const [recruitmentOpen, setRecruitmentOpen] = useState(() => initialRecruitmentOpen || Boolean(sessionStorage.getItem('companion-assessment-recharge-draft')))
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
   const [footprints, setFootprints] = useState(profileFootprints)
   const [visitors, setVisitors] = useState(profileVisitors)
@@ -99,7 +101,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialSocialTab
   const [applicationIntro, setApplicationIntro] = useState('')
   const [clubApplication, setClubApplication] = useState(emptyClubApplication)
   const [applicationSubmitted, setApplicationSubmitted] = useState<Record<ApplicationKind, boolean>>({ companion: false, club: false })
-  const [activeSetting, setActiveSetting] = useState<'security' | 'blacklist' | 'logout' | null>(null)
+  const [activeSetting, setActiveSetting] = useState<'security' | 'blacklist' | 'logout' | null>(() => initialSecurityView ? 'security' : null)
   const [identityFlowOpen, setIdentityFlowOpen] = useState(false)
   const [realNameEntryClicks, setRealNameEntryClicks] = useState(0)
 
@@ -276,7 +278,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialSocialTab
         <p className="personal-demo-note personal-field--full">申请状态仅在当前原型会话中展示，不代表正式审核结果。</p>
       </form>}
     </DialogPanel>}
-    {activeSetting === 'security' && <AccountSecurityDialog phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} realNameEntryClicks={realNameEntryClicks} onRealNameEntryClick={() => { const isVerified = realNameEntryClicks === 0; setRealNameEntryClicks((count) => count + 1); if (!isVerified) { setActiveSetting(null); setIdentityFlowOpen(true) } return isVerified }} onClose={() => setActiveSetting(null)} />}
+    {activeSetting === 'security' && <AccountSecurityDialog initialView={initialSecurityView} phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} realNameEntryClicks={realNameEntryClicks} onRealNameEntryClick={() => { const isVerified = realNameEntryClicks === 0; setRealNameEntryClicks((count) => count + 1); if (!isVerified) { setActiveSetting(null); setIdentityFlowOpen(true) } return isVerified }} onClose={() => setActiveSetting(null)} />}
     {identityFlowOpen && <IdentityVerificationFlow onClose={() => setIdentityFlowOpen(false)} />}
     {activeSetting === 'blacklist' && <BlacklistDialog profiles={blockedProfiles} onRemove={onUnblockProfile} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'logout' && <DialogPanel overlayId="logout-confirmation-dialog" title="退出登录" description="确认退出当前账号并返回登录页？" onClose={() => setActiveSetting(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setActiveSetting(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={onLogout}>确认退出</button></>}><p className="social-dialog-copy">退出后将返回登录页面。本次原型不会清除或提交真实账号数据。</p></DialogPanel>}
@@ -364,7 +366,8 @@ function maskPhone(phone: string) {
 
 type SecurityView = 'overview' | 'real-name' | 'phone' | 'devices' | 'closure-terms' | 'closure-warning' | 'closure-phone' | 'closure-complete'
 
-function AccountSecurityDialog({ phone, onSavePhone, endedDeviceIds, onEndDevice, diamondBalance, beanBalance, realNameEntryClicks, onRealNameEntryClick, onClose }: {
+function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, endedDeviceIds, onEndDevice, diamondBalance, beanBalance, realNameEntryClicks, onRealNameEntryClick, onClose }: {
+  initialView?: SecurityView
   phone: string
   onSavePhone: (phone: string) => void
   endedDeviceIds: string[]
@@ -375,7 +378,7 @@ function AccountSecurityDialog({ phone, onSavePhone, endedDeviceIds, onEndDevice
   onRealNameEntryClick: () => boolean
   onClose: () => void
 }) {
-  const [view, setView] = useState<SecurityView>('overview')
+  const [view, setView] = useState<SecurityView>(initialView)
   const [newPhone, setNewPhone] = useState('')
   const [code, setCode] = useState('')
   const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null)

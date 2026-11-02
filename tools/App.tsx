@@ -43,13 +43,22 @@ function AppContent() {
   useEffect(() => {
     if (!currentPage?.entryView) return
     const syncToolPath = () => {
-      if (currentPage.defaultHash && window.location.hash !== currentPage.defaultHash) {
+      if (currentPage.defaultHash && !window.location.hash) {
         window.location.hash = currentPage.defaultHash
         return
       }
       const params = new URLSearchParams(window.location.hash.slice(1))
       const hashPage = params.get('page') ?? currentPage.entryView
-      const entryView = hashPage === 'voice-room' && params.get('voiceFrom') === 'club'
+      const entryView = hashPage === 'profile' && params.get('section') === 'onboarding' ? 'profile-onboarding'
+        : hashPage === 'profile' && params.get('section') === 'clubs' ? 'profile-clubs'
+          : hashPage === 'profile' && params.get('section') === 'cancel-account' ? 'profile-cancel-account'
+            : hashPage === 'profile' && params.get('section') === 'wealth' ? 'profile-wealth'
+              : hashPage === 'profile' && params.get('section') === 'visits' ? 'profile-visits'
+                : hashPage === 'profile' && params.get('section') === 'favorites' ? 'profile-social'
+            : hashPage === 'messages' && params.get('support') === 'club' ? 'club-support'
+              : hashPage === 'home' && params.get('support') === 'platform' ? 'platform-support'
+                  : hashPage === 'home' && params.get('tool') ? params.get('tool')!
+                : hashPage === 'voice-room' && params.get('voiceFrom') === 'club'
         ? 'club-voice-room'
         : hashPage === 'recharge' ? 'wallet-recharge'
           : hashPage === 'club-detail' && params.get('panel') === 'club-cards' ? 'club-cards'
@@ -74,12 +83,36 @@ function AppContent() {
     const expectedPage = currentPage.entryView === 'club-voice-room' ? 'voice-room'
       : currentPage.entryView === 'quick-match' ? 'quick-match'
         : currentPage.entryView === 'wallet-recharge' ? 'recharge'
+          : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-clubs' || currentPage.entryView === 'profile-cancel-account' || currentPage.entryView === 'profile-wealth' || currentPage.entryView === 'profile-visits' || currentPage.entryView === 'profile-social' ? 'profile'
+            : currentPage.entryView === 'club-support' ? 'messages'
+              : currentPage.entryView === 'platform-support' ? 'home'
+                : currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' ? 'home'
           : currentPage.entryView
     const expectedVoiceFrom = currentPage.entryView === 'club-voice-room' ? 'club' : null
-    if (params.get('page') === expectedPage && (expectedVoiceFrom == null || params.get('voiceFrom') === expectedVoiceFrom)) return
+    const expectedSection = currentPage.entryView === 'profile-onboarding' ? 'onboarding'
+      : currentPage.entryView === 'profile-clubs' ? 'clubs'
+        : currentPage.entryView === 'profile-cancel-account' ? 'cancel-account'
+          : currentPage.entryView === 'profile-wealth' ? 'wealth'
+            : currentPage.entryView === 'profile-visits' ? 'visits'
+              : currentPage.entryView === 'profile-social' ? 'favorites' : null
+    const expectedSupport = currentPage.entryView === 'club-support' ? 'club'
+      : currentPage.entryView === 'platform-support' ? 'platform' : null
+    const expectedTool = currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel'
+      ? currentPage.entryView : null
+    if (params.get('page') === expectedPage
+      && (expectedVoiceFrom == null || params.get('voiceFrom') === expectedVoiceFrom)
+      && (expectedSection == null ? !params.has('section') : params.get('section') === expectedSection)
+      && (expectedSupport == null ? !params.has('support') : params.get('support') === expectedSupport)
+      && (expectedTool == null ? !params.has('tool') : params.get('tool') === expectedTool)) return
     params.set('page', expectedPage)
     if (expectedVoiceFrom) params.set('voiceFrom', expectedVoiceFrom)
     else params.delete('voiceFrom')
+    if (expectedSection) params.set('section', expectedSection)
+    else params.delete('section')
+    if (expectedSupport) params.set('support', expectedSupport)
+    else params.delete('support')
+    if (expectedTool) params.set('tool', expectedTool)
+    else params.delete('tool')
     window.location.hash = params.toString()
   }, [currentPage])
   const [previewContainer, setPreviewContainer] = useState<HTMLElement | null>(null)

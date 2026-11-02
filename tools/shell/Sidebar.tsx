@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react'
-import { FileText, Monitor, Palette, Smartphone, XIcon, Search, ChevronRight } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type React from 'react'
+import { FileText, Monitor, Palette, Smartphone, XIcon, Search, ChevronDown } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { pages, type PageCategory } from '../config/pages'
 import { docModules } from '../config/docs'
 import { getThemeInfo, themeModules } from '../config/themes'
+import { loadMenuTree, moveMenuNode, saveMenuTree, type MenuNode } from '../lib/menuTree'
 
 interface SidebarProps {
   projectName: string
@@ -14,30 +16,103 @@ interface SidebarProps {
 interface PageListProps {
   filteredPages: typeof pages
   icon: typeof Smartphone
+  tree: MenuNode[]
+  onMove: (draggedId: string, targetId: string, placement: 'before' | 'after' | 'inside') => void
+  expanded: Set<string>
+  onToggle: (id: string) => void
 }
 
-const PageList = ({ filteredPages, icon: Icon }: PageListProps) => {
-  return (
-    <div className="space-y-0.5">
-      {filteredPages.map((page) => (
-        <NavLink
-          key={page.path}
-          to={`${page.path}${page.defaultHash ?? ''}`}
-          title={page.label}
-          className={({ isActive }) =>
-            `group flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs leading-5 tool-control ${
-              isActive
-                ? 'tool-menu-active-light dark:tool-menu-active-dark'
-                : 'text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'
-            }`
-          }
+const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle }: PageListProps) => {
+  const [dropTarget, setDropTarget] = useState<{ id: string; placement: 'before' | 'after' | 'inside' } | null>(null)
+  const pointerDrag = useRef<{ id: string; pointerId: number; startX: number; startY: number; active: boolean } | null>(null)
+  const suppressClick = useRef(false)
+  const pagesById = useMemo(() => new Map(pages.map(page => [page.path, page])), [])
+  const allowedIds = useMemo(() => new Set(filteredPages.map(page => page.path)), [filteredPages])
+  const visibleTree = useMemo(() => {
+    const filter = (nodes: MenuNode[]): MenuNode[] => nodes.flatMap(node => {
+      const children = filter(node.children)
+      const page = pages.find(item => item.path === node.id)
+      return page && (allowedIds.has(node.id) || children.length) ? [{ ...node, children }] : []
+    })
+    return filter(tree)
+  }, [tree, allowedIds])
+
+  const getDropTarget = (clientX: number, clientY: number, sourceId: string) => {
+    const element = document.elementFromPoint(clientX, clientY)
+    const row = element instanceof Element ? element.closest<HTMLElement>('[data-menu-id]') : null
+    if (!row || row.dataset.menuId === sourceId) return null
+    const bounds = row.getBoundingClientRect()
+    const ratio = (clientY - bounds.top) / bounds.height
+    return { id: row.dataset.menuId as string, placement: (ratio < 0.25 ? 'before' : ratio > 0.75 ? 'after' : 'inside') as 'before' | 'after' | 'inside' }
+  }
+
+  const clearPointerDrag = () => {
+    pointerDrag.current = null
+    setDropTarget(null)
+  }
+
+  const renderNodes = (nodes: MenuNode[], depth = 0): React.ReactNode => nodes.map((node) => {
+    const page = pagesById.get(node.id) ?? pages.find(item => item.path === node.id)
+    if (!page) return null
+    const hasChildren = node.children.length > 0
+    const isOpen = expanded.has(node.id)
+    const placement = dropTarget?.id === node.id ? dropTarget.placement : null
+    return (
+      <div key={node.id}>
+        <div
+          className={`group relative flex cursor-grab items-center rounded-xl active:cursor-grabbing ${placement === 'inside' ? 'ring-1 ring-[var(--tool-focus)] bg-[var(--tool-surface-hover)]' : ''} ${placement === 'before' ? 'before:absolute before:inset-x-2 before:top-0 before:border-t-2 before:border-[var(--tool-focus)]' : ''} ${placement === 'after' ? 'after:absolute after:inset-x-2 after:bottom-0 after:border-b-2 after:border-[var(--tool-focus)]' : ''}`}
+          style={{ marginLeft: depth * 14 }}
+          data-menu-id={node.id}
+          onPointerDown={(event) => {
+            if (event.button !== 0 || (event.target as HTMLElement).closest('button')) return
+            pointerDrag.current = { id: node.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false }
+          }}
+          onPointerMove={(event) => {
+            const drag = pointerDrag.current
+            if (!drag || drag.pointerId !== event.pointerId) return
+            if (!drag.active && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 5) return
+            if (!drag.active) {
+              drag.active = true
+              suppressClick.current = true
+              event.currentTarget.setPointerCapture(event.pointerId)
+            }
+            event.preventDefault()
+            setDropTarget(getDropTarget(event.clientX, event.clientY, drag.id))
+          }}
+          onPointerUp={(event) => {
+            const drag = pointerDrag.current
+            if (!drag || drag.pointerId !== event.pointerId) return
+            if (drag.active) {
+              const target = getDropTarget(event.clientX, event.clientY, drag.id)
+              if (target) onMove(drag.id, target.id, target.placement)
+              window.setTimeout(() => { suppressClick.current = false }, 0)
+            }
+            clearPointerDrag()
+          }}
+          onPointerCancel={clearPointerDrag}
+          onClickCapture={(event) => {
+            if (!suppressClick.current) return
+            event.preventDefault()
+            event.stopPropagation()
+            suppressClick.current = false
+          }}
         >
-          <Icon size={15} className="opacity-80" />
-          <span className="truncate font-medium">{page.label}</span>
-          <ChevronRight size={12} className="ml-auto opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-        </NavLink>
-      ))}
-    </div>
+          <NavLink
+            draggable={false}
+            to={`${page.path}${page.defaultHash ?? ''}`}
+            title={page.label}
+            className={({ isActive }) => `flex min-w-0 flex-1 items-center gap-2.5 px-2 py-2 rounded-xl text-xs leading-5 tool-control ${isActive ? 'tool-menu-active-light dark:tool-menu-active-dark' : 'text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'}`}
+          >
+            {({ isActive }) => <><Icon size={15} className="shrink-0 opacity-80" /><span className="truncate font-medium">{page.label}</span>{isActive && <span className="sr-only">当前页面</span>}</>}
+          </NavLink>
+          {hasChildren && <button type="button" aria-label={`${isOpen ? '折叠' : '展开'}${page.label}`} onClick={() => onToggle(node.id)} className="mr-1 rounded p-1 text-[var(--tool-text-subtle)] hover:bg-[var(--tool-surface-hover)]"><ChevronDown size={13} className={`transition-transform ${isOpen ? '' : '-rotate-90'}`} /></button>}
+        </div>
+        {hasChildren && isOpen && <div className="mt-0.5 space-y-0.5 border-l border-[var(--tool-border)] ml-3">{renderNodes(node.children, depth + 1)}</div>}
+      </div>
+    )
+  })
+  return (
+    <div className="space-y-0.5">{renderNodes(visibleTree)}</div>
   )
 }
 
@@ -152,6 +227,27 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
   const [tempName, setTempName] = useState(projectName)
   const [activeTab, setActiveTab] = useState<PageCategory | 'themes' | 'docs'>('frontend')
   const [searchQuery, setSearchQuery] = useState('')
+  const [menuTree, setMenuTree] = useState(() => loadMenuTree({
+    frontend: pages.filter(page => page.category === 'frontend').map(page => page.path),
+    admin: pages.filter(page => page.category === 'admin').map(page => page.path),
+  }))
+  const [expandedMenuIds, setExpandedMenuIds] = useState<Set<string>>(() => {
+    const ids = new Set<string>()
+    const collectExpandable = (nodes: MenuNode[]) => nodes.forEach(node => {
+      if (node.children.length) ids.add(node.id)
+      collectExpandable(node.children)
+    })
+    Object.values(menuTree).forEach(collectExpandable)
+    return ids
+  })
+
+  useEffect(() => saveMenuTree(menuTree), [menuTree])
+
+  const handleMenuMove = (category: PageCategory, draggedId: string, targetId: string, placement: 'before' | 'after' | 'inside') => {
+    setMenuTree(current => moveMenuNode(current, category, draggedId, targetId, placement))
+    if (placement === 'inside') setExpandedMenuIds(current => new Set(current).add(targetId))
+  }
+  const toggleMenuNode = (id: string) => setExpandedMenuIds(current => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next })
 
   const filteredPages = useMemo(() => {
     const categoryPages = pages.filter(p => p.category === activeTab as PageCategory)
@@ -275,10 +371,10 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
 
           <nav className="flex-1 overflow-y-auto px-2 pb-4" aria-label="原型工作区导航">
             {activeTab === 'frontend' && (
-              <PageList filteredPages={filteredPages} icon={Smartphone} />
+              <PageList filteredPages={filteredPages} icon={Smartphone} tree={menuTree.frontend ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('frontend', dragged, target, placement)} />
             )}
             {activeTab === 'admin' && (
-              <PageList filteredPages={filteredPages} icon={Monitor} />
+              <PageList filteredPages={filteredPages} icon={Monitor} tree={menuTree.admin ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('admin', dragged, target, placement)} />
             )}
             {activeTab === 'themes' && (
               <ThemeNav searchQuery={searchQuery} />

@@ -12,10 +12,10 @@ function formatDuration(seconds: number) {
   return `${minutes}:${remainder}`
 }
 
-export function ScreenRecordingFeature() {
+export function ScreenRecordingFeature({ autoOpen = false, onClose }: { autoOpen?: boolean; onClose?: () => void }) {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const [promptOpen, setPromptOpen] = useState(false)
+  const [promptOpen, setPromptOpen] = useState(autoOpen)
   const [skipPrompt, setSkipPrompt] = useState(() => window.sessionStorage.getItem(skipPromptStorageKey) === 'true')
   const [skipPromptChecked, setSkipPromptChecked] = useState(false)
   const [recordingEnded, setRecordingEnded] = useState(false)
@@ -120,6 +120,11 @@ export function ScreenRecordingFeature() {
     setRecordingEnded(true)
   }
 
+  const closePrompt = () => {
+    setPromptOpen(false)
+    onClose?.()
+  }
+
   const startDragging = (event: PointerEvent<HTMLElement>) => {
     if ((event.target as HTMLElement).closest('button')) return
     const container = event.currentTarget.closest<HTMLElement>('.windows-client-frame')
@@ -173,9 +178,9 @@ export function ScreenRecordingFeature() {
       title="屏幕录制"
       description="开始后可在悬浮工具条暂停或结束录制。"
       width={440}
-      onClose={() => setPromptOpen(false)}
+        onClose={closePrompt}
       footer={<>
-        <button type="button" className="client-button client-button--secondary" onClick={() => setPromptOpen(false)}>取消</button>
+        <button type="button" className="client-button client-button--secondary" onClick={closePrompt}>取消</button>
         <button ref={startButtonRef} type="button" className="client-button client-button--primary" onClick={startRecording}>开始录制</button>
       </>}
     >

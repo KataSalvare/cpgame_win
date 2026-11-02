@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Check, Coins, Copy, Gem, WalletCards } from 'lucide-react'
 import type { PlayerProfile } from '../data/accountMockData'
 import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
@@ -7,14 +7,16 @@ import { UserNameWithLevel } from './UserNameWithLevel'
 
 type QuickAction = 'profile' | 'wealth' | 'following' | 'fans' | 'recharge' | 'withdraw' | 'exchange'
 
-export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavigate, children }: {
+export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavigate, children, initialOpen = false, onDismiss }: {
+  initialOpen?: boolean
+  onDismiss?: () => void
   profile: PlayerProfile
   diamondBalance: number
   beanBalance: number
   onNavigate: (action: QuickAction) => void
   children: ReactNode
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(initialOpen)
   const [copyFeedback, setCopyFeedback] = useState('')
   const rootRef = useRef<HTMLDivElement>(null)
   const currentLevel = wealthLevels.find((item) => item.level === currentWealthLevel) ?? wealthLevels[0]
@@ -26,9 +28,14 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavi
     onNavigate(action)
   }
 
+  const dismiss = useCallback(() => {
+    setOpen(false)
+    onDismiss?.()
+  }, [onDismiss])
+
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
-      setOpen(false)
+      dismiss()
     }
   }
 
@@ -51,14 +58,14 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavi
   useEffect(() => {
     if (!open) return
     const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+      if (!rootRef.current?.contains(event.target as Node)) dismiss()
     }
     document.addEventListener('pointerdown', closeOnOutsideClick)
     return () => document.removeEventListener('pointerdown', closeOnOutsideClick)
-  }, [open])
+  }, [open, dismiss])
 
   return <div ref={rootRef} className="client-profile-quick client-profile-quick--sidebar" onKeyDown={handleKeyDown}>
-    <button type="button" className="client-sidebar-account" onClick={() => setOpen((isOpen) => !isOpen)} aria-label={open ? '关闭个人快捷面板' : '打开个人快捷面板'} aria-haspopup="true" aria-expanded={open}>
+    <button type="button" className="client-sidebar-account" onClick={() => { if (open) dismiss(); else setOpen(true) }} aria-label={open ? '关闭个人快捷面板' : '打开个人快捷面板'} aria-haspopup="true" aria-expanded={open}>
       {children}<span className="client-sidebar-account__details"><strong><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></strong><span>{profile.userId}</span></span>
     </button>
     {open && <section className="client-profile-popover" aria-label="个人资料快捷面板">
