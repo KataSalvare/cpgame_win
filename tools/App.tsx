@@ -43,6 +43,10 @@ function AppContent() {
   useEffect(() => {
     if (!currentPage?.entryView) return
     const syncToolPath = () => {
+      if (currentPage.defaultHash && window.location.hash !== currentPage.defaultHash) {
+        window.location.hash = currentPage.defaultHash
+        return
+      }
       const params = new URLSearchParams(window.location.hash.slice(1))
       const hashPage = params.get('page') ?? currentPage.entryView
       const entryView = hashPage === 'voice-room' && params.get('voiceFrom') === 'club'

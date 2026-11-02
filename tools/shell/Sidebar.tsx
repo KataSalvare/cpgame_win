@@ -22,7 +22,7 @@ const PageList = ({ filteredPages, icon: Icon }: PageListProps) => {
       {filteredPages.map((page) => (
         <NavLink
           key={page.path}
-          to={page.path}
+          to={`${page.path}${page.defaultHash ?? ''}`}
           title={page.label}
           className={({ isActive }) =>
             `group flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs leading-5 tool-control ${

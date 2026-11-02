@@ -4,7 +4,7 @@
 
 - **所属 PRD**：`prd.md`
 - **页面 / 路由 ID**：`game-companion-client` / `/game-companion-client`
-- **内部路由**：独立入口 `/game-companion-login`；其余内部页面为 `home`、`talents`、`club-detail`、`checkout`、`profile`、`wallet`、`recharge`、`coupons`、`club-cards`、`my-cards`、`orders`、`messages`、`voice-room`、`announcements`、`club-announcements`；个人中心六个模块在 `profile` 页面内切换，不新增路由；钻石明细和糖豆明细分别通过 `#page=wallet&panel=diamond-ledger`、`#page=wallet&panel=bean-ledger` 打开；俱乐部详情中的公告列表、陪玩详情、订单详情、两类钱包明细、俱乐部尊享卡、钱包优惠券和我的尊享卡均为各自主页面中的第三栏状态；`club-announcements` 保留为工作台直接预览入口；啄木鸟通过客户端侧栏内部路由 `#page=woodpecker` 打开
+- **内部路由**：独立入口 `/game-companion-login`；其余内部页面为 `home`、`talents`、`club-detail`、`checkout`、`profile`、`wallet`、`recharge`、`coupons`、`club-cards`、`my-cards`、`orders`、`messages`、`voice-room`、`announcements`、`club-announcements`；个人中心六个模块在 `profile` 页面内切换，不新增路由；钻石明细和糖豆明细分别通过 `#page=wallet&panel=diamond-ledger`、`#page=wallet&panel=bean-ledger` 打开；俱乐部详情中的公告列表、陪玩详情、订单详情、两类钱包明细、俱乐部尊享卡、钱包优惠券和我的尊享卡均为各自主页面中的第三栏状态；工作台“俱乐部公告”入口默认通过 `#page=club-detail&club=club-001&panel=club-announcements` 打开北境俱乐部详情和第三栏公告，`club-announcements` 页面仍可直接预览；啄木鸟通过客户端侧栏内部路由 `#page=woodpecker` 打开
 - **关联需求 ID**：`US-01` 至 `US-28`、`FR-01` 至 `FR-81`
 - **关联验收 ID**：`AC-01-01` 至 `AC-01-10`、`AC-02-01` 至 `AC-02-15`、`AC-03-01` 至 `AC-03-10`、`AC-04-01` 至 `AC-04-08`、`AC-05-01` 至 `AC-05-13`、`AC-06-01`、`AC-07-01`、`AC-08-01`、`AC-09-01`、`AC-10-01` 至 `AC-10-07`、`AC-11-01`、`AC-11-02`、`AC-12-01`、`AC-13-01`、`AC-14-01`、`AC-16-01`、`AC-17-01`、`AC-18-01`、`AC-19-01`、`AC-20-01`、`AC-20-02`、`AC-21-01`
 - **页面变体**：玩家浏览端；不区分玩家/陪玩身份

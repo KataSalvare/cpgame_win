@@ -13,6 +13,7 @@ export interface PageItem {
   path: string
   label: string
   entryView?: string
+  defaultHash?: string
   component: React.ComponentType<PrototypePreviewProps>
   category: PageCategory
   dirName: string
@@ -56,7 +57,7 @@ const identityVerificationPageStates: readonly PageStateOption[] = [
   { id: 'normal', label: '正常' },
 ]
 
-type PageConfig = { path: string; label: string; states: readonly PageStateOption[]; entryView?: string }
+type PageConfig = { path: string; label: string; states: readonly PageStateOption[]; entryView?: string; defaultHash?: string }
 
 const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
   'game-companion-client': [
@@ -81,7 +82,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-woodpecker', label: '啄木鸟', entryView: 'woodpecker', states: demoPageStates },
     { path: '/game-companion-workbench', label: '陪玩工作台', entryView: 'workbench', states: demoPageStates },
     { path: '/game-companion-announcements', label: '平台公告', entryView: 'announcements', states: demoPageStates },
-    { path: '/game-companion-club-announcements', label: '俱乐部公告', entryView: 'club-announcements', states: demoPageStates },
+    { path: '/game-companion-club-announcements', label: '俱乐部公告', entryView: 'club-detail', defaultHash: '#page=club-detail&club=club-001&panel=club-announcements', states: demoPageStates },
   ],
 }
 
@@ -112,6 +113,7 @@ export const generatePages = (): PageItem[] => {
         path: pageConfig.path,
         label: pageConfig.label,
         entryView: pageConfig.entryView,
+        defaultHash: pageConfig.defaultHash,
         component: getLazyComponent(loader),
         category: 'frontend',
         dirName,
