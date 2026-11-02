@@ -6,6 +6,7 @@ import { pages, type PageCategory } from '../config/pages'
 import { docModules } from '../config/docs'
 import { getThemeInfo, themeModules } from '../config/themes'
 import { loadMenuTree, loadMenuTreeFromFile, moveMenuNode, renameMenuNode, saveMenuTree, type MenuNode } from '../lib/menuTree'
+import { useEditAuthorization } from '../components/editAuthorizationContext'
 
 interface SidebarProps {
   projectName: string
@@ -26,6 +27,7 @@ interface PageListProps {
 }
 
 const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle, onRename, onToggleAll, dragEnabled }: PageListProps) => {
+  const requestAuthorization = useEditAuthorization()
   const [dropTarget, setDropTarget] = useState<{ id: string; placement: 'before' | 'after' | 'inside' } | null>(null)
   const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -90,9 +92,11 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
             event.preventDefault()
             setContextMenu({ id: node.id, x: Math.min(event.clientX, window.innerWidth - 190), y: Math.min(event.clientY, window.innerHeight - 360) })
           }}
-          onPointerDown={(event) => {
+          onPointerDown={async (event) => {
             if (!dragEnabled || event.button !== 0 || (event.target as HTMLElement).closest('button')) return
-            pointerDrag.current = { id: node.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false }
+            const { clientX, clientY, pointerId } = event
+            if (!await requestAuthorization()) return
+            pointerDrag.current = { id: node.id, pointerId, startX: clientX, startY: clientY, active: false }
           }}
           onPointerMove={(event) => {
             const drag = pointerDrag.current

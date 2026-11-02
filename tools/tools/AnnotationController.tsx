@@ -13,6 +13,7 @@ import {
   revealAnnotationTarget,
 } from '../lib/annotations'
 import type { Theme } from '../lib/shortcuts'
+import { useEditAuthorization } from '../components/editAuthorizationContext'
 
 export interface AnnotationControllerState {
   showAnnotations: boolean
@@ -57,6 +58,7 @@ export function useAnnotationController({
     onSelectAnnotation: (id: string) => void
   }
 } {
+  const requestAuthorization = useEditAuthorization()
   const [showAnnotations, setShowAnnotations] = useState(true)
   const [annotationEditMode, setAnnotationEditMode] = useState(false)
   const [annotationSelecting, setAnnotationSelecting] = useState(false)
@@ -236,12 +238,13 @@ export function useAnnotationController({
   ])
 
   const handleSelectElement = useCallback(
-    (selector: string, clientX: number, clientY: number) => {
+    async (selector: string, clientX: number, clientY: number) => {
+      if (!await requestAuthorization()) return
       const existing = allAnnotations.filter((a) => a.pagePath === currentPath && a.selector === selector)
       const annotation = existing[0] ?? prepareAnnotation(selector)
       openAnnotationModal(annotation, { x: clientX, y: clientY }, false)
     },
-    [allAnnotations, currentPath, prepareAnnotation, openAnnotationModal]
+    [allAnnotations, currentPath, prepareAnnotation, openAnnotationModal, requestAuthorization]
   )
 
   const handleSaveAnnotationModal = useCallback(
@@ -304,14 +307,16 @@ export function useAnnotationController({
     [saveElementAnnotations]
   )
 
-  const handleEditAnnotationModal = useCallback(() => {
+  const handleEditAnnotationModal = useCallback(async () => {
+    if (!await requestAuthorization()) return
     setShowAnnotations(true)
     setModalReadOnly(false)
-  }, [])
+  }, [requestAuthorization])
 
   const actions: AnnotationControllerActions = useMemo(
     () => ({
-      enableEditMode: () => {
+      enableEditMode: async () => {
+        if (!await requestAuthorization()) return
         setShowAnnotations(true)
         setAnnotationEditMode(true)
         // 进入批注模式即开启选择元素
@@ -335,7 +340,7 @@ export function useAnnotationController({
         setShowAnnotations(show)
       },
     }),
-    []
+    [requestAuthorization]
   )
 
   const state: AnnotationControllerState = useMemo(

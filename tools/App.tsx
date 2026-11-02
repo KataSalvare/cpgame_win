@@ -14,6 +14,7 @@ import { DocsListPage } from '@/workspace/DocsListPage'
 import { useToolEntrance } from './hooks/useToolEntrance'
 import { DESKTOP_PREVIEW_HEIGHT, DESKTOP_PREVIEW_WIDTH, usePreviewScale } from './hooks/usePreviewScale'
 import { UpdateNotice } from './components/UpdateNotice'
+import { EditAuthorizationProvider } from './components/EditAuthorization'
 
 const messagePerspectiveEntryViews = ['im-user-support-view', 'im-user-message-view', 'im-support-view', 'im-companion-view', 'im-group-owner-view', 'im-group-user-view'] as const
 const orderTabEntryViews = ['orders-receiving', 'orders-exam-candidate', 'orders-exam-proctor'] as const
@@ -427,9 +428,11 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <EditAuthorizationProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </EditAuthorizationProvider>
   )
 }
 
