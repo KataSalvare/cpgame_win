@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
-import type { Annotation, AnnotationCategory } from '../lib/annotations'
+import type { Annotation, AnnotationCategory, AnnotationMarkerColor } from '../lib/annotations'
+import { getAnnotationMarkerColor } from '../lib/annotations'
 
 export type Theme = 'light' | 'dark'
 
 interface AnnotationPanelProps {
   annotations: Annotation[]
   categories: AnnotationCategory[]
+  markerColor: AnnotationMarkerColor
   selectedCategories: Set<string>
   onToggleCategory: (key: string) => void
   selectedId: string | null
@@ -17,6 +19,7 @@ interface AnnotationPanelProps {
 export default function AnnotationPanel({
   annotations,
   categories,
+  markerColor,
   selectedCategories,
   onToggleCategory,
   selectedId,
@@ -24,6 +27,7 @@ export default function AnnotationPanel({
   onSelect,
 }: AnnotationPanelProps) {
   const isDark = theme === 'dark'
+  const markerHex = getAnnotationMarkerColor(markerColor)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(categories.map((c) => c.key)))
 
   const grouped = useMemo(() => {
@@ -138,16 +142,13 @@ export default function AnnotationPanel({
                         <div className="flex items-start gap-2.5">
                           <span
                             className="flex-shrink-0 w-5 h-5 rounded-full text-[10px] text-white flex items-center justify-center font-bold shadow-sm"
-                            style={{ backgroundColor: cat.color }}
+                            style={{ backgroundColor: markerHex }}
                           >
                             {item.number}
                           </span>
                           <div className="flex-1 min-w-0">
-                            <div className={`font-semibold truncate ${selectedId === item.id ? 'tool-accent' : textPrimary}`}>
-                              {item.title || '未命名标注'}
-                            </div>
-                            <div className={`text-xs line-clamp-2 mt-0.5 ${selectedId === item.id ? 'opacity-80' : textMuted}`}>
-                              {item.content}
+                            <div className={`text-xs leading-5 line-clamp-2 ${selectedId === item.id ? 'tool-accent' : textPrimary}`}>
+                              {item.content || '暂无说明'}
                             </div>
                           </div>
                         </div>

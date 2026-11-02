@@ -1,3 +1,5 @@
+import { DEFAULT_ANNOTATION_MARKER_COLOR, type AnnotationMarkerColor } from './annotations'
+
 export type Theme = 'light' | 'dark'
 
 export const DEFAULT_PROJECT_NAME = '项目原型预览'
@@ -47,6 +49,7 @@ export interface ShortcutConfig {
   copyToAxure: string
   openDoc: string
   selectElement: string
+  markerColor: AnnotationMarkerColor
 }
 
 export const DEFAULT_SHORTCUTS: ShortcutConfig = {
@@ -54,6 +57,7 @@ export const DEFAULT_SHORTCUTS: ShortcutConfig = {
   copyToAxure: 'ctrl+cmd+x',
   openDoc: 'ctrl+cmd+e',
   selectElement: 'ctrl+cmd+s',
+  markerColor: DEFAULT_ANNOTATION_MARKER_COLOR,
 }
 
 export const AXURE_BRIDGE_URL = 'http://127.0.0.1:32767'

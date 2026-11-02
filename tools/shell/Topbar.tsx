@@ -6,13 +6,10 @@ import {
   Monitor,
   Moon,
   Pencil,
-  Save,
   Smartphone,
   Sun,
-  Trash2,
   Eye,
   EyeOff,
-  MousePointer,
   XIcon,
   PanelLeft,
 } from 'lucide-react'
@@ -95,8 +92,8 @@ export const Topbar = ({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [showAnnotationsBeforeEdit, setShowAnnotationsBeforeEdit] = useState(annotationState.showAnnotations)
 
-  const { showAnnotations, annotationEditMode, annotationSelecting, hasDraft } = annotationState
-  const { enableEditMode, exitEditMode, toggleSelecting, toggleShow, setShowAnnotations, saveDraft, clearDraft } = annotationActions
+  const { showAnnotations, annotationEditMode } = annotationState
+  const { enableEditMode, exitEditMode, toggleShow, setShowAnnotations } = annotationActions
 
   const hasSpec = currentPage != null
   const isDark = theme === 'dark'
@@ -148,13 +145,6 @@ export const Topbar = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isShortcutModalOpen()) return
 
-      if (e.key === 'Escape' && annotationEditMode) {
-        e.preventDefault()
-        setShowAnnotations(showAnnotationsBeforeEdit)
-        exitEditMode()
-        return
-      }
-
       if (matchShortcut(e, shortcuts.copyToFigma)) {
         e.preventDefault()
         copyToFigma()
@@ -175,18 +165,20 @@ export const Topbar = ({
 
       if (matchShortcut(e, shortcuts.selectElement)) {
         e.preventDefault()
-        if (!annotationEditMode) {
+        if (annotationEditMode) {
+          setShowAnnotations(showAnnotationsBeforeEdit)
+          exitEditMode()
+        } else {
           setShowAnnotationsBeforeEdit(showAnnotations)
           enableEditMode()
         }
-        toggleSelecting()
         return
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [shortcuts, onToggleDoc, copyToFigma, copyToAxure, annotationEditMode, showAnnotations, enableEditMode, toggleSelecting, exitEditMode, setShowAnnotations, showAnnotationsBeforeEdit])
+  }, [shortcuts, onToggleDoc, copyToFigma, copyToAxure, annotationEditMode, showAnnotations, enableEditMode, exitEditMode, setShowAnnotations, showAnnotationsBeforeEdit])
 
   return (
     <>
@@ -254,64 +246,22 @@ export const Topbar = ({
 
         <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
           {annotationEditMode ? (
-            <>
-              <TooltipButton
-                tooltip={`选择页面元素 (${formatShortcut(shortcuts.selectElement)})`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggleSelecting()
-                }}
-                className={annotationSelecting ? accentBtn : ghostBtn}
-              >
-                <MousePointer size={14} />
-                <span className="hidden min-[1180px]:inline">{annotationSelecting ? '选择中' : '选择元素'}</span>
-              </TooltipButton>
-              <TooltipButton
-                tooltip="清空当前未保存的批注改动"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  clearDraft()
-                }}
-                className={`${ghostBtn} ${!hasDraft && 'opacity-40 cursor-not-allowed'}`}
-                disabled={!hasDraft}
-              >
-                <Trash2 size={14} />
-                <span className="hidden min-[1180px]:inline">清空</span>
-              </TooltipButton>
-              <TooltipButton
-                tooltip="保存到本地文件"
-                onClick={async (e) => {
-                  e.stopPropagation()
-                  try {
-                    await saveDraft()
-                    showToast('批注已保存到本地文件', 'success')
-                  } catch {
-                    showToast('保存失败，请重试', 'error')
-                  }
-                }}
-                className={`${baseBtn} ${isDark ? 'text-emerald-400 hover:bg-emerald-900/20' : 'text-emerald-600 hover:bg-emerald-50'} ${!hasDraft && 'opacity-40 cursor-not-allowed'}`}
-                disabled={!hasDraft}
-              >
-                <Save size={14} />
-                <span className="hidden min-[1180px]:inline">保存</span>
-              </TooltipButton>
-              <TooltipButton
-                tooltip="退出编辑模式 (ESC)"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowAnnotations(showAnnotationsBeforeEdit)
-                  exitEditMode()
-                }}
-                className={ghostBtn}
-              >
-                <XIcon size={14} />
-                <span className="hidden min-[1180px]:inline">退出</span>
-              </TooltipButton>
-            </>
+            <TooltipButton
+              tooltip={`退出批注模式 (${formatShortcut(shortcuts.selectElement)})`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowAnnotations(showAnnotationsBeforeEdit)
+                exitEditMode()
+              }}
+              className={accentBtn}
+            >
+              <XIcon size={14} />
+              <span className="hidden min-[1180px]:inline">退出批注</span>
+            </TooltipButton>
           ) : (
             <>
               <TooltipButton
-                tooltip="进入批注编辑模式"
+                tooltip={`进入批注模式 (${formatShortcut(shortcuts.selectElement)})`}
                 onClick={(e) => {
                   e.stopPropagation()
                   setShowAnnotationsBeforeEdit(showAnnotations)

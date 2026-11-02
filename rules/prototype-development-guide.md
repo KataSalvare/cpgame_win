@@ -205,6 +205,26 @@ return (
 
 参考实现：`src/prototypes/demo-login 20-22-24-906/index.tsx`、`src/prototypes/demo-home/index.tsx`、`src/prototypes/demo-admin-orders/index.tsx`。
 
+### 批注定位：弹窗/浮层的展开标识
+
+批注保存时会读取元素最近祖先上的弹窗标识，供工具层从「标注说明」点击批注时重新展开弹窗：
+
+- 普通弹窗遮罩继续使用 `data-overlay="<唯一标识>"`。
+- 不遮挡页面操作的浮层（如客户端「一键匹配」）使用 `data-reveal-overlay="<唯一标识>"`。它只用于批注定位，不会被批注层当作遮罩而隐藏页面批注。
+- 同一浮层有多个状态时，按状态分别标注标识（如 `quick-match-matching`、`quick-match-notice`），并在浮层所在组件注册展开方式：
+
+```tsx
+import { registerOverlayReveal } from '@/lib/overlayReveal'
+
+useEffect(() => registerOverlayReveal('<唯一标识>', () => {
+  // 恢复到该标识对应的状态，例如打开弹窗并切换到对应层级
+}), [])
+```
+
+工具层按 `overlayId` 调用注册的展开方式后轮询定位批注元素；未注册时退回点击 `data-overlay-trigger="<唯一标识>"` 的触发按钮。新增弹窗或浮层时，若批注需要能从列表直接定位，必须补齐上述标识或注册。
+
+批注保存时还会记录原型内部路由（`window.location.hash`，如 `page=club-detail&club=club-001`；空值表示原型默认页面）。从其他内部页面点击批注时，工具先恢复该路由，再执行上述弹窗展开并定位元素。因此多页面原型不需要为每个页面额外注册展开方式，但页面内容应继续通过 hash 路由切换。
+
 ## 依赖与样式
 
 - React 与 Hooks 直接从 `react` 导入。

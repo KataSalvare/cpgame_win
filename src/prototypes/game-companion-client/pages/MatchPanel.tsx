@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { Check, ChevronDown, Headphones, Maximize2, Minimize2, Plus, Search, Swords, UserRound, UsersRound, X } from 'lucide-react'
 import type { useMatchLogic } from '../hooks/useMatchLogic'
+import { registerOverlayReveal } from '@/lib/overlayReveal'
 import { companions, games } from '../data/mockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
@@ -194,6 +195,31 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
     return () => window.clearTimeout(timeout)
   }, [matching])
 
+  // 批注定位：注册浮层各状态的展开方式，供工具层从「标注说明」点击时恢复
+  useEffect(() => {
+    const restoreToMatching = () => {
+      onRestore()
+      onStartMatching()
+      setCandidatesReady(true)
+    }
+    const unregister = [
+      registerOverlayReveal('quick-match-matching', restoreToMatching, { hints: ['match-panel__matching'] }),
+      registerOverlayReveal('quick-match-notice', () => {
+        onRestore()
+        setDialog('notice')
+      }, { hints: ['match-notice', 'match-dialog--notice'] }),
+      registerOverlayReveal('quick-match-price', () => {
+        restoreToMatching()
+        setDialog('price')
+      }, { hints: ['match-price'] }),
+      registerOverlayReveal('quick-match-cancel', () => {
+        restoreToMatching()
+        setDialog('cancel')
+      }, { hints: ['match-cancel'] }),
+    ]
+    return () => unregister.forEach((unregisterOne) => unregisterOne())
+  }, [onRestore, onStartMatching])
+
   useEffect(() => {
     const closePickerOutside = (event: PointerEvent) => {
       if (clubPickerRef.current && !clubPickerRef.current.contains(event.target as Node)) setClubPickerOpen(false)
@@ -204,7 +230,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
 
   const showMiniCard = !open && matching
 
-  return <div ref={matchHostRef} className={`match-panel-host${showMiniCard ? ' is-minimized' : !open ? ' is-hidden' : ''}`} aria-hidden={!open && !showMiniCard}>
+  return <div ref={matchHostRef} data-reveal-overlay={matching ? 'quick-match-matching' : 'quick-match'} className={`match-panel-host${showMiniCard ? ' is-minimized' : !open ? ' is-hidden' : ''}`} aria-hidden={!open && !showMiniCard}>
     {showMiniCard && <div
       className={`match-mini-card${miniDragging ? ' is-dragging' : ''}${hasCandidateList ? ' is-ready' : ''}`}
       style={miniPosition ? { left: miniPosition.left, top: miniPosition.top, right: 'auto' } : undefined}
@@ -266,7 +292,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.selectedService || !club || !validQuantity} onClick={() => logic.tryout ? onGoToVoiceRoom() : beginMatching()}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
       </div>}
 
-      {dialog === 'notice' && <div className="match-dialog-scrim"><section className="match-dialog match-dialog--notice" role="dialog" aria-modal="true" aria-labelledby="match-notice-title">
+      {dialog === 'notice' && <div className="match-dialog-scrim" data-reveal-overlay="quick-match-notice"><section className="match-dialog match-dialog--notice" role="dialog" aria-modal="true" aria-labelledby="match-notice-title">
         <header><div><h3 id="match-notice-title">下单须知</h3></div><button type="button" className="windows-icon-button" aria-label="关闭下单须知" onClick={() => setDialog(null)}><X size={15} /></button></header>
         <div className="match-notice-tabs" role="tablist" aria-label="下单须知内容">
           {([{ id: 'tab1', label: '后台配置TAB1' }, { id: 'tab2', label: '后台配置TAB2' }, { id: 'tab3', label: '后台配置TAB3' }] as const).map((tab) => <button type="button" role="tab" id={`match-notice-tab-${tab.id}`} aria-selected={noticeTab === tab.id} aria-controls="match-notice-panel" tabIndex={noticeTab === tab.id ? 0 : -1} key={tab.id} onClick={() => setNoticeTab(tab.id)}>{tab.label}</button>)}
@@ -276,8 +302,8 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         </div>
         <footer className="match-notice-footer"><label className="match-notice-remember"><input type="checkbox" checked={dontRemind} onChange={(event) => setDontRemind(event.target.checked)} />不再提醒</label><button type="button" className="client-button client-button--primary" onClick={agreeAndContinue}>同意并继续</button></footer>
       </section></div>}
-      {dialog === 'price' && <div className="match-dialog-scrim"><section className="match-dialog" role="dialog" aria-modal="true" aria-labelledby="match-price-title"><header><h3 id="match-price-title">加价</h3><button type="button" className="windows-icon-button" aria-label="关闭" onClick={() => setDialog(null)}><X size={15} /></button></header><p>提高本次匹配的单价。</p><label>加价金额（钻石）<input type="number" min="1" step="1" value={priceInput} onChange={(event) => setPriceInput(event.target.value)} placeholder="请输入金额" /></label><footer><button type="button" className="client-button client-button--secondary" onClick={() => setDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!Number.isInteger(Number(priceInput)) || Number(priceInput) <= 0} onClick={() => { logic.setAddedPrice(Number(priceInput)); setDialog(null) }}>确认加价</button></footer></section></div>}
-      {dialog === 'cancel' && <div className="match-dialog-scrim"><section className="match-dialog" role="dialog" aria-modal="true" aria-labelledby="match-cancel-title"><header><h3 id="match-cancel-title">取消匹配</h3><button type="button" className="windows-icon-button" aria-label="关闭" onClick={() => setDialog(null)}><X size={15} /></button></header><p>确定取消当前匹配并返回首页吗？</p><footer><button type="button" className="client-button client-button--secondary" onClick={() => setDialog(null)}>继续匹配</button><button type="button" className="client-button client-button--primary" onClick={() => { setDialog(null); onCancel() }}>确认取消</button></footer></section></div>}
+      {dialog === 'price' && <div className="match-dialog-scrim" data-reveal-overlay="quick-match-price"><section className="match-dialog" role="dialog" aria-modal="true" aria-labelledby="match-price-title"><header><h3 id="match-price-title">加价</h3><button type="button" className="windows-icon-button" aria-label="关闭" onClick={() => setDialog(null)}><X size={15} /></button></header><p>提高本次匹配的单价。</p><label>加价金额（钻石）<input type="number" min="1" step="1" value={priceInput} onChange={(event) => setPriceInput(event.target.value)} placeholder="请输入金额" /></label><footer><button type="button" className="client-button client-button--secondary" onClick={() => setDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!Number.isInteger(Number(priceInput)) || Number(priceInput) <= 0} onClick={() => { logic.setAddedPrice(Number(priceInput)); setDialog(null) }}>确认加价</button></footer></section></div>}
+      {dialog === 'cancel' && <div className="match-dialog-scrim" data-reveal-overlay="quick-match-cancel"><section className="match-dialog" role="dialog" aria-modal="true" aria-labelledby="match-cancel-title"><header><h3 id="match-cancel-title">取消匹配</h3><button type="button" className="windows-icon-button" aria-label="关闭" onClick={() => setDialog(null)}><X size={15} /></button></header><p>确定取消当前匹配并返回首页吗？</p><footer><button type="button" className="client-button client-button--secondary" onClick={() => setDialog(null)}>继续匹配</button><button type="button" className="client-button client-button--primary" onClick={() => { setDialog(null); onCancel() }}>确认取消</button></footer></section></div>}
     </section>}
   </div>
 }

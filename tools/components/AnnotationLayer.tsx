@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
-import type { Annotation, AnnotationCategory } from '../lib/annotations'
-import { findElementBySelector, getElementPosition, getElementSelector, isElementInViewport, isElementVisible, findActiveOverlay } from '../lib/annotations'
+import type { Annotation, AnnotationCategory, AnnotationMarkerColor } from '../lib/annotations'
+import { findElementBySelector, getAnnotationMarkerColor, getElementPosition, getElementSelector, isElementInViewport, isElementVisible, findActiveOverlay } from '../lib/annotations'
 
 interface AnnotationLayerProps {
   annotations: Annotation[]
   categories: AnnotationCategory[]
+  markerColor: AnnotationMarkerColor
   selectedId: string | null
   highlightedId: string | null
   selecting: boolean
@@ -13,13 +14,12 @@ interface AnnotationLayerProps {
   onSelectElement: (selector: string, clientX: number, clientY: number) => void
 }
 
-const getCategoryColor = (categories: AnnotationCategory[], categoryKey: string): string => {
-  return categories.find((c) => c.key === categoryKey)?.color ?? '#6b7280'
-}
+// 角标颜色由设置项统一控制，分类颜色只在弹窗与列表中区分
 
 export default function AnnotationLayer({
   annotations,
   categories,
+  markerColor,
   selectedId,
   highlightedId,
   selecting,
@@ -28,11 +28,11 @@ export default function AnnotationLayer({
   onSelectElement,
 }: AnnotationLayerProps) {
   const layerRef = useRef<HTMLDivElement>(null)
-  const [hoveredSelector, setHoveredSelector] = useState<string | null>(null)
   const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(null)
   const [highlightedElement, setHighlightedElement] = useState<HTMLElement | null>(null)
   const [positions, setPositions] = useState<Record<string, { left: number; top: number }>>({})
   const [visibleMap, setVisibleMap] = useState<Record<string, boolean>>({})
+  const markerHex = getAnnotationMarkerColor(markerColor)
 
   const recomputePositions = useCallback(() => {
     if (!previewContainer) return
@@ -135,17 +135,14 @@ export default function AnnotationLayer({
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!selecting || !previewContainer) return
-      const target = getElementAtPoint(e.clientX, e.clientY)
-      if (!target) {
-        setHoveredElement(null)
-        setHoveredSelector(null)
-        return
-      }
-      setHoveredElement(target)
-      setHoveredSelector(getElementSelector(target, previewContainer))
+      setHoveredElement(getElementAtPoint(e.clientX, e.clientY))
     },
     [selecting, previewContainer, getElementAtPoint]
   )
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredElement(null)
+  }, [])
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -176,6 +173,7 @@ export default function AnnotationLayer({
     <div
       ref={layerRef}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       onClick={handleClick}
       className={[
         'absolute inset-0 z-[200]',
@@ -184,7 +182,7 @@ export default function AnnotationLayer({
     >
       {selecting && hoveredElement && (
         <div
-          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/10 transition-[box-shadow,opacity] duration-150"
+          className="absolute pointer-events-none rounded-none border-2 border-dashed border-red-500 bg-red-500/10 transition-opacity duration-150"
           style={(() => {
             const rect = hoveredElement.getBoundingClientRect()
             const containerRect = previewContainer.getBoundingClientRect()
@@ -200,7 +198,7 @@ export default function AnnotationLayer({
 
       {highlightedElement && (
         <div
-          className="absolute pointer-events-none rounded-xl ring-2 ring-[var(--tool-brand)] ring-offset-2 ring-offset-transparent bg-[var(--tool-brand)]/12 animate-pulse motion-reduce:animate-none"
+          className="absolute pointer-events-none rounded-none border-2 border-dashed border-red-500 bg-red-500/10 transition-opacity duration-150"
           style={(() => {
             const rect = highlightedElement.getBoundingClientRect()
             const containerRect = previewContainer.getBoundingClientRect()
@@ -214,7 +212,7 @@ export default function AnnotationLayer({
         />
       )}
 
-      {Object.entries(annotationsBySelector).map(([, group]) => {
+      {!selecting && Object.entries(annotationsBySelector).map(([, group]) => {
         const order = new Map(categories.map((c, i) => [c.key, i]))
         const sorted = [...group].sort(
           (a, b) => (order.get(a.category) ?? Infinity) - (order.get(b.category) ?? Infinity)
@@ -222,7 +220,7 @@ export default function AnnotationLayer({
         const annotation = sorted[0]
         const pos = positions[annotation.id]
         if (!pos || !visibleMap[annotation.id]) return null
-        const color = getCategoryColor(categories, annotation.category)
+        const color = markerHex
         const isSelected = sorted.some((a) => a.id === selectedId)
         const isHighlighted = sorted.some((a) => a.id === highlightedId)
 
@@ -239,31 +237,20 @@ export default function AnnotationLayer({
               left: `${pos.left}%`,
               top: `${pos.top}%`,
               backgroundColor: color,
-              translate: '-50% -50%',
+              transform: 'translate(-50%, -50%)',
             }}
             className={[
-              'absolute flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-bold ring-2 ring-white/80 dark:ring-black/30',
-              'select-none tool-control transition-[box-shadow,opacity,scale] duration-200 ease-out',
-              selecting ? 'pointer-events-none opacity-50' : 'pointer-events-auto cursor-pointer hover:scale-110',
-              isSelected || isHighlighted ? 'ring-[3px] ring-white/90 dark:ring-black/50 scale-110 annotation-glow' : 'shadow-[var(--tool-shadow-float)] hover:scale-110',
+              'absolute flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold ring-1 ring-white/80 dark:ring-black/30',
+              'select-none tool-control pointer-events-auto cursor-pointer transition-[box-shadow,opacity,transform] duration-200 ease-out',
+              isSelected || isHighlighted ? 'ring-2 ring-white/90 dark:ring-black/50 scale-110 annotation-glow' : 'shadow-[var(--tool-shadow-float)] hover:scale-110',
             ].join(' ')}
-            title={group.length > 1 ? `${group.length} 条批注` : annotation.title}
+            title={group.length > 1 ? `${group.length} 条批注` : annotation.content || '批注'}
           >
             {annotation.number}
           </button>
         )
       })}
 
-      {selecting && (
-        <div className="absolute top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-2xl border border-[var(--tool-border)] tool-surface-raised text-[var(--tool-text)] text-sm font-medium pointer-events-none animate-tool-enter motion-reduce:animate-none">
-          点击页面元素添加批注
-        </div>
-      )}
-      {selecting && hoveredSelector && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[80%] px-4 py-2 rounded-xl border border-[var(--tool-border)] tool-surface-raised text-[var(--tool-text-muted)] text-xs font-mono truncate pointer-events-none animate-tool-enter motion-reduce:animate-none">
-          {hoveredSelector}
-        </div>
-      )}
     </div>
   )
 }

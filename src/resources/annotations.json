@@ -1,5 +1,57 @@
 {
-  "annotations": [],
+  "annotations": [
+    {
+      "id": "anno-1793544036240-interaction",
+      "pagePath": "/game-companion-client",
+      "number": 1,
+      "title": "",
+      "content": "测试详情",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.club-detail-page > section.club-members-section:nth-of-type(3) > div.client-card-grid.client-card-grid--companions:nth-of-type(3) > article.client-card.companion-card:nth-of-type(1) > div.client-tag-row:nth-of-type(2)",
+      "position": "top-left",
+      "createdAt": 1793544036240,
+      "route": "page=club-detail&club=club-001"
+    },
+    {
+      "id": "anno-1793544057023-interaction",
+      "pagePath": "/game-companion-client",
+      "number": 2,
+      "title": "",
+      "content": "测试1",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.match-panel-host:nth-of-type(3) > section.match-panel > div.match-panel__form > section.match-field.match-field--wide:nth-of-type(1) > div.home-game-browser > div.home-game-list > button.game-choice:nth-of-type(3)",
+      "position": "top-left",
+      "createdAt": 1793544057023,
+      "overlayId": "quick-match",
+      "route": "page=home&club=club-001"
+    },
+    {
+      "id": "anno-1793544066756-interaction",
+      "pagePath": "/game-companion-client",
+      "number": 3,
+      "title": "",
+      "content": "测试2",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.match-panel-host:nth-of-type(3) > section.match-panel > div.match-dialog-scrim:nth-of-type(2) > section.match-dialog.match-dialog--notice > header",
+      "position": "top-left",
+      "createdAt": 1793544066756,
+      "overlayId": "quick-match-notice",
+      "route": "page=home&club=club-001"
+    },
+    {
+      "id": "anno-1793544076806-interaction",
+      "pagePath": "/game-companion-client",
+      "number": 4,
+      "title": "",
+      "content": "测试3",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.match-panel-host:nth-of-type(3) > section.match-panel > div.match-panel__matching > section.match-found-list > div.match-candidate-list > button.match-candidate:nth-of-type(1)",
+      "position": "top-left",
+      "createdAt": 1793544076806,
+      "overlayId": "quick-match-matching",
+      "route": "page=home&club=club-001"
+    }
+  ],
   "categories": [
     {
       "key": "interaction",

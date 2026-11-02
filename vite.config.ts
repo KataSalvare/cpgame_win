@@ -120,6 +120,10 @@ export default defineConfig({
   server: {
     port: 1045,
     strictPort: true,
+    watch: {
+      // 批注保存会直接写入该文件，忽略监听以避免开发时整页刷新
+      ignored: ['**/src/resources/annotations.json'],
+    },    
   },
   resolve: {
     alias: {

@@ -1,27 +1,30 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type React from 'react'
 import AnnotationLayer from '../components/AnnotationLayer'
-import AnnotationModal from '../components/AnnotationModal'
+import AnnotationModal, { type AnnotationSaveEntry } from '../components/AnnotationModal'
 import { useAnnotations } from '../hooks/useAnnotations'
-import type { Annotation, AnnotationCategory } from '../lib/annotations'
-import { findElementBySelector, getElementPosition, isElementInViewport } from '../lib/annotations'
+import type { Annotation, AnnotationCategory, AnnotationMarkerColor } from '../lib/annotations'
+import {
+  findElementBySelector,
+  getElementPosition,
+  getNextNumber,
+  getOverlayIdForSelector,
+  isElementInViewport,
+  revealAnnotationTarget,
+} from '../lib/annotations'
 import type { Theme } from '../lib/shortcuts'
 
 export interface AnnotationControllerState {
   showAnnotations: boolean
   annotationEditMode: boolean
   annotationSelecting: boolean
-  hasDraft: boolean
 }
 
 export interface AnnotationControllerActions {
   enableEditMode: () => void
   exitEditMode: () => void
-  toggleSelecting: () => void
   toggleShow: () => void
   setShowAnnotations: (show: boolean) => void
-  saveDraft: () => Promise<void>
-  clearDraft: () => void
 }
 
 interface UseAnnotationControllerOptions {
@@ -29,6 +32,7 @@ interface UseAnnotationControllerOptions {
   currentPath: string
   theme: Theme
   deviceMode: 'mobile' | 'pc'
+  markerColor: AnnotationMarkerColor
   onOpenDocAnnotations: () => void
 }
 
@@ -37,6 +41,7 @@ export function useAnnotationController({
   currentPath,
   theme,
   deviceMode,
+  markerColor,
   onOpenDocAnnotations,
 }: UseAnnotationControllerOptions): {
   state: AnnotationControllerState
@@ -45,6 +50,7 @@ export function useAnnotationController({
   docDrawerProps: {
     annotations: Annotation[]
     categories: AnnotationCategory[]
+    markerColor: AnnotationMarkerColor
     selectedCategories: Set<string>
     onToggleCategory: (key: string) => void
     selectedId: string | null
@@ -59,6 +65,7 @@ export function useAnnotationController({
   const [modalAnchor, setModalAnchor] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [modalReadOnly, setModalReadOnly] = useState(false)
   const [hiddenCategoryKeys, setHiddenCategoryKeys] = useState<Set<string>>(new Set())
+  const [revealRequest, setRevealRequest] = useState<{ id: string; nonce: number } | null>(null)
 
   const {
     annotations: allAnnotations,
@@ -66,15 +73,8 @@ export function useAnnotationController({
     selectedId: selectedAnnotationId,
     setSelectedId: setSelectedAnnotationId,
     currentAnnotations,
-    hasDraft,
     prepareAnnotation,
-    addAnnotation,
-    updateAnnotation,
-    deleteAnnotation,
-    addCategory,
-    deleteCategory,
-    saveDraftToFile,
-    clearLocalDraft,
+    saveElementAnnotations,
   } = useAnnotations(currentPath)
 
   const selectedCategoryKeys = useMemo(
@@ -134,126 +134,192 @@ export function useAnnotationController({
     []
   )
 
-  // 批注面板在未缩放的工具层中，画布缩放或内容滚动后重新锚定显示坐标。
-  useEffect(() => {
-    if (!annotationModalOpen || !modalAnnotation || !previewContainer) return
-    let frameId: number | null = null
-    const scheduleAnchor = () => {
-      if (frameId !== null) return
-      frameId = requestAnimationFrame(() => {
-        frameId = null
-        setModalAnchor(getAnnotationAnchor(modalAnnotation))
-      })
-    }
-    const observer = new ResizeObserver(scheduleAnchor)
-    observer.observe(previewContainer.parentElement ?? previewContainer)
-    document.addEventListener('scroll', scheduleAnchor, true)
-    window.addEventListener('resize', scheduleAnchor)
-    return () => {
-      observer.disconnect()
-      document.removeEventListener('scroll', scheduleAnchor, true)
-      window.removeEventListener('resize', scheduleAnchor)
-      if (frameId !== null) cancelAnimationFrame(frameId)
-    }
-  }, [annotationModalOpen, modalAnnotation, previewContainer, getAnnotationAnchor])
-
   const handleSelectAnnotation = useCallback(
     (id: string) => {
       const annotation = allAnnotations.find((a) => a.id === id)
-      if (annotation && previewContainer) {
-        if (annotation.selector) {
-          const element = findElementBySelector(annotation.selector, previewContainer)
-          if (element && !isElementInViewport(element, previewContainer)) {
-            element.scrollIntoView({ block: 'center', inline: 'nearest' })
-          }
-        }
-        setSelectedAnnotationId(id)
-        openAnnotationModal(annotation, getAnnotationAnchor(annotation), !annotationEditMode)
-        onOpenDocAnnotations()
+      if (!annotation) return
+
+      // 再次点击同一元素的批注时关闭弹窗
+      const isSameElementOpen =
+        annotationModalOpen &&
+        modalAnnotation != null &&
+        (annotation.selector
+          ? annotation.selector === modalAnnotation.selector
+          : annotation.id === modalAnnotation.id)
+      if (isSameElementOpen) {
+        setAnnotationModalOpen(false)
+        setModalAnnotation(null)
+        setRevealRequest(null)
+        return
       }
+
+      // 点击标注后总是先开启批注显示
+      setShowAnnotations(true)
+      setSelectedAnnotationId(id)
+      onOpenDocAnnotations()
+      setRevealRequest((previous) => ({ id, nonce: (previous?.nonce ?? 0) + 1 }))
     },
-    [allAnnotations, annotationEditMode, getAnnotationAnchor, openAnnotationModal, previewContainer, setSelectedAnnotationId, onOpenDocAnnotations]
+    [
+      allAnnotations,
+      annotationModalOpen,
+      modalAnnotation,
+      onOpenDocAnnotations,
+      setSelectedAnnotationId,
+    ]
   )
+
+  // 展开当前页面内的弹窗/抽屉，再打开批注弹窗
+  useEffect(() => {
+    if (!revealRequest) return
+    const annotation = allAnnotations.find((a) => a.id === revealRequest.id)
+    if (!annotation) return
+    if (annotation.pagePath !== currentPath || !previewContainer) return
+
+    let cancelled = false
+    let timer: number | null = null
+
+    const finish = () => {
+      if (cancelled) return
+      if (annotation.selector) {
+        const element = findElementBySelector(annotation.selector, previewContainer)
+        if (element && !isElementInViewport(element, previewContainer)) {
+          element.scrollIntoView({ block: 'center', inline: 'nearest' })
+        }
+      }
+      setSelectedAnnotationId(annotation.id)
+      openAnnotationModal(annotation, getAnnotationAnchor(annotation), !annotationEditMode)
+      setShowAnnotations(true)
+      setRevealRequest(null)
+    }
+
+    // 弹窗展开后目标元素可能延后渲染（如匹配中的候选列表），轮询等待出现
+    const deadline = performance.now() + 4000
+    const poll = () => {
+      if (cancelled) return
+      if (!annotation.selector || findElementBySelector(annotation.selector, previewContainer)) {
+        finish()
+        return
+      }
+      if (performance.now() >= deadline) {
+        setRevealRequest(null)
+        return
+      }
+      timer = window.setTimeout(poll, 140)
+    }
+
+    const attempt = async () => {
+      if (cancelled) return
+      if (!annotation.selector) {
+        finish()
+        return
+      }
+      // 只执行一次展开，避免在匹配中等多状态浮层里反复切换状态
+      await revealAnnotationTarget(previewContainer, annotation)
+      if (cancelled) return
+      poll()
+    }
+
+    void attempt()
+    return () => {
+      cancelled = true
+      if (timer !== null) window.clearTimeout(timer)
+    }
+  }, [
+    revealRequest,
+    allAnnotations,
+    currentPath,
+    previewContainer,
+    annotationEditMode,
+    getAnnotationAnchor,
+    openAnnotationModal,
+    setSelectedAnnotationId,
+  ])
 
   const handleSelectElement = useCallback(
     (selector: string, clientX: number, clientY: number) => {
-      const existing = allAnnotations.filter((a) => a.selector === selector)
-      let annotation: Annotation
-      if (existing.length === 0) {
-        annotation = prepareAnnotation(selector)
-      } else {
-        const usedCategories = new Set(existing.map((a) => a.category))
-        const unusedCategory = annotationCategories.find((c) => !usedCategories.has(c.key))
-        if (unusedCategory) {
-          annotation = prepareAnnotation(selector)
-          annotation.category = unusedCategory.key
-        } else {
-          annotation = existing[0]
-        }
-      }
+      const existing = allAnnotations.filter((a) => a.pagePath === currentPath && a.selector === selector)
+      const annotation = existing[0] ?? prepareAnnotation(selector)
       openAnnotationModal(annotation, { x: clientX, y: clientY }, false)
     },
-    [allAnnotations, annotationCategories, prepareAnnotation, openAnnotationModal]
+    [allAnnotations, currentPath, prepareAnnotation, openAnnotationModal]
   )
 
   const handleSaveAnnotationModal = useCallback(
-    (updated: Annotation) => {
-      const duplicate = allAnnotations.find(
-        (a) => a.id !== updated.id && a.selector === updated.selector && a.category === updated.category
-      )
-      if (duplicate) {
-        return
-      }
-      const exists = allAnnotations.some((a) => a.id === updated.id)
-      if (exists) {
-        updateAnnotation(updated)
-      } else {
-        addAnnotation(updated)
-      }
-      setAnnotationModalOpen(false)
-      setModalAnnotation(null)
+    async (entries: AnnotationSaveEntry[], position: NonNullable<Annotation['position']>) => {
+      const selector = modalAnnotation?.selector
+      if (!selector) return
+      const existing = allAnnotations.filter((a) => a.pagePath === currentPath && a.selector === selector)
+      const elementNumber = existing[0]?.number ?? getNextNumber(allAnnotations, currentPath)
+      const overlayId = previewContainer ? getOverlayIdForSelector(selector, previewContainer) : undefined
+      // 记录原型内部路由，跨页面定位时先恢复到该页面（空字符串表示原型默认页面）
+      const route = window.location.hash.replace(/^#/, '')
+      const timestamp = Date.now()
+      const upserted: Annotation[] = []
+      const deleted: string[] = []
+
+      entries.forEach((entry, index) => {
+        const content = entry.content.trim()
+        const current = existing.find((a) => a.category === entry.category)
+        if (content) {
+          if (current) {
+            upserted.push({
+              ...current,
+              content,
+              position,
+              overlayId: current.overlayId ?? overlayId,
+              route: current.route ?? route,
+            })
+          } else {
+            const prepared = prepareAnnotation(selector)
+            upserted.push({
+              ...prepared,
+              id: `anno-${timestamp}-${entry.category}`,
+              category: entry.category,
+              content,
+              position,
+              overlayId,
+              route,
+              title: '',
+              number: elementNumber,
+              createdAt: timestamp + index,
+            })
+          }
+        } else if (current) {
+          deleted.push(current.id)
+        }
+      })
+
+      // 分类全部为空时相当于删除该批注；没有改动则无需请求
+      if (upserted.length === 0 && deleted.length === 0) return
+
+      await saveElementAnnotations({ upserted, deleted })
     },
-    [allAnnotations, addAnnotation, updateAnnotation]
+    [allAnnotations, currentPath, modalAnnotation, prepareAnnotation, previewContainer, saveElementAnnotations]
   )
 
-  const handleDeleteAnnotationModal = useCallback(
-    (id: string) => {
-      deleteAnnotation(id)
-      setAnnotationModalOpen(false)
-      setModalAnnotation(null)
+  const handleDeleteAnnotationsModal = useCallback(
+    async (ids: string[]) => {
+      await saveElementAnnotations({ upserted: [], deleted: ids })
     },
-    [deleteAnnotation]
+    [saveElementAnnotations]
   )
 
-  const handleSwitchAnnotationModal = useCallback(
-    (id: string) => {
-      const annotation = allAnnotations.find((a) => a.id === id)
-      if (annotation) setModalAnnotation(annotation)
-    },
-    [allAnnotations]
-  )
-
-  const handleAddRelatedAnnotation = useCallback(
-    (selector: string, category: string) => {
-      const pending = prepareAnnotation(selector)
-      pending.category = category
-      setModalAnnotation(pending)
-    },
-    [prepareAnnotation]
-  )
+  const handleEditAnnotationModal = useCallback(() => {
+    setShowAnnotations(true)
+    setModalReadOnly(false)
+  }, [])
 
   const actions: AnnotationControllerActions = useMemo(
     () => ({
       enableEditMode: () => {
         setShowAnnotations(true)
         setAnnotationEditMode(true)
+        // 进入批注模式即开启选择元素
+        setAnnotationSelecting(true)
       },
       exitEditMode: () => {
         setAnnotationEditMode(false)
         setAnnotationSelecting(false)
-      },
-      toggleSelecting: () => {
-        setAnnotationSelecting((prev) => !prev)
       },
       toggleShow: () => {
         setShowAnnotations((prev) => {
@@ -268,16 +334,8 @@ export function useAnnotationController({
       setShowAnnotations: (show: boolean) => {
         setShowAnnotations(show)
       },
-      saveDraft: async () => {
-        await saveDraftToFile()
-      },
-      clearDraft: () => {
-        clearLocalDraft()
-        setAnnotationModalOpen(false)
-        setModalAnnotation(null)
-      },
     }),
-    [saveDraftToFile, clearLocalDraft]
+    []
   )
 
   const state: AnnotationControllerState = useMemo(
@@ -285,21 +343,21 @@ export function useAnnotationController({
       showAnnotations,
       annotationEditMode,
       annotationSelecting,
-      hasDraft,
     }),
-    [showAnnotations, annotationEditMode, annotationSelecting, hasDraft]
+    [showAnnotations, annotationEditMode, annotationSelecting]
   )
 
   const docDrawerProps = useMemo(
     () => ({
       annotations: currentAnnotations,
       categories: annotationCategories,
+      markerColor,
       selectedCategories: selectedCategoryKeys,
       onToggleCategory: handleToggleCategory,
       selectedId: selectedAnnotationId,
       onSelectAnnotation: handleSelectAnnotation,
     }),
-    [currentAnnotations, annotationCategories, selectedCategoryKeys, handleToggleCategory, selectedAnnotationId, handleSelectAnnotation]
+    [currentAnnotations, annotationCategories, markerColor, selectedCategoryKeys, handleToggleCategory, selectedAnnotationId, handleSelectAnnotation]
   )
 
   const ui = (
@@ -308,6 +366,7 @@ export function useAnnotationController({
         <AnnotationLayer
           annotations={visibleAnnotations}
           categories={annotationCategories}
+          markerColor={markerColor}
           selectedId={selectedAnnotationId}
           highlightedId={modalAnnotation?.id ?? null}
           selecting={annotationEditMode && annotationSelecting}
@@ -330,12 +389,9 @@ export function useAnnotationController({
         previewContainer={previewContainer}
         constrainToPreview={deviceMode === 'pc'}
         readOnly={modalReadOnly}
+        onEdit={handleEditAnnotationModal}
         onSave={handleSaveAnnotationModal}
-        onDelete={handleDeleteAnnotationModal}
-        onAddCategory={addCategory}
-        onDeleteCategory={deleteCategory}
-        onSwitchAnnotation={handleSwitchAnnotationModal}
-        onAddRelatedAnnotation={handleAddRelatedAnnotation}
+        onDelete={handleDeleteAnnotationsModal}
       />
     </>
   )

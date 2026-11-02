@@ -97,6 +97,7 @@ function AppContent() {
     currentPath: location.pathname,
     theme,
     deviceMode,
+    markerColor: shortcuts.markerColor,
     onOpenDocAnnotations: useCallback(() => {
       setDocTab('annotations')
       setDocOpen(true)

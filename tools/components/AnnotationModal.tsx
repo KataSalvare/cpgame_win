@@ -1,9 +1,15 @@
 import { useState, useMemo, useEffect, useRef, useLayoutEffect, useCallback } from 'react'
-import { X, Plus, Trash2, Check } from 'lucide-react'
-import { DEFAULT_CATEGORY_KEYS, type Annotation, type AnnotationCategory } from '../lib/annotations'
+import type { PointerEvent as ReactPointerEvent } from 'react'
+import { X, Trash2, Pencil } from 'lucide-react'
+import { DEFAULT_ANNOTATION_CATEGORIES, type Annotation, type AnnotationCategory } from '../lib/annotations'
 import { useToolEntrance } from '../hooks/useToolEntrance'
 
 export type Theme = 'light' | 'dark'
+
+export interface AnnotationSaveEntry {
+  category: string
+  content: string
+}
 
 interface AnnotationModalProps {
   isOpen: boolean
@@ -16,17 +22,10 @@ interface AnnotationModalProps {
   previewContainer: HTMLElement | null
   constrainToPreview?: boolean
   readOnly?: boolean
-  onSave: (annotation: Annotation) => void
-  onDelete: (id: string) => void
-  onAddCategory: (category: AnnotationCategory) => void
-  onDeleteCategory: (key: string) => void
-  onSwitchAnnotation?: (id: string) => void
-  onAddRelatedAnnotation?: (selector: string, category: string) => void
+  onEdit?: () => void
+  onSave: (entries: AnnotationSaveEntry[], position: NonNullable<Annotation['position']>) => Promise<void> | void
+  onDelete: (ids: string[]) => Promise<void> | void
 }
-
-const PRESET_COLORS = [
-  '#d65a31', '#2a9d8f', '#e9c46a', '#e76f51', '#264653', '#f4a261', '#8ab17d', '#9b5de5', '#00bbf9', '#f15bb5'
-]
 
 const CORNERS: { key: NonNullable<Annotation['position']>; label: string }[] = [
   { key: 'top-left', label: '左上' },
@@ -35,10 +34,7 @@ const CORNERS: { key: NonNullable<Annotation['position']>; label: string }[] = [
   { key: 'bottom-right', label: '右下' },
 ]
 
-const pickColor = (categories: AnnotationCategory[]): string => {
-  const used = new Set(categories.map((c) => c.color))
-  return PRESET_COLORS.find((c) => !used.has(c)) ?? '#6b7280'
-}
+const MODAL_WIDTH = 420
 
 export default function AnnotationModal({
   isOpen,
@@ -51,38 +47,72 @@ export default function AnnotationModal({
   previewContainer,
   constrainToPreview = false,
   readOnly = false,
+  onEdit,
   onSave,
   onDelete,
-  onAddCategory,
-  onDeleteCategory,
-  onSwitchAnnotation,
-  onAddRelatedAnnotation,
 }: AnnotationModalProps) {
   const isDark = theme === 'dark'
-  const isNew = annotation?.title === '' && annotation?.content === ''
   const canEdit = !readOnly
   const modalRef = useRef<HTMLDivElement>(null)
 
-  const [form, setForm] = useState({
-    title: annotation?.title || '',
-    content: annotation?.content || '',
-    category: annotation?.category || categories[0]?.key || 'other',
-    position: annotation?.position || 'top-left',
-  })
+  const elementAnnotations = useMemo(() => {
+    if (!annotation) return []
+    return annotation.selector
+      ? annotations.filter((a) => a.selector === annotation.selector)
+      : annotations.filter((a) => a.id === annotation.id)
+  }, [annotations, annotation])
 
-  const [showCategoryInput, setShowCategoryInput] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState('')
+  const isNew = elementAnnotations.length === 0
+
+  const tabs = useMemo(() => {
+    const defaultTabs = DEFAULT_ANNOTATION_CATEGORIES.map(
+      (fallback) => categories.find((c) => c.key === fallback.key) ?? fallback
+    )
+    if (!annotation || !readOnly) return defaultTabs
+
+    // 查看模式只展示该元素已有内容的分类
+    const keys = new Set(elementAnnotations.map((a) => a.category))
+    const existingTabs = defaultTabs.filter((tab) => keys.has(tab.key))
+    if (annotation.category && !existingTabs.some((tab) => tab.key === annotation.category)) {
+      const current = categories.find((c) => c.key === annotation.category)
+      if (current) existingTabs.push(current)
+    }
+    if (existingTabs.length > 0) return existingTabs
+    const ownTab = defaultTabs.find((tab) => tab.key === annotation.category)
+    return ownTab ? [ownTab] : [defaultTabs[0]]
+  }, [annotation, categories, elementAnnotations, readOnly])
+
+  const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const [activeCategory, setActiveCategory] = useState('')
+  const [position, setPosition] = useState<NonNullable<Annotation['position']>>('top-left')
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStateRef = useRef<{ startX: number; startY: number; offsetX: number; offsetY: number } | null>(null)
+  const dragCleanupRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
-    queueMicrotask(() =>
-      setForm({
-        title: annotation?.title || '',
-        content: annotation?.content || '',
-        category: annotation?.category || categories[0]?.key || 'other',
-        position: annotation?.position || 'top-left',
-      })
-    )
-  }, [annotation, categories])
+    if (!isOpen || !annotation) return
+    const nextDrafts: Record<string, string> = {}
+    tabs.forEach((tab) => {
+      const existing = elementAnnotations.find((a) => a.category === tab.key)
+      nextDrafts[tab.key] = existing?.content ?? ''
+    })
+    const preferredCategory = tabs.some((tab) => tab.key === annotation.category)
+      ? annotation.category
+      : tabs.find((tab) => elementAnnotations.some((a) => a.category === tab.key))?.key ?? tabs[0]?.key ?? ''
+
+    queueMicrotask(() => {
+      setDrafts(nextDrafts)
+      setActiveCategory(preferredCategory)
+      setPosition(annotation.position ?? 'top-left')
+      setError(null)
+      setSaving(false)
+      setConfirmDelete(false)
+    })
+  }, [isOpen, annotation, tabs, elementAnnotations])
 
   useEffect(() => {
     if (!isOpen) return
@@ -93,48 +123,20 @@ export default function AnnotationModal({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
-  const handleSave = () => {
-    if (!annotation) return
-    onSave({
-      ...annotation,
-      title: form.title.trim(),
-      content: form.content.trim(),
-      category: form.category,
-      position: form.position as NonNullable<Annotation['position']>,
+  useEffect(() => {
+    if (!isOpen) return
+    queueMicrotask(() => {
+      setDragOffset({ x: 0, y: 0 })
+      setIsDragging(false)
     })
-    onClose()
-  }
+  }, [isOpen, annotation?.id])
 
-  const handleAddCategory = () => {
-    const name = newCategoryName.trim()
-    if (!name) return
-    const key = `cat-${Date.now()}`
-    onAddCategory({ key, label: name, color: pickColor(categories) })
-    setNewCategoryName('')
-    setShowCategoryInput(false)
-  }
+  useEffect(() => {
+    return () => {
+      dragCleanupRef.current?.()
+    }
+  }, [])
 
-  const categoryOrder = useMemo(() => new Map(categories.map((c, i) => [c.key, i])), [categories])
-
-  const elementAnnotations = useMemo(() => {
-    if (!annotation?.selector) return []
-    return annotations
-      .filter((a) => a.selector === annotation.selector)
-      .sort((a, b) => (categoryOrder.get(a.category) ?? Infinity) - (categoryOrder.get(b.category) ?? Infinity))
-  }, [annotations, annotation, categoryOrder])
-
-  const tabAnnotations = useMemo(() => {
-    if (!annotation) return elementAnnotations
-    if (elementAnnotations.some((a) => a.id === annotation.id)) return elementAnnotations
-    return [...elementAnnotations, annotation]
-  }, [elementAnnotations, annotation])
-
-  const unusedCategories = useMemo(
-    () => categories.filter((c) => !tabAnnotations.some((a) => a.category === c.key)),
-    [categories, tabAnnotations]
-  )
-
-  const MODAL_WIDTH = 380
   const getViewportBounds = useCallback(() => {
     if (constrainToPreview && previewContainer) {
       const rect = previewContainer.getBoundingClientRect()
@@ -157,15 +159,13 @@ export default function AnnotationModal({
     }
   }, [constrainToPreview, previewContainer])
 
-  const estimatedStyle = (() => {
+  const estimatedStyle = useMemo(() => {
     const padding = 16
     const gap = 8
     const markerHalf = 12
     const viewport = getViewportBounds()
-    const isEdit = !readOnly
-    const width = Math.max(1, Math.min(MODAL_WIDTH, viewport.width - padding * 2))
-    const maxHeight = Math.max(1, Math.min(window.innerHeight * 0.8, viewport.height - padding * 2))
-    const height = Math.min(isEdit ? 520 : 260, maxHeight)
+    const width = Math.min(MODAL_WIDTH, Math.max(0, viewport.width - padding * 2))
+    const height = Math.min(canEdit ? 560 : 360, Math.max(240, viewport.height - padding * 2))
 
     let left = anchor.x + markerHalf + gap
     if (left + width > viewport.right - padding) {
@@ -186,8 +186,54 @@ export default function AnnotationModal({
         : viewport.top + padding
     }
 
-    return { left, top, width, maxHeight }
-  })()
+    return { left, top, height }
+  }, [anchor, canEdit, getViewportBounds])
+
+  const handleDragStart = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || !modalRef.current) return
+    if ((e.target as HTMLElement).closest('button, input, textarea, select, a')) return
+    e.preventDefault()
+
+    const base = estimatedStyle
+    const rect = modalRef.current.getBoundingClientRect()
+    dragStateRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      offsetX: rect.left - base.left,
+      offsetY: rect.top - base.top,
+    }
+    setIsDragging(true)
+
+    const handleMove = (event: PointerEvent) => {
+      const drag = dragStateRef.current
+      if (!drag) return
+      const viewport = getViewportBounds()
+      const padding = 16
+      const rawLeft = base.left + drag.offsetX + event.clientX - drag.startX
+      const rawTop = base.top + drag.offsetY + event.clientY - drag.startY
+      const left = Math.max(viewport.left + padding, Math.min(rawLeft, viewport.right - rect.width - padding))
+      const top = Math.max(viewport.top + padding, Math.min(rawTop, viewport.bottom - rect.height - padding))
+      setDragOffset({ x: left - base.left, y: top - base.top })
+    }
+
+    const removeListeners = () => {
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
+      window.removeEventListener('pointercancel', handleUp)
+      dragCleanupRef.current = null
+    }
+
+    const handleUp = () => {
+      dragStateRef.current = null
+      setIsDragging(false)
+      removeListeners()
+    }
+
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
+    window.addEventListener('pointercancel', handleUp)
+    dragCleanupRef.current = removeListeners
+  }
 
   useLayoutEffect(() => {
     if (!isOpen || !modalRef.current) return
@@ -213,127 +259,153 @@ export default function AnnotationModal({
 
   if (!isOpen || !annotation) return null
 
-  const inputBase = 'w-full px-3 py-2.5 text-sm rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] text-[var(--tool-text)] placeholder-[var(--tool-text-subtle)] outline-none tool-control focus:border-[var(--tool-focus)] focus:ring-2 focus:ring-[var(--tool-focus)]/20'
+  const activeContent = drafts[activeCategory] ?? ''
+  const activeTab = tabs.find((tab) => tab.key === activeCategory) ?? tabs[0]
+
+  const handleSave = async () => {
+    if (saving) return
+    const entries = tabs.map((tab) => ({
+      category: tab.key,
+      content: (drafts[tab.key] ?? '').trim(),
+    }))
+    setError(null)
+    setSaving(true)
+    try {
+      await onSave(entries, position)
+      onClose()
+    } catch {
+      setError('保存失败，请重试')
+      setSaving(false)
+    }
+  }
+
+  const handleDeleteConfirm = async () => {
+    const ids = elementAnnotations.map((a) => a.id)
+    setError(null)
+    try {
+      await onDelete(ids.length > 0 ? ids : [annotation.id])
+      onClose()
+    } catch {
+      setError('删除失败，请重试')
+      setConfirmDelete(false)
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
       <div
         ref={modalRef}
-        style={estimatedStyle}
+        role="dialog"
+        aria-modal="true"
+        aria-label={canEdit ? (isNew ? '新增批注' : '编辑批注') : '查看批注'}
+        style={{
+          ...estimatedStyle,
+          left: estimatedStyle.left + dragOffset.x,
+          top: estimatedStyle.top + dragOffset.y,
+        }}
         className={[
-          'absolute pointer-events-auto flex flex-col rounded-2xl overflow-hidden border tool-panel-light dark:tool-panel-dark',
+          'absolute pointer-events-auto w-[420px] max-w-[calc(100vw-32px)] flex flex-col rounded-2xl overflow-hidden border tool-panel-light dark:tool-panel-dark',
           'bg-[var(--tool-surface)] border-[var(--tool-border)]',
         ].join(' ')}
       >
-        {canEdit ? (
-          <div className="flex items-center justify-between px-5 py-4 bg-[var(--tool-surface-raised)]">
-            <div>
-              <h2 className="text-sm font-bold text-[var(--tool-text)]">
-                {isNew ? '新增批注' : '编辑批注'}
-              </h2>
-              <p className="text-xs mt-0.5 text-[var(--tool-text-subtle)]">
-                {isNew ? '为选中的元素添加说明' : `标记 #${annotation.number}`}
-              </p>
-            </div>
+        <div
+          onPointerDown={handleDragStart}
+          className={[
+            'flex items-center justify-between gap-3 px-4 py-3 bg-[var(--tool-surface-raised)] select-none touch-none',
+            isDragging ? 'cursor-grabbing' : 'cursor-move',
+          ].join(' ')}
+        >
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-bold text-[var(--tool-text)]">
+              {canEdit ? (isNew ? '新增批注' : '编辑批注') : `批注 #${annotation.number}`}
+            </h2>
+            <p className="mt-0.5 truncate text-[11px] text-[var(--tool-text-subtle)]">
+              {canEdit
+                ? (isNew ? '点击分类切换编辑，保存时一并提交' : '点击分类切换编辑，保存时一并更新')
+                : '点击分类查看对应说明'}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            {!canEdit && onEdit && (
+              <button
+                onClick={onEdit}
+                className="flex h-8 items-center gap-1 rounded-lg border border-[var(--tool-border)] px-2.5 text-xs font-semibold text-[var(--tool-brand)] tool-control hover:bg-[var(--tool-surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
+              >
+                <Pencil size={13} />
+                <span>编辑</span>
+              </button>
+            )}
             <button
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-xl tool-control text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg tool-control text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
             >
               <X size={16} />
             </button>
           </div>
-        ) : (
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl tool-control text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
-          >
-            <X size={16} />
-          </button>
-        )}
-
-        <div className="px-5 py-3 bg-[color-mix(in_srgb,var(--tool-background)_24%,transparent)]">
-          <div className="flex flex-wrap gap-1.5">
-            {tabAnnotations.map((a) => {
-              const cat = categories.find((c) => c.key === a.category)
-              if (!cat) return null
-              const isActive = a.id === annotation.id
-              return (
-                <button
-                  key={a.id}
-                  onClick={() => onSwitchAnnotation?.(a.id)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border tool-control hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
-                  style={{
-                    borderColor: cat.color,
-                    backgroundColor: isActive ? cat.color : isDark ? `${cat.color}25` : `${cat.color}12`,
-                    color: isActive ? '#ffffff' : cat.color,
-                  }}
-                >
-                  {cat.label}
-                </button>
-              )
-            })}
-            {canEdit && !isNew && unusedCategories.length > 0 && (
-              <button
-                onClick={() => {
-                  const cat = unusedCategories[0]
-                  if (cat) onAddRelatedAnnotation?.(annotation.selector || '', cat.key)
-                }}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-dashed border-[var(--tool-border)] text-[var(--tool-text-muted)] text-[11px] font-medium tool-control hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
-              >
-                <Plus size={10} />
-                新增分类
-              </button>
-            )}
-          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          <div>
-            {canEdit ? (
-              <>
-                <label className="block text-xs font-semibold mb-1.5 text-[var(--tool-text-muted)]">标题</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="例如：登录按钮交互"
-                  className={inputBase}
-                />
-              </>
-            ) : (
-              <h3 className="text-sm font-bold text-[var(--tool-text)]">{annotation.title}</h3>
-            )}
-          </div>
+        <div
+          className="grid gap-1.5 px-4 pb-3"
+          style={{ gridTemplateColumns: `repeat(${Math.max(1, tabs.length)}, minmax(0, 1fr))` }}
+        >
+          {tabs.map((tab) => {
+            const isActive = tab.key === activeCategory
+            const hasContent = (drafts[tab.key] ?? '').trim().length > 0
+            return (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveCategory(tab.key)
+                  setError(null)
+                }}
+                className="flex h-9 items-center justify-center gap-1.5 rounded-lg border px-2 text-[11px] font-semibold tool-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
+                style={{
+                  borderColor: tab.color,
+                  backgroundColor: isActive ? tab.color : isDark ? `${tab.color}25` : `${tab.color}12`,
+                  color: isActive ? '#ffffff' : tab.color,
+                }}
+              >
+                <span className="truncate">{tab.label}</span>
+                {canEdit && !isActive && hasContent && (
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: tab.color }} />
+                )}
+              </button>
+            )
+          })}
+        </div>
 
-          <div>
-            {canEdit ? (
-              <>
-                <label className="block text-xs font-semibold mb-1.5 text-[var(--tool-text-muted)]">详细说明</label>
-                <textarea
-                  value={form.content}
-                  onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                  placeholder="描述该元素的交互、业务逻辑或注意事项"
-                  rows={3}
-                  className={`${inputBase} resize-none`}
-                />
-              </>
-            ) : (
-              <p className="text-sm whitespace-pre-wrap leading-relaxed text-[var(--tool-text-muted)]">{annotation.content}</p>
-            )}
-          </div>
+        <div className="min-h-0 flex-1 px-4 pt-3">
+          {canEdit ? (
+            <textarea
+              value={activeContent}
+              onChange={(event) => {
+                const value = event.target.value
+                setDrafts((previous) => ({ ...previous, [activeCategory]: value }))
+              }}
+              placeholder={`描述该元素的${activeTab?.label ?? '批注'}…`}
+              className="h-full w-full resize-none rounded-xl border border-[var(--tool-border)] bg-[var(--tool-surface-muted)] px-3 py-2.5 text-sm leading-6 text-[var(--tool-text)] placeholder-[var(--tool-text-subtle)] outline-none tool-control focus:border-[var(--tool-focus)] focus:ring-2 focus:ring-[var(--tool-focus)]/20"
+            />
+          ) : (
+            <div className="h-full overflow-y-auto whitespace-pre-wrap text-sm leading-6 text-[var(--tool-text-muted)]">
+              {activeContent || '暂无说明'}
+            </div>
+          )}
+        </div>
 
-          {canEdit && (
-            <div>
-              <label className="block text-xs font-semibold mb-2 text-[var(--tool-text-muted)]">标记位置</label>
-              <div className="grid grid-cols-4 gap-2">
+        {canEdit && (
+          <>
+            {error && <p className="px-4 pt-2 text-xs text-red-500">{error}</p>}
+            <div className="flex items-center gap-2 px-4 pt-3">
+              <span className="whitespace-nowrap text-[11px] font-semibold text-[var(--tool-text-muted)]">标记位置</span>
+              <div className="grid flex-1 grid-cols-4 gap-1">
                 {CORNERS.map((corner) => (
                   <button
                     key={corner.key}
-                    onClick={() => setForm((f) => ({ ...f, position: corner.key }))}
+                    onClick={() => setPosition(corner.key)}
                     className={[
-                      'px-2 py-2.5 text-xs rounded-xl border tool-control font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]',
-                      form.position === corner.key
-                        ? 'tool-accent-bg text-white border-transparent shadow-sm'
+                      'h-7 rounded-md border text-[11px] font-medium tool-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]',
+                      position === corner.key
+                        ? 'tool-accent-bg border-transparent text-white'
                         : 'border-[var(--tool-border)] text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]',
                     ].join(' ')}
                   >
@@ -342,118 +414,54 @@ export default function AnnotationModal({
                 ))}
               </div>
             </div>
-          )}
 
-          {canEdit && (
-            <div>
-              <label className="block text-xs font-semibold mb-2 text-[var(--tool-text-muted)]">分类</label>
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {categories.map((cat) => (
+            <div className="flex items-center justify-between gap-2 border-t border-[var(--tool-border)] bg-[var(--tool-surface-raised)] px-4 py-3 mt-3">
+              {!isNew ? (
+                confirmDelete ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className="whitespace-nowrap text-[11px] font-semibold text-red-600">确认删除？</span>
+                    <button
+                      onClick={() => setConfirmDelete(false)}
+                      className="rounded-md px-2 py-1 text-[11px] font-medium text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
+                    >
+                      取消
+                    </button>
+                    <button
+                      onClick={handleDeleteConfirm}
+                      className="rounded-md bg-red-600 px-2.5 py-1 text-[11px] font-bold text-white transition-colors hover:bg-red-700"
+                    >
+                      删除
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    key={cat.key}
-                    onClick={() => setForm((f) => ({ ...f, category: cat.key }))}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border tool-control group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tool-focus)]"
-                    style={{
-                      borderColor: cat.color,
-                      backgroundColor: form.category === cat.key ? cat.color : isDark ? `${cat.color}20` : `${cat.color}10`,
-                      color: form.category === cat.key ? '#ffffff' : cat.color,
-                    }}
+                    onClick={() => setConfirmDelete(true)}
+                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
-                    {form.category === cat.key && <Check size={10} />}
-                    <span>{cat.label}</span>
-                    {!DEFAULT_CATEGORY_KEYS.includes(cat.key) && (
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onDeleteCategory(cat.key)
-                        }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-black/10 rounded"
-                        title="删除分类"
-                      >
-                        <X size={10} />
-                      </span>
-                    )}
+                    <Trash2 size={13} />
+                    <span>删除</span>
                   </button>
-                ))}
-              </div>
-
-              {showCategoryInput ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddCategory()
-                      if (e.key === 'Escape') {
-                        setShowCategoryInput(false)
-                        setNewCategoryName('')
-                      }
-                    }}
-                    placeholder="新分类名称"
-                    autoFocus
-                    className={inputBase}
-                  />
-                  <button
-                    onClick={handleAddCategory}
-                    className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors"
-                  >
-                    <Check size={16} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowCategoryInput(false)
-                      setNewCategoryName('')
-                    }}
-                    className="p-2 rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
+                )
               ) : (
-                <button
-                  onClick={() => setShowCategoryInput(true)}
-                  className="flex items-center gap-1 text-xs tool-accent hover:opacity-80 font-semibold transition-opacity"
-                >
-                  <Plus size={12} />
-                  新增分类
-                </button>
+                <div />
               )}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onClose}
+                  className="rounded-lg px-3 py-2 text-xs font-medium text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="rounded-lg px-3.5 py-2 text-xs font-bold text-white transition-all duration-200 tool-accent-bg hover:bg-[var(--tool-brand-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {saving ? '保存中…' : '保存'}
+                </button>
+              </div>
             </div>
-          )}
-        </div>
-
-        {canEdit && (
-          <div className="flex items-center justify-between px-5 py-4 bg-[var(--tool-surface-raised)]">
-            {!isNew ? (
-              <button
-                onClick={() => {
-                  onDelete(annotation.id)
-                  onClose()
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-              >
-                <Trash2 size={13} />
-                <span>删除</span>
-              </button>
-            ) : (
-              <div />
-            )}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-xs font-medium rounded-xl text-[var(--tool-text-muted)] transition-colors hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]"
-              >
-                取消
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 tool-accent-bg text-white hover:bg-[var(--tool-brand-hover)] shadow-sm"
-              >
-                保存到草稿
-              </button>
-            </div>
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, CircleHelp, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Settings, Sparkles, Swords, TreeDeciduous, UserRound, WalletCards } from 'lucide-react'
 import { DialogPanel, NotificationToast, RightDrawer, WindowsClientFrame, WindowsSidebar, WindowsTitleBar } from '@/components/WindowsClient'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
+import { registerOverlayReveal } from '@/lib/overlayReveal'
 import { playerProfile, type PlayerProfile } from './data/accountMockData'
 import { useAccountLogic } from './hooks/useAccountLogic'
 import { BeanExchangePanel, BeanWithdrawPanel, CheckoutPage, OrderDetailPanel, OrdersPage, PersonalCenterPage, WalletLedgerPanel, WalletPage } from './pages/AccountPages'
@@ -229,6 +230,14 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     return { id, name: friend?.name ?? '未知用户', initials: friend?.initials ?? '用', profileId: friend?.profileId ?? id, kind: friend?.companionId ? '陪玩' : '玩家' }
   }), [social.blockedProfileIds])
   const match = useMatchLogic()
+  // 批注定位：从工具层「标注说明」点击批注时，恢复到标注当时的一键匹配浮层状态
+  useEffect(() => {
+    const unregister = registerOverlayReveal('quick-match', () => {
+      setIsMatching(false)
+      setMatchPanelOpen(true)
+    }, { hints: ['match-panel__form'] })
+    return unregister
+  }, [])
   const selectedOrder = account.orders.find((order) => order.id === selectedOrderId) ?? null
   const orderService = account.findOrderService(navigation.companionId, navigation.serviceId)
   const selectedPremiumCard = premiumCards.find((card) => card.id === selectedPremiumCardId && account.ownedPremiumCardIds.includes(card.id)) ?? null
