@@ -1,5 +1,6 @@
 import defaultAnnotations from '../src/resources/annotations.json'
 import defaultMenuTree from '../tools/config/menu-tree.json'
+import { mergeMenuTreeWithDefaults } from '../tools/lib/menuTree'
 
 const ANNOTATIONS_KEY = 'annotations'
 const MENU_TREE_KEY = 'tool-menu-tree'
@@ -109,7 +110,7 @@ async function handleMenuTree(request: Request, env: WorkerEnv): Promise<Respons
     const stored = await env.ANNOTATIONS_KV.get(MENU_TREE_KEY, 'json')
     if (stored === null) return jsonResponse({ tree: defaultMenuTree })
     if (!isMenuTree(stored)) return jsonResponse({ error: 'Stored menu tree is invalid' }, 500)
-    return jsonResponse({ tree: stored })
+    return jsonResponse({ tree: mergeMenuTreeWithDefaults(stored, defaultMenuTree as MenuTree) })
   }
 
   if (request.method === 'POST') {
@@ -122,7 +123,8 @@ async function handleMenuTree(request: Request, env: WorkerEnv): Promise<Respons
     if (!isRecord(body) || !isMenuTree(body.tree)) {
       return jsonResponse({ error: 'Request body must contain a valid menu tree' }, 400)
     }
-    await env.ANNOTATIONS_KV.put(MENU_TREE_KEY, JSON.stringify(body.tree))
+    const tree = mergeMenuTreeWithDefaults(body.tree, defaultMenuTree as MenuTree)
+    await env.ANNOTATIONS_KV.put(MENU_TREE_KEY, JSON.stringify(tree))
     return jsonResponse({ success: true })
   }
 

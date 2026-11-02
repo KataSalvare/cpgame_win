@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import fs from 'fs'
 import { getBuildInfo } from './scripts/build-info.mjs'
+import { mergeMenuTreeWithDefaults } from './tools/lib/menuTree'
 
 const ANNOTATIONS_FILE = path.resolve(__dirname, 'src/resources/annotations.json')
 const MENU_TREE_FILE = path.resolve(__dirname, 'tools/config/menu-tree.json')
@@ -37,7 +38,8 @@ function menuTreeApiPlugin() {
       server.middlewares.use('/api/menu-tree', (req: IncomingMessage, res: ServerResponse) => {
         if (req.method === 'GET') {
           try {
-            const tree = fs.existsSync(MENU_TREE_FILE) ? JSON.parse(fs.readFileSync(MENU_TREE_FILE, 'utf8')) : null
+            const storedTree = fs.existsSync(MENU_TREE_FILE) ? JSON.parse(fs.readFileSync(MENU_TREE_FILE, 'utf8')) : null
+            const tree = storedTree ? mergeMenuTreeWithDefaults(storedTree) : null
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify({ tree }))
           } catch (error) {
@@ -71,7 +73,8 @@ function menuTreeApiPlugin() {
                 return
               }
               fs.mkdirSync(path.dirname(MENU_TREE_FILE), { recursive: true })
-              fs.writeFileSync(MENU_TREE_FILE, JSON.stringify(payload.tree, null, 2), 'utf8')
+              const tree = mergeMenuTreeWithDefaults(payload.tree)
+              fs.writeFileSync(MENU_TREE_FILE, JSON.stringify(tree, null, 2), 'utf8')
               res.setHeader('Content-Type', 'application/json; charset=utf-8')
               res.end(JSON.stringify({ success: true }))
             } catch (error) {

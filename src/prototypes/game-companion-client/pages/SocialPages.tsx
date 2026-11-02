@@ -547,7 +547,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [removeBlockedMember, setRemoveBlockedMember] = useState<{ channelId: string; friend: typeof socialFriends[number] } | null>(null)
   const [deleteChannelId, setDeleteChannelId] = useState<string | null>(null)
   const [memberAction, setMemberAction] = useState<{ type: VoiceMemberAction; member: VoiceMember } | null>(null)
-  const [memberContextMenu, setMemberContextMenu] = useState<{ member: VoiceMember; x: number; y: number } | null>(null)
+  const [memberContextMenu, setMemberContextMenu] = useState<{ member: VoiceMember; roomId: string; channelId: string; x: number; y: number } | null>(null)
   const [singleMoveDialog, setSingleMoveDialog] = useState<{ member: VoiceMember; roomId: string; channelId: string } | null>(null)
   const [singleMoveTargetRoomId, setSingleMoveTargetRoomId] = useState('')
   const [singleMoveTargetChannelId, setSingleMoveTargetChannelId] = useState('')
@@ -969,7 +969,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     setMemberContextMenu(null)
   }
 
-  const openMemberContextMenu = (event: ReactMouseEvent, member: VoiceMember) => {
+  const openMemberContextMenu = (event: ReactMouseEvent, member: VoiceMember, sourceRoomId = room?.id, sourceChannelId = channel?.id) => {
     event.preventDefault()
     event.stopPropagation()
     if (userPerspective) return
@@ -977,7 +977,8 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     if (!root) return
     const bounds = root.getBoundingClientRect()
     const scale = bounds.width / root.clientWidth || 1
-    setMemberContextMenu({ member, x: (event.clientX - bounds.left) / scale, y: (event.clientY - bounds.top) / scale })
+    if (!sourceRoomId || !sourceChannelId) return
+    setMemberContextMenu({ member, roomId: sourceRoomId, channelId: sourceChannelId, x: (event.clientX - bounds.left) / scale, y: (event.clientY - bounds.top) / scale })
   }
 
   const openSingleMoveDialogFor = (member: VoiceMember, sourceRoomId: string, sourceChannelId: string) => {
@@ -986,10 +987,8 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     setSingleMoveTargetChannelId('')
   }
   const openSingleMoveDialog = () => {
-    if (!memberContextMenu || !room) return
-    const sourceChannel = room.channels.find((item) => item.members.some((member) => member.id === memberContextMenu.member.id))
-    if (!sourceChannel) return
-    openSingleMoveDialogFor(memberContextMenu.member, room.id, sourceChannel.id)
+    if (!memberContextMenu) return
+    openSingleMoveDialogFor(memberContextMenu.member, memberContextMenu.roomId, memberContextMenu.channelId)
     setMemberContextMenu(null)
   }
   const confirmSingleMove = () => {
@@ -1120,7 +1119,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
                 <button type="button" className="voice-subchannel__action" aria-label={`编辑${subchannel.name}`} title="编辑房间" onClick={() => openChannelDialog('edit', subchannel.id, item.id)}><Pencil size={13} /></button>
               </div>}
             </div>
-            {!collapsedChannelIds.includes(subchannel.id) && <div className="voice-channel-members">{subchannel.members.map((member) => <span className={`voice-channel-member${member.id === currentSocialUser.id ? ' is-self' : ''}`} data-voice-member-id={member.id} tabIndex={member.id === currentSocialUser.id ? -1 : undefined} key={member.id} draggable={room?.id === item.id && canManage && member.id !== currentSocialUser.id} onDragStart={() => logic.setDraggedMemberId(member.id)} onDragEnd={() => logic.setDraggedMemberId(null)} title={canManage ? '拖动到其他房间' : member.name}><button type="button" className="voice-channel-member__avatar" aria-label={`查看${member.name}陪玩详情`} onClick={() => openMemberProfile(member.id)}><AvatarMark initials={member.initials} size="sm" /></button><UserNameWithLevel name={member.name} identityId={member.id} />{member.muted && <MicOff size={12} />}</span>)}</div>}
+            {!collapsedChannelIds.includes(subchannel.id) && <div className="voice-channel-members">{subchannel.members.map((member) => <span className={`voice-channel-member${member.id === currentSocialUser.id ? ' is-self' : ''}`} data-voice-member-id={member.id} tabIndex={member.id === currentSocialUser.id ? -1 : undefined} key={member.id} draggable={room?.id === item.id && canManage && member.id !== currentSocialUser.id} onDragStart={() => logic.setDraggedMemberId(member.id)} onDragEnd={() => logic.setDraggedMemberId(null)} onContextMenu={(event) => openMemberContextMenu(event, member, item.id, subchannel.id)} title={canManage ? '拖动到其他房间' : member.name}><button type="button" className="voice-channel-member__avatar" aria-label={`查看${member.name}陪玩详情`} onClick={() => openMemberProfile(member.id)} onContextMenu={(event) => openMemberContextMenu(event, member, item.id, subchannel.id)}><AvatarMark initials={member.initials} size="sm" /></button><UserNameWithLevel name={member.name} identityId={member.id} />{member.muted && <MicOff size={12} />}</span>)}</div>}
           </div>)}
         </div>}
         </section>)}
@@ -1282,7 +1281,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id} onClick={() => { setMemberAction({ type: 'block', member: memberContextMenu.member }); setMemberContextMenu(null) }}><Flag size={15} />拉黑</button>
       {isOwner && memberContextMenu.member.id !== currentSocialUser.id && <button type="button" role="menuitem" onClick={() => { setMemberAction({ type: 'role', member: memberContextMenu.member }); setMemberContextMenu(null) }}><Users size={15} />{memberContextMenu.member.role === 'admin' ? '撤销管理员' : '设为管理员'}</button>}
       <div className="voice-channel-context-separator" />
-      <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id || !logic.voiceRooms.some((voiceRoom) => voiceRoom.channels.some((target) => voiceRoom.id !== room?.id || target.id !== channel?.id))} onClick={openSingleMoveDialog}>移动至其他房间<ChevronRight size={14} /></button>
+      <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id || !logic.voiceRooms.some((voiceRoom) => voiceRoom.channels.some((target) => voiceRoom.id !== memberContextMenu.roomId || target.id !== memberContextMenu.channelId))} onClick={openSingleMoveDialog}>移动至其他房间<ChevronRight size={14} /></button>
     </div>}
 
     {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' && !channelDialogIsUngrouped ? `添加到「${channelDialogRoom?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || (channelMessageFrequency.trim() !== '' && (!Number.isSafeInteger(Number(channelMessageFrequency)) || Number(channelMessageFrequency) < 1)) || !Number.isSafeInteger(Number(channelMicQueueDuration)) || Number(channelMicQueueDuration) < 1 || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > channelCapacityLimit}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>

@@ -49,7 +49,7 @@ const mergeMissingDefaults = (savedNodes: MenuNode[], defaultNodes: MenuNode[], 
   return merged
 }
 
-const restoreMenuTree = (saved: unknown, idsByCategory: Record<string, string[]>): MenuTree => {
+const restoreMenuTree = (saved: unknown, idsByCategory: Record<string, string[]>, configuredTree: MenuTree = defaultMenuTree as MenuTree): MenuTree => {
   return Object.fromEntries(Object.entries(idsByCategory).map(([category, ids]) => {
     const allowed = new Set(ids)
     const savedNodes = saved && typeof saved === 'object'
@@ -58,10 +58,20 @@ const restoreMenuTree = (saved: unknown, idsByCategory: Record<string, string[]>
     const seen = new Set<string>()
     const collect = (nodes: MenuNode[]) => nodes.forEach(node => { seen.add(node.id); collect(node.children) })
     collect(savedNodes)
-    const configured = (defaultMenuTree as MenuTree)[category] ?? makeFlatTree(ids)
+    const configured = configuredTree[category] ?? makeFlatTree(ids)
     const defaultNodes = sanitizeNodes(configured, allowed)
     return [category, mergeMissingDefaults(savedNodes, defaultNodes, seen)]
   }))
+}
+
+export const mergeMenuTreeWithDefaults = (saved: unknown, defaults: MenuTree = defaultMenuTree as MenuTree): MenuTree => {
+  const idsByCategory = Object.fromEntries(Object.entries(defaults).map(([category, nodes]) => {
+    const ids: string[] = []
+    const collect = (items: MenuNode[]) => items.forEach(node => { ids.push(node.id); collect(node.children) })
+    collect(nodes)
+    return [category, ids]
+  }))
+  return restoreMenuTree(saved, idsByCategory, defaults)
 }
 
 const readSavedMenuTree = (): unknown => {
@@ -79,15 +89,19 @@ export const loadMenuTree = (idsByCategory: Record<string, string[]>): MenuTree 
 
 export const loadMenuTreeFromFile = async (idsByCategory: Record<string, string[]>): Promise<MenuTree> => {
   const savedLocally = readSavedMenuTree()
-  if (savedLocally) return restoreMenuTree(savedLocally, idsByCategory)
-
-  const response = await fetch(FILE_API)
-  if (!response.ok) throw new Error(`菜单文件读取失败：${response.status}`)
-  const payload = await response.json() as { tree?: unknown }
-  if (!Object.hasOwn(payload, 'tree')) throw new Error('菜单文件接口未返回有效数据')
-  const tree = payload.tree ? restoreMenuTree(payload.tree, idsByCategory) : loadMenuTree(idsByCategory)
-  if (!payload.tree) await saveMenuTree(tree)
-  return tree
+  try {
+    const response = await fetch(FILE_API)
+    if (!response.ok) throw new Error(`菜单文件读取失败：${response.status}`)
+    const payload = await response.json() as { tree?: unknown }
+    if (!Object.hasOwn(payload, 'tree')) throw new Error('菜单文件接口未返回有效数据')
+    const tree = payload.tree ? restoreMenuTree(payload.tree, idsByCategory) : restoreMenuTree(savedLocally, idsByCategory)
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tree)) } catch { /* The API remains the source of truth. */ }
+    if (!payload.tree || JSON.stringify(tree) !== JSON.stringify(payload.tree)) await saveMenuTree(tree)
+    return tree
+  } catch (error) {
+    if (savedLocally) return restoreMenuTree(savedLocally, idsByCategory)
+    throw error
+  }
 }
 
 let saveQueue: Promise<void> = Promise.resolve()
