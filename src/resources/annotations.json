@@ -50,6 +50,54 @@
       "createdAt": 1793544076806,
       "overlayId": "quick-match-matching",
       "route": "page=home&club=club-001"
+    },
+    {
+      "id": "anno-1793608158027-interaction",
+      "pagePath": "/game-companion-orders",
+      "number": 1,
+      "title": "",
+      "content": "作为陪玩身份，接到的订单。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.account-page > nav.personal-center-tabs.orders-role-tabs > button.personal-center-tab:nth-of-type(2)",
+      "position": "top-left",
+      "createdAt": 1793608158027,
+      "route": "page=orders&club=club-001&companion=companion-001"
+    },
+    {
+      "id": "anno-1793608169318-interaction",
+      "pagePath": "/game-companion-orders",
+      "number": 2,
+      "title": "",
+      "content": "作为老板身份，给陪玩下的订单。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.account-page > nav.personal-center-tabs.orders-role-tabs > button.personal-center-tab.is-active:nth-of-type(1)",
+      "position": "top-left",
+      "createdAt": 1793608169318,
+      "route": "page=orders&club=club-001&companion=companion-001"
+    },
+    {
+      "id": "anno-1793608187501-interaction",
+      "pagePath": "/game-companion-orders",
+      "number": 3,
+      "title": "",
+      "content": "作为老板身份，通过陪玩入驻下的单。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.account-page > nav.personal-center-tabs.orders-role-tabs > button.personal-center-tab:nth-of-type(3)",
+      "position": "top-left",
+      "createdAt": 1793608187501,
+      "route": "page=orders&club=club-001&companion=companion-001"
+    },
+    {
+      "id": "anno-1793608283202-interaction",
+      "pagePath": "/game-companion-orders",
+      "number": 4,
+      "title": "",
+      "content": "作为陪玩身份，获得的陪玩入驻考核单。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.account-page > nav.personal-center-tabs.orders-role-tabs > button.personal-center-tab:nth-of-type(4)",
+      "position": "top-left",
+      "createdAt": 1793608283202,
+      "route": "page=orders&club=club-001&companion=companion-001"
     }
   ],
   "categories": [

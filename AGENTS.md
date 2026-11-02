@@ -28,6 +28,8 @@
 路由分类：frontend / admin（仅业务原型需要）
 ```
 
+侧栏中的每个原型预览路由必须关联一份独立 PRD，文档放在 `src/docs/page-prds/`，以去掉首个 `/` 并将其余 `/` 替换为 `-` 后的路由命名（如 `game-companion-client.md`）。页面配置维护该关联；PRD 内容由用户编辑，不得从 mock 数据或页面实现自动补写需求。原型 `spec.md` 仍按原型目录维护，用于记录实现规格，不替代页面级 PRD。
+
 工具层中的 `tools/hooks/` 是 React Hook；仓库级 Git Hook 位于 `.githooks/`，两者不可混用。
 
 ## 2. 开始任务时的规则路由

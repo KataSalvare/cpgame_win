@@ -11,6 +11,7 @@ export interface PageItem {
   path: string
   label: string
   dirName: string
+  prdPath: string
 }
 
 interface DocDrawerProps {
@@ -29,12 +30,8 @@ interface DocDrawerProps {
   onSelectAnnotation: (id: string, clientX: number, clientY: number) => void
 }
 
-const specGlob = import.meta.glob('../../src/prototypes/*/spec.md', { query: '?raw', import: 'default' })
+const prdGlob = import.meta.glob('../../src/docs/page-prds/*.md', { query: '?raw', import: 'default' })
 const EDIT_SESSION_KEY = 'prototype-spec-edit-verified'
-
-function getSpecKey(dirName: string): string {
-  return `../../src/prototypes/${dirName}/spec.md`
-}
 
 export default function DocDrawer({
   isOpen,
@@ -72,19 +69,11 @@ export default function DocDrawer({
     }
     setDocLoading(true)
     setDocContent(null)
-    const key = getSpecKey(currentPage.dirName)
-    const loader = specGlob[key]
+    const loader = prdGlob[currentPage.prdPath]
     if (loader) {
       try {
         const content = await loader() as string
-        let saved: { content?: string | null } | null = null
-        try {
-          const response = await fetch(`/api/spec/${encodeURIComponent(currentPage.dirName)}`)
-          if (response.ok) saved = await response.json() as { content?: string | null }
-        } catch {
-          // 静态预览环境没有写入 API 时，仍可展示打包的原始文档。
-        }
-        setDocContent(saved?.content ?? content)
+        setDocContent(content)
       } catch {
         setDocContent('无法加载文档。')
       }

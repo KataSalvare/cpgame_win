@@ -23,9 +23,9 @@ export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, label =
         const game = games.find(g => g.id === service?.gameId)
         const displayedStatus = o.earlyEndRequested ? '待陪玩确认' : o.status
         return <article className={`order-item workbench-order-table-row${w.selectedOrder?.id === o.id ? ' is-selected' : ''}`} key={o.id}>
-          <button type="button" className="order-item__main" aria-label={`查看订单 ${o.id}，${o.player}，所属俱乐部 ${o.clubName}，${displayedStatus}`} onClick={() => w.setSelectedOrderId(o.id)}>
+          <button type="button" className="order-item__main" aria-label={`查看订单 ${o.id}，${o.player}，${displayedStatus}`} onClick={() => w.setSelectedOrderId(o.id)}>
             <span className="order-item__info"><strong>{o.id}</strong><small>{o.createdAt}</small></span>
-            <span className="order-item__companion"><AvatarMark initials={o.playerInitials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={o.player} identityId={o.player} /></strong><small>{o.clubName}</small></span></span>
+            <span className="order-item__companion"><AvatarMark initials={o.playerInitials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={o.player} identityId={o.player} /></strong></span></span>
             <span className="order-item__service"><strong>{game?.name} · {service?.playName}</strong><small>{service?.levelName} · {service?.name}</small></span>
             <span className="order-item__duration">{o.duration} {o.durationUnit}</span>
             <span className="order-item__price"><strong>{o.unitPrice} 钻石 / {o.durationUnit}</strong><small>合计 {o.amount} 钻石</small></span>

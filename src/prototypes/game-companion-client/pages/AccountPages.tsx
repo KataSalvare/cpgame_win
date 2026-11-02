@@ -264,7 +264,7 @@ function ExamOrderRow({ order, role, selected, onSelect, onPay, onCancel, onSubm
   return <article className={`order-item exam-order-row${selected ? ' is-selected' : ''}`}>
     <button type="button" className="exam-order-row__main" aria-label={`查看考核订单 ${order.id}，${order.person}，${order.status}`} onClick={onSelect}>
       <span className="order-item__info"><strong>{order.id}</strong><small>{order.createdAt}</small></span>
-      <span className="order-item__companion"><AvatarMark initials={order.initials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={order.person} identityId={order.personId} /></strong><small>{order.clubName}</small></span></span>
+      <span className="order-item__companion"><AvatarMark initials={order.initials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={order.person} identityId={order.personId} /></strong>{role === '考生订单' && <small>{order.clubName}</small>}</span></span>
       <span className="order-item__service"><strong>{order.game} · {order.play}</strong><small>{order.level} · {order.service}</small></span>
       <span className="order-item__price"><strong>500 钻石</strong></span>
       <span className="workbench-order-table-row__status"><span className={`order-item__status order-item__status--${statusClass}`}>{order.status}</span></span>

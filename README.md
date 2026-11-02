@@ -39,7 +39,7 @@ npm run dev
 | 消息 | `/game-companion-messages` |
 | 语音房 | `/game-companion-voice-room` |
 
-其他页面入口及内部状态见 [页面配置](tools/config/pages.ts) 和客户端 SPEC。客户端默认按 PC 画布预览，工作台等比缩放画布以适应可用空间，不改变布局尺寸；支持移动端预览的工作台能力仍保留。
+其他页面入口及内部状态见 [页面配置](tools/config/pages.ts) 和客户端 SPEC。每个预览路由在 `src/docs/page-prds/` 下关联独立 PRD，PRD 内容由产品负责人维护；原型 `spec.md` 继续记录原型实现规格。客户端默认按 PC 画布预览，工作台等比缩放画布以适应可用空间，不改变布局尺寸；支持移动端预览的工作台能力仍保留。
 
 ## 项目结构
 

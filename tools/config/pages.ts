@@ -12,6 +12,7 @@ export interface PageStateOption {
 export interface PageItem {
   path: string
   label: string
+  prdPath: string
   entryView?: string
   defaultHash?: string
   component: React.ComponentType<PrototypePreviewProps>
@@ -129,6 +130,7 @@ export const generatePages = (): PageItem[] => {
       pageConfigs.forEach((pageConfig) => pages.push({
         path: pageConfig.path,
         label: pageConfig.label,
+        prdPath: `../../src/docs/page-prds/${pageConfig.path.replace(/^\//, '').replace(/\//g, '-')}.md`,
         entryView: pageConfig.entryView,
         defaultHash: pageConfig.defaultHash,
         component: getLazyComponent(loader),
@@ -148,6 +150,7 @@ export const generatePages = (): PageItem[] => {
         pages.push({
           path: config.path,
           label: config.label,
+          prdPath: `../../src/docs/page-prds/${config.path.replace(/^\//, '').replace(/\//g, '-')}.md`,
           component: getLazyComponent(loader),
           category: 'admin',
           dirName,

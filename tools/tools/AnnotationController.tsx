@@ -57,7 +57,7 @@ export function useAnnotationController({
     onSelectAnnotation: (id: string) => void
   }
 } {
-  const [showAnnotations, setShowAnnotations] = useState(false)
+  const [showAnnotations, setShowAnnotations] = useState(true)
   const [annotationEditMode, setAnnotationEditMode] = useState(false)
   const [annotationSelecting, setAnnotationSelecting] = useState(false)
   const [annotationModalOpen, setAnnotationModalOpen] = useState(false)
