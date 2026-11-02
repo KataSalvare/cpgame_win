@@ -7,12 +7,13 @@ function ServiceSwitch({ label, checked, disabled = false, onToggle }: { label: 
   return <button type="button" role="switch" aria-label={label} aria-checked={checked} disabled={disabled} className="workbench-service-switch" onClick={onToggle}><span /></button>
 }
 
-export function WorkbenchServicesPanel({ logic: w }: { logic: WorkbenchLogic }) {
-  const [applicationOpen, setApplicationOpen] = useState(false)
-  const [applicationGameId, setApplicationGameId] = useState('')
+export function WorkbenchServicesPanel({ logic: w, initialApplicationOpen = false, onApplicationClose }: { logic: WorkbenchLogic; initialApplicationOpen?: boolean; onApplicationClose?: () => void }) {
+  const [applicationOpen, setApplicationOpen] = useState(initialApplicationOpen)
+  const [applicationGameId, setApplicationGameId] = useState(() => w.serviceApplicationOptions[0]?.gameId ?? '')
   const [applicationPlay, setApplicationPlay] = useState('')
   const [applicationLevel, setApplicationLevel] = useState('')
   const [applicationServiceId, setApplicationServiceId] = useState('')
+  const closeApplication = () => { setApplicationOpen(false); onApplicationClose?.() }
   const applicationGames = [...new Set(w.serviceApplicationOptions.map(service => service.gameId))].map(id => games.find(item => item.id === id)).filter((item): item is NonNullable<typeof item> => Boolean(item))
   const gameOptions = w.serviceApplicationOptions.filter(service => service.gameId === applicationGameId)
   const plays = [...new Set(gameOptions.map(service => service.playName))]
@@ -58,11 +59,11 @@ export function WorkbenchServicesPanel({ logic: w }: { logic: WorkbenchLogic }) 
         })}
       </section>)}
     </div>
-    {applicationOpen && <div className="workbench-overlay" data-overlay="workbench-service-application" onClick={event => { if (event.target === event.currentTarget) setApplicationOpen(false) }}><section className="client-card workbench-dialog workbench-service-application-dialog" role="dialog" aria-modal="true" aria-labelledby="workbench-service-application-title"><header><h2 id="workbench-service-application-title">申请服务</h2><button type="button" className="workbench-dialog-close" aria-label="关闭" onClick={() => setApplicationOpen(false)}><X size={20} /></button></header><p>选择你要申请的游戏服务，提交后等待后台审核。</p><div className="workbench-service-cascade" aria-label="选择游戏、玩法、等级和服务">
+    {applicationOpen && <div className="workbench-overlay" data-overlay="workbench-service-application" onClick={event => { if (event.target === event.currentTarget) closeApplication() }}><section className="client-card workbench-dialog workbench-service-application-dialog" role="dialog" aria-modal="true" aria-labelledby="workbench-service-application-title"><header><h2 id="workbench-service-application-title">申请服务</h2><button type="button" className="workbench-dialog-close" aria-label="关闭" onClick={closeApplication}><X size={20} /></button></header><p>选择你要申请的游戏服务，提交后等待后台审核。</p><div className="workbench-service-cascade" aria-label="选择游戏、玩法、等级和服务">
       <section><h3>游戏</h3>{applicationGames.map(item => <button type="button" className={applicationGameId === item.id ? 'is-selected' : ''} key={item.id} onClick={() => { setApplicationGameId(item.id); setApplicationPlay(''); setApplicationLevel(''); setApplicationServiceId('') }}>{item.name}<ChevronRight size={14} /></button>)}</section>
       <section><h3>玩法</h3>{plays.map(name => <button type="button" className={applicationPlay === name ? 'is-selected' : ''} key={name} onClick={() => { setApplicationPlay(name); setApplicationLevel(''); setApplicationServiceId('') }}>{name}<ChevronRight size={14} /></button>)}</section>
       <section><h3>等级</h3>{levels.map(name => <button type="button" className={applicationLevel === name ? 'is-selected' : ''} key={name} onClick={() => { setApplicationLevel(name); setApplicationServiceId('') }}>{name}<ChevronRight size={14} /></button>)}</section>
       <section><h3>服务</h3>{availableServices.map(option => <button type="button" className={applicationServiceId === option.id ? 'is-selected' : ''} key={option.id} onClick={() => chooseService(option.id)}>{option.name}</button>)}</section>
-    </div><footer><button type="button" className="client-button client-button--secondary" onClick={() => setApplicationOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!applicationServiceId} onClick={() => { if (w.applyService(applicationServiceId)) setApplicationOpen(false) }}>提交申请</button></footer></section></div>}
+    </div><footer><button type="button" className="client-button client-button--secondary" onClick={closeApplication}>取消</button><button type="button" className="client-button client-button--primary" disabled={!applicationServiceId} onClick={() => { if (w.applyService(applicationServiceId)) closeApplication() }}>提交申请</button></footer></section></div>}
   </section>
 }

@@ -12,6 +12,10 @@
       "id": "/game-companion-quick-match",
       "children": [
         {
+          "id": "/game-companion-match-in-progress",
+          "children": []
+        },
+        {
           "id": "/game-companion-checkout",
           "children": []
         }
@@ -57,13 +61,42 @@
     },
     {
       "id": "/game-companion-messages",
-      "children": []
+      "children": [
+        {
+          "id": "/game-companion-user-support",
+          "children": []
+        },
+        {
+          "id": "/game-companion-user-messages",
+          "children": []
+        },
+        {
+          "id": "/game-companion-support-messages",
+          "children": []
+        },
+        {
+          "id": "/game-companion-companion-messages",
+          "children": []
+        },
+        {
+          "id": "/game-companion-group-owner-messages",
+          "children": []
+        },
+        {
+          "id": "/game-companion-group-user-messages",
+          "children": []
+        }
+      ]
     },
     {
       "id": "/game-companion-voice-room",
       "children": [
         {
           "id": "/game-companion-club-voice-room",
+          "children": []
+        },
+        {
+          "id": "/game-companion-room-minimized",
           "children": []
         }
       ]
@@ -125,11 +158,41 @@
     },
     {
       "id": "/game-companion-orders",
-      "children": []
+      "children": [
+        {
+          "id": "/game-companion-orders-receiving",
+          "children": []
+        },
+        {
+          "id": "/game-companion-orders-exam-candidate",
+          "children": []
+        },
+        {
+          "id": "/game-companion-orders-exam-proctor",
+          "children": []
+        }
+      ]
     },
     {
       "id": "/game-companion-workbench",
-      "children": []
+      "children": [
+        {
+          "id": "/game-companion-workbench-matches",
+          "children": []
+        },
+        {
+          "id": "/game-companion-workbench-orders",
+          "children": []
+        },
+        {
+          "id": "/game-companion-workbench-services",
+          "children": []
+        },
+        {
+          "id": "/game-companion-workbench-apply-service",
+          "children": []
+        }
+      ]
     },
     {
       "id": "/game-companion-system-settings",

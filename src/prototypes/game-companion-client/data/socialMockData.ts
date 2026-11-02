@@ -160,6 +160,24 @@ export const initialConversations: SocialConversation[] = [
       { id: 'kata-4', senderId: supportIdentity.id, senderName: supportIdentity.name, initials: supportIdentity.initials, time: '15:16', ...supportReviewSample },
     ],
   },
+  {
+    id: 'direct-user-message-view', kind: 'direct', title: '晚风', initials: '风', members: ['friend-1'], unread: 0,
+    messages: [
+      { id: 'user-message-view-1', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '17:36', kind: 'text', content: '刚刚那局配合得不错，还要继续吗？' },
+      { id: 'user-message-view-2', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '17:37', kind: 'text', content: '继续吧，我再开一局。' },
+      { id: 'user-message-view-3', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '17:38', kind: 'emoji', content: '好呀，等你邀请。' },
+    ],
+  },
+  {
+    id: 'direct-companion-view', kind: 'direct', title: '林小满', initials: '满', members: ['player'], unread: 0,
+    self: { id: 'companion-001', name: '林间晚风', initials: '风' },
+    messages: [
+      { id: 'companion-view-1', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '16:20', kind: 'text', content: '你好，想约一局排位，今晚有时间吗？' },
+      { id: 'companion-view-2', senderId: 'companion-001', senderName: '林间晚风', initials: '风', time: '16:21', kind: 'text', content: '有的，可以先告诉我你想玩的模式。' },
+      { id: 'companion-view-3', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '16:22', kind: 'text', content: '双排上分，想打两小时。' },
+      { id: 'companion-view-4', senderId: 'companion-001', senderName: '林间晚风', initials: '风', time: '16:23', kind: 'text', content: '好的，我先发服务给你确认。' },
+    ],
+  },
   { id: 'direct-friend-1', kind: 'direct', title: '聊天枚举', initials: '风', members: ['friend-1'], unread: 2, messages: seedMessages },
   {
     id: 'group-squad', kind: 'group', title: '周末五排小队', initials: '五', members: ['friend-1', 'friend-2', 'friend-3', 'friend-5'], unread: 1, ownerId: 'player', adminIds: ['friend-1'], joinApprovalRequired: true,

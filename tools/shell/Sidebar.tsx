@@ -75,7 +75,7 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
   const renderNodes = (nodes: MenuNode[], depth = 0): React.ReactNode => nodes.map((node) => {
     const page = pagesById.get(node.id) ?? pages.find(item => item.path === node.id)
     if (!page) return null
-    const PageIcon = page.entryView === 'global-search' ? Search : Icon
+    const PageIcon = page.entryView === 'global-search' ? Search : page.entryView === 'voice-room-minimized' ? Minimize2 : Icon
     const label = node.label || page.label
     const hasChildren = node.children.length > 0
     const isOpen = expanded.has(node.id)

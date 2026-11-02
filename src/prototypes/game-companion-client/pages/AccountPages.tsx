@@ -184,6 +184,7 @@ export function WalletLedgerPanel({ entries }: { entries: readonly WalletTransac
 }
 
 type OrdersPageProps = StateProps & {
+  initialTab?: '我的下单' | '我的接单' | '考生订单' | '考官订单'
   orders: ClientOrder[]
   selectedOrderId: string | null
   diamondBalance: number
@@ -206,8 +207,8 @@ type OrdersPageProps = StateProps & {
 }
 const orderStatuses: OrderStatus[] = ['待接单', '待服务', '服务中', '待用户确认', '已完成', '已取消', '退款']
 
-export function OrdersPage({ pageState, onRetry, orders, selectedOrderId, diamondBalance, onSelectOrder, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onPauseOrder, onRenewOrder, onOpenRecharge, workbench, examCandidateOrders, examProctorOrders, selectedExamOrderId, onSelectExamOrder, onCancelExamOrder, onSubmitExamMaterials, onPayExamOrder }: OrdersPageProps) {
-  const [tab, setTab] = useState<'我的下单' | '我的接单' | '考生订单' | '考官订单'>('我的下单')
+export function OrdersPage({ pageState, onRetry, initialTab = '我的下单', orders, selectedOrderId, diamondBalance, onSelectOrder, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onPauseOrder, onRenewOrder, onOpenRecharge, workbench, examCandidateOrders, examProctorOrders, selectedExamOrderId, onSelectExamOrder, onCancelExamOrder, onSubmitExamMaterials, onPayExamOrder }: OrdersPageProps) {
+  const [tab, setTab] = useState<'我的下单' | '我的接单' | '考生订单' | '考官订单'>(initialTab)
   const [filter, setFilter] = useState<'全部' | OrderStatus>('全部')
   const [workbenchFilter, setWorkbenchFilter] = useState('全部')
   const [examFilters, setExamFilters] = useState<Record<'考生订单' | '考官订单', '全部' | ExamOrderStatus>>({ 考生订单: '全部', 考官订单: '全部' })

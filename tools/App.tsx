@@ -15,6 +15,10 @@ import { useToolEntrance } from './hooks/useToolEntrance'
 import { DESKTOP_PREVIEW_HEIGHT, DESKTOP_PREVIEW_WIDTH, usePreviewScale } from './hooks/usePreviewScale'
 import { UpdateNotice } from './components/UpdateNotice'
 
+const messagePerspectiveEntryViews = ['im-user-support-view', 'im-user-message-view', 'im-support-view', 'im-companion-view', 'im-group-owner-view', 'im-group-user-view'] as const
+const orderTabEntryViews = ['orders-receiving', 'orders-exam-candidate', 'orders-exam-proctor'] as const
+const workbenchEntryViews = ['workbench-matches', 'workbench-orders', 'workbench-services', 'workbench-apply-service'] as const
+
 const DEFAULT_PROJECT_NAME = '项目原型预览'
 type Toast = { message: string; type: 'success' | 'error' }
 
@@ -53,7 +57,14 @@ function AppContent() {
       const hashTool = params.get('tool')
       const entryView = params.get('support') === 'club' ? 'club-support'
         : params.get('support') === 'platform' ? 'platform-support'
-          : hashTool && ['help-center', 'screen-recording', 'client-notifications', 'close-app', 'quick-panel', 'quick-match', 'identity-verification', 'global-search'].includes(hashTool) ? hashTool
+          : hashPage === 'workbench' && params.get('workbenchTab') === 'matches' ? 'workbench-matches'
+            : hashPage === 'workbench' && params.get('workbenchTab') === 'orders' ? 'workbench-orders'
+              : hashPage === 'workbench' && params.get('workbenchTab') === 'services' && params.get('applyService') === '1' ? 'workbench-apply-service'
+                : hashPage === 'workbench' && params.get('workbenchTab') === 'services' ? 'workbench-services'
+          : hashPage === 'orders' && params.get('orderTab') === 'receiving' ? 'orders-receiving'
+            : hashPage === 'orders' && params.get('orderTab') === 'exam-candidate' ? 'orders-exam-candidate'
+              : hashPage === 'orders' && params.get('orderTab') === 'exam-proctor' ? 'orders-exam-proctor'
+          : hashTool && ['help-center', 'screen-recording', 'client-notifications', 'close-app', 'quick-panel', 'quick-match', 'quick-match-in-progress', 'identity-verification', 'global-search', 'voice-room-minimized', ...messagePerspectiveEntryViews].includes(hashTool) ? hashTool
         : hashPage === 'profile' && params.get('section') === 'onboarding' ? params.get('onboarding') === 'companion' ? 'profile-onboarding' : params.get('onboarding') === 'club' ? 'profile-club-onboarding' : 'profile-onboarding-center'
         : hashPage === 'profile' && params.get('section') === 'clubs' ? 'profile-clubs'
           : hashPage === 'profile' && params.get('section') === 'cancel-account' ? 'profile-cancel-account'
@@ -100,8 +111,10 @@ function AppContent() {
       const requestedPage = pages.find((page) => page.dirName === currentPage.dirName && page.entryView === requestedView)
       if (requestedPage && requestedPage.path !== currentPage.path) return
     }
-    const expectedPage = currentPage.entryView === 'club-voice-room' ? 'voice-room'
-      : currentPage.entryView === 'quick-match' ? params.get('tool') === 'quick-match' ? params.get('page') ?? 'home' : 'home'
+    const expectedPage = workbenchEntryViews.includes(currentPage.entryView as typeof workbenchEntryViews[number]) ? 'workbench'
+      : orderTabEntryViews.includes(currentPage.entryView as typeof orderTabEntryViews[number]) ? 'orders'
+      : currentPage.entryView === 'club-voice-room' ? 'voice-room'
+      : currentPage.entryView === 'quick-match' || currentPage.entryView === 'quick-match-in-progress' ? params.get('tool') === currentPage.entryView ? params.get('page') ?? 'home' : 'home'
       : currentPage.entryView === 'companion-detail' ? params.get('page') === 'talents' ? 'talents' : 'club-detail'
         : currentPage.entryView === 'identity-verification' && params.get('page') === 'profile' && params.get('tool') === 'identity-verification' ? 'profile'
           : currentPage.entryView === 'identity-verification' ? 'identity-verification'
@@ -110,9 +123,9 @@ function AppContent() {
         : currentPage.entryView === 'club-announcements' || currentPage.entryView === 'club-cards' ? 'club-detail'
           : currentPage.entryView === 'my-cards' ? 'wallet'
           : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' || currentPage.entryView === 'profile-clubs' || currentPage.entryView === 'profile-cancel-account' || currentPage.entryView === 'profile-wealth' || currentPage.entryView === 'profile-visits' || currentPage.entryView === 'profile-social' ? 'profile'
-      : currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' ? params.get('page') ?? (currentPage.entryView === 'club-support' ? 'messages' : 'home')
+      : currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'voice-room-minimized' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) ? params.get('page') ?? (currentPage.entryView === 'club-support' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) ? 'messages' : 'home')
           : currentPage.entryView
-    const preservesUnderlyingRoute = currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'quick-match' || currentPage.entryView === 'companion-detail' || currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
+    const preservesUnderlyingRoute = currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'voice-room-minimized' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) || currentPage.entryView === 'quick-match' || currentPage.entryView === 'quick-match-in-progress' || currentPage.entryView === 'companion-detail' || currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
     const expectedVoiceFrom = preservesUnderlyingRoute ? params.get('voiceFrom') : currentPage.entryView === 'club-voice-room' ? 'club' : null
     const expectedSection = preservesUnderlyingRoute ? params.get('section') : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' ? 'onboarding'
       : currentPage.entryView === 'profile-clubs' ? 'clubs'
@@ -125,8 +138,15 @@ function AppContent() {
     const expectedOnboarding = preservesUnderlyingRoute ? params.get('onboarding')
       : currentPage.entryView === 'profile-onboarding' ? 'companion'
         : currentPage.entryView === 'profile-club-onboarding' ? 'club' : null
-    const expectedTool = currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'quick-match' || currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
+    const expectedTool = currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'voice-room-minimized' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) || currentPage.entryView === 'quick-match' || currentPage.entryView === 'quick-match-in-progress' || currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
       ? currentPage.entryView : null
+    const expectedOrderTab = currentPage.entryView === 'orders-receiving' ? 'receiving'
+      : currentPage.entryView === 'orders-exam-candidate' ? 'exam-candidate'
+        : currentPage.entryView === 'orders-exam-proctor' ? 'exam-proctor' : null
+    const expectedWorkbenchTab = currentPage.entryView === 'workbench-matches' ? 'matches'
+      : currentPage.entryView === 'workbench-orders' ? 'orders'
+        : currentPage.entryView === 'workbench-services' || currentPage.entryView === 'workbench-apply-service' ? 'services' : null
+    const expectedApplyService = currentPage.entryView === 'workbench-apply-service'
     const expectedSecurity = currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
       ? params.get('security') === 'flow' ? 'flow' : 'real-name'
       : null
@@ -144,6 +164,9 @@ function AppContent() {
       && (expectedPanel == null ? !params.has('panel') : params.get('panel') === expectedPanel)
       && (expectedSecurity == null ? !params.has('security') : params.get('security') === expectedSecurity)
       && (expectedCompanion == null ? !params.has('companion') : params.get('companion') === expectedCompanion)
+      && (expectedOrderTab == null ? !params.has('orderTab') : params.get('orderTab') === expectedOrderTab)
+      && (expectedWorkbenchTab == null ? !params.has('workbenchTab') : params.get('workbenchTab') === expectedWorkbenchTab)
+      && (expectedApplyService ? params.get('applyService') === '1' : !params.has('applyService'))
       && (expectedTool == null ? !params.has('tool') : params.get('tool') === expectedTool)) return
     params.set('page', expectedPage)
     if (expectedVoiceFrom) params.set('voiceFrom', expectedVoiceFrom)
@@ -159,6 +182,12 @@ function AppContent() {
     if (expectedSecurity) params.set('security', expectedSecurity)
     else params.delete('security')
     if (expectedCompanion) params.set('companion', expectedCompanion)
+    if (expectedOrderTab) params.set('orderTab', expectedOrderTab)
+    else params.delete('orderTab')
+    if (expectedWorkbenchTab) params.set('workbenchTab', expectedWorkbenchTab)
+    else params.delete('workbenchTab')
+    if (expectedApplyService) params.set('applyService', '1')
+    else params.delete('applyService')
     if (expectedTool) params.set('tool', expectedTool)
     else params.delete('tool')
     window.location.hash = params.toString()

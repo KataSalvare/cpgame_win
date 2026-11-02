@@ -53,7 +53,7 @@ const updateMicQueue = (channel: VoiceSubchannel, memberId: string, micOn: boole
   return { ...channel, micQueueMemberIds, members: channel.members.map((member) => member.id === memberId ? { ...member, micOn } : member) }
 }
 
-export function useSocialLogic() {
+export function useSocialLogic(initialConversationId?: string) {
   const [activeFixedFeed, setActiveFixedFeed] = useState<FixedMessageFeed | null>(null)
   const [groupJoinRequests, setGroupJoinRequests] = useState(initialGroupJoinRequests)
   const resolveGroupJoinRequest = (requestId: string, status: 'approved' | 'rejected') => {
@@ -65,7 +65,7 @@ export function useSocialLogic() {
   }
   const [conversations, setConversations] = useState(initialConversations)
   const [clubGroups, setClubGroups] = useState(initialClubGroups)
-  const [selectedConversationId, setSelectedConversationId] = useState('group-ordinary')
+  const [selectedConversationId, setSelectedConversationId] = useState(initialConversationId ?? 'direct-friend-1')
   const [activeMessagesTab, setActiveMessagesTab] = useState<'messages' | 'friends'>('messages')
   const [chatSearch, setChatSearch] = useState('')
   const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null)

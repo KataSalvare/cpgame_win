@@ -139,7 +139,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [selectedPremiumCardId, setSelectedPremiumCardId] = useState<string | null>(null)
   const [premiumCardToast, setPremiumCardToast] = useState<string | null>(null)
-  const [matchPanelOpen, setMatchPanelOpen] = useState(() => props.entryView === 'quick-match')
+  const [matchPanelOpen, setMatchPanelOpen] = useState(() => props.entryView === 'quick-match' || props.entryView === 'quick-match-in-progress')
   const [globalSearchOpen, setGlobalSearchOpen] = useState(() => props.entryView === 'global-search')
   const [personalCenterRequest, setPersonalCenterRequest] = useState<{
     entryView: string | undefined
@@ -210,7 +210,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     setWindowCloseDialogOpen(false)
     closeClientOverlay('close-app')
   }
-  const [isMatching, setIsMatching] = useState(false)
+  const [isMatching, setIsMatching] = useState(() => props.entryView === 'quick-match-in-progress')
   const [checkoutRechargeOpen, setCheckoutRechargeOpen] = useState(false)
   const [rechargeReturnLabel, setRechargeReturnLabel] = useState('返回钱包')
   const [checkoutRechargePromptDismissed, setCheckoutRechargePromptDismissed] = useState(false)
@@ -228,7 +228,11 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const navigation = useClientNavigation(props.entryView)
   const rechargeMenuOpen = rechargeMenuState.open
   const voiceReturnPage = useRef<ClientPage>(navigation.page === 'voice-room' ? (window.sessionStorage.getItem('voice-room-return-page') as ClientPage | null) ?? 'home' : navigation.page)
-  const [voiceRoomMinimized, setVoiceRoomMinimized] = useState(() => window.sessionStorage.getItem('voice-room-minimized') === 'true')
+  const [voiceRoomMinimized, setVoiceRoomMinimized] = useState(() => props.entryView === 'voice-room-minimized' || window.sessionStorage.getItem('voice-room-minimized') === 'true')
+  useEffect(() => {
+    if (props.entryView !== 'voice-room-minimized') return
+    window.sessionStorage.setItem('voice-room-minimized', 'true')
+  }, [props.entryView])
   useEffect(() => {
     if (navigation.page !== 'voice-room' && !voiceRoomMinimized) {
       voiceReturnPage.current = navigation.page
@@ -262,7 +266,15 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [voiceCallNotifications, setVoiceCallNotifications] = useState<VoiceCallNotification[]>(initialVoiceCallNotifications)
   const [voiceCallDialogOpen, setVoiceCallDialogOpen] = useState(false)
   const [selectedVoiceCallId, setSelectedVoiceCallId] = useState(initialVoiceCallNotifications[0]?.id ?? '')
-  const social = useSocialLogic()
+  const messagePreviewConversationId: Record<string, string> = {
+    'im-user-support-view': 'direct-club-support',
+    'im-user-message-view': 'direct-user-message-view',
+    'im-support-view': 'direct-customer-kata',
+    'im-companion-view': 'direct-companion-view',
+    'im-group-owner-view': 'group-squad',
+    'im-group-user-view': 'group-ordinary',
+  }
+  const social = useSocialLogic(messagePreviewConversationId[props.entryView ?? ''])
   useEffect(() => {
     if (navigation.page !== 'messages') return
     try {
@@ -631,7 +643,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     </>}
   >
     <>
-    {rechargeBackdropPage === 'system-settings' ? <SystemSettingsPage settings={systemSettings} onSave={setSystemSettings} notifications={notificationPreferences} onUpdateNotifications={setNotificationPreferences} onBack={() => { const returnHash = new URLSearchParams(window.location.hash.slice(1)).get('returnHash'); if (returnHash) window.location.hash = returnHash; else navigation.goToPage(navigation.returnTo && navigation.returnTo !== 'system-settings' ? navigation.returnTo : 'home') }} /> : rechargeBackdropPage === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} availableBeanBalance={account.availableBeanBalance} pendingBeanSettlementBalance={account.pendingBeanSettlementBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} onOpenExchange={() => setBeanExchangeOpen(true)} onContactMatch={(request) => { setChatCompanionId(null); setChatConversationOverride({ title: request.player, initials: request.playerInitials }); social.startDirectMessageToUser(`workbench-match-${request.id}`, request.player, request.playerInitials, `你好，关于匹配请求 ${request.id}，我们可以在这里沟通。`); setCompanionChatOpen(true) }} /> : rechargeBackdropPage === 'woodpecker' ? <WoodpeckerPage pageState={pageState} onRetry={() => setPageState('normal')} /> : rechargeBackdropPage === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(platformAnnouncements)} onRetry={() => setPageState('normal')} /> : rechargeBackdropPage === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId))} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : rechargeBackdropPage === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onOpenGift={openGiftPanel} /> : rechargeBackdropPage === 'voice-room' ? <VoiceRoomsPage logic={social} ownerSource={navigation.voiceRoomSource} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} onOpenClubSupport={openClubSupportChat} onChatWithCompanion={(id) => { social.startDirectMessageWithCompanion(id); setVoiceRoomMinimized(true); window.sessionStorage.setItem('voice-room-minimized', 'true'); navigation.goToPage('messages') }} onOpenGift={(recipients, fixedRecipient, anchor) => openGiftPanel(recipients, fixedRecipient, anchor)} /> : rechargeBackdropPage === 'profile' ? <PersonalCenterPage
+    {rechargeBackdropPage === 'system-settings' ? <SystemSettingsPage settings={systemSettings} onSave={setSystemSettings} notifications={notificationPreferences} onUpdateNotifications={setNotificationPreferences} onBack={() => { const returnHash = new URLSearchParams(window.location.hash.slice(1)).get('returnHash'); if (returnHash) window.location.hash = returnHash; else navigation.goToPage(navigation.returnTo && navigation.returnTo !== 'system-settings' ? navigation.returnTo : 'home') }} /> : rechargeBackdropPage === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} availableBeanBalance={account.availableBeanBalance} pendingBeanSettlementBalance={account.pendingBeanSettlementBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} onOpenExchange={() => setBeanExchangeOpen(true)} onContactMatch={(request) => { setChatCompanionId(null); setChatConversationOverride({ title: request.player, initials: request.playerInitials }); social.startDirectMessageToUser(`workbench-match-${request.id}`, request.player, request.playerInitials, `你好，关于匹配请求 ${request.id}，我们可以在这里沟通。`); setCompanionChatOpen(true) }} initialTab={props.entryView === 'workbench-matches' ? '匹配请求' : props.entryView === 'workbench-orders' ? '订单' : props.entryView === 'workbench-services' || props.entryView === 'workbench-apply-service' ? '服务管理' : '总览'} initialApplicationOpen={props.entryView === 'workbench-apply-service'} onTabChange={(tab) => { const tabValue = tab === '匹配请求' ? 'matches' : tab === '订单' ? 'orders' : tab === '服务管理' ? 'services' : tab === '总览' ? '' : null; if (tabValue === null) return; window.location.hash = tabValue ? `page=workbench&workbenchTab=${tabValue}` : 'page=workbench' }} onApplicationClose={() => { window.location.hash = 'page=workbench&workbenchTab=services' }} /> : rechargeBackdropPage === 'woodpecker' ? <WoodpeckerPage pageState={pageState} onRetry={() => setPageState('normal')} /> : rechargeBackdropPage === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(platformAnnouncements)} onRetry={() => setPageState('normal')} /> : rechargeBackdropPage === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId))} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : rechargeBackdropPage === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onOpenGift={openGiftPanel} /> : rechargeBackdropPage === 'voice-room' ? <VoiceRoomsPage logic={social} ownerSource={navigation.voiceRoomSource} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} onOpenClubSupport={openClubSupportChat} onChatWithCompanion={(id) => { social.startDirectMessageWithCompanion(id); setVoiceRoomMinimized(true); window.sessionStorage.setItem('voice-room-minimized', 'true'); navigation.goToPage('messages') }} onOpenGift={(recipients, fixedRecipient, anchor) => openGiftPanel(recipients, fixedRecipient, anchor)} /> : rechargeBackdropPage === 'profile' ? <PersonalCenterPage
       key={personalCenterRequest.version}
       initialSection={personalCenterRequest.section}
       initialRecruitmentOpen={personalCenterRequest.recruitmentOpen}
@@ -698,6 +710,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onNotify={setPremiumCardToast}
     /> : rechargeBackdropPage === 'orders' ? <OrdersPage
       pageState={pageState}
+      initialTab={props.entryView === 'orders-receiving' ? '我的接单' : props.entryView === 'orders-exam-candidate' ? '考生订单' : props.entryView === 'orders-exam-proctor' ? '考官订单' : '我的下单'}
       onRetry={() => setPageState('normal')}
       orders={account.orders}
       selectedOrderId={selectedOrderId}
