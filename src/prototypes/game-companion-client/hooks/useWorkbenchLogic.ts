@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
-export type WorkOrderAction = '接收' | '取消' | '拒绝' | '开始服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
+export type WorkOrderAction = '接受' | '拒绝' | '开始服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
 export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
@@ -31,7 +31,7 @@ export function useWorkbenchLogic() {
   const [selectedServiceGameId, setSelectedServiceGameId] = useState(serviceGroups[0]?.id ?? '')
   const enabled = services.filter(s => serviceSelections.includes(s.id) && enabledLevelKeys.includes(levelKey(s))).map(s => s.id)
   const [automatic, setAutomatic] = useState(false)
-  const [requests, setRequests] = useState(services.slice(0, 3).map((s, i) => ({ id: `M-${i+1}`, player: ['小宇', '晚风玩家', '星河'][i], playerInitials: ['宇', '晚风', '星河'][i], audition: i % 2 === 0 ? '试音' : '不试音', matchPrice: 150, tipAmount: [100, 0, 100][i], serviceId: s.id, status: '待响应' })))
+  const [requests, setRequests] = useState(services.slice(0, 3).map((s, i) => ({ id: `M-${i+1}`, player: ['小宇', '晚风玩家', '星河'][i], playerInitials: ['宇', '晚风', '星河'][i], audition: i % 2 === 0 ? '试音' : '不试音', matchPrice: 150, tipAmount: [100, 0, 100][i], serviceId: s.id, note: ['想练团队配合和沟通，可以先简单磨合。', '熟悉基础操作，希望重点练习对局思路。', '想提升地图点位理解，节奏可以稍快。'][i], status: '待响应' })))
   const [orders, setOrders] = useState<WorkOrder[]>(() => {
     const examples = ['待接单', '待服务', '服务中', '待玩家确认', '已完成'].map((status, i) => ({ id: `CW-1028-${100+i}`, player: ['晚风玩家', '小宇', '星河', '阿白', '奶糖'][i], playerId: `P-1028${60 + i}`, playerInitials: ['晚风', '宇', '星河', '白', '糖'][i], serviceId: services[i % services.length]?.id ?? '', clubName: workbenchClubName, status, amount: 120 + i * 20 + (i === 0 ? 20 : 0), tipAmount: i === 0 ? 20 : 0, discountAmount: 0, paymentSource: '钻石钱包' as const, createdAt: `2026-10-28 ${String(14 - i).padStart(2, '0')}:20`, duration: 2, durationUnit: services[i % services.length]?.unit ?? '小时', unitPrice: (120 + i * 20) / 2, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) }))
     const hourlyService = services.find(service => service.unit === '小时')
@@ -158,7 +158,7 @@ export function useWorkbenchLogic() {
       if (!service || !enabledLevelKeys.includes(levelKey(service))) return
       setServiceSelections(items => items.includes(id) ? items.filter(x => x !== id) : [...items, id])
     },
-    serviceLabel: (id: string) => { const s = services.find(s => s.id === id); return s ? `${games.find(g => g.id === s.gameId)?.name} · ${s.playName} · ${s.levelName}` : '游戏服务' },
+    serviceLabel: (id: string) => { const s = services.find(s => s.id === id); return s ? `${games.find(g => g.id === s.gameId)?.name} · ${s.playName} · ${s.levelName} · ${s.name}` : '游戏服务' },
     pending: requests.filter(r => r.status === '待响应').length + orders.filter(o => o.status === '待接单').length,
   }
 }

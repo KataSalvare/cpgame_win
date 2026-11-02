@@ -3,7 +3,12 @@ import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, Cred
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { PageStatePanel } from '../components/PageStatePanel'
+import { DialogPanel } from '@/components/WindowsClient'
+import { WorkbenchOrdersPanel } from '../components/WorkbenchOrdersPanel'
+import { ExamOrderPayButton, ExamSubmissionDialog } from '../components/ExamOrderDetailPanel'
 import { type ClientOrder, type OrderStatus, type WalletTransaction } from '../data/accountMockData'
+import type { ExamOrder, ExamOrderStatus, ExamSubmission } from '../data/examOrderMockData'
+import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
 import { clubs, companions, games, type Companion, type Service } from '../data/mockData'
 
 export { PersonalCenterPage } from './PersonalCenterPage'
@@ -190,17 +195,48 @@ type OrdersPageProps = StateProps & {
   onPauseOrder: (orderId: string) => void
   onRenewOrder: (orderId: string, quantity: number) => boolean
   onOpenRecharge: () => void
+  workbench: WorkbenchLogic
+  examCandidateOrders: ExamOrder[]
+  examProctorOrders: ExamOrder[]
+  selectedExamOrderId: string | null
+  onSelectExamOrder: (order: ExamOrder | null, role: '考生订单' | '考官订单' | null) => void
+  onCancelExamOrder: (orderId: string) => void
+  onSubmitExamMaterials: (orderId: string, submission: ExamSubmission) => void
+  onPayExamOrder: (order: ExamOrder) => void
 }
 const orderStatuses: OrderStatus[] = ['待接单', '待服务', '服务中', '待用户确认', '已完成', '已取消', '退款']
 
-export function OrdersPage({ pageState, onRetry, orders, selectedOrderId, diamondBalance, onSelectOrder, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onPauseOrder, onRenewOrder, onOpenRecharge }: OrdersPageProps) {
+export function OrdersPage({ pageState, onRetry, orders, selectedOrderId, diamondBalance, onSelectOrder, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onPauseOrder, onRenewOrder, onOpenRecharge, workbench, examCandidateOrders, examProctorOrders, selectedExamOrderId, onSelectExamOrder, onCancelExamOrder, onSubmitExamMaterials, onPayExamOrder }: OrdersPageProps) {
+  const [tab, setTab] = useState<'我的下单' | '我的接单' | '考生订单' | '考官订单'>('我的下单')
   const [filter, setFilter] = useState<'全部' | OrderStatus>('全部')
+  const [workbenchFilter, setWorkbenchFilter] = useState('全部')
+  const [examFilters, setExamFilters] = useState<Record<'考生订单' | '考官订单', '全部' | ExamOrderStatus>>({ 考生订单: '全部', 考官订单: '全部' })
+  const [examCancelOrder, setExamCancelOrder] = useState<ExamOrder | null>(null)
+  const [examSubmissionOrder, setExamSubmissionOrder] = useState<ExamOrder | null>(null)
+  const [examCandidateInfoOrder, setExamCandidateInfoOrder] = useState<ExamOrder | null>(null)
   const filteredOrders = useMemo(() => filter === '全部' ? orders : orders.filter((order) => order.status === filter), [filter, orders])
   if (pageState !== 'normal') return <div className="client-content account-page"><PageState pageState={pageState} onRetry={onRetry} /></div>
 
-  return <div className="client-content account-page">
+  const examOrders = tab === '考生订单' ? examCandidateOrders : examProctorOrders
+  const examStatuses: ExamOrderStatus[] = tab === '考生订单' ? ['待支付', '待考核', '审核中', '已通过', '未通过', '已取消'] : ['待考核', '审核中', '已通过', '未通过']
+  const currentExamFilter = tab === '考生订单' || tab === '考官订单' ? examFilters[tab] : '全部'
+  const filteredExamOrders = currentExamFilter === '全部' ? examOrders : examOrders.filter(order => order.status === currentExamFilter)
+  const renderExamOrders = (items: ExamOrder[]) => items.length ? <div className="orders-list exam-orders-list" role="group" aria-label={`${tab}列表`}>
+    <div className="order-list-header"><span>订单号</span><span>{tab === '考生订单' ? '考官' : '考生'}信息</span><span>考试信息</span><span>价格</span><span>状态</span><span>操作</span></div>
+    {items.map(order => <ExamOrderRow key={order.id} order={order} role={tab as '考生订单' | '考官订单'} selected={selectedExamOrderId === order.id} onSelect={() => onSelectExamOrder(order, tab as '考生订单' | '考官订单')} onPay={() => onPayExamOrder(order)} onCancel={() => setExamCancelOrder(order)} onSubmit={() => setExamSubmissionOrder(order)} onViewCandidate={() => setExamCandidateInfoOrder(order)} />)}
+  </div> : <div className="account-empty-inline"><History size={22} /><strong>没有符合条件的订单</strong></div>
+
+  return <>
+  <div className="client-content account-page">
     <PageHeading title="我的订单" />
-    <section className="client-card orders-list-card">
+    <nav className="personal-center-tabs orders-role-tabs" role="tablist" aria-label="订单类型">
+      {(['我的下单', '我的接单', '考生订单', '考官订单'] as const).map(item => <button type="button" role="tab" key={item} className={`personal-center-tab${tab === item ? ' is-active' : ''}`} aria-selected={tab === item} onClick={() => { setTab(item); onSelectOrder(null); workbench.setSelectedOrderId(null); onSelectExamOrder(null, null) }}>{item}</button>)}
+    </nav>
+    {tab === '我的接单' ? <WorkbenchOrdersPanel logic={workbench} filter={workbenchFilter} onFilterChange={value => { setWorkbenchFilter(value); workbench.setSelectedOrderId(null) }} label="接单" /> : tab === '考生订单' || tab === '考官订单' ? <section className="client-card orders-list-card exam-orders-card">
+      <div className="orders-list-card__toolbar"><span className="client-count">{filteredExamOrders.length} 笔订单</span></div>
+      <div className="orders-filter-bar" role="group" aria-label={`按${tab}状态筛选`}>{(['全部', ...examStatuses] as Array<'全部' | ExamOrderStatus>).map(status => <button type="button" key={status} className={`orders-filter-chip${currentExamFilter === status ? ' is-active' : ''}`} aria-pressed={currentExamFilter === status} onClick={() => setExamFilters(current => ({ ...current, [tab]: status }))}>{status}</button>)}</div>
+      {renderExamOrders(filteredExamOrders)}
+    </section> : <section className="client-card orders-list-card">
       <div className="orders-list-card__toolbar"><span className="client-count">{filteredOrders.length} 笔订单</span></div>
       <div className="orders-filter-bar" role="group" aria-label="按订单状态筛选">
         {(['全部', ...orderStatuses] as Array<'全部' | OrderStatus>).map((status) => <button type="button" key={status} className={`orders-filter-chip${filter === status ? ' is-active' : ''}`} aria-pressed={filter === status} onClick={() => { setFilter(status); onSelectOrder(null) }}>{status === '待用户确认' ? '待确认' : status}</button>)}
@@ -210,7 +246,35 @@ export function OrdersPage({ pageState, onRetry, orders, selectedOrderId, diamon
         {filteredOrders.map((order) => <OrderCard order={order} key={order.id} selected={selectedOrderId === order.id} diamondBalance={diamondBalance} onSelect={() => onSelectOrder(order.id)} onReorder={() => onReorder(order)} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onPauseOrder={onPauseOrder} onRenewOrder={onRenewOrder} onOpenRecharge={onOpenRecharge} />)}
       </div>}
     </section>
+    }
   </div>
+  {examCancelOrder && <DialogPanel overlayId="exam-order-list-cancel-confirm" title="取消考核订单" onClose={() => setExamCancelOrder(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setExamCancelOrder(null)}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { onCancelExamOrder(examCancelOrder.id); setExamCancelOrder(null) }}>确认取消</button></>}><p>确认取消这笔考核订单吗？取消后订单将关闭。</p></DialogPanel>}
+  {examSubmissionOrder && <ExamSubmissionDialog order={examSubmissionOrder} onClose={() => setExamSubmissionOrder(null)} onSubmit={submission => { onSubmitExamMaterials(examSubmissionOrder.id, submission); setExamSubmissionOrder(null) }} />}
+  {examCandidateInfoOrder && <DialogPanel overlayId="exam-order-candidate-info" title="考生资料" onClose={() => setExamCandidateInfoOrder(null)} width={520} footer={<button type="button" className="client-button client-button--primary" onClick={() => setExamCandidateInfoOrder(null)}>完成</button>}>
+    <div className="exam-candidate-info">
+      <div className="exam-candidate-info__person"><AvatarMark initials={examCandidateInfoOrder.initials} size="lg" /><div><strong><UserNameWithLevel name={examCandidateInfoOrder.person} identityId={examCandidateInfoOrder.personId} /></strong><span>{examCandidateInfoOrder.clubName}</span></div></div>
+      <dl className="exam-candidate-info__facts"><dt>订单号</dt><dd>{examCandidateInfoOrder.id}</dd><dt>下单时间</dt><dd>{examCandidateInfoOrder.createdAt}</dd><dt>游戏</dt><dd>{examCandidateInfoOrder.game}</dd><dt>玩法</dt><dd>{examCandidateInfoOrder.play}</dd><dt>等级</dt><dd>{examCandidateInfoOrder.level}</dd><dt>服务</dt><dd>{examCandidateInfoOrder.service}</dd></dl>
+    </div>
+  </DialogPanel>}
+  </>
+}
+
+function ExamOrderRow({ order, role, selected, onSelect, onPay, onCancel, onSubmit, onViewCandidate }: { order: ExamOrder; role: '考生订单' | '考官订单'; selected: boolean; onSelect: () => void; onPay: () => void; onCancel: () => void; onSubmit: () => void; onViewCandidate: () => void }) {
+  const statusClass = order.status === '已通过' ? 'completed' : order.status === '未通过' || order.status === '已取消' ? 'cancelled' : 'active'
+  return <article className={`order-item exam-order-row${selected ? ' is-selected' : ''}`}>
+    <button type="button" className="exam-order-row__main" aria-label={`查看考核订单 ${order.id}，${order.person}，${order.status}`} onClick={onSelect}>
+      <span className="order-item__info"><strong>{order.id}</strong><small>{order.createdAt}</small></span>
+      <span className="order-item__companion"><AvatarMark initials={order.initials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={order.person} identityId={order.personId} /></strong><small>{order.clubName}</small></span></span>
+      <span className="order-item__service"><strong>{order.game} · {order.play}</strong><small>{order.level} · {order.service}</small></span>
+      <span className="order-item__price"><strong>500 钻石</strong></span>
+      <span className="workbench-order-table-row__status"><span className={`order-item__status order-item__status--${statusClass}`}>{order.status}</span></span>
+    </button>
+    <div className="exam-order-row__actions" aria-label={`订单 ${order.id} 操作`}>
+      {role === '考生订单' && order.status === '待支付' && <><ExamOrderPayButton onPay={onPay} /><button type="button" className="client-button client-button--secondary" onClick={onCancel}>取消订单</button></>}
+      {role === '考官订单' && order.status === '待考核' && <button type="button" className="client-button client-button--primary" onClick={onSubmit}>提交资料</button>}
+      {role === '考官订单' && <button type="button" className="client-button client-button--secondary" onClick={onViewCandidate}>查看资料</button>}
+    </div>
+  </article>
 }
 
 type CheckoutPageProps = StateProps & {
@@ -412,7 +476,7 @@ const orderActions: Record<OrderStatus, string[]> = {
   '待服务': ['提前结束'],
   '服务中': ['确认完成', '提前结束', '续单', '暂停'],
   '待用户确认': ['完成订单'],
-  '已完成': ['发起售后', '再次下单', '评价'],
+  '已完成': ['联系客服', '再次下单', '评价'],
   '已取消': [],
   '退款': [],
 }
@@ -427,7 +491,7 @@ function orderActionMessage(action: string) {
   if (action === '确认完成' || action === '完成订单') return '请确认陪玩服务是否完成？'
   if (action === '暂停') return '确认暂停本次服务吗？确认后会记录本次服务的时长。暂停后您可以联系陪玩继续开启服务。'
   if (action === '提前结束') return '提前结束功能尚未接入；当前仅展示已服务时长，不会更改订单状态或结算金额。'
-  if (action === '发起售后') return '售后申请功能尚未接入，本次仅展示操作提示，不会提交申请或更改订单状态。'
+  if (action === '联系客服') return '在线客服功能尚未接入，本次仅展示操作提示。'
   return '该操作仅作原型演示，不会更改订单状态。'
 }
 

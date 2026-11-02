@@ -1,6 +1,6 @@
 # Cloudflare 部署与批注 API 指南
 
-本文件是 Worker、Static Assets、Workers KV 和 `/api/annotations` 的部署约束来源。README 只保留快速开始，不重复维护绑定细节。
+本文件是 Worker、Static Assets、Workers KV、`/api/annotations` 和 `/api/menu-tree` 的部署约束来源。README 只保留快速开始，不重复维护绑定细节。
 
 ## 1. 当前配置关系
 
@@ -13,6 +13,8 @@
 | 生产 namespace | `pm-annotations` | 不得擅自更换 namespace ID |
 | 批注 Key | `annotations` | 保存整份批注 JSON |
 | API | `/api/annotations` | 支持 GET 和合法 JSON POST |
+| 菜单排序 Key | `tool-menu-tree` | 保存前端和后台导航的树结构 |
+| 菜单 API | `/api/menu-tree` | 支持 GET 和合法 JSON POST；空 KV 回退到 `tools/config/menu-tree.json` |
 | 原型 SPEC Key | `spec:<原型目录名>` | 保存通过文档面板编辑的 Markdown 内容 |
 
 除非用户明确授权，不得把测试数据写入线上 KV，不得把生产 namespace 用作本地开发存储。
@@ -21,6 +23,8 @@
 
 - KV 没有 `annotations` Key 时，GET 回退到 `src/resources/annotations.json`。
 - 第一次合法 POST 后，完整数据写入 KV 的 `annotations` Key。
+- `/api/menu-tree` 的 GET 在 KV 没有 `tool-menu-tree` 时返回构建时打包的 `tools/config/menu-tree.json`；合法 POST 将菜单树写入该 Key。
+- 菜单树校验节点路径、嵌套深度和同分类重复 ID；无效请求返回 400，未知 API 方法返回 405。
 - 非法 JSON 或缺少 `annotations`、`categories` 数组时返回 400。
 - 不支持的方法返回 405；KV 读写异常返回 500。
 - 当前 API 没有用户身份校验、用户隔离、租户隔离或敏感数据保护。

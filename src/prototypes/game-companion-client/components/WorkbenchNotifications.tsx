@@ -32,7 +32,7 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
   ]
   const respond = (message: WorkbenchMessage, accept: boolean) => {
     if (message.kind === 'match' && !w.respond(message.id, accept)) return
-    if (message.kind === 'order' && accept) { w.setOrderAction({ id: message.id, action: '接收' }); return }
+    if (message.kind === 'order' && accept) { w.setOrderAction({ id: message.id, action: '接受' }); return }
     const key = message.kind === 'match' ? `match-${message.id}` : 'order'
     setHandled(keys => keys.includes(key) ? keys : [...keys, key])
   }

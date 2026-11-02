@@ -7,7 +7,7 @@ export function WorkbenchOrderDetailPanel({ logic: w, onChat }: { logic: Workben
   const order = w.selectedOrder
   if (!order) return null
   const service = w.services.find(s => s.id === order.serviceId)
-  const actions = order.earlyEndRequested ? ['同意提前结束', '拒绝提前结束'] as const : order.status === '待接单' ? ['接收', '取消'] as const : order.status === '待服务' ? ['开始服务'] as const : order.status === '服务中' ? ['完成服务', '免单'] as const : order.status === '已完成' ? ['免单'] as const : []
+  const actions = order.earlyEndRequested ? ['同意提前结束', '拒绝提前结束'] as const : order.status === '待接单' ? ['接受', '拒绝'] as const : order.status === '待服务' ? ['开始服务'] as const : order.status === '服务中' ? ['完成服务', '免单'] as const : order.status === '已完成' ? ['免单'] as const : []
   return <div className="order-detail-panel">
     <section className="order-detail-status-card"><strong className="order-detail-status-card__status">{order.earlyEndRequested ? '待陪玩确认' : order.status}</strong><span className="order-detail-status-card__id">{order.id}</span><span className="order-detail-status-card__created">创建时间 {order.createdAt}</span></section>
     <section className="order-detail-section"><div className="order-detail-section__heading"><span className="client-eyebrow">玩家信息</span><button type="button" className="client-button client-button--secondary" onClick={() => onChat(order)}><MessageCircle size={15} />聊一聊</button></div><div className="order-detail-companion"><AvatarMark initials={order.playerInitials} size="md" /><div><strong><UserNameWithLevel name={order.player} identityId={order.player} /></strong><span>ID · {order.playerId}</span></div></div></section>
@@ -19,15 +19,15 @@ export function WorkbenchOrderDetailPanel({ logic: w, onChat }: { logic: Workben
         <strong>免单</strong><div><span>记录时间</span><time dateTime={record.recordedAt}>{new Date(record.recordedAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false })}</time></div><div><span>免单数量</span><strong>{record.quantity} {record.unit}</strong></div>
       </article>)}</div> : <p className="order-detail-empty-record">暂无售后记录</p>}
     </section>
-    <div className="order-detail-actions" aria-label="陪玩订单操作">{actions.map(action => <button type="button" key={action} className={`client-button ${action === '取消' || action === '免单' || action === '拒绝提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => w.setOrderAction({ id: order.id, action })}>{action}</button>)}</div>
+    <div className="order-detail-actions" aria-label="陪玩订单操作">{actions.map(action => <button type="button" key={action} className={`client-button ${action === '拒绝' || action === '免单' || action === '拒绝提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => w.setOrderAction({ id: order.id, action })}>{action}</button>)}</div>
   </div>
 }
 
 export function WorkbenchOrderActions({ logic: w, orderId }: { logic: WorkbenchLogic; orderId: string }) {
   const order = w.orders.find(o => o.id === orderId)
   if (!order) return null
-  const actions = order.earlyEndRequested ? ['同意提前结束', '拒绝提前结束'] as const : order.status === '待接单' ? ['接收', '取消'] as const : order.status === '待服务' ? ['开始服务'] as const : order.status === '服务中' ? ['完成服务', '免单'] as const : order.status === '已完成' ? ['免单'] as const : []
-  return <div className="workbench-match-actions" aria-label={`订单 ${order.id} 操作`}>{actions.map(action => <button type="button" key={action} className={`client-button ${action === '取消' || action === '免单' || action === '拒绝提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => w.setOrderAction({ id: order.id, action })}>{action}</button>)}</div>
+  const actions = order.earlyEndRequested ? ['同意提前结束', '拒绝提前结束'] as const : order.status === '待接单' ? ['接受', '拒绝'] as const : order.status === '待服务' ? ['开始服务'] as const : order.status === '服务中' ? ['完成服务', '免单'] as const : order.status === '已完成' ? ['免单'] as const : []
+  return <div className="workbench-match-actions workbench-order__actions" aria-label={`订单 ${order.id} 操作`}>{actions.map(action => <button type="button" key={action} className={`client-button ${action === '拒绝' || action === '免单' || action === '拒绝提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => w.setOrderAction({ id: order.id, action })}>{action}</button>)}</div>
 }
 
 function formatServiceDuration(totalMinutes: number) {

@@ -11,6 +11,7 @@ import { registerOverlayReveal } from '@/lib/overlayReveal'
 import { playerProfile, type PlayerProfile } from './data/accountMockData'
 import { useAccountLogic } from './hooks/useAccountLogic'
 import { BeanExchangePanel, BeanWithdrawPanel, CheckoutPage, OrderDetailPanel, OrdersPage, PersonalCenterPage, WalletLedgerPanel, WalletPage } from './pages/AccountPages'
+import { examCandidateOrders as initialExamCandidateOrders, examProctorOrders as initialExamProctorOrders, type ExamOrder } from './data/examOrderMockData'
 import { closeClientOverlay, navigateToClientOverlay, navigateToProfileSection, navigateToSystemSettings } from './profileNavigation'
 import { CompanionDetailPage } from './pages/CompanionDetailPage'
 import { ClubDetailPage } from './pages/ClubDetailPage'
@@ -50,9 +51,12 @@ import { clubAnnouncementCategories, clubAnnouncements, platformAnnouncementCate
 import { WorkbenchNotifications } from './components/WorkbenchNotifications'
 import { WorkbenchOrderActionDialog } from './components/WorkbenchOrderActionDialog'
 import { WorkbenchOrderDetailPanel } from './components/WorkbenchOrderDetailPanel'
+import { ExamOrderDetailPanel } from './components/ExamOrderDetailPanel'
 import { WorkbenchPage } from './pages/WorkbenchPage'
 import { useWorkbenchLogic } from './hooks/useWorkbenchLogic'
 import clubAdminDashboardReference from './assets/club-admin-dashboard-reference.png'
+
+const clientNoticeCycleStorageKey = 'game-companion-client-notice-cycle'
 
 const PENDING_SEARCH_USER_KEY = 'game-companion-pending-search-user'
 
@@ -166,6 +170,9 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [clubSupportSelectionOpen, setClubSupportSelectionOpen] = useState(() => props.entryView === 'club-support')
   const [clubSupportChatOpen, setClubSupportChatOpen] = useState(false)
   const [onboardingApplications, setOnboardingApplications] = useState<OnboardingApplication[]>(initialOnboardingApplications)
+  const [examCandidateOrderRecords, setExamCandidateOrderRecords] = useState<ExamOrder[]>(initialExamCandidateOrders)
+  const [examProctorOrderRecords, setExamProctorOrderRecords] = useState<ExamOrder[]>(initialExamProctorOrders)
+  const [selectedExamOrder, setSelectedExamOrder] = useState<{ id: string; role: '考生订单' | '考官订单' } | null>(null)
   const [companionChatOpen, setCompanionChatOpen] = useState(false)
   const [chatCompanionId, setChatCompanionId] = useState<string | null>(null)
   const [chatConversationOverride, setChatConversationOverride] = useState<{ title: string; initials: string } | null>(null)
@@ -180,6 +187,8 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   }, [])
   const closeClientNotifications = () => {
     setNoticeMode('closed')
+    window.sessionStorage.removeItem(`${clientNoticeCycleStorageKey}-open`)
+    window.sessionStorage.setItem(`${clientNoticeCycleStorageKey}-next`, nextNoticeMode)
     closeClientOverlay('client-notifications')
   }
   const requestWindowClose = () => {
@@ -238,8 +247,17 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   }
   const account = useAccountLogic()
   const workbench = useWorkbenchLogic()
-  const [noticeMode, setNoticeMode] = useState<'closed' | 'panel' | 'all'>(() => props.entryView === 'client-notifications' ? 'panel' : 'closed')
-  const [nextNoticeMode, setNextNoticeMode] = useState<'panel' | 'all'>('panel')
+  const selectedExamOrderRecord = selectedExamOrder ? (selectedExamOrder.role === '考生订单' ? examCandidateOrderRecords : examProctorOrderRecords).find(order => order.id === selectedExamOrder.id) ?? null : null
+  const [noticeMode, setNoticeMode] = useState<'closed' | 'panel' | 'all'>(() => {
+    if (props.entryView !== 'client-notifications') return 'closed'
+    return window.sessionStorage.getItem(`${clientNoticeCycleStorageKey}-open`) === 'all' ? 'all' : 'panel'
+  })
+  const [nextNoticeMode, setNextNoticeMode] = useState<'panel' | 'all'>(() => {
+    if (props.entryView === 'client-notifications' && !window.sessionStorage.getItem(`${clientNoticeCycleStorageKey}-open`)) return 'all'
+    const savedNextMode = window.sessionStorage.getItem(`${clientNoticeCycleStorageKey}-next`)
+    if (savedNextMode === 'panel' || savedNextMode === 'all') return savedNextMode
+    return props.entryView === 'client-notifications' ? 'all' : 'panel'
+  })
   const [notificationsRead, setNotificationsRead] = useState(false)
   const [voiceCallNotifications, setVoiceCallNotifications] = useState<VoiceCallNotification[]>(initialVoiceCallNotifications)
   const [voiceCallDialogOpen, setVoiceCallDialogOpen] = useState(false)
@@ -358,11 +376,16 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const toggleClientNotifications = () => {
     if (noticeMode !== 'closed') {
       setNoticeMode('closed')
+      window.sessionStorage.removeItem(`${clientNoticeCycleStorageKey}-open`)
+      window.sessionStorage.setItem(`${clientNoticeCycleStorageKey}-next`, nextNoticeMode)
       closeClientOverlay('client-notifications')
       return
     }
     setNoticeMode(nextNoticeMode)
-    setNextNoticeMode(nextNoticeMode === 'panel' ? 'all' : 'panel')
+    const followingMode = nextNoticeMode === 'panel' ? 'all' : 'panel'
+    setNextNoticeMode(followingMode)
+    window.sessionStorage.setItem(`${clientNoticeCycleStorageKey}-open`, nextNoticeMode)
+    window.sessionStorage.setItem(`${clientNoticeCycleStorageKey}-next`, followingMode)
     navigateToClientOverlay('client-notifications')
   }
   const premiumCardsDrawer = navigation.panel === 'club-cards' || navigation.panel === 'my-cards'
@@ -487,7 +510,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         onGift={(anchor) => openGiftPanel([], { id: companion.id, name: companion.name, initials: companion.initials, profileId: companion.id.replace('companion-', 'P-') }, anchor)}
         onChat={() => { setSelectedSearchUser(null); setChatCompanionId(companion.id); setChatConversationOverride(null); social.startDirectMessageWithCompanion(companion.id) }}
       /></RightDrawer> : null
-    })() : selectedSearchProfile ? <RightDrawer mode="inline" title={selectedSearchProfile.name} onClose={() => setSelectedSearchUser(null)} className="game-companion-drawer" width="100%"><div className="client-content companion-detail-page companion-detail-page--panel"><CompanionProfileCard profile={selectedSearchProfile} /></div></RightDrawer> : navigation.page === 'workbench' && pageState === 'normal' && workbench.selectedOrder ? <RightDrawer mode="inline" title="订单详情" description={workbench.selectedOrder.id} onClose={() => workbench.setSelectedOrderId(null)} className="game-order-drawer" width="100%"><WorkbenchOrderDetailPanel logic={workbench} onChat={(order) => { setChatCompanionId(null); setChatConversationOverride({ title: order.player, initials: order.playerInitials }); social.startDirectMessageToUser(`workbench-player-${order.player}`, order.player, order.playerInitials); setCompanionChatOpen(true) }} /></RightDrawer> : navigation.panel === 'club-reviews' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部评价" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><ClubReviewsPanel /></RightDrawer> : navigation.panel === 'club-announcements' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部公告" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId))} onRetry={() => setPageState('normal')} presentation="panel" /></RightDrawer> : navigation.panel === 'club-groups' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部群聊" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><ClubGroupsPanel groups={social.clubGroups.filter((group) => group.clubId === navigation.clubId)} onApply={social.applyToClubGroup} onOpenChat={(groupId) => { social.openClubGroupChat(groupId); navigation.goToPage('messages') }} /></RightDrawer> : navigation.panel === 'diamond-ledger' ? <RightDrawer mode="inline" title="钻石明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.diamondTransactions} /></RightDrawer> : navigation.panel === 'bean-ledger' ? <RightDrawer mode="inline" title="糖豆明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.beanTransactions} /></RightDrawer> : premiumCardsDrawer ? premiumCardsDrawer : navigation.panel === 'coupons' ? <RightDrawer mode="inline" title="我的优惠券" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><CouponsPage pageState={pageState} onRetry={() => setPageState('normal')} coupons={account.coupons} onBack={navigation.closePanel} /></RightDrawer> : (navigation.page === 'club-detail' || navigation.page === 'talents') && navigation.companion ? <RightDrawer
+    })() : selectedSearchProfile ? <RightDrawer mode="inline" title={selectedSearchProfile.name} onClose={() => setSelectedSearchUser(null)} className="game-companion-drawer" width="100%"><div className="client-content companion-detail-page companion-detail-page--panel"><CompanionProfileCard profile={selectedSearchProfile} /></div></RightDrawer> : navigation.page === 'orders' && pageState === 'normal' && selectedExamOrderRecord && selectedExamOrder ? <RightDrawer mode="inline" title="考核订单详情" description={selectedExamOrderRecord.id} onClose={() => setSelectedExamOrder(null)} className="game-order-drawer" width="100%"><ExamOrderDetailPanel order={selectedExamOrderRecord} role={selectedExamOrder.role} onPay={() => navigation.goToPage('checkout')} onCancel={() => setExamCandidateOrderRecords(current => current.map(order => order.id === selectedExamOrderRecord.id ? { ...order, status: '已取消' } : order))} onContact={() => { setPlatformSupportOpen(true); navigateToClientOverlay('platform-support') }} onSubmit={(submission) => setExamProctorOrderRecords(current => current.map(order => order.id === selectedExamOrderRecord.id ? { ...order, status: submission.result, submission } : order))} /></RightDrawer> : (navigation.page === 'workbench' || navigation.page === 'orders') && pageState === 'normal' && workbench.selectedOrder ? <RightDrawer mode="inline" title="订单详情" description={workbench.selectedOrder.id} onClose={() => workbench.setSelectedOrderId(null)} className="game-order-drawer" width="100%"><WorkbenchOrderDetailPanel logic={workbench} onChat={(order) => { setChatCompanionId(null); setChatConversationOverride({ title: order.player, initials: order.playerInitials }); social.startDirectMessageToUser(`workbench-player-${order.player}`, order.player, order.playerInitials); setCompanionChatOpen(true) }} /></RightDrawer> : navigation.panel === 'club-reviews' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部评价" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><ClubReviewsPanel /></RightDrawer> : navigation.panel === 'club-announcements' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部公告" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId))} onRetry={() => setPageState('normal')} presentation="panel" /></RightDrawer> : navigation.panel === 'club-groups' && navigation.page === 'club-detail' ? <RightDrawer mode="inline" title="俱乐部群聊" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><ClubGroupsPanel groups={social.clubGroups.filter((group) => group.clubId === navigation.clubId)} onApply={social.applyToClubGroup} onOpenChat={(groupId) => { social.openClubGroupChat(groupId); navigation.goToPage('messages') }} /></RightDrawer> : navigation.panel === 'diamond-ledger' ? <RightDrawer mode="inline" title="钻石明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.diamondTransactions} /></RightDrawer> : navigation.panel === 'bean-ledger' ? <RightDrawer mode="inline" title="糖豆明细" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><WalletLedgerPanel entries={account.beanTransactions} /></RightDrawer> : premiumCardsDrawer ? premiumCardsDrawer : navigation.panel === 'coupons' ? <RightDrawer mode="inline" title="我的优惠券" onClose={navigation.closePanel} className="game-companion-drawer" width="100%"><CouponsPage pageState={pageState} onRetry={() => setPageState('normal')} coupons={account.coupons} onBack={navigation.closePanel} /></RightDrawer> : (navigation.page === 'club-detail' || navigation.page === 'talents') && navigation.companion ? <RightDrawer
       mode="inline"
       title={navigation.companion.name}
       onClose={navigation.closeCompanion}
@@ -684,6 +707,14 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onRequestEarlyEnd={account.requestEarlyEnd}
       onRenewOrder={account.renewOrder}
       onOpenRecharge={() => { setRechargeReturnLabel('返回订单'); setCheckoutRechargeOpen(true) }}
+      workbench={workbench}
+      examCandidateOrders={examCandidateOrderRecords}
+      examProctorOrders={examProctorOrderRecords}
+      selectedExamOrderId={selectedExamOrder?.id ?? null}
+      onSelectExamOrder={(order, role) => { setSelectedExamOrder(order && role ? { id: order.id, role } : null); setSelectedOrderId(null); workbench.setSelectedOrderId(null) }}
+      onCancelExamOrder={(orderId) => setExamCandidateOrderRecords(current => current.map(order => order.id === orderId ? { ...order, status: '已取消' } : order))}
+      onSubmitExamMaterials={(orderId, submission) => setExamProctorOrderRecords(current => current.map(order => order.id === orderId ? { ...order, status: submission.result, submission } : order))}
+      onPayExamOrder={() => navigation.goToPage('checkout')}
       onReorder={(order) => {
         const services = servicesByCompanion[order.companionId] ?? []
         const matchingService = services.find((service) => service.playName === order.serviceName && service.levelName === order.levelName && account.getGameName(service.gameId) === order.gameName)
