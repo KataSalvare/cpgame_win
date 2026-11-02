@@ -296,7 +296,7 @@ function AppContent() {
           onToggleSidebarCollapsed={() => setSidebarCollapsed(prev => !prev)}
         />
 
-        <UpdateNotice theme={theme} />
+        <UpdateNotice theme={theme} pageId={currentPage?.dirName} />
 
         <main className="flex-1 overflow-hidden flex flex-col relative tool-workspace">
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1100] pointer-events-none">

@@ -53,8 +53,8 @@
 
 ### 页面更新提示
 
-- `npm run build` 会在 `dist/version.json` 写入发布信息；版本号由根目录 `release-version.txt` 管理，初始为 `v1.0.0`，Git commit 短 SHA（无 Git 元数据时用构建 ID）用于识别部署内容。
-- 前端在生产环境每 60 秒检查 `/version.json`。检测到部署标识改变后显示刷新按钮；刷新由开发者主动触发。
+- `npm run build` 会在 `dist/version.json` 写入发布信息；版本号由根目录 `release-version.txt` 管理，初始为 `v1.0.0`，同时记录 Git commit 短 SHA（无 Git 元数据时用构建 ID）、工作台公共代码标识和各原型内容标识。
+- 前端在生产环境每 60 秒检查 `/version.json`。仅当前原型内容标识发生变化时显示刷新按钮；公共工作台代码变化会提示所有原型。当前按原型目录判定更新，目录下的多个路由共享同一更新范围。刷新由开发者主动触发。
 - 新建正式版本时，将 `release-version.txt` 更新为新版本号（例如 `v1.0.1`）；每次代码部署即使版本号未变，构建标识仍能发现部署更新。
 - `public/_headers` 对 `/version.json` 设置 `Cache-Control: no-store`，确保检查不会读到旧版本信息。
 - 本地开发不显示更新提示；构建产物的 `dist/version.json` 是生成文件，不提交到仓库。

@@ -5,8 +5,11 @@ const CHECK_INTERVAL_MS = 60_000
 
 type BuildInfo = typeof __BUILD_INFO__
 
-export function UpdateNotice({ theme }: { theme: 'dark' | 'light' }) {
-  const [availableVersion, setAvailableVersion] = useState<BuildInfo | null>(null)
+export function UpdateNotice({ theme, pageId }: { theme: 'dark' | 'light'; pageId?: string }) {
+  const [availableUpdate, setAvailableUpdate] = useState<{ pageId?: string; info: BuildInfo } | null>(null)
+  const availableVersion = availableUpdate && availableUpdate.pageId === pageId
+    ? availableUpdate.info
+    : null
 
   useEffect(() => {
     if (!import.meta.env.PROD) return
@@ -17,8 +20,14 @@ export function UpdateNotice({ theme }: { theme: 'dark' | 'light' }) {
         const response = await fetch(`/version.json?check=${Date.now()}`, { cache: 'no-store' })
         if (!response.ok) return
         const latest = await response.json() as BuildInfo
-        if (active && latest.revision && latest.revision !== __BUILD_INFO__.revision) {
-          setAvailableVersion(latest)
+        const currentPageRevision = pageId ? __BUILD_INFO__.pages[pageId] : undefined
+        const latestPageRevision = pageId ? latest.pages[pageId] : undefined
+        const pageHasUpdate = pageId
+          ? latestPageRevision !== undefined && latestPageRevision !== currentPageRevision
+          : latest.coreRevision !== __BUILD_INFO__.coreRevision
+
+        if (active) {
+          setAvailableUpdate(pageHasUpdate ? { pageId, info: latest } : null)
         }
       } catch {
         // A temporary network error should not interrupt prototype work.
@@ -31,7 +40,7 @@ export function UpdateNotice({ theme }: { theme: 'dark' | 'light' }) {
       active = false
       window.clearInterval(timer)
     }
-  }, [])
+  }, [pageId])
 
   if (!availableVersion) return null
 
@@ -41,7 +50,7 @@ export function UpdateNotice({ theme }: { theme: 'dark' | 'light' }) {
         ? 'border-sky-400/20 bg-sky-950/70 text-sky-100'
         : 'border-sky-200 bg-sky-50 text-sky-950'
     }`} role="status" aria-live="polite">
-      <span>新版本 {availableVersion.version}（{availableVersion.revision}）已发布，刷新后使用最新原型。</span>
+      <span>当前页面有更新：{availableVersion.version}（{availableVersion.revision}），刷新后查看最新原型。</span>
       <button
         type="button"
         onClick={() => window.location.reload()}
