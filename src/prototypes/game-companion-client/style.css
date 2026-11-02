@@ -253,7 +253,9 @@
 .club-info-dialog { max-height: min(760px, calc(100% - 32px)); }
 .club-info-dialog > .windows-dialog-panel__content { padding: 0; }
 .club-admin-preview-dialog .windows-dialog-panel__content { display: flex; min-height: 0; justify-content: center; overflow: auto; padding: 12px; }
-.club-admin-preview-dialog img { display: block; width: 100%; height: auto; max-height: min(78vh, 820px); object-fit: contain; }
+.club-admin-preview-dialog__image-wrap { position: relative; width: 100%; align-self: flex-start; }
+.club-admin-preview-dialog__image-wrap img { display: block; width: 100%; height: auto; max-height: min(78vh, 820px); object-fit: contain; }
+.club-admin-preview-dialog__watermark { position: absolute; top: 50%; left: 50%; color: rgb(190 24 24 / 72%); font-size: clamp(18px, 2vw, 30px); font-style: italic; font-weight: 700; line-height: 1.4; white-space: nowrap; text-shadow: 0 1px 2px rgb(255 255 255 / 85%), 0 0 8px rgb(255 255 255 / 55%); transform: translate(-50%, -50%) rotate(-12deg); pointer-events: none; }
 .club-info-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--prototype-border, #e5e7eb); padding: 0 20px; background: var(--prototype-canvas, #f3f4f6); }
 .club-info-tabs [role="tab"] { min-width: 136px; min-height: 40px; border: 1px solid transparent; border-bottom: 0; border-radius: 20px 20px 0 0; padding: 0 20px; background: transparent; color: var(--prototype-text-secondary, #4b5563); font: inherit; font-size: 14px; cursor: pointer; }
 .club-info-tabs [role="tab"][aria-selected="true"] { border-color: var(--prototype-border-strong, #d1d5db); background: var(--prototype-surface, #fff); color: var(--prototype-text, #1f2937); }

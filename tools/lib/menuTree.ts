@@ -1,5 +1,6 @@
 export interface MenuNode {
   id: string
+  label?: string
   children: MenuNode[]
 }
 
@@ -15,10 +16,11 @@ const sanitizeNodes = (value: unknown, allowed: Set<string>): MenuNode[] => {
   const seen = new Set<string>()
   const visit = (items: unknown[]): MenuNode[] => items.flatMap((item) => {
     if (!item || typeof item !== 'object') return []
-    const candidate = item as { id?: unknown; children?: unknown }
+    const candidate = item as { id?: unknown; label?: unknown; children?: unknown }
     if (typeof candidate.id !== 'string' || !allowed.has(candidate.id) || seen.has(candidate.id)) return []
     seen.add(candidate.id)
-    return [{ id: candidate.id, children: visit(Array.isArray(candidate.children) ? candidate.children : []) }]
+    const label = typeof candidate.label === 'string' && candidate.label.trim() ? candidate.label.trim() : undefined
+    return [{ id: candidate.id, ...(label ? { label } : {}), children: visit(Array.isArray(candidate.children) ? candidate.children : []) }]
   })
   return visit(value)
 }
@@ -110,4 +112,11 @@ export const moveMenuNode = (tree: MenuTree, category: string, draggedId: string
   const collectIds = (items: MenuNode[]) => items.forEach(item => { allowed.add(item.id); collectIds(item.children) })
   collectIds(current)
   return { ...tree, [category]: sanitizeNodes(result.nodes, allowed) }
+}
+
+export const renameMenuNode = (tree: MenuTree, category: string, id: string, label: string): MenuTree => {
+  const rename = (nodes: MenuNode[]): MenuNode[] => nodes.map(node => node.id === id
+    ? { ...node, label: label.trim() || undefined }
+    : { ...node, children: rename(node.children) })
+  return { ...tree, [category]: rename(tree[category] ?? []) }
 }

@@ -52,7 +52,7 @@ function AppContent() {
       const hashTool = params.get('tool')
       const entryView = params.get('support') === 'club' ? 'club-support'
         : params.get('support') === 'platform' ? 'platform-support'
-          : hashTool && ['help-center', 'screen-recording', 'client-notifications', 'close-app', 'quick-panel'].includes(hashTool) ? hashTool
+          : hashTool && ['help-center', 'screen-recording', 'client-notifications', 'close-app', 'quick-panel', 'quick-match', 'identity-verification', 'global-search'].includes(hashTool) ? hashTool
         : hashPage === 'profile' && params.get('section') === 'onboarding' ? params.get('onboarding') === 'companion' ? 'profile-onboarding' : params.get('onboarding') === 'club' ? 'profile-club-onboarding' : 'profile-onboarding-center'
         : hashPage === 'profile' && params.get('section') === 'clubs' ? 'profile-clubs'
           : hashPage === 'profile' && params.get('section') === 'cancel-account' ? 'profile-cancel-account'
@@ -64,9 +64,12 @@ function AppContent() {
                   : hashPage === 'home' && params.get('tool') ? params.get('tool')!
                 : hashPage === 'voice-room' && params.get('voiceFrom') === 'club'
         ? 'club-voice-room'
-        : hashPage === 'recharge' ? 'wallet-recharge'
+        : hashPage === 'recharge' || hashPage === 'wallet' && params.get('panel') === 'diamond-recharge' ? 'wallet-recharge'
+          : hashPage === 'wallet' && params.get('panel') === 'coupons' ? 'coupons'
+          : hashPage === 'club-detail' && params.get('panel') === 'club-announcements' ? 'club-announcements'
           : hashPage === 'club-detail' && params.get('panel') === 'club-cards' ? 'club-cards'
             : hashPage === 'wallet' && params.get('panel') === 'my-cards' ? 'my-cards'
+              : (hashPage === 'club-detail' || hashPage === 'talents') && params.has('companion') ? 'companion-detail'
               : hashPage
       const matchingPage = pages.find((page) => page.dirName === currentPage.dirName && page.entryView === entryView)
       if (matchingPage && matchingPage.path !== window.location.pathname) {
@@ -97,12 +100,18 @@ function AppContent() {
       if (requestedPage && requestedPage.path !== currentPage.path) return
     }
     const expectedPage = currentPage.entryView === 'club-voice-room' ? 'voice-room'
-      : currentPage.entryView === 'quick-match' ? 'quick-match'
-        : currentPage.entryView === 'wallet-recharge' ? 'recharge'
+      : currentPage.entryView === 'quick-match' ? params.get('tool') === 'quick-match' ? params.get('page') ?? 'home' : 'home'
+      : currentPage.entryView === 'companion-detail' ? params.get('page') === 'talents' ? 'talents' : 'club-detail'
+        : currentPage.entryView === 'identity-verification' && params.get('page') === 'profile' && params.get('tool') === 'identity-verification' ? 'profile'
+          : currentPage.entryView === 'identity-verification' ? 'identity-verification'
+      : currentPage.entryView === 'wallet-recharge' ? params.get('page') === 'wallet' && params.get('panel') === 'diamond-recharge' ? 'wallet' : 'recharge'
+        : currentPage.entryView === 'coupons' ? 'wallet'
+        : currentPage.entryView === 'club-announcements' || currentPage.entryView === 'club-cards' ? 'club-detail'
+          : currentPage.entryView === 'my-cards' ? 'wallet'
           : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' || currentPage.entryView === 'profile-clubs' || currentPage.entryView === 'profile-cancel-account' || currentPage.entryView === 'profile-wealth' || currentPage.entryView === 'profile-visits' || currentPage.entryView === 'profile-social' ? 'profile'
-            : currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' ? params.get('page') ?? (currentPage.entryView === 'club-support' ? 'messages' : 'home')
+      : currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' ? params.get('page') ?? (currentPage.entryView === 'club-support' ? 'messages' : 'home')
           : currentPage.entryView
-    const preservesUnderlyingRoute = currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel'
+    const preservesUnderlyingRoute = currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'quick-match' || currentPage.entryView === 'companion-detail' || currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
     const expectedVoiceFrom = preservesUnderlyingRoute ? params.get('voiceFrom') : currentPage.entryView === 'club-voice-room' ? 'club' : null
     const expectedSection = preservesUnderlyingRoute ? params.get('section') : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' ? 'onboarding'
       : currentPage.entryView === 'profile-clubs' ? 'clubs'
@@ -115,13 +124,25 @@ function AppContent() {
     const expectedOnboarding = preservesUnderlyingRoute ? params.get('onboarding')
       : currentPage.entryView === 'profile-onboarding' ? 'companion'
         : currentPage.entryView === 'profile-club-onboarding' ? 'club' : null
-    const expectedTool = currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel'
+    const expectedTool = currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'quick-match' || currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
       ? currentPage.entryView : null
+    const expectedSecurity = currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
+      ? params.get('security') === 'flow' ? 'flow' : 'real-name'
+      : null
+    const expectedCompanion = currentPage.entryView === 'companion-detail' ? params.get('companion') ?? 'companion-001' : null
+    const expectedPanel = currentPage.entryView === 'wallet-recharge' && expectedPage === 'wallet' ? 'diamond-recharge'
+      : currentPage.entryView === 'coupons' ? 'coupons'
+        : currentPage.entryView === 'club-announcements' ? 'club-announcements'
+          : currentPage.entryView === 'club-cards' ? 'club-cards'
+            : currentPage.entryView === 'my-cards' ? 'my-cards' : null
     if (params.get('page') === expectedPage
       && (expectedVoiceFrom == null || params.get('voiceFrom') === expectedVoiceFrom)
       && (expectedSection == null ? !params.has('section') : params.get('section') === expectedSection)
       && (expectedSupport == null ? !params.has('support') : params.get('support') === expectedSupport)
       && (expectedOnboarding == null ? !params.has('onboarding') : params.get('onboarding') === expectedOnboarding)
+      && (expectedPanel == null ? !params.has('panel') : params.get('panel') === expectedPanel)
+      && (expectedSecurity == null ? !params.has('security') : params.get('security') === expectedSecurity)
+      && (expectedCompanion == null ? !params.has('companion') : params.get('companion') === expectedCompanion)
       && (expectedTool == null ? !params.has('tool') : params.get('tool') === expectedTool)) return
     params.set('page', expectedPage)
     if (expectedVoiceFrom) params.set('voiceFrom', expectedVoiceFrom)
@@ -132,6 +153,11 @@ function AppContent() {
     else params.delete('support')
     if (expectedOnboarding) params.set('onboarding', expectedOnboarding)
     else params.delete('onboarding')
+    if (expectedPanel) params.set('panel', expectedPanel)
+    else if (currentPage.entryView === 'wallet-recharge' || currentPage.entryView === 'coupons') params.delete('panel')
+    if (expectedSecurity) params.set('security', expectedSecurity)
+    else params.delete('security')
+    if (expectedCompanion) params.set('companion', expectedCompanion)
     if (expectedTool) params.set('tool', expectedTool)
     else params.delete('tool')
     window.location.hash = params.toString()

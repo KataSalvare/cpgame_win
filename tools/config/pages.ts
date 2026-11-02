@@ -63,11 +63,12 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
   'game-companion-client': [
     { path: '/game-companion-login', label: '登录', entryView: 'login', states: loginPageStates },
     { path: '/game-companion-identity-verification', label: '实名认证', entryView: 'identity-verification', states: identityVerificationPageStates },
+    { path: '/game-companion-search', label: '搜索', entryView: 'global-search', defaultHash: '#page=home&tool=global-search', states: demoPageStates },
     { path: '/game-companion-client', label: '首页', entryView: 'home', states: demoPageStates },
-    { path: '/game-companion-quick-match', label: '一键匹配', entryView: 'quick-match', states: demoPageStates },
+    { path: '/game-companion-quick-match', label: '一键匹配', entryView: 'quick-match', defaultHash: '#page=home&tool=quick-match', states: demoPageStates },
     { path: '/game-companion-talents', label: '大神', entryView: 'talents', states: demoPageStates },
     { path: '/game-companion-club-detail', label: '俱乐部详情', entryView: 'club-detail', states: demoPageStates },
-    { path: '/game-companion-companion-detail', label: '陪玩详情', entryView: 'companion-detail', states: demoPageStates },
+    { path: '/game-companion-companion-detail', label: '陪玩详情', entryView: 'companion-detail', defaultHash: '#page=club-detail&club=club-001&companion=companion-001', states: demoPageStates },
     { path: '/game-companion-checkout', label: '下单结算', entryView: 'checkout', states: demoPageStates },
     { path: '/game-companion-profile', label: '个人中心', entryView: 'profile', states: demoPageStates },
     { path: '/game-companion-profile-wealth', label: '财富等级', entryView: 'profile-wealth', defaultHash: '#page=profile&section=wealth', states: demoPageStates },
@@ -98,7 +99,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-woodpecker', label: '啄木鸟', entryView: 'woodpecker', states: demoPageStates },
     { path: '/game-companion-workbench', label: '陪玩工作台', entryView: 'workbench', states: demoPageStates },
     { path: '/game-companion-announcements', label: '平台公告', entryView: 'announcements', states: demoPageStates },
-    { path: '/game-companion-club-announcements', label: '俱乐部公告', entryView: 'club-detail', defaultHash: '#page=club-detail&club=club-001&panel=club-announcements', states: demoPageStates },
+    { path: '/game-companion-club-announcements', label: '俱乐部公告', entryView: 'club-announcements', defaultHash: '#page=club-detail&club=club-001&panel=club-announcements', states: demoPageStates },
   ],
 }
 

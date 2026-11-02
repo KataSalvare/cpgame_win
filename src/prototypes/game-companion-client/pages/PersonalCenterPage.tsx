@@ -13,7 +13,6 @@ import { favoriteClubs, favoriteUsers, favoriteVoiceRooms, personalFans } from '
 import { personalGiftInventory, profileFootprints, profileRoomVisits, profileVisitors } from '../data/personalCenterMockData'
 import { type BlockedProfile } from '../data/personalSettingsMockData'
 import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
-import { IdentityVerificationFlow } from './IdentityVerificationFlow'
 import { navigateToProfileSection, type ProfileSection } from '../profileNavigation'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
@@ -105,8 +104,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   const [clubApplication, setClubApplication] = useState(emptyClubApplication)
   const [applicationSubmitted, setApplicationSubmitted] = useState<Record<ApplicationKind, boolean>>({ companion: false, club: false })
   const [activeSetting, setActiveSetting] = useState<'security' | 'blacklist' | 'logout' | null>(() => initialSecurityView ? 'security' : null)
-  const [identityFlowOpen, setIdentityFlowOpen] = useState(false)
-  const [realNameEntryClicks, setRealNameEntryClicks] = useState(0)
+  const [realNameEntryClicks, setRealNameEntryClicks] = useState(() => Number(sessionStorage.getItem('personal-real-name-entry-clicks') ?? '0'))
 
   const joinedClub = useMemo(() => clubs.find((club) => club.id === joinedClubId) ?? null, [joinedClubId])
 
@@ -287,8 +285,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
         <p className="personal-demo-note personal-field--full">申请状态仅在当前原型会话中展示，不代表正式审核结果。</p>
       </form>}
     </DialogPanel>}
-    {activeSetting === 'security' && <AccountSecurityDialog initialView={initialSecurityView} phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} realNameEntryClicks={realNameEntryClicks} onRealNameEntryClick={() => { const isVerified = realNameEntryClicks === 0; setRealNameEntryClicks((count) => count + 1); if (!isVerified) { setActiveSetting(null); setIdentityFlowOpen(true) } return isVerified }} onNavigateClosure={() => navigateToProfileSection('cancel-account')} onClose={() => setActiveSetting(null)} />}
-    {identityFlowOpen && <IdentityVerificationFlow onClose={() => setIdentityFlowOpen(false)} />}
+    {activeSetting === 'security' && <AccountSecurityDialog initialView={initialSecurityView} phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} realNameEntryClicks={realNameEntryClicks} onRealNameEntryClick={() => { const params = new URLSearchParams(window.location.hash.slice(1)); const wasViewed = realNameEntryClicks > 0 || params.get('realNameVisited') === '1' || Number(sessionStorage.getItem('personal-real-name-entry-clicks') ?? '0') > 0; const isVerified = !wasViewed; const nextClickCount = Math.max(1, realNameEntryClicks + 1); setRealNameEntryClicks(nextClickCount); sessionStorage.setItem('personal-real-name-entry-clicks', String(nextClickCount)); params.set('page', 'profile'); params.set('tool', 'identity-verification'); params.set('realNameVisited', '1'); if (isVerified) params.set('security', 'real-name'); else { params.set('security', 'flow'); setActiveSetting(null) } window.location.hash = params.toString(); return isVerified }} onNavigateClosure={() => navigateToProfileSection('cancel-account')} onBackFromRealName={() => navigateToProfileSection('profile')} onClose={() => { setActiveSetting(null); if (initialSecurityView === 'real-name') navigateToProfileSection('profile') }} />}
     {activeSetting === 'blacklist' && <BlacklistDialog profiles={blockedProfiles} onRemove={onUnblockProfile} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'logout' && <DialogPanel overlayId="logout-confirmation-dialog" title="退出登录" description="确认退出当前账号并返回登录页？" onClose={() => setActiveSetting(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setActiveSetting(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={onLogout}>确认退出</button></>}><p className="social-dialog-copy">退出后将返回登录页面。本次原型不会清除或提交真实账号数据。</p></DialogPanel>}
   </div>
@@ -375,7 +372,7 @@ function maskPhone(phone: string) {
 
 type SecurityView = 'overview' | 'real-name' | 'phone' | 'devices' | 'closure-terms' | 'closure-warning' | 'closure-phone' | 'closure-complete'
 
-function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, endedDeviceIds, onEndDevice, diamondBalance, beanBalance, realNameEntryClicks, onRealNameEntryClick, onNavigateClosure, onClose }: {
+function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, endedDeviceIds, onEndDevice, diamondBalance, beanBalance, realNameEntryClicks, onRealNameEntryClick, onNavigateClosure, onBackFromRealName, onClose }: {
   initialView?: SecurityView
   phone: string
   onSavePhone: (phone: string) => void
@@ -386,6 +383,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
   realNameEntryClicks: number
   onRealNameEntryClick: () => boolean
   onNavigateClosure: () => void
+  onBackFromRealName: () => void
   onClose: () => void
 }) {
   const [view, setView] = useState<SecurityView>(initialView)
@@ -438,7 +436,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
   const footer = pendingDevice
     ? <><button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { onEndDevice(pendingDevice.id); setPendingDeviceId(null); setFeedback('已结束该设备的登录') }}>确认结束登录</button></>
     : view === 'overview' || view === 'devices' || view === 'closure-complete' || view === 'real-name'
-      ? <button type="button" className="client-button client-button--secondary" onClick={view === 'overview' || view === 'closure-complete' ? onClose : backToOverview}>{view === 'devices' || view === 'real-name' ? '返回' : '完成'}</button>
+      ? <button type="button" className="client-button client-button--secondary" onClick={view === 'overview' || view === 'closure-complete' ? onClose : () => { backToOverview(); if (view === 'real-name') onBackFromRealName() }}>{view === 'devices' || view === 'real-name' ? '返回' : '完成'}</button>
       : view === 'phone'
         ? <><button type="button" className="client-button client-button--secondary" onClick={backToOverview}>返回</button><button type="submit" form="personal-phone-form" className="client-button client-button--primary">确认更换</button></>
         : view === 'closure-terms'

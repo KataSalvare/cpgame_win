@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { ArrowLeft, Bell, Headphones, MessageCircle, ShieldCheck, ShoppingCart, Star, UsersRound } from 'lucide-react'
 import type { Club } from '../data/mockData'
-import type { ClientOrder } from '../data/accountMockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { FollowIconButton } from '../components/FollowIconButton'
 import { ClubInfoDialog, ClubMoreActions, type ClubInfoTab } from '../components/ClubMoreActions'
@@ -9,7 +8,6 @@ import { CompanionDirectory } from '../components/CompanionDirectory'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
 import type { useSocialLogic } from '../hooks/useSocialLogic'
-import { ClubSupportChatPanel, ClubSupportSelectionDialog } from './SocialPages'
 
 type Props = {
   club: Club
@@ -20,17 +18,15 @@ type Props = {
   onOpenVoiceRoom: () => void
   onOpenClubGroups: () => void
   onOpenMatch: () => void
+  onOpenClubSupport: () => void
   onOpenPremiumCards: () => void
   onOpenAnnouncements: () => void
   onOpenClubReviews: () => void
   social: ReturnType<typeof useSocialLogic>
-  orders: ClientOrder[]
   onRetry: () => void
 }
 
-export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenPremiumCards, onOpenAnnouncements, onOpenClubReviews, social, orders, onRetry }: Props) {
-  const [supportChatOpen, setSupportChatOpen] = useState(false)
-  const [supportSelectionOpen, setSupportSelectionOpen] = useState(false)
+export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenClubSupport, onOpenPremiumCards, onOpenAnnouncements, onOpenClubReviews, social, onRetry }: Props) {
   const [clubInfoTab, setClubInfoTab] = useState<ClubInfoTab | null>(null)
   if (pageState !== 'normal') {
     return <div className="client-content client-content--narrow-state">
@@ -65,7 +61,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
         <DisplayAction icon={<ShoppingCart size={17} />} label="自助下单" onClick={onOpenMatch} variant="primary" />
         </div>
         <div className="club-profile-card__secondary-actions" role="group" aria-label="俱乐部服务">
-        <DisplayAction icon={<Headphones size={15} />} label="客服" onClick={() => setSupportSelectionOpen(true)} />
+        <DisplayAction icon={<Headphones size={15} />} label="客服" onClick={onOpenClubSupport} />
         <DisplayAction icon={<ShieldCheck size={15} />} label="尊享卡" onClick={onOpenPremiumCards} />
         <DisplayAction icon={<Star size={15} />} label="价目表" onClick={() => setClubInfoTab('pricing')} />
         </div>
@@ -78,8 +74,6 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
 
     <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
     {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
-    {supportSelectionOpen && <ClubSupportSelectionDialog onClose={() => setSupportSelectionOpen(false)} onConsult={() => { setSupportSelectionOpen(false); social.markConversationRead('direct-club-support'); setSupportChatOpen(true) }} />}
-    {supportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={orders} onClose={() => setSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}
   </div>
 }
 

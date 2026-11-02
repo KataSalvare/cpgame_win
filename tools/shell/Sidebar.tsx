@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type React from 'react'
-import { FileText, Monitor, Palette, Smartphone, XIcon, Search, ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronsDown, ChevronsUp, FileText, Maximize2, Minimize2, Monitor, Palette, Pencil, Search, Smartphone, XIcon } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { pages, type PageCategory } from '../config/pages'
 import { docModules } from '../config/docs'
 import { getThemeInfo, themeModules } from '../config/themes'
-import { loadMenuTree, loadMenuTreeFromFile, moveMenuNode, saveMenuTree, type MenuNode } from '../lib/menuTree'
+import { loadMenuTree, loadMenuTreeFromFile, moveMenuNode, renameMenuNode, saveMenuTree, type MenuNode } from '../lib/menuTree'
 
 interface SidebarProps {
   projectName: string
@@ -20,11 +20,17 @@ interface PageListProps {
   onMove: (draggedId: string, targetId: string, placement: 'before' | 'after' | 'inside') => void
   expanded: Set<string>
   onToggle: (id: string) => void
+  onRename: (id: string, label: string) => void
+  onToggleAll: (open: boolean) => void
   dragEnabled: boolean
 }
 
-const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle, dragEnabled }: PageListProps) => {
+const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle, onRename, onToggleAll, dragEnabled }: PageListProps) => {
   const [dropTarget, setDropTarget] = useState<{ id: string; placement: 'before' | 'after' | 'inside' } | null>(null)
+  const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingLabel, setEditingLabel] = useState('')
+  const contextRef = useRef<HTMLDivElement>(null)
   const pointerDrag = useRef<{ id: string; pointerId: number; startX: number; startY: number; active: boolean } | null>(null)
   const suppressClick = useRef(false)
   const pagesById = useMemo(() => new Map(pages.map(page => [page.path, page])), [])
@@ -37,6 +43,20 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
     })
     return filter(tree)
   }, [tree, allowedIds])
+
+  useEffect(() => {
+    if (!contextMenu) return
+    const dismiss = (event: MouseEvent) => {
+      if (event.target instanceof Node && !contextRef.current?.contains(event.target)) setContextMenu(null)
+    }
+    const keydown = (event: KeyboardEvent) => { if (event.key === 'Escape') setContextMenu(null) }
+    window.addEventListener('pointerdown', dismiss)
+    window.addEventListener('keydown', keydown)
+    return () => {
+      window.removeEventListener('pointerdown', dismiss)
+      window.removeEventListener('keydown', keydown)
+    }
+  }, [contextMenu])
 
   const getDropTarget = (clientX: number, clientY: number, sourceId: string) => {
     const element = document.elementFromPoint(clientX, clientY)
@@ -55,6 +75,8 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
   const renderNodes = (nodes: MenuNode[], depth = 0): React.ReactNode => nodes.map((node) => {
     const page = pagesById.get(node.id) ?? pages.find(item => item.path === node.id)
     if (!page) return null
+    const PageIcon = page.entryView === 'global-search' ? Search : Icon
+    const label = node.label || page.label
     const hasChildren = node.children.length > 0
     const isOpen = expanded.has(node.id)
     const placement = dropTarget?.id === node.id ? dropTarget.placement : null
@@ -64,6 +86,10 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
           className={`group relative flex items-center rounded-xl ${dragEnabled ? 'cursor-grab active:cursor-grabbing' : ''} ${placement === 'inside' ? 'ring-1 ring-[var(--tool-focus)] bg-[var(--tool-surface-hover)]' : ''} ${placement === 'before' ? 'before:absolute before:inset-x-2 before:top-0 before:border-t-2 before:border-[var(--tool-focus)]' : ''} ${placement === 'after' ? 'after:absolute after:inset-x-2 after:bottom-0 after:border-b-2 after:border-[var(--tool-focus)]' : ''}`}
           style={{ marginLeft: depth * 14 }}
           data-menu-id={node.id}
+          onContextMenu={(event) => {
+            event.preventDefault()
+            setContextMenu({ id: node.id, x: Math.min(event.clientX, window.innerWidth - 190), y: Math.min(event.clientY, window.innerHeight - 360) })
+          }}
           onPointerDown={(event) => {
             if (!dragEnabled || event.button !== 0 || (event.target as HTMLElement).closest('button')) return
             pointerDrag.current = { id: node.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false }
@@ -101,13 +127,19 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle,
           <NavLink
             draggable={false}
             to={`${page.path}${page.defaultHash ?? ''}`}
-            title={page.label}
+            title={label}
             className={({ isActive }) => `flex min-w-0 flex-1 items-center gap-2.5 px-2 py-2 rounded-xl text-xs leading-5 tool-control ${isActive ? 'tool-menu-active-light dark:tool-menu-active-dark' : 'text-[var(--tool-text-muted)] hover:bg-[var(--tool-surface-hover)] hover:text-[var(--tool-text)]'}`}
           >
-            {({ isActive }) => <><Icon size={15} className="shrink-0 opacity-80" /><span className="truncate font-medium">{page.label}</span>{isActive && <span className="sr-only">当前页面</span>}</>}
+            {({ isActive }) => <><PageIcon size={15} className="shrink-0 opacity-80" />{editingId === node.id ? <input autoFocus value={editingLabel} aria-label="导航名称" onChange={event => setEditingLabel(event.target.value)} onClick={event => event.preventDefault()} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); onRename(node.id, editingLabel); setEditingId(null) } if (event.key === 'Escape') { event.preventDefault(); setEditingId(null) } }} onBlur={() => { if (editingId === node.id) { onRename(node.id, editingLabel); setEditingId(null) } }} className="min-w-0 flex-1 bg-transparent text-xs outline-none border-b border-[var(--tool-focus)]" /> : <span className="truncate font-medium">{label}</span>}{isActive && <span className="sr-only">当前页面</span>}</>}
           </NavLink>
-          {hasChildren && <button type="button" aria-label={`${isOpen ? '折叠' : '展开'}${page.label}`} onClick={() => onToggle(node.id)} className="mr-1 rounded p-1 text-[var(--tool-text-subtle)] hover:bg-[var(--tool-surface-hover)]"><ChevronDown size={13} className={`transition-transform ${isOpen ? '' : '-rotate-90'}`} /></button>}
+          {hasChildren && <button type="button" aria-label={`${isOpen ? '折叠' : '展开'}${label}`} onClick={() => onToggle(node.id)} className="mr-1 rounded p-1 text-[var(--tool-text-subtle)] hover:bg-[var(--tool-surface-hover)]"><ChevronDown size={13} className={`transition-transform ${isOpen ? '' : '-rotate-90'}`} /></button>}
         </div>
+        {contextMenu?.id === node.id && <div ref={contextRef} role="menu" className="fixed z-[1200] min-w-44 rounded-lg border border-[var(--tool-border)] bg-[var(--tool-surface-raised)] p-1 shadow-xl" style={{ left: contextMenu.x, top: contextMenu.y }}>
+          {hasChildren && <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-xs text-[var(--tool-text)] hover:bg-[var(--tool-surface-hover)]" onClick={() => { onToggle(node.id); setContextMenu(null) }}>{isOpen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}{isOpen ? '折叠当前' : '展开当前'}</button>}
+          <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-xs text-[var(--tool-text)] hover:bg-[var(--tool-surface-hover)]" onClick={() => { onToggleAll(false); setContextMenu(null) }}><ChevronsDown size={14} />折叠全部</button>
+          <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-xs text-[var(--tool-text)] hover:bg-[var(--tool-surface-hover)]" onClick={() => { onToggleAll(true); setContextMenu(null) }}><ChevronsUp size={14} />展开全部</button>
+          <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-xs text-[var(--tool-text)] hover:bg-[var(--tool-surface-hover)]" onClick={() => { setEditingLabel(label); setEditingId(node.id); setContextMenu(null) }}><Pencil size={14} />重命名</button>
+        </div>}
         {hasChildren && isOpen && <div className="mt-0.5 space-y-0.5 border-l border-[var(--tool-border)] ml-3">{renderNodes(node.children, depth + 1)}</div>}
       </div>
     )
@@ -275,6 +307,17 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
     if (placement === 'inside') setExpandedMenuIds(current => new Set(current).add(targetId))
   }
   const toggleMenuNode = (id: string) => setExpandedMenuIds(current => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next })
+  const renameMenuItem = (category: PageCategory, id: string, label: string) => setMenuTree(current => renameMenuNode(current, category, id, label))
+  const toggleAllMenuNodes = (open: boolean) => {
+    const ids = new Set<string>()
+    const collect = (nodes: MenuNode[]) => nodes.forEach(node => { if (node.children.length) ids.add(node.id); collect(node.children) })
+    collect(menuTree[activeTab as PageCategory] ?? [])
+    setExpandedMenuIds(current => {
+      const next = new Set(current)
+      ids.forEach(id => open ? next.add(id) : next.delete(id))
+      return next
+    })
+  }
 
   const filteredPages = useMemo(() => {
     const categoryPages = pages.filter(p => p.category === activeTab as PageCategory)
@@ -398,10 +441,10 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
 
           <nav className="flex-1 overflow-y-auto px-2 pb-4" aria-label="原型工作区导航">
             {activeTab === 'frontend' && (
-              <PageList filteredPages={filteredPages} icon={Smartphone} tree={menuTree.frontend ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('frontend', dragged, target, placement)} dragEnabled={menuTreeReady} />
+              <PageList filteredPages={filteredPages} icon={Smartphone} tree={menuTree.frontend ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onToggleAll={toggleAllMenuNodes} onRename={(id, label) => renameMenuItem('frontend', id, label)} onMove={(dragged, target, placement) => handleMenuMove('frontend', dragged, target, placement)} dragEnabled={menuTreeReady} />
             )}
             {activeTab === 'admin' && (
-              <PageList filteredPages={filteredPages} icon={Monitor} tree={menuTree.admin ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('admin', dragged, target, placement)} dragEnabled={menuTreeReady} />
+              <PageList filteredPages={filteredPages} icon={Monitor} tree={menuTree.admin ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onToggleAll={toggleAllMenuNodes} onRename={(id, label) => renameMenuItem('admin', id, label)} onMove={(dragged, target, placement) => handleMenuMove('admin', dragged, target, placement)} dragEnabled={menuTreeReady} />
             )}
             {activeTab === 'themes' && (
               <ThemeNav searchQuery={searchQuery} />

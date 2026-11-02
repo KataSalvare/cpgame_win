@@ -2,10 +2,15 @@
   "frontend": [
     {
       "id": "/game-companion-login",
+      "label": "登录",
       "children": []
     },
     {
       "id": "/game-companion-identity-verification",
+      "children": []
+    },
+    {
+      "id": "/game-companion-search",
       "children": []
     },
     {
@@ -132,18 +137,18 @@
       "children": []
     },
     {
-      "id": "/game-companion-platform-support",
-      "children": []
-    },
-    {
       "id": "/game-companion-system-settings",
       "children": [
+        {
+          "id": "/game-companion-screen-recording",
+          "children": []
+        },
         {
           "id": "/game-companion-help-center",
           "children": []
         },
         {
-          "id": "/game-companion-screen-recording",
+          "id": "/game-companion-platform-support",
           "children": []
         },
         {
@@ -151,11 +156,11 @@
           "children": []
         },
         {
-          "id": "/game-companion-close-app",
+          "id": "/game-companion-quick-panel",
           "children": []
         },
         {
-          "id": "/game-companion-quick-panel",
+          "id": "/game-companion-close-app",
           "children": []
         }
       ]

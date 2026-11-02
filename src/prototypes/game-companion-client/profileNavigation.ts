@@ -5,6 +5,7 @@ export function navigateToProfileSection(section: ProfileSection, onboardingEntr
   params.set('page', 'profile')
   params.delete('tool')
   params.delete('support')
+  params.delete('security')
   params.delete('onboarding')
   if (section === 'profile') params.delete('section')
   else params.set('section', section)
@@ -13,7 +14,7 @@ export function navigateToProfileSection(section: ProfileSection, onboardingEntr
   if (window.location.hash.slice(1) !== nextHash) window.location.hash = nextHash
 }
 
-export type ClientOverlay = 'help-center' | 'screen-recording' | 'client-notifications' | 'close-app' | 'platform-support' | 'club-support'
+export type ClientOverlay = 'help-center' | 'screen-recording' | 'client-notifications' | 'close-app' | 'platform-support' | 'club-support' | 'global-search'
 
 export function navigateToClientOverlay(overlay: ClientOverlay) {
   const params = new URLSearchParams(window.location.hash.slice(1))
