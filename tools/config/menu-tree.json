@@ -98,7 +98,12 @@
       "children": [
         {
           "id": "/game-companion-club-voice-room",
-          "children": []
+          "children": [
+            {
+              "id": "/game-companion-club-voice-room-user",
+              "children": []
+            }
+          ]
         },
         {
           "id": "/game-companion-room-minimized",
