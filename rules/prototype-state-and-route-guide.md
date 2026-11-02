@@ -215,6 +215,7 @@ const allModules = import.meta.glob('../../src/prototypes/*/index.tsx', { eager:
 
 - [ ] 已在 `src/prototypes/<name>/index.tsx` 创建默认导出的入口组件。
 - [ ] 已在 `frontendPageConfig` 或 `adminPageConfig` 注册路径、名称、分类和 `states`。
+- [ ] 已在 `tools/config/menu-tree.json` 登记新页面并设置预期排序和父子层级；`tools/lib/menuTree.ts` 迁移旧本地菜单树时须按该默认树补入新增页面，并将合并结果保存到本地菜单文件。
 - [ ] 页面状态 `id` 与原型代码判断值一致。
 - [ ] 页面状态分支已补充 SPEC，mock 行为已标记为仅用于演示。
 - [ ] 用户状态没有混入页面状态；如果要接入工具层，先扩展独立的 `userStates` 维度。

@@ -1,3 +1,5 @@
+import defaultMenuTree from '../config/menu-tree.json'
+
 export interface MenuNode {
   id: string
   label?: string
@@ -25,28 +27,60 @@ const sanitizeNodes = (value: unknown, allowed: Set<string>): MenuNode[] => {
   return visit(value)
 }
 
+const mergeMissingDefaults = (savedNodes: MenuNode[], defaultNodes: MenuNode[], seen: Set<string>): MenuNode[] => {
+  const defaultById = new Map(defaultNodes.map(node => [node.id, node]))
+  const merged = savedNodes.map(node => {
+    const defaultNode = defaultById.get(node.id)
+    return {
+      ...node,
+      children: mergeMissingDefaults(node.children, defaultNode?.children ?? [], seen),
+    }
+  })
+  for (const node of defaultNodes) {
+    if (seen.has(node.id)) continue
+    seen.add(node.id)
+    const addMissingChildren = (children: MenuNode[]): MenuNode[] => children.flatMap(child => {
+      if (seen.has(child.id)) return []
+      seen.add(child.id)
+      return [{ ...child, children: addMissingChildren(child.children) }]
+    })
+    merged.push({ ...node, children: addMissingChildren(node.children) })
+  }
+  return merged
+}
+
 const restoreMenuTree = (saved: unknown, idsByCategory: Record<string, string[]>): MenuTree => {
-  const defaults = Object.fromEntries(Object.entries(idsByCategory).map(([category, ids]) => [category, makeFlatTree(ids)]))
-  if (!saved || typeof saved !== 'object') return defaults
   return Object.fromEntries(Object.entries(idsByCategory).map(([category, ids]) => {
     const allowed = new Set(ids)
-    const restored = sanitizeNodes((saved as Record<string, unknown>)[category], allowed)
-    const present = new Set<string>()
-    const collect = (nodes: MenuNode[]) => nodes.forEach(node => { present.add(node.id); collect(node.children) })
-    collect(restored)
-    return [category, [...restored, ...ids.filter(id => !present.has(id)).map(id => ({ id, children: [] }))]]
+    const savedNodes = saved && typeof saved === 'object'
+      ? sanitizeNodes((saved as Record<string, unknown>)[category], allowed)
+      : []
+    const seen = new Set<string>()
+    const collect = (nodes: MenuNode[]) => nodes.forEach(node => { seen.add(node.id); collect(node.children) })
+    collect(savedNodes)
+    const configured = (defaultMenuTree as MenuTree)[category] ?? makeFlatTree(ids)
+    const defaultNodes = sanitizeNodes(configured, allowed)
+    return [category, mergeMissingDefaults(savedNodes, defaultNodes, seen)]
   }))
 }
 
-export const loadMenuTree = (idsByCategory: Record<string, string[]>): MenuTree => {
+const readSavedMenuTree = (): unknown => {
   try {
-    return restoreMenuTree(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'), idsByCategory)
+    const saved = localStorage.getItem(STORAGE_KEY)
+    return saved ? JSON.parse(saved) : null
   } catch {
-    return restoreMenuTree(null, idsByCategory)
+    return null
   }
 }
 
+export const loadMenuTree = (idsByCategory: Record<string, string[]>): MenuTree => {
+  return restoreMenuTree(readSavedMenuTree(), idsByCategory)
+}
+
 export const loadMenuTreeFromFile = async (idsByCategory: Record<string, string[]>): Promise<MenuTree> => {
+  const savedLocally = readSavedMenuTree()
+  if (savedLocally) return restoreMenuTree(savedLocally, idsByCategory)
+
   const response = await fetch(FILE_API)
   if (!response.ok) throw new Error(`菜单文件读取失败：${response.status}`)
   const payload = await response.json() as { tree?: unknown }
@@ -60,6 +94,7 @@ let saveQueue: Promise<void> = Promise.resolve()
 
 export const saveMenuTree = (tree: MenuTree): Promise<void> => {
   const serialized = JSON.stringify(tree)
+  try { localStorage.setItem(STORAGE_KEY, serialized) } catch { /* The API remains the fallback source of truth. */ }
   saveQueue = saveQueue.catch(() => undefined).then(async () => {
     const response = await fetch(FILE_API, {
       method: 'POST',
@@ -69,7 +104,6 @@ export const saveMenuTree = (tree: MenuTree): Promise<void> => {
     if (!response.ok) throw new Error(`菜单文件保存失败：${response.status}`)
     const result = await response.json() as { success?: unknown }
     if (result.success !== true) throw new Error('菜单文件接口未确认保存结果')
-    try { localStorage.setItem(STORAGE_KEY, serialized) } catch { /* The local file remains the source of truth. */ }
   })
   return saveQueue
 }

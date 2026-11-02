@@ -30,6 +30,7 @@
 ## 原型索引
 
 - `src/prototypes/game-companion-client/`：玩家端陪玩平台；工具层按 `tools/config/pages.ts` 注册业务页面和快捷入口，内容层内部路由与个人中心模块以原型 SPEC 和 hash 为准。
+- 工具层新增页面时，同步在 `tools/config/menu-tree.json` 登记默认排序与父子层级；旧菜单树迁移后须保存新增节点到本地菜单文件。
 - 默认工具栏入口为固定 mock 俱乐部和陪玩数据；详情之间也可在原型内逐层进入。
 
 ## 当前待补事项
