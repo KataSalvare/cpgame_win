@@ -47,8 +47,8 @@ export function UpdateNotice({ theme, pageId }: { theme: 'dark' | 'light'; pageI
   return (
     <div className={`flex shrink-0 items-center justify-center gap-3 border-b px-4 py-2 text-sm ${
       theme === 'dark'
-        ? 'border-sky-400/20 bg-sky-950/70 text-sky-100'
-        : 'border-sky-200 bg-sky-50 text-sky-950'
+        ? 'border-red-900 bg-red-800 text-white'
+        : 'border-red-700 bg-red-600 text-white'
     }`} role="status" aria-live="polite">
       <span>当前页面有更新：{availableVersion.version}（{availableVersion.revision}），刷新后查看最新原型。</span>
       <button
@@ -56,8 +56,8 @@ export function UpdateNotice({ theme, pageId }: { theme: 'dark' | 'light'; pageI
         onClick={() => window.location.reload()}
         className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
           theme === 'dark'
-            ? 'bg-sky-200 text-sky-950 hover:bg-white focus-visible:outline-sky-200'
-            : 'bg-sky-800 text-white hover:bg-sky-900 focus-visible:outline-sky-800'
+            ? 'bg-red-100 text-red-950 hover:bg-white focus-visible:outline-red-100'
+            : 'bg-white text-red-800 hover:bg-red-50 focus-visible:outline-white'
         }`}
       >
         <RefreshCw size={14} aria-hidden="true" />
