@@ -72,7 +72,7 @@
       "id": "/game-companion-profile",
       "children": [
         {
-          "id": "/game-companion-profile-cancel-account",
+          "id": "/game-companion-profile-wealth",
           "children": []
         },
         {
@@ -80,7 +80,20 @@
           "children": []
         },
         {
-          "id": "/game-companion-profile-onboarding",
+          "id": "/game-companion-profile-onboarding-center",
+          "children": [
+            {
+              "id": "/game-companion-profile-onboarding",
+              "children": []
+            },
+            {
+              "id": "/game-companion-profile-club-onboarding",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "/game-companion-profile-social",
           "children": []
         },
         {
@@ -88,11 +101,7 @@
           "children": []
         },
         {
-          "id": "/game-companion-profile-social",
-          "children": []
-        },
-        {
-          "id": "/game-companion-profile-wealth",
+          "id": "/game-companion-profile-cancel-account",
           "children": []
         }
       ]
@@ -150,14 +159,6 @@
           "children": []
         }
       ]
-    },
-    {
-      "id": "/game-companion-profile-onboarding-center",
-      "children": []
-    },
-    {
-      "id": "/game-companion-profile-club-onboarding",
-      "children": []
     }
   ],
   "admin": [
