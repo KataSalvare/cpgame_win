@@ -16,6 +16,7 @@
 | 菜单排序 Key | `tool-menu-tree` | 保存前端和后台导航的树结构 |
 | 菜单 API | `/api/menu-tree` | 支持 GET 和合法 JSON POST；空 KV 回退到 `tools/config/menu-tree.json` |
 | 原型 SPEC Key | `spec:<原型目录名>` | 保存通过文档面板编辑的 Markdown 内容 |
+| 版本检查 | `/version.json` | 每次构建写入版本号和部署标识 |
 
 除非用户明确授权，不得把测试数据写入线上 KV，不得把生产 namespace 用作本地开发存储。
 
@@ -49,5 +50,13 @@
 3. 执行 `npx wrangler deploy --dry-run`。
 4. 用户明确授权后，才执行 `npx wrangler deploy`。
 5. 部署后检查首页、SPA 路由和 `/api/annotations` 的 GET/POST 行为。
+
+### 页面更新提示
+
+- `npm run build` 会在 `dist/version.json` 写入发布信息；版本号由根目录 `release-version.txt` 管理，初始为 `v1.0.0`，Git commit 短 SHA（无 Git 元数据时用构建 ID）用于识别部署内容。
+- 前端在生产环境每 60 秒检查 `/version.json`。检测到部署标识改变后显示刷新按钮；刷新由开发者主动触发。
+- 新建正式版本时，将 `release-version.txt` 更新为新版本号（例如 `v1.0.1`）；每次代码部署即使版本号未变，构建标识仍能发现部署更新。
+- `public/_headers` 对 `/version.json` 设置 `Cache-Control: no-store`，确保检查不会读到旧版本信息。
+- 本地开发不显示更新提示；构建产物的 `dist/version.json` 是生成文件，不提交到仓库。
 
 Cloudflare Dashboard 中的临时配置不作为项目事实来源；后续部署应以仓库中的 `wrangler.jsonc` 和 Worker 代码为准。

@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import fs from 'fs'
+import { getBuildInfo } from './scripts/build-info.mjs'
 
 const ANNOTATIONS_FILE = path.resolve(__dirname, 'src/resources/annotations.json')
 const MENU_TREE_FILE = path.resolve(__dirname, 'tools/config/menu-tree.json')
@@ -195,6 +196,9 @@ function annotationsPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __BUILD_INFO__: JSON.stringify(getBuildInfo()),
+  },
   plugins: [react(), tailwindcss(), annotationsPlugin(), menuTreeApiPlugin(), specApiPlugin()],
   server: {
     host: '0.0.0.0',

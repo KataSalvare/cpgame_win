@@ -13,6 +13,7 @@ import { DocDetailPage } from '@/workspace/DocDetailPage'
 import { DocsListPage } from '@/workspace/DocsListPage'
 import { useToolEntrance } from './hooks/useToolEntrance'
 import { DESKTOP_PREVIEW_HEIGHT, DESKTOP_PREVIEW_WIDTH, usePreviewScale } from './hooks/usePreviewScale'
+import { UpdateNotice } from './components/UpdateNotice'
 
 const DEFAULT_PROJECT_NAME = '项目原型预览'
 type Toast = { message: string; type: 'success' | 'error' }
@@ -294,6 +295,8 @@ function AppContent() {
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebarCollapsed={() => setSidebarCollapsed(prev => !prev)}
         />
+
+        <UpdateNotice theme={theme} />
 
         <main className="flex-1 overflow-hidden flex flex-col relative tool-workspace">
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1100] pointer-events-none">
