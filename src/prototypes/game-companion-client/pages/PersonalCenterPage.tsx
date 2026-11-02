@@ -465,9 +465,11 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
 
 function BlacklistDialog({ profiles, onRemove, onClose }: { profiles: BlockedProfile[]; onRemove: (profileId: string) => void; onClose: () => void }) {
   const [removedId, setRemovedId] = useState<string | null>(null)
+  const [profileToRemove, setProfileToRemove] = useState<BlockedProfile | null>(null)
   const visibleProfiles = profiles.filter((profile) => profile.id !== removedId)
   return <DialogPanel overlayId="profile-blacklist-dialog" title="黑名单" description="移除后可重新查看资料并发起私聊，历史消息会保留。" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
-    {visibleProfiles.length ? <div className="personal-blacklist-list">{visibleProfiles.map((profile) => <article key={profile.id}><AvatarMark initials={profile.initials} size="sm" /><div><strong><UserNameWithLevel name={profile.name} identityId={profile.profileId} /></strong><small>{profile.kind} · ID：{profile.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => { onRemove(profile.id); setRemovedId(profile.id) }}>移除</button></article>)}</div> : <div className="personal-blacklist-empty"><Shield size={24} /><strong>黑名单为空</strong><span>被拉黑的玩家和陪玩会显示在这里</span></div>}
+    {visibleProfiles.length ? <div className="personal-blacklist-list">{visibleProfiles.map((profile) => <article key={profile.id}><AvatarMark initials={profile.initials} size="sm" /><div><strong><UserNameWithLevel name={profile.name} identityId={profile.profileId} /></strong><small>{profile.kind} · ID：{profile.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => setProfileToRemove(profile)}>移除</button></article>)}</div> : <div className="personal-blacklist-empty"><Shield size={24} /><strong>黑名单为空</strong><span>被拉黑的玩家和陪玩会显示在这里</span></div>}
+    {profileToRemove && <DialogPanel overlayId="profile-blacklist-remove-confirm" title="移除黑名单" description={`确定将「${profileToRemove.name}」移出黑名单吗？`} onClose={() => setProfileToRemove(null)} width={420} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setProfileToRemove(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { onRemove(profileToRemove.id); setRemovedId(profileToRemove.id); setProfileToRemove(null) }}>确认移除</button></>}><p>移除后可重新查看该用户资料并发起私聊。</p></DialogPanel>}
   </DialogPanel>
 }
 

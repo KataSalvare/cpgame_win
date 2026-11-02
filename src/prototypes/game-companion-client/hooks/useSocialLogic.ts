@@ -351,6 +351,31 @@ export function useSocialLogic(initialConversationId?: string) {
     updateMessages(conversationId, (id, time) => ({ id, senderId: self.id, senderName: self.name, initials: self.initials, time, kind, content, duration, replyTo }))
   }
 
+  const shareVoiceRoomToFriends = (friendIds: string[], roomShare: NonNullable<SocialMessage['roomShare']>) => {
+    const recipients = socialFriends.filter((friend) => friendIds.includes(friend.id))
+    if (!recipients.length) return 0
+    setConversations((items) => {
+      const next = [...items]
+      recipients.forEach((friend) => {
+        const preferredId = friend.id === 'friend-1' ? 'direct-friend-1' : `direct-${friend.id}`
+        let targetIndex = next.findIndex((conversation) => conversation.id === preferredId)
+        if (targetIndex < 0) targetIndex = next.findIndex((conversation) => conversation.kind === 'direct' && conversation.members.includes(friend.id) && !conversation.self)
+        if (targetIndex < 0) {
+          next.push({ id: preferredId, kind: 'direct', title: friend.name, initials: friend.initials, members: [friend.id], unread: 0, messages: [] })
+          targetIndex = next.length - 1
+        }
+        const target = next[targetIndex]
+        const message: SocialMessage = {
+          id: createId('room-share'), senderId: currentSocialUser.id, senderName: currentSocialUser.name, initials: currentSocialUser.initials,
+          time: '现在', kind: 'room-share', content: `[房间分享] ${roomShare.name}`, roomShare,
+        }
+        next[targetIndex] = { ...target, unread: target.id === selectedConversationId ? 0 : target.unread + 1, messages: [...target.messages, message] }
+      })
+      return next
+    })
+    return recipients.length
+  }
+
   const recallChatMessage = (conversationId: string, messageId: string) => {
     const target = conversations.find((item) => item.id === conversationId)
     if (!target || !target.messages.some((message) => message.id === messageId && message.senderId === (target.self?.id ?? currentSocialUser.id))) return false
@@ -778,7 +803,7 @@ export function useSocialLogic(initialConversationId?: string) {
     followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile, unblockProfile, profileNotes, setProfileNote,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
     activeFixedFeed, setActiveFixedFeed, groupJoinRequests, resolveGroupJoinRequest,
-    selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageToUser, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, updateGroupAvatar, setGroupAdmin, removeGroupMember, setGroupJoinApproval, setGroupMuted, leaveGroup, dissolveGroup, sendChatMessage, sendChatMessageToConversation, recallChatMessage, sendSupportCard, sendSupportCardToConversation, updateSupportReview, updateSupportReviewInConversation, applyToClubGroup, openClubGroupChat,
+    selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageToUser, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, updateGroupAvatar, setGroupAdmin, removeGroupMember, setGroupJoinApproval, setGroupMuted, leaveGroup, dissolveGroup, sendChatMessage, sendChatMessageToConversation, shareVoiceRoomToFriends, recallChatMessage, sendSupportCard, sendSupportCardToConversation, updateSupportReview, updateSupportReviewInConversation, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms, nextVoiceChannelName: getNextVoiceChannelName(voiceRooms),
     roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
     setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, recallRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,

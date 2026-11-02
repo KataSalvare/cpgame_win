@@ -626,6 +626,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-closure-terms p { margin: 6px 0; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
 .personal-closure-check { display: flex; align-items: flex-start; gap: 8px; color: var(--client-text); font-size: 12px; line-height: 1.5; cursor: pointer; }
 .personal-closure-check input { width: 15px; height: 15px; flex: 0 0 auto; margin: 1px 0 0; accent-color: var(--prototype-primary, #374151); }
+.transaction-agreement { display: flex; align-items: flex-start; gap: 8px; margin: 12px 0; color: var(--client-text); font-size: 12px; line-height: 1.5; cursor: pointer; }
+.transaction-agreement input { width: 15px; height: 15px; flex: 0 0 auto; margin: 1px 0 0; accent-color: var(--prototype-primary, #374151); }
 .personal-closure-warning { border: 1px solid var(--client-border); border-radius: 6px; padding: 14px 16px; background: var(--prototype-surface-muted, #f9fafb); }
 .personal-closure-warning p { margin: 0 0 8px; color: var(--client-text); font-size: 14px; font-weight: 600; }
 .personal-closure-warning p strong { color: var(--prototype-text-secondary, #4b5563); }
@@ -1211,7 +1213,6 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .recharge-coupon b { font-size: 14px; font-weight: 600; }
 .store-muted-note, .store-demo-note { color: var(--client-muted); font-size: 11px; line-height: 1.6; }
 .store-summary-card h2 { margin-bottom: 16px; }
-.store-summary-payment { display: flex; align-items: center; gap: 8px; margin-top: 16px; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
 .store-submit-button { width: 100%; margin-top: 17px; }
 .payment-method-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .payment-method { display: flex; min-width: 150px; min-height: 48px; align-items: center; gap: 9px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 11px; background: var(--prototype-surface, #fff); color: var(--client-text); font: inherit; font-size: 12px; cursor: pointer; }

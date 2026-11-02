@@ -397,6 +397,23 @@
 .voice-stage__room-meta{display:flex;align-items:center;gap:12px;color:var(--client-muted);font-size:10px}
 .voice-stage__room-meta>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .voice-mode-control{position:relative;flex:0 0 auto}
+.voice-more-control{position:relative;flex:0 0 auto}
+.voice-more-trigger{position:relative;display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border:1px solid var(--client-border);border-radius:6px;padding:0;background:var(--prototype-surface,#fff);color:var(--client-text);cursor:pointer}
+.voice-more-trigger:hover,.voice-more-trigger[aria-expanded="true"]{border-color:var(--prototype-text-subtle,#9ca3af);background:var(--prototype-surface-muted,#f9fafb)}
+.voice-more-trigger:focus-visible,.voice-more-menu button:focus-visible{outline:2px solid var(--prototype-text-subtle,#9ca3af);outline-offset:2px}
+.voice-more-trigger::after{position:absolute;z-index:25;top:calc(100% + 6px);right:0;display:none;content:attr(data-tooltip);border:1px solid var(--client-border);border-radius:5px;padding:5px 8px;background:var(--prototype-surface,#fff);box-shadow:0 2px 6px rgba(17,24,39,.1);color:var(--client-text);font-family:inherit;font-size:11px;font-weight:400;line-height:1.3;white-space:nowrap;pointer-events:none}
+.voice-more-trigger:hover::after,.voice-more-trigger:focus-visible::after{display:block}
+.voice-more-menu{position:absolute;z-index:20;top:calc(100% + 6px);right:0;display:grid;width:184px;gap:2px;border:1px solid var(--client-border);border-radius:8px;padding:5px;background:var(--prototype-surface,#fff);box-shadow:0 4px 12px rgba(17,24,39,.12)}
+.voice-more-menu button{display:flex;min-height:36px;align-items:center;gap:9px;border:0;border-radius:5px;padding:0 9px;background:transparent;color:var(--client-text);font:inherit;font-size:11px;text-align:left;cursor:pointer}
+.voice-more-menu button:hover{background:var(--prototype-canvas,#f3f4f6)}
+.voice-more-menu button>span{margin-left:auto;color:var(--client-muted);font-size:10px}
+.voice-room-blacklist-list{display:grid;max-height:360px;overflow:auto}
+.voice-room-blacklist-row{display:flex;min-height:62px;align-items:center;gap:10px;border-bottom:1px solid var(--client-border);padding:8px 2px}
+.voice-room-blacklist-row>div{display:grid;min-width:0;flex:1;gap:4px}
+.voice-room-blacklist-row strong{font-size:12px}
+.voice-room-blacklist-row small{color:var(--client-muted);font-size:10px}
+.voice-room-blacklist-empty{display:grid;min-height:110px;place-items:center;color:var(--client-muted);font-size:12px}
+.voice-room-share-success{display:flex;min-height:120px;align-items:center;justify-content:center;gap:8px;color:var(--client-text-secondary,#4b5563);font-size:13px}
 .voice-room-image-upload{position:relative;display:flex;width:92px;height:76px;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px dashed var(--client-border);border-radius:7px;background:var(--prototype-surface-muted,#f9fafb);color:var(--client-muted);font-size:10px;cursor:pointer}
 .voice-room-image-upload:hover{border-color:var(--prototype-text-subtle,#9ca3af);color:var(--client-text)}
 .voice-room-image-upload img{width:100%;height:52px;object-fit:cover}
@@ -600,7 +617,13 @@
 .companion-share-message header > .client-avatar { flex: 0 0 auto; margin-left: 0; }
 .companion-share-message header > strong { min-width: 0; }
 .companion-share-message__facts { color: var(--prototype-text-secondary,#4b5563); font-size: 12px; }
+.voice-room-share-message .social-message-card__content{gap:6px;color:var(--prototype-text-secondary,#4b5563);font-size:12px}
+.voice-room-share-message footer{display:flex;justify-content:flex-end}
 
 [data-prototype-palette="color"] .voice-room-heading-row:hover,
 [data-prototype-palette="color"] .voice-subchannel > .voice-subchannel__heading-row:hover,
 [data-prototype-palette="color"] .voice-channel-member:hover { background: var(--prototype-canvas, #f3f4f6); }
+
+.voice-page--user-view .voice-mode-control,
+.voice-page--user-view .voice-more-control,
+.voice-page--user-view .voice-member-context-menu { display: none !important; }

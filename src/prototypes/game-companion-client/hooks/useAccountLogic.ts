@@ -57,19 +57,7 @@ export function useAccountLogic() {
   }, [diamondBalance, orders, premiumCardBalances])
 
   const requestEarlyEnd = useCallback((orderId: string) => {
-    setOrders((current) => current.map((order) => order.id === orderId && ['待接单', '待服务', '服务中'].includes(order.status) && !order.earlyEndPending ? { ...order, earlyEndPending: true } : order))
-  }, [])
-
-  const pauseOrder = useCallback((orderId: string) => {
-    const pausedAt = new Date().toLocaleString('zh-CN', { hour12: false })
-    setOrders((current) => current.map((order) => {
-      if (order.id !== orderId || order.status !== '服务中') return order
-      const activeSegmentIndex = order.serviceSegments.findLastIndex((segment) => segment.startAt && !segment.endAt)
-      const serviceSegments = activeSegmentIndex < 0
-        ? order.serviceSegments
-        : order.serviceSegments.map((segment, index) => index === activeSegmentIndex ? { ...segment, endAt: pausedAt } : segment)
-      return { ...order, status: '待服务', serviceSegments }
-    }))
+    setOrders((current) => current.map((order) => order.id === orderId && ['待接单', '待服务', '服务中', '暂停中'].includes(order.status) && !order.earlyEndPending ? { ...order, earlyEndPending: true } : order))
   }, [])
 
   const renewOrder = useCallback((orderId: string, quantity: number) => {
@@ -179,7 +167,6 @@ export function useAccountLogic() {
     completeRecharge,
     payGift,
     payAssessment,
-    pauseOrder,
     requestEarlyEnd,
     renewOrder,
     purchasePremiumCard,

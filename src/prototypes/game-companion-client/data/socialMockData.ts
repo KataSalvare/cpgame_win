@@ -1,6 +1,6 @@
 import { initialOrders, type ClientOrder } from './accountMockData'
 
-export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review' | 'companion-share'
+export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review' | 'companion-share' | 'room-share'
 
 export interface SocialFriend {
   id: string
@@ -27,6 +27,7 @@ export interface SocialMessage {
   kind: ChatMessageKind
   content: string
   companionShare?: { id: string; clubId: string; name: string; initials: string; gender: '女' | '男'; age: number; intro: string }
+  roomShare?: { roomId: string; channelId: string; avatarInitials: string; avatarDataUrl?: string; name: string; onlineCount: number }
   recalled?: boolean
   systemNotice?: boolean
   order?: { id: string; companion: string; service: string; duration: string; amount: number; status: string }
@@ -126,6 +127,7 @@ const seedMessages: SocialMessage[] = [
   { id: 'msg-3', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:43', kind: 'emoji', content: '收到，房间里见' },
   { id: 'msg-4', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:44', kind: 'voice', content: '语音消息', duration: 8 },
   { id: 'msg-5-shared-friend', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:45', kind: 'companion-share', content: '[陪玩名片] 北纬三十度', companionShare: { id: 'companion-002', clubId: 'club-001', name: '北纬三十度', initials: '北纬', gender: '男', age: 27, intro: '熟悉多种地图点位，重视沟通和复盘。' } },
+  { id: 'msg-6-shared-room', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '19:46', kind: 'room-share', content: '[房间分享] 分组A · 房间A', roomShare: { roomId: 'room-ranked', channelId: 'channel-main', avatarInitials: '房', name: '分组A · 房间A', onlineCount: 4 } },
 ]
 
 export const orderMessageFromOrder = (order: ClientOrder): Pick<SocialMessage, 'kind' | 'content' | 'order'> => ({

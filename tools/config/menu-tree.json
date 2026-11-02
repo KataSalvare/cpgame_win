@@ -2,24 +2,12 @@
   "frontend": [
     {
       "id": "/game-companion-login",
+      "label": "登录",
       "children": []
     },
     {
       "id": "/game-companion-identity-verification",
       "children": []
-    },
-    {
-      "id": "/game-companion-quick-match",
-      "children": [
-        {
-          "id": "/game-companion-match-in-progress",
-          "children": []
-        },
-        {
-          "id": "/game-companion-checkout",
-          "children": []
-        }
-      ]
     },
     {
       "id": "/game-companion-client",
@@ -46,6 +34,23 @@
           "children": []
         }
       ]
+    },
+    {
+      "id": "/game-companion-quick-match",
+      "children": [
+        {
+          "id": "/game-companion-match-in-progress",
+          "children": []
+        },
+        {
+          "id": "/game-companion-checkout",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "/game-companion-search",
+      "children": []
     },
     {
       "id": "/game-companion-talents",
@@ -222,10 +227,6 @@
           "children": []
         }
       ]
-    },
-    {
-      "id": "/game-companion-search",
-      "children": []
     }
   ],
   "admin": [

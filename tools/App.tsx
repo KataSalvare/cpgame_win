@@ -75,8 +75,8 @@ function AppContent() {
             : hashPage === 'messages' && params.get('support') === 'club' ? 'club-support'
               : hashPage === 'home' && params.get('support') === 'platform' ? 'platform-support'
                   : hashPage === 'home' && params.get('tool') ? params.get('tool')!
-                : hashPage === 'voice-room' && params.get('voiceFrom') === 'club'
-        ? 'club-voice-room'
+                : hashPage === 'voice-room' && params.get('voiceFrom') === 'club' && params.get('voiceView') === 'user' ? 'club-voice-room-user'
+                  : hashPage === 'voice-room' && params.get('voiceFrom') === 'club' ? 'club-voice-room'
         : hashPage === 'recharge' || hashPage === 'wallet' && params.get('panel') === 'diamond-recharge' ? 'wallet-recharge'
           : hashPage === 'wallet' && params.get('panel') === 'coupons' ? 'coupons'
           : hashPage === 'club-detail' && params.get('panel') === 'club-announcements' ? 'club-announcements'
@@ -114,7 +114,7 @@ function AppContent() {
     }
     const expectedPage = workbenchEntryViews.includes(currentPage.entryView as typeof workbenchEntryViews[number]) ? 'workbench'
       : orderTabEntryViews.includes(currentPage.entryView as typeof orderTabEntryViews[number]) ? 'orders'
-      : currentPage.entryView === 'club-voice-room' ? 'voice-room'
+      : currentPage.entryView === 'club-voice-room' || currentPage.entryView === 'club-voice-room-user' ? 'voice-room'
       : currentPage.entryView === 'quick-match' || currentPage.entryView === 'quick-match-in-progress' ? params.get('tool') === currentPage.entryView ? params.get('page') ?? 'home' : 'home'
       : currentPage.entryView === 'companion-detail' ? params.get('page') === 'talents' ? 'talents' : 'club-detail'
         : currentPage.entryView === 'identity-verification' && params.get('page') === 'profile' && params.get('tool') === 'identity-verification' ? 'profile'
@@ -127,7 +127,8 @@ function AppContent() {
       : currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'voice-room-minimized' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) ? params.get('page') ?? (currentPage.entryView === 'club-support' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) ? 'messages' : 'home')
           : currentPage.entryView
     const preservesUnderlyingRoute = currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'voice-room-minimized' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) || currentPage.entryView === 'quick-match' || currentPage.entryView === 'quick-match-in-progress' || currentPage.entryView === 'companion-detail' || currentPage.entryView === 'identity-verification' && expectedPage === 'profile'
-    const expectedVoiceFrom = preservesUnderlyingRoute ? params.get('voiceFrom') : currentPage.entryView === 'club-voice-room' ? 'club' : null
+    const expectedVoiceFrom = preservesUnderlyingRoute ? params.get('voiceFrom') : currentPage.entryView === 'club-voice-room' || currentPage.entryView === 'club-voice-room-user' ? 'club' : null
+    const expectedVoiceView = currentPage.entryView === 'club-voice-room-user' ? 'user' : null
     const expectedSection = preservesUnderlyingRoute ? params.get('section') : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' ? 'onboarding'
       : currentPage.entryView === 'profile-clubs' ? 'clubs'
         : currentPage.entryView === 'profile-cancel-account' ? 'cancel-account'
@@ -159,6 +160,7 @@ function AppContent() {
             : currentPage.entryView === 'my-cards' ? 'my-cards' : null
     if (params.get('page') === expectedPage
       && (expectedVoiceFrom == null || params.get('voiceFrom') === expectedVoiceFrom)
+      && (expectedVoiceView == null ? !params.has('voiceView') : params.get('voiceView') === expectedVoiceView)
       && (expectedSection == null ? !params.has('section') : params.get('section') === expectedSection)
       && (expectedSupport == null ? !params.has('support') : params.get('support') === expectedSupport)
       && (expectedOnboarding == null ? !params.has('onboarding') : params.get('onboarding') === expectedOnboarding)
@@ -172,6 +174,8 @@ function AppContent() {
     params.set('page', expectedPage)
     if (expectedVoiceFrom) params.set('voiceFrom', expectedVoiceFrom)
     else params.delete('voiceFrom')
+    if (expectedVoiceView) params.set('voiceView', expectedVoiceView)
+    else params.delete('voiceView')
     if (expectedSection) params.set('section', expectedSection)
     else params.delete('section')
     if (expectedSupport) params.set('support', expectedSupport)

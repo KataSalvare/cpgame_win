@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
-export type WorkOrderAction = '接受' | '拒绝' | '开始服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
+export type WorkOrderAction = '接受' | '拒绝' | '开始服务' | '继续服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
 export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
@@ -44,6 +44,10 @@ export function useWorkbenchLogic() {
       id: 'CW-1028-106', player: '小满', playerId: 'P-102866', playerInitials: '满', playerGender: '男', playerAge: 25, serviceId: roundService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
       status: '服务中', amount: 400, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 08:20', duration: 5,
       durationUnit: roundService?.unit ?? '局', unitPrice: 80, startedAt: '2026-10-28 08:25', earlyEndRequested: true, serviceSegmentMinutes: [18, 22, 15],
+    }, {
+      id: 'CW-1028-107', player: '晚风玩家', playerId: 'P-102860', playerInitials: '晚风', playerGender: '女', playerAge: 26, serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
+      status: '暂停中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 07:20', duration: 3,
+      durationUnit: hourlyService?.unit ?? '小时', unitPrice: 80, startedAt: '2026-10-28 07:35', serviceSegmentMinutes: [45],
     }]
   })
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
@@ -99,6 +103,13 @@ export function useWorkbenchLogic() {
     setOrders(items => items.map(o => o.id === id ? { ...o, status, ...(status === '服务中' ? { startedAt: new Date().toLocaleString('zh-CN') } : {}), ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000, completionRequestedAt: new Date().toLocaleString('zh-CN') } : {}) } : o))
     setFeedback(status === '已取消' ? '订单已取消，已退款并通知玩家' : status === '待玩家确认' ? '已通知玩家确认，24 小时后自动完成' : `订单已变更为${status}`)
   }
+  const resumeOrder = (id: string) => {
+    const order = orders.find(item => item.id === id)
+    if (!order || order.status !== '暂停中') return false
+    setOrders(items => items.map(item => item.id === id && item.status === '暂停中' ? { ...item, status: '服务中', startedAt: new Date().toLocaleString('zh-CN', { hour12: false }) } : item))
+    setFeedback('已继续服务')
+    return true
+  }
   const rejectOrder = (id: string) => {
     const order = orders.find(item => item.id === id)
     if (!order || order.status !== '待接单') return false
@@ -142,7 +153,7 @@ export function useWorkbenchLogic() {
     setFeedback(`已同意提前结束，确认完成 ${quantity} ${order.durationUnit}，等待玩家确认`)
     return true
   }
-  return { selectedOrderId, setSelectedOrderId, selectedOrder: orders.find(o => o.id === selectedOrderId) ?? null, orderAction, setOrderAction, services: allWorkbenchServices, serviceGroups, serviceApplicationOptions, applyService, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder, rejectOrder, recordOrderWaiver,
+  return { selectedOrderId, setSelectedOrderId, selectedOrder: orders.find(o => o.id === selectedOrderId) ?? null, orderAction, setOrderAction, services: allWorkbenchServices, serviceGroups, serviceApplicationOptions, applyService, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder, resumeOrder, rejectOrder, recordOrderWaiver,
     rejectEarlyEnd, agreeEarlyEnd,
     toggleLevel: (key: string) => {
       const opening = !enabledLevelKeys.includes(key)

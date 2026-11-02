@@ -4,7 +4,7 @@ import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { WorkbenchOrderActions } from './WorkbenchOrderDetailPanel'
 
-const filters = ['全部', '待接单', '待服务', '服务中', '已完成', '已取消', '退款']
+const filters = ['全部', '待接单', '待服务', '服务中', '暂停中', '已完成', '已取消', '退款']
 
 export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, label = '工作台订单' }: {
   logic: WorkbenchLogic

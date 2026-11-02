@@ -32,7 +32,7 @@ export function WorkbenchOrderActionDialog({ logic: w }: { logic: WorkbenchLogic
   const validEarlyEndQuantity = order.durationUnit === '局'
     ? quantity.trim() !== '' && Number.isFinite(amount) && amount > 0 && amount <= order.duration && Number.isInteger(amount)
     : totalServiceMinutes > 0 && totalServiceMinutes <= order.duration * 60
-  const message = action.action === '接受' ? '接受后订单将变为待服务。' : action.action === '拒绝' ? '拒绝后订单将取消、退款并通知玩家。' : action.action === '开始服务' ? '确认后订单将进入服务中。' : action.action === '拒绝提前结束' ? '确认拒绝后，订单会继续服务中。' : '将通知玩家确认，24 小时未确认自动完成订单。'
+  const message = action.action === '接受' ? '接受后订单将变为待服务。' : action.action === '拒绝' ? '拒绝后订单将取消、退款并通知玩家。' : action.action === '开始服务' ? '确认后订单将进入服务中。' : action.action === '继续服务' ? '确认后订单将恢复服务，服务计时继续。' : action.action === '拒绝提前结束' ? '确认拒绝后，订单会继续服务中。' : '将通知玩家确认，24 小时未确认自动完成订单。'
   const actionTitle = action.action === '同意提前结束' ? '同意提前结束' : action.action === '拒绝提前结束' ? '拒绝提前结束' : action.action === '拒绝' ? '拒绝订单' : action.action === '免单' ? '免单' : `确认${action.action}`
   return <div className="workbench-order-action-overlay" data-overlay="workbench-order-action" onClick={event => { if (event.target === event.currentTarget) w.setOrderAction(null) }}>
     <section ref={ref} tabIndex={-1} className="order-action-dialog" role="dialog" aria-modal="true" aria-labelledby="workbench-order-action-title">
@@ -54,6 +54,11 @@ export function WorkbenchOrderActionDialog({ logic: w }: { logic: WorkbenchLogic
         }
         if (action.action === '拒绝') {
           w.rejectOrder(order.id)
+          w.setOrderAction(null)
+          return
+        }
+        if (action.action === '继续服务') {
+          if (order.status === '暂停中') w.resumeOrder(order.id)
           w.setOrderAction(null)
           return
         }
