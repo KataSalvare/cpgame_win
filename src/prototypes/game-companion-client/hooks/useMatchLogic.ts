@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
 export type MatchGender = '不限' | '男' | '女'
-export type MatchPeople = '单陪' | '双陪'
+export type MatchPeople = '单陪' | '双陪' | '选项数量后台配置'
 
 const firstGameId = games.find((game) => game.id !== 'all')?.id ?? games[0].id
 const firstClubId = clubs.find((club) => club.gameIds.includes(firstGameId))?.id ?? clubs[0].id
@@ -36,9 +36,13 @@ export function useMatchLogic() {
   }, [clubId, gameId])
   const playOptions = useMemo(() => [...new Set(availableServices.map((service) => service.playName))], [availableServices])
   const levelOptions = useMemo(() => [...new Set(availableServices.filter((service) => !playName || service.playName === playName).map((service) => service.levelName))], [availableServices, playName])
-  const serviceOptions = useMemo(() => availableServices.filter((service) => (!playName || service.playName === playName) && (!levelName || service.levelName === levelName)), [availableServices, levelName, playName])
+  const serviceOptions = useMemo(() => {
+    const matching = availableServices.filter((service) => (!playName || service.playName === playName) && (!levelName || service.levelName === levelName))
+    return matching.length ? matching : availableServices
+  }, [availableServices, levelName, playName])
   const selectedService = serviceOptions.find((service) => service.id === serviceId) ?? serviceOptions[0] ?? availableServices[0] ?? null
-  const recommendedUnitPrice = selectedService ? selectedService.price * (people === '双陪' ? 2 : 1) : 0
+  const peopleCount = people === '双陪' ? 2 : people === '选项数量后台配置' ? 3 : 1
+  const recommendedUnitPrice = selectedService ? selectedService.price * peopleCount : 0
 
   const chooseGame = (nextGameId: string) => {
     const nextClubId = clubs.find((club) => club.gameIds.includes(nextGameId))?.id ?? ''
@@ -75,7 +79,7 @@ export function useMatchLogic() {
 
   return {
     gameId, clubId, tryout, playName, levelName, serviceId, people, gender, quantity, remark, addedPrice,
-    availableClubs, availableServices, playOptions, levelOptions, serviceOptions, selectedService, recommendedUnitPrice,
+    availableClubs, availableServices, playOptions, levelOptions, serviceOptions, selectedService, peopleCount, recommendedUnitPrice,
     setTryout, setPeople, setGender, setQuantity, setRemark, setAddedPrice,
     chooseGame, chooseClub, choosePlay, chooseLevel, setServiceId,
   }

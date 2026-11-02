@@ -77,7 +77,18 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [skipWindowClosePromptToday, setSkipWindowClosePromptToday] = useState(false)
   const systemSettingsReturnHash = useRef<string | null>(null)
   const [systemSettings, setSystemSettings] = useState<ClientSystemSettings>(defaultSystemSettings)
-  const [profile, setProfile] = useState<PlayerProfile>(playerProfile)
+  const [profile, setProfile] = useState<PlayerProfile>(() => {
+    try {
+      const onboardingProfile = sessionStorage.getItem('gc-new-user-profile')
+      if (onboardingProfile) {
+        sessionStorage.removeItem('gc-new-user-profile')
+        return { ...playerProfile, ...JSON.parse(onboardingProfile) as Partial<PlayerProfile> }
+      }
+    } catch {
+      // Keep the local sample profile if browser storage is unavailable or invalid.
+    }
+    return playerProfile
+  })
   const [boundPhone, setBoundPhone] = useState('13800138600')
   const [endedDeviceIds, setEndedDeviceIds] = useState<string[]>([])
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(initialNotificationPreferences)

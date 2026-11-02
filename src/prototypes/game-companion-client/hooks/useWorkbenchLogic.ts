@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
-export type WorkOrderAction = '接收' | '取消' | '开始服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
+export type WorkOrderAction = '接收' | '取消' | '拒绝' | '开始服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
 export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
@@ -99,6 +99,13 @@ export function useWorkbenchLogic() {
     setOrders(items => items.map(o => o.id === id ? { ...o, status, ...(status === '服务中' ? { startedAt: new Date().toLocaleString('zh-CN') } : {}), ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000, completionRequestedAt: new Date().toLocaleString('zh-CN') } : {}) } : o))
     setFeedback(status === '已取消' ? '订单已取消，已退款并通知玩家' : status === '待玩家确认' ? '已通知玩家确认，24 小时后自动完成' : `订单已变更为${status}`)
   }
+  const rejectOrder = (id: string) => {
+    const order = orders.find(item => item.id === id)
+    if (!order || order.status !== '待接单') return false
+    setOrders(items => items.map(item => item.id === id && item.status === '待接单' ? { ...item, status: '已取消' } : item))
+    setFeedback('已拒绝订单，订单已取消、退款并通知玩家')
+    return true
+  }
   const recordOrderWaiver = (id: string, quantity: number) => {
     const order = orders.find(item => item.id === id)
     if (!order || !['服务中', '已完成'].includes(order.status) || !Number.isFinite(quantity) || quantity <= 0 || !Number.isSafeInteger(quantity * 2)) return false
@@ -135,7 +142,7 @@ export function useWorkbenchLogic() {
     setFeedback(`已同意提前结束，确认完成 ${quantity} ${order.durationUnit}，等待玩家确认`)
     return true
   }
-  return { selectedOrderId, setSelectedOrderId, selectedOrder: orders.find(o => o.id === selectedOrderId) ?? null, orderAction, setOrderAction, services: allWorkbenchServices, serviceGroups, serviceApplicationOptions, applyService, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder, recordOrderWaiver,
+  return { selectedOrderId, setSelectedOrderId, selectedOrder: orders.find(o => o.id === selectedOrderId) ?? null, orderAction, setOrderAction, services: allWorkbenchServices, serviceGroups, serviceApplicationOptions, applyService, selectedServiceGameId, setSelectedServiceGameId, serviceSelections, enabledLevelKeys, expandedLevelKeys, enabled, automatic, requests, orders, feedback, setFeedback, activeMatch, cancelMatch, respond, toggleAutomatic, updateOrder, rejectOrder, recordOrderWaiver,
     rejectEarlyEnd, agreeEarlyEnd,
     toggleLevel: (key: string) => {
       const opening = !enabledLevelKeys.includes(key)

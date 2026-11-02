@@ -124,7 +124,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
   const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [globalNotice, setGlobalNotice] = useState('')
-  const [groupSettingsOpen, setGroupSettingsOpen] = useState(false)
+  const [groupSettingsOpen, setGroupSettingsOpen] = useState(true)
   const [groupManagementAction, setGroupManagementAction] = useState<GroupManagementAction | null>(null)
   const [groupMemberDialog, setGroupMemberDialog] = useState<'admin' | 'remove' | null>(null)
   const [replyTarget, setReplyTarget] = useState<SocialMessage | null>(null)
@@ -448,7 +448,7 @@ function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdat
           const isAdmin = conversation.adminIds?.includes(friend.id) ?? false
           return <GroupMemberTile key={friend.id} initials={friend.initials} name={friend.name} identityId={friend.profileId} role={friend.id === conversation.ownerId ? '群主' : isAdmin ? '管理员' : '成员'} onClick={() => onOpenProfile(friend.id)} />
         })}
-        <button type="button" className="group-settings-member-tile group-settings-member-add" onClick={onInvite}><span className="group-settings-member-avatar"><UserPlus size={19} /></span><strong>添加</strong></button>
+        {conversation.id !== 'group-ordinary' && <button type="button" className="group-settings-member-tile group-settings-member-add" onClick={onInvite}><span className="group-settings-member-avatar"><UserPlus size={19} /></span><strong>添加</strong></button>}
         {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('remove')}><span className="group-settings-member-avatar"><X size={19} /></span><strong>移除</strong></button>}
         {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('admin')}><span className="group-settings-member-avatar"><Users size={19} /></span><strong>管理</strong></button>}
       </div>

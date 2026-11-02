@@ -1,6 +1,6 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, CircleAlert, LoaderCircle, QrCode, RefreshCw, ShieldCheck, X } from 'lucide-react'
+import { CalendarDays, Camera, Check, CircleAlert, LoaderCircle, QrCode, RefreshCw, ShieldCheck, UserRound, X } from 'lucide-react'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 type LoginPageState = 'normal' | 'loading' | 'empty' | 'error'
@@ -72,9 +72,23 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
   const [codeSent, setCodeSent] = useState(false)
+  const [codeCountdown, setCodeCountdown] = useState(0)
   const [qrRevision, setQrRevision] = useState(0)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
+  const [completingProfile, setCompletingProfile] = useState(false)
+  const [nickname, setNickname] = useState('晚风玩家')
+  const [birthday, setBirthday] = useState('2000-01-01')
+  const [gender, setGender] = useState<'女' | '男'>('女')
+  const [avatarDataUrl, setAvatarDataUrl] = useState('')
+  const birthdayInputRef = useRef<HTMLInputElement>(null)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (codeCountdown <= 0) return
+    const timer = window.setTimeout(() => setCodeCountdown((seconds) => seconds - 1), 1000)
+    return () => window.clearTimeout(timer)
+  }, [codeCountdown])
 
   const sendCode = () => {
     setError('')
@@ -83,6 +97,7 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
       return
     }
     setCodeSent(true)
+    setCodeCountdown(60)
     setNotice('验证码已发送')
   }
 
@@ -105,7 +120,32 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
       setError('请输入 6 位验证码。')
       return
     }
+    setCompletingProfile(true)
+    setError('')
+  }
+
+  const submitProfile = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const name = nickname.trim()
+    if (!name) {
+      setError('请输入昵称。')
+      return
+    }
+    try {
+      sessionStorage.setItem('gc-new-user-profile', JSON.stringify({ nickname: name, initials: name.slice(0, 2), birthday, gender, avatarDataUrl: avatarDataUrl || undefined }))
+    } catch {
+      setError('资料暂时无法保存，请重试。')
+      return
+    }
     navigate('/game-companion-client')
+  }
+
+  const chooseAvatar = (file?: File) => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => setAvatarDataUrl(String(reader.result))
+    reader.onerror = () => setError('头像读取失败，请重新选择图片。')
+    reader.readAsDataURL(file)
   }
 
   const refreshQr = () => {
@@ -123,17 +163,31 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
         </div>
       </section>
 
-      <section className="gc-login-card" aria-labelledby="gc-login-title">
-        <header className="gc-login-card-heading">
-          <h2 id="gc-login-title">登录</h2>
-        </header>
+      <section className="gc-login-card" aria-label={completingProfile ? '完善信息' : undefined} aria-labelledby={completingProfile ? undefined : 'gc-login-title'}>
+        {!completingProfile && <header className="gc-login-card-heading"><h2 id="gc-login-title">登录</h2></header>}
 
-        <div className="gc-login-tabs" role="tablist" aria-label="登录方式">
+        {!completingProfile && <div className="gc-login-tabs" role="tablist" aria-label="登录方式">
           <button type="button" role="tab" id="gc-login-phone-tab" aria-selected={activeMethod === 'phone'} aria-controls="gc-login-phone-panel" onClick={() => { setActiveMethod('phone'); setError(''); setNotice('') }}>手机号登录</button>
           <button type="button" role="tab" id="gc-login-qr-tab" aria-selected={activeMethod === 'qr'} aria-controls="gc-login-qr-panel" onClick={() => { setActiveMethod('qr'); setError(''); setNotice('') }}>扫码登录</button>
-        </div>
+        </div>}
 
-        {activeMethod === 'phone' ? (
+        {completingProfile ? (
+          <form className="gc-onboarding-form" onSubmit={submitProfile}>
+            <div className="gc-onboarding-heading"><strong>欢迎来到超速电竞</strong><span>完善信息，为您推荐个性化内容~</span></div>
+            <div className="gc-onboarding-avatar-wrap">
+              <button type="button" className="gc-onboarding-avatar" aria-label="更换默认头像" onClick={() => avatarInputRef.current?.click()}>
+                {avatarDataUrl ? <img src={avatarDataUrl} alt="当前头像" /> : <span><UserRound size={48} /></span>}
+                <i><Camera size={15} /></i>
+              </button>
+              <input ref={avatarInputRef} className="gc-visually-hidden" type="file" accept="image/*" aria-label="选择头像图片" onChange={(event) => { chooseAvatar(event.currentTarget.files?.[0]); event.currentTarget.value = '' }} />
+            </div>
+            <label className="gc-onboarding-field"><span>昵称<em>*</em></span><input required maxLength={20} value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="请输入昵称" /></label>
+            <label className="gc-onboarding-field"><span>生日</span><span className="gc-onboarding-date"><input ref={birthdayInputRef} type="date" value={birthday} onChange={(event) => setBirthday(event.target.value)} aria-label="生日" /><button type="button" aria-label="选择生日" onClick={() => birthdayInputRef.current?.showPicker?.()}><CalendarDays size={16} /></button></span></label>
+            <fieldset className="gc-onboarding-gender"><legend>性别</legend><div>{(['女', '男'] as const).map((value) => <button type="button" key={value} aria-pressed={gender === value} className={gender === value ? 'is-selected' : ''} onClick={() => setGender(value)}>{value}</button>)}</div></fieldset>
+            {error && <p className="gc-login-error" role="alert"><CircleAlert size={14} />{error}</p>}
+            <button type="submit" className="gc-onboarding-submit">进入超速，让游戏改变生活</button>
+          </form>
+        ) : activeMethod === 'phone' ? (
           <form id="gc-login-phone-panel" role="tabpanel" aria-labelledby="gc-login-phone-tab" className="gc-login-form" onSubmit={submitPhoneLogin}>
             <label className="gc-login-field">
               <span>手机号</span>
@@ -143,7 +197,7 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
               <span>验证码</span>
               <span className="gc-login-code-row">
                 <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} aria-label="验证码（6位）" placeholder="6 位验证码" />
-                <button type="button" className="gc-login-code-button" onClick={sendCode}>获取验证码</button>
+                <button type="button" className="gc-login-code-button" onClick={sendCode} disabled={codeCountdown > 0}>{codeCountdown > 0 ? `${codeCountdown}秒后重新获取` : codeSent ? '重新获取' : '获取验证码'}</button>
               </span>
             </label>
             {notice && <p className="gc-login-notice" role="status"><Check size={14} />{notice}</p>}

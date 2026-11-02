@@ -65,7 +65,7 @@ export function useSocialLogic() {
   }
   const [conversations, setConversations] = useState(initialConversations)
   const [clubGroups, setClubGroups] = useState(initialClubGroups)
-  const [selectedConversationId, setSelectedConversationId] = useState(initialConversations[0].id)
+  const [selectedConversationId, setSelectedConversationId] = useState('group-ordinary')
   const [activeMessagesTab, setActiveMessagesTab] = useState<'messages' | 'friends'>('messages')
   const [chatSearch, setChatSearch] = useState('')
   const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null)
