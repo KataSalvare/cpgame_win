@@ -1290,11 +1290,11 @@ export function ClubSupportSelectionDialog({ onClose, onConsult }: { onClose: ()
       <button type="button" role="tab" aria-selected={tab === 'aftersale'} className={tab === 'aftersale' ? 'is-active' : ''} onClick={() => setTab('aftersale')}>售后客服</button>
     </div>
     <div className="club-support-list" role="tabpanel" aria-label={tab === 'presale' ? '售前客服列表' : '售后客服列表'}>
-      {staffList.map((staff) => <article className="club-support-staff" key={staff.id}>
+        {staffList.map((staff) => <article className="club-support-staff" key={staff.id}>
         <AvatarMark initials={staff.initials} size="md" />
         <div className="club-support-staff__info"><strong>{staff.name}</strong><span>工作时间：{staff.hours}</span></div>
         {staff.available
-          ? <button type="button" className="client-button client-button--secondary" onClick={() => { onClose(); onConsult() }}>咨询</button>
+          ? <button type="button" className="client-button client-button--secondary" onClick={onConsult}>咨询</button>
           : <button type="button" className="client-button client-button--secondary" disabled={messageSentTo === staff.id} onClick={() => setMessageSentTo(staff.id)}>{messageSentTo === staff.id ? '已留言' : '留言'}</button>}
       </article>)}
       {messageSentTo && <p className="club-support-message-status" role="status">已留言（仅演示）</p>}

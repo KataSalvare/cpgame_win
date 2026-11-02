@@ -14,9 +14,10 @@ import { personalGiftInventory, profileFootprints, profileRoomVisits, profileVis
 import { type BlockedProfile } from '../data/personalSettingsMockData'
 import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
 import { IdentityVerificationFlow } from './IdentityVerificationFlow'
+import { navigateToProfileSection, type ProfileSection } from '../profileNavigation'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
-type CenterSection = 'profile' | 'clubs' | 'onboarding' | 'visits' | 'gifts' | 'favorites' | 'wealth'
+type CenterSection = ProfileSection | 'gifts'
 type VisitTab = 'footprints' | 'visitors' | 'rooms'
 type FavoriteTab = 'clubs' | 'users' | 'rooms' | 'fans'
 type ApplicationKind = 'companion' | 'club'
@@ -28,8 +29,9 @@ const emptyClubApplication: Record<ClubApplicationField, string> = {
 
 type PersonalCenterProps = {
   pageState: PageState
-  initialSection: 'profile' | 'wealth' | 'favorites' | 'clubs' | 'onboarding' | 'visits'
+  initialSection: CenterSection
   initialRecruitmentOpen?: boolean
+  initialClubApplicationOpen?: boolean
   initialSecurityView?: SecurityView
   initialSocialTab: FavoriteTab
   onRetry: () => void
@@ -68,8 +70,8 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
 
 const personalGiftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 
-export function PersonalCenterPage({ pageState, initialSection, initialRecruitmentOpen = false, initialSecurityView, initialSocialTab, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
-  const [section, setSection] = useState<CenterSection>(() => initialSection === 'wealth' || initialSection === 'favorites' || initialSection === 'clubs' || initialSection === 'onboarding' || initialSection === 'visits' ? initialSection : sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : initialSection)
+export function PersonalCenterPage({ pageState, initialSection, initialRecruitmentOpen = false, initialClubApplicationOpen = false, initialSecurityView, initialSocialTab, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
+  const [section, setSection] = useState<CenterSection>(() => initialSection === 'wealth' || initialSection === 'favorites' || initialSection === 'clubs' || initialSection === 'onboarding' || initialSection === 'visits' || initialSection === 'gifts' ? initialSection : sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : initialSection)
   const [recruitmentOpen, setRecruitmentOpen] = useState(() => initialRecruitmentOpen || Boolean(sessionStorage.getItem('companion-assessment-recharge-draft')))
   const [visitTab, setVisitTab] = useState<VisitTab>('footprints')
   const [footprints, setFootprints] = useState(profileFootprints)
@@ -90,12 +92,13 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   const [choosingClub, setChoosingClub] = useState(false)
   const [clubSearch, setClubSearch] = useState('')
   const normalizedClubSearch = clubSearch.trim().toLocaleLowerCase()
+
   const filteredJoiningClubs = clubs.filter(club => club.name.toLocaleLowerCase().includes(normalizedClubSearch))
 
   const [clubApplicationId, setClubApplicationId] = useState<string | null>(null)
   const [clubJoinReason, setClubJoinReason] = useState('')
   const [confirmCancelClubApplication, setConfirmCancelClubApplication] = useState(false)
-  const [applicationKind, setApplicationKind] = useState<ApplicationKind | null>(null)
+  const [applicationKind, setApplicationKind] = useState<ApplicationKind | null>(() => initialClubApplicationOpen ? 'club' : null)
   const [applicationName, setApplicationName] = useState('')
   const [applicationGame, setApplicationGame] = useState(games[1]?.id ?? '')
   const [applicationIntro, setApplicationIntro] = useState('')
@@ -106,6 +109,12 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   const [realNameEntryClicks, setRealNameEntryClicks] = useState(0)
 
   const joinedClub = useMemo(() => clubs.find((club) => club.id === joinedClubId) ?? null, [joinedClubId])
+
+  const selectSection = (nextSection: CenterSection) => {
+    setSection(nextSection)
+    setFeedback('')
+    if (nextSection !== 'gifts') navigateToProfileSection(nextSection)
+  }
 
   useEffect(() => {
     if (clubMembershipStatus === 'idle' || confirmCancelClubApplication) return
@@ -184,10 +193,10 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   return <div className="client-content account-page personal-center-page">
     <header className="client-page-heading account-page-heading"><div><span className="client-eyebrow">玩家中心</span><h1>个人中心</h1></div></header>
     <nav className="personal-center-tabs" role="tablist" aria-label="个人中心模块">
-      {sectionItems.map(({ id, label, icon: Icon }) => <button type="button" role="tab" key={id} className={`personal-center-tab${section === id ? ' is-active' : ''}`} aria-selected={section === id} onClick={() => { setSection(id); setFeedback('') }}><Icon size={16} /><span>{label}</span></button>)}
+      {sectionItems.map(({ id, label, icon: Icon }) => <button type="button" role="tab" key={id} className={`personal-center-tab${section === id ? ' is-active' : ''}`} aria-selected={section === id} onClick={() => selectSection(id)}><Icon size={16} /><span>{label}</span></button>)}
     </nav>
     <main className="personal-center-content" aria-live="polite">
-        {section === 'profile' && <ProfileOverview profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} onOpenFollowing={() => { setSection('favorites'); setFavoriteTab('users') }} onOpenFans={() => { setSection('favorites'); setFavoriteTab('fans') }} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
+        {section === 'profile' && <ProfileOverview profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} onOpenFollowing={() => { selectSection('favorites'); setFavoriteTab('users') }} onOpenFans={() => { selectSection('favorites'); setFavoriteTab('fans') }} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
         {section === 'clubs' && <section className="personal-module">
           <ModuleHeading title="我的俱乐部" />
           {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status">{clubMembershipStatus === 'idle' && <Check size={12} />}{clubMembershipStatus === 'joining' || clubMembershipStatus === 'leaving' ? '待审核' : '已加入'}</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(1)}</span><span><UsersRound size={13} />{joinedClub.companionCount} 位成员</span><span>{joinedClub.tags.slice(0, 2).join(' · ')}</span></div></div><div className="personal-club-card__actions">{clubMembershipStatus === 'idle' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => { setClubMembershipStatus('leaving'); setFeedback('退出申请已提交，待审核') }}>退出俱乐部</button></> : <><button type="button" className="client-button client-button--secondary" disabled>待审核</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(true)}>取消申请</button></>}</div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => { setClubSearch(''); setChoosingClub(true) }} />}
@@ -196,8 +205,8 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
         {section === 'onboarding' && (recruitmentOpen ? <CompanionOnboarding balance={diamondBalance} onBack={() => setRecruitmentOpen(false)} onChat={onAssessmentChat} onRecharge={onAssessmentRecharge} onPay={onAssessmentPay} onSubmitted={(submission) => { onSubmitOnboarding(submission); setRecruitmentOpen(false); setFeedback('支付成功，入驻申请已提交') }} /> : <section className="personal-module">
           <ModuleHeading title="入驻中心" />
           <div className="onboarding-card-grid">
-            <OnboardingCard icon={<UserRound size={20} />} title="陪玩入驻" description="选择俱乐部与游戏，报名入驻考核。" submitted={false} onApply={() => setRecruitmentOpen(true)} />
-            <OnboardingCard icon={<Building2 size={20} />} title="俱乐部入驻" description="提交俱乐部资料，申请在平台展示和招募成员。" submitted={applicationSubmitted.club} onApply={() => { setApplicationKind('club'); setClubApplication(emptyClubApplication) }} />
+            <OnboardingCard icon={<UserRound size={20} />} title="陪玩入驻" description="选择俱乐部与游戏，报名入驻考核。" submitted={false} onApply={() => { navigateToProfileSection('onboarding', 'companion'); setRecruitmentOpen(true) }} />
+            <OnboardingCard icon={<Building2 size={20} />} title="俱乐部入驻" description="提交俱乐部资料，申请在平台展示和招募成员。" submitted={applicationSubmitted.club} onApply={() => { navigateToProfileSection('onboarding', 'club'); setApplicationKind('club'); setClubApplication(emptyClubApplication) }} />
           </div>
           <OnboardingApplicationRecords records={onboardingApplications} />
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
@@ -278,7 +287,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
         <p className="personal-demo-note personal-field--full">申请状态仅在当前原型会话中展示，不代表正式审核结果。</p>
       </form>}
     </DialogPanel>}
-    {activeSetting === 'security' && <AccountSecurityDialog initialView={initialSecurityView} phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} realNameEntryClicks={realNameEntryClicks} onRealNameEntryClick={() => { const isVerified = realNameEntryClicks === 0; setRealNameEntryClicks((count) => count + 1); if (!isVerified) { setActiveSetting(null); setIdentityFlowOpen(true) } return isVerified }} onClose={() => setActiveSetting(null)} />}
+    {activeSetting === 'security' && <AccountSecurityDialog initialView={initialSecurityView} phone={boundPhone} onSavePhone={onSaveBoundPhone} endedDeviceIds={endedDeviceIds} onEndDevice={onEndDevice} diamondBalance={diamondBalance} beanBalance={beanBalance} realNameEntryClicks={realNameEntryClicks} onRealNameEntryClick={() => { const isVerified = realNameEntryClicks === 0; setRealNameEntryClicks((count) => count + 1); if (!isVerified) { setActiveSetting(null); setIdentityFlowOpen(true) } return isVerified }} onNavigateClosure={() => navigateToProfileSection('cancel-account')} onClose={() => setActiveSetting(null)} />}
     {identityFlowOpen && <IdentityVerificationFlow onClose={() => setIdentityFlowOpen(false)} />}
     {activeSetting === 'blacklist' && <BlacklistDialog profiles={blockedProfiles} onRemove={onUnblockProfile} onClose={() => setActiveSetting(null)} />}
     {activeSetting === 'logout' && <DialogPanel overlayId="logout-confirmation-dialog" title="退出登录" description="确认退出当前账号并返回登录页？" onClose={() => setActiveSetting(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setActiveSetting(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={onLogout}>确认退出</button></>}><p className="social-dialog-copy">退出后将返回登录页面。本次原型不会清除或提交真实账号数据。</p></DialogPanel>}
@@ -366,7 +375,7 @@ function maskPhone(phone: string) {
 
 type SecurityView = 'overview' | 'real-name' | 'phone' | 'devices' | 'closure-terms' | 'closure-warning' | 'closure-phone' | 'closure-complete'
 
-function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, endedDeviceIds, onEndDevice, diamondBalance, beanBalance, realNameEntryClicks, onRealNameEntryClick, onClose }: {
+function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, endedDeviceIds, onEndDevice, diamondBalance, beanBalance, realNameEntryClicks, onRealNameEntryClick, onNavigateClosure, onClose }: {
   initialView?: SecurityView
   phone: string
   onSavePhone: (phone: string) => void
@@ -376,6 +385,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
   beanBalance: number
   realNameEntryClicks: number
   onRealNameEntryClick: () => boolean
+  onNavigateClosure: () => void
   onClose: () => void
 }) {
   const [view, setView] = useState<SecurityView>(initialView)
@@ -394,6 +404,17 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
     return () => window.clearTimeout(timer)
   }, [codeCountdown, view])
   const backToOverview = () => { setView('overview'); setError(''); setFeedback('') }
+  const beginAccountClosure = () => {
+    setView('closure-terms')
+    setTermsAccepted(false)
+    setWarningAccepted(false)
+    setNewPhone('')
+    setCode('')
+    setCodeSent(false)
+    setError('')
+    setFeedback('')
+    onNavigateClosure()
+  }
   const changePhone = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
@@ -431,7 +452,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
         <button type="button" className="personal-security-menu__row" onClick={() => { if (onRealNameEntryClick()) setView('real-name') }}><span><strong>实名认证</strong><small>{realNameEntryClicks === 0 ? '已实名' : '未实名'}</small></span><ChevronRight size={17} /></button>
         <button type="button" className="personal-security-menu__row" onClick={() => { setView('phone'); setError(''); setFeedback(''); setCodeSent(false); setNewPhone(''); setCode('') }}><span><strong>手机号</strong><small>{maskPhone(phone)}</small></span><ChevronRight size={17} /></button>
         <button type="button" className="personal-security-menu__row" onClick={() => { setView('devices'); setError('') }}><span><strong>登录设备</strong><small>{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).length} 台设备</small></span><ChevronRight size={17} /></button>
-        <button type="button" className="personal-security-menu__row is-danger" onClick={() => { setView('closure-terms'); setTermsAccepted(false); setWarningAccepted(false); setNewPhone(''); setCode(''); setCodeSent(false); setError(''); setFeedback('') }}><span><strong>注销账号</strong><small>注销后账号相关信息将按协议处理</small></span><ChevronRight size={17} /></button>
+        <button type="button" className="personal-security-menu__row is-danger" onClick={beginAccountClosure}><span><strong>注销账号</strong><small>注销后账号相关信息将按协议处理</small></span><ChevronRight size={17} /></button>
         {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
       </div>
       : view === 'phone' ? <form id="personal-phone-form" className="personal-security-form" onSubmit={changePhone}><div className="personal-bound-phone"><span>当前手机号</span><strong>{maskPhone(phone)}</strong></div><label className="personal-setting-field" htmlFor="personal-new-phone">新手机号<input id="personal-new-phone" type="tel" inputMode="numeric" maxLength={11} placeholder="请输入 11 位手机号" value={newPhone} onChange={(event) => { setNewPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setError('') }} /></label><div className="personal-setting-field"><label htmlFor="personal-phone-code">验证码</label><div className="personal-code-field"><input id="personal-phone-code" inputMode="numeric" maxLength={6} placeholder="输入 6 位验证码" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }} /><button type="button" className="client-button client-button--secondary" disabled={codeCountdown > 0} onClick={() => { if (!/^1\d{10}$/.test(newPhone)) { setError('请先输入正确的 11 位手机号。'); return } setCodeSent(true); setCodeCountdown(60); setFeedback('验证码已发送（演示：任意 6 位数字均可通过）'); setError('') }}>{codeCountdown > 0 ? `${codeCountdown}秒后重新获取` : codeSent ? '重新获取' : '获取验证码'}</button></div></div>{error && <p className="personal-setting-error" role="alert">{error}</p>}{feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}</form>

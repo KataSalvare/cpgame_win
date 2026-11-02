@@ -3,5 +3,6 @@
 > 一行一条，按时间倒序追加；无内容统一写 `-`。
 > 字段：时间 | kind | src | sum | doc | theme | data | git | todo
 
+2026-11-02 14:22 | upd | user | 记录导航双向同步 | project-overview,content-tool-nav-sync | - | - | - | 新增入口同步验收
 2026-10-23 16:07 | upd | user | 记录浏览器标签误绑定 | project-overview,browser-surface-mismatch | - | - | - | 按URL确认surface与标签
 2026-10-23 11:59 | upd | user | 记录工具栏路由故障 | project-overview,tool-route-component-remount | - | - | - | 路由入口变化时复查组件实例生命周期

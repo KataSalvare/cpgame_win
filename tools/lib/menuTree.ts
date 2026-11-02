@@ -6,6 +6,7 @@ export interface MenuNode {
 export type MenuTree = Record<string, MenuNode[]>
 
 const STORAGE_KEY = 'prototype-sidebar-menu-tree-v3'
+const FILE_API = '/api/menu-tree'
 
 const makeFlatTree = (ids: string[]): MenuNode[] => ids.map(id => ({ id, children: [] }))
 
@@ -22,26 +23,53 @@ const sanitizeNodes = (value: unknown, allowed: Set<string>): MenuNode[] => {
   return visit(value)
 }
 
-export const loadMenuTree = (idsByCategory: Record<string, string[]>): MenuTree => {
+const restoreMenuTree = (saved: unknown, idsByCategory: Record<string, string[]>): MenuTree => {
   const defaults = Object.fromEntries(Object.entries(idsByCategory).map(([category, ids]) => [category, makeFlatTree(ids)]))
+  if (!saved || typeof saved !== 'object') return defaults
+  return Object.fromEntries(Object.entries(idsByCategory).map(([category, ids]) => {
+    const allowed = new Set(ids)
+    const restored = sanitizeNodes((saved as Record<string, unknown>)[category], allowed)
+    const present = new Set<string>()
+    const collect = (nodes: MenuNode[]) => nodes.forEach(node => { present.add(node.id); collect(node.children) })
+    collect(restored)
+    return [category, [...restored, ...ids.filter(id => !present.has(id)).map(id => ({ id, children: [] }))]]
+  }))
+}
+
+export const loadMenuTree = (idsByCategory: Record<string, string[]>): MenuTree => {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as Record<string, unknown> | null
-    if (!saved || typeof saved !== 'object') return defaults
-    return Object.fromEntries(Object.entries(idsByCategory).map(([category, ids]) => {
-      const allowed = new Set(ids)
-      const restored = sanitizeNodes(saved[category], allowed)
-      const present = new Set<string>()
-      const collect = (nodes: MenuNode[]) => nodes.forEach(node => { present.add(node.id); collect(node.children) })
-      collect(restored)
-      return [category, [...restored, ...ids.filter(id => !present.has(id)).map(id => ({ id, children: [] }))]]
-    }))
+    return restoreMenuTree(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'), idsByCategory)
   } catch {
-    return defaults
+    return restoreMenuTree(null, idsByCategory)
   }
 }
 
-export const saveMenuTree = (tree: MenuTree) => {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tree)) } catch { /* Storage can be unavailable in private browsing. */ }
+export const loadMenuTreeFromFile = async (idsByCategory: Record<string, string[]>): Promise<MenuTree> => {
+  const response = await fetch(FILE_API)
+  if (!response.ok) throw new Error(`菜单文件读取失败：${response.status}`)
+  const payload = await response.json() as { tree?: unknown }
+  if (!Object.hasOwn(payload, 'tree')) throw new Error('菜单文件接口未返回有效数据')
+  const tree = payload.tree ? restoreMenuTree(payload.tree, idsByCategory) : loadMenuTree(idsByCategory)
+  if (!payload.tree) await saveMenuTree(tree)
+  return tree
+}
+
+let saveQueue: Promise<void> = Promise.resolve()
+
+export const saveMenuTree = (tree: MenuTree): Promise<void> => {
+  const serialized = JSON.stringify(tree)
+  saveQueue = saveQueue.catch(() => undefined).then(async () => {
+    const response = await fetch(FILE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tree }),
+    })
+    if (!response.ok) throw new Error(`菜单文件保存失败：${response.status}`)
+    const result = await response.json() as { success?: unknown }
+    if (result.success !== true) throw new Error('菜单文件接口未确认保存结果')
+    try { localStorage.setItem(STORAGE_KEY, serialized) } catch { /* The local file remains the source of truth. */ }
+  })
+  return saveQueue
 }
 
 const removeNode = (nodes: MenuNode[], id: string): { nodes: MenuNode[]; removed?: MenuNode } => {

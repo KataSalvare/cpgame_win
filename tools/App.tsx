@@ -49,7 +49,11 @@ function AppContent() {
       }
       const params = new URLSearchParams(window.location.hash.slice(1))
       const hashPage = params.get('page') ?? currentPage.entryView
-      const entryView = hashPage === 'profile' && params.get('section') === 'onboarding' ? 'profile-onboarding'
+      const hashTool = params.get('tool')
+      const entryView = params.get('support') === 'club' ? 'club-support'
+        : params.get('support') === 'platform' ? 'platform-support'
+          : hashTool && ['help-center', 'screen-recording', 'client-notifications', 'close-app', 'quick-panel'].includes(hashTool) ? hashTool
+        : hashPage === 'profile' && params.get('section') === 'onboarding' ? params.get('onboarding') === 'companion' ? 'profile-onboarding' : params.get('onboarding') === 'club' ? 'profile-club-onboarding' : 'profile-onboarding-center'
         : hashPage === 'profile' && params.get('section') === 'clubs' ? 'profile-clubs'
           : hashPage === 'profile' && params.get('section') === 'cancel-account' ? 'profile-cancel-account'
             : hashPage === 'profile' && params.get('section') === 'wealth' ? 'profile-wealth'
@@ -66,7 +70,7 @@ function AppContent() {
               : hashPage
       const matchingPage = pages.find((page) => page.dirName === currentPage.dirName && page.entryView === entryView)
       if (matchingPage && matchingPage.path !== window.location.pathname) {
-        navigate(matchingPage.path, { replace: true })
+        navigate(`${matchingPage.path}${window.location.hash}`, { replace: true })
       }
     }
     window.addEventListener('hashchange', syncToolPath)
@@ -80,16 +84,27 @@ function AppContent() {
       return
     }
     const params = new URLSearchParams(window.location.hash.slice(1))
+    if (params.get('page') === 'profile') {
+      const profileSection = params.get('section')
+      const requestedView = profileSection === 'wealth' ? 'profile-wealth'
+        : profileSection === 'visits' ? 'profile-visits'
+          : profileSection === 'favorites' ? 'profile-social'
+            : profileSection === 'onboarding' ? params.get('onboarding') === 'companion' ? 'profile-onboarding' : params.get('onboarding') === 'club' ? 'profile-club-onboarding' : 'profile-onboarding-center'
+              : profileSection === 'clubs' ? 'profile-clubs'
+                : profileSection === 'cancel-account' ? 'profile-cancel-account'
+                  : 'profile'
+      const requestedPage = pages.find((page) => page.dirName === currentPage.dirName && page.entryView === requestedView)
+      if (requestedPage && requestedPage.path !== currentPage.path) return
+    }
     const expectedPage = currentPage.entryView === 'club-voice-room' ? 'voice-room'
       : currentPage.entryView === 'quick-match' ? 'quick-match'
         : currentPage.entryView === 'wallet-recharge' ? 'recharge'
-          : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-clubs' || currentPage.entryView === 'profile-cancel-account' || currentPage.entryView === 'profile-wealth' || currentPage.entryView === 'profile-visits' || currentPage.entryView === 'profile-social' ? 'profile'
-            : currentPage.entryView === 'club-support' ? 'messages'
-              : currentPage.entryView === 'platform-support' ? 'home'
-                : currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' ? 'home'
+          : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' || currentPage.entryView === 'profile-clubs' || currentPage.entryView === 'profile-cancel-account' || currentPage.entryView === 'profile-wealth' || currentPage.entryView === 'profile-visits' || currentPage.entryView === 'profile-social' ? 'profile'
+            : currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' ? params.get('page') ?? (currentPage.entryView === 'club-support' ? 'messages' : 'home')
           : currentPage.entryView
-    const expectedVoiceFrom = currentPage.entryView === 'club-voice-room' ? 'club' : null
-    const expectedSection = currentPage.entryView === 'profile-onboarding' ? 'onboarding'
+    const preservesUnderlyingRoute = currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel'
+    const expectedVoiceFrom = preservesUnderlyingRoute ? params.get('voiceFrom') : currentPage.entryView === 'club-voice-room' ? 'club' : null
+    const expectedSection = preservesUnderlyingRoute ? params.get('section') : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' ? 'onboarding'
       : currentPage.entryView === 'profile-clubs' ? 'clubs'
         : currentPage.entryView === 'profile-cancel-account' ? 'cancel-account'
           : currentPage.entryView === 'profile-wealth' ? 'wealth'
@@ -97,12 +112,16 @@ function AppContent() {
               : currentPage.entryView === 'profile-social' ? 'favorites' : null
     const expectedSupport = currentPage.entryView === 'club-support' ? 'club'
       : currentPage.entryView === 'platform-support' ? 'platform' : null
+    const expectedOnboarding = preservesUnderlyingRoute ? params.get('onboarding')
+      : currentPage.entryView === 'profile-onboarding' ? 'companion'
+        : currentPage.entryView === 'profile-club-onboarding' ? 'club' : null
     const expectedTool = currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel'
       ? currentPage.entryView : null
     if (params.get('page') === expectedPage
       && (expectedVoiceFrom == null || params.get('voiceFrom') === expectedVoiceFrom)
       && (expectedSection == null ? !params.has('section') : params.get('section') === expectedSection)
       && (expectedSupport == null ? !params.has('support') : params.get('support') === expectedSupport)
+      && (expectedOnboarding == null ? !params.has('onboarding') : params.get('onboarding') === expectedOnboarding)
       && (expectedTool == null ? !params.has('tool') : params.get('tool') === expectedTool)) return
     params.set('page', expectedPage)
     if (expectedVoiceFrom) params.set('voiceFrom', expectedVoiceFrom)
@@ -111,6 +130,8 @@ function AppContent() {
     else params.delete('section')
     if (expectedSupport) params.set('support', expectedSupport)
     else params.delete('support')
+    if (expectedOnboarding) params.set('onboarding', expectedOnboarding)
+    else params.delete('onboarding')
     if (expectedTool) params.set('tool', expectedTool)
     else params.delete('tool')
     window.location.hash = params.toString()

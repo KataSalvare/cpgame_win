@@ -7,7 +7,86 @@ import path from 'path'
 import fs from 'fs'
 
 const ANNOTATIONS_FILE = path.resolve(__dirname, 'src/resources/annotations.json')
+const MENU_TREE_FILE = path.resolve(__dirname, 'tools/config/menu-tree.json')
 const PROTOTYPES_DIR = path.resolve(__dirname, 'src/prototypes')
+
+function isMenuTree(value: unknown): value is Record<string, Array<{ id: string; children: unknown[] }>> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  return Object.values(value).every((nodes) => {
+    if (!Array.isArray(nodes)) return false
+    const seen = new Set<string>()
+    const validateNodes = (items: unknown[], depth = 0): boolean => {
+      if (depth > 20) return false
+      return items.every((item) => {
+        if (!item || typeof item !== 'object' || Array.isArray(item)) return false
+        const node = item as { id?: unknown; children?: unknown }
+        if (typeof node.id !== 'string' || !/^\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*$/.test(node.id) || seen.has(node.id) || !Array.isArray(node.children)) return false
+        seen.add(node.id)
+        return validateNodes(node.children, depth + 1)
+      })
+    }
+    return validateNodes(nodes)
+  })
+}
+
+function menuTreeApiPlugin() {
+  return {
+    name: 'menu-tree-api',
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use('/api/menu-tree', (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method === 'GET') {
+          try {
+            const tree = fs.existsSync(MENU_TREE_FILE) ? JSON.parse(fs.readFileSync(MENU_TREE_FILE, 'utf8')) : null
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify({ tree }))
+          } catch (error) {
+            res.statusCode = 500
+            res.end(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }))
+          }
+          return
+        }
+
+        if (req.method === 'POST') {
+          let body = ''
+          let tooLarge = false
+          req.on('data', (chunk: Buffer) => {
+            if (body.length + chunk.length > 1_000_000) {
+              tooLarge = true
+              return
+            }
+            body += chunk.toString()
+          })
+          req.on('end', () => {
+            if (tooLarge) {
+              res.statusCode = 413
+              res.end(JSON.stringify({ error: 'Menu tree payload is too large' }))
+              return
+            }
+            try {
+              const payload = JSON.parse(body) as { tree?: unknown }
+              if (!isMenuTree(payload.tree)) {
+                res.statusCode = 400
+                res.end(JSON.stringify({ error: 'Invalid menu tree' }))
+                return
+              }
+              fs.mkdirSync(path.dirname(MENU_TREE_FILE), { recursive: true })
+              fs.writeFileSync(MENU_TREE_FILE, JSON.stringify(payload.tree, null, 2), 'utf8')
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify({ success: true }))
+            } catch (error) {
+              res.statusCode = 400
+              res.end(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }))
+            }
+          })
+          return
+        }
+
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method not allowed' }))
+      })
+    },
+  }
+}
 
 function specApiPlugin() {
   return {
@@ -116,13 +195,13 @@ function annotationsPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), annotationsPlugin(), specApiPlugin()],
+  plugins: [react(), tailwindcss(), annotationsPlugin(), menuTreeApiPlugin(), specApiPlugin()],
   server: {
     port: 1045,
     strictPort: true,
     watch: {
       // 批注保存会直接写入该文件，忽略监听以避免开发时整页刷新
-      ignored: ['**/src/resources/annotations.json'],
+      ignored: ['**/src/resources/annotations.json', '**/tools/config/menu-tree.json'],
     },    
   },
   resolve: {

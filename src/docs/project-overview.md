@@ -13,21 +13,23 @@
 1. 本文件：项目范围与资料索引。
 2. `src/prototypes/game-companion-client/spec.md`：陪玩平台原型说明（若文件存在）。
 3. `src/docs/troubleshooting/tool-route-component-remount.md`：工具栏路由切换故障记录。
-4. `src/docs/troubleshooting/browser-surface-mismatch.md`：内置浏览器误选 surface/标签导致访问拒绝的排查记录。
-5. `rules/prototype-development-guide.md` 与相关主题规范：原型实现约束。
+4. `src/docs/troubleshooting/content-tool-nav-sync.md`：内容层 hash 与工具层 pathname 的双向同步、上下文保留和回归方法。
+5. `src/docs/troubleshooting/browser-surface-mismatch.md`：内置浏览器误选 surface/标签导致访问拒绝的排查记录。
+6. `rules/prototype-development-guide.md` 与相关主题规范：原型实现约束。
 
 ## 文档索引
 
 | 文档 | 用途 |
 | --- | --- |
 | `src/docs/troubleshooting/tool-route-component-remount.md` | 记录页面路由已切换但原型内容未切换的原因与修复方式 |
+| `src/docs/troubleshooting/content-tool-nav-sync.md` | 记录内容层 hash、工具层 pathname、浮层入口与返回上下文的同步约定 |
 | `src/docs/troubleshooting/browser-surface-mismatch.md` | 记录浏览器 surface/标签绑定错误导致本机预览访问被拒绝的原因与操作约束 |
 | `src/docs/memory-log.md` | 主动维护记忆的简短追加日志 |
 | `rules/prototype-state-and-route-guide.md` | 原型页面状态与路由规则 |
 
 ## 原型索引
 
-- `src/prototypes/game-companion-client/`：玩家端陪玩平台，工具栏提供首页、俱乐部详情、陪玩详情三个入口。
+- `src/prototypes/game-companion-client/`：玩家端陪玩平台；工具层按 `tools/config/pages.ts` 注册业务页面和快捷入口，内容层内部路由与个人中心模块以原型 SPEC 和 hash 为准。
 - 默认工具栏入口为固定 mock 俱乐部和陪玩数据；详情之间也可在原型内逐层进入。
 
 ## 当前待补事项

@@ -12,7 +12,7 @@ function formatDuration(seconds: number) {
   return `${minutes}:${remainder}`
 }
 
-export function ScreenRecordingFeature({ autoOpen = false, onClose }: { autoOpen?: boolean; onClose?: () => void }) {
+export function ScreenRecordingFeature({ autoOpen = false, onOpen, onClose }: { autoOpen?: boolean; onOpen?: () => void; onClose?: () => void }) {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [promptOpen, setPromptOpen] = useState(autoOpen)
@@ -100,6 +100,7 @@ export function ScreenRecordingFeature({ autoOpen = false, onClose }: { autoOpen
 
   const openRecording = () => {
     if (recordingState !== 'idle') return
+    onOpen?.()
     if (skipPrompt) {
       startRecording()
       return

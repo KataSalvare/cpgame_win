@@ -1,0 +1,169 @@
+{
+  "frontend": [
+    {
+      "id": "/game-companion-login",
+      "children": []
+    },
+    {
+      "id": "/game-companion-identity-verification",
+      "children": []
+    },
+    {
+      "id": "/game-companion-quick-match",
+      "children": [
+        {
+          "id": "/game-companion-checkout",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "/game-companion-client",
+      "children": [
+        {
+          "id": "/game-companion-club-detail",
+          "children": [
+            {
+              "id": "/game-companion-club-cards",
+              "children": []
+            },
+            {
+              "id": "/game-companion-club-support",
+              "children": []
+            },
+            {
+              "id": "/game-companion-club-announcements",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "/game-companion-companion-detail",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "/game-companion-talents",
+      "children": []
+    },
+    {
+      "id": "/game-companion-announcements",
+      "children": []
+    },
+    {
+      "id": "/game-companion-woodpecker",
+      "children": []
+    },
+    {
+      "id": "/game-companion-messages",
+      "children": []
+    },
+    {
+      "id": "/game-companion-voice-room",
+      "children": [
+        {
+          "id": "/game-companion-club-voice-room",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "/game-companion-profile",
+      "children": [
+        {
+          "id": "/game-companion-profile-cancel-account",
+          "children": []
+        },
+        {
+          "id": "/game-companion-profile-clubs",
+          "children": []
+        },
+        {
+          "id": "/game-companion-profile-onboarding",
+          "children": []
+        },
+        {
+          "id": "/game-companion-profile-visits",
+          "children": []
+        },
+        {
+          "id": "/game-companion-profile-social",
+          "children": []
+        },
+        {
+          "id": "/game-companion-profile-wealth",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "/game-companion-wallet",
+      "children": [
+        {
+          "id": "/game-companion-recharge",
+          "children": []
+        },
+        {
+          "id": "/game-companion-my-cards",
+          "children": []
+        },
+        {
+          "id": "/game-companion-coupons",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "/game-companion-orders",
+      "children": []
+    },
+    {
+      "id": "/game-companion-workbench",
+      "children": []
+    },
+    {
+      "id": "/game-companion-platform-support",
+      "children": []
+    },
+    {
+      "id": "/game-companion-system-settings",
+      "children": [
+        {
+          "id": "/game-companion-help-center",
+          "children": []
+        },
+        {
+          "id": "/game-companion-screen-recording",
+          "children": []
+        },
+        {
+          "id": "/game-companion-client-notifications",
+          "children": []
+        },
+        {
+          "id": "/game-companion-close-app",
+          "children": []
+        },
+        {
+          "id": "/game-companion-quick-panel",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "/game-companion-profile-onboarding-center",
+      "children": []
+    },
+    {
+      "id": "/game-companion-profile-club-onboarding",
+      "children": []
+    }
+  ],
+  "admin": [
+    {
+      "id": "/demo/admin/windows-client-components",
+      "children": []
+    }
+  ]
+}

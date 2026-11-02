@@ -78,7 +78,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
 
     <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
     {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
-    {supportSelectionOpen && <ClubSupportSelectionDialog onClose={() => setSupportSelectionOpen(false)} onConsult={() => { social.markConversationRead('direct-club-support'); setSupportChatOpen(true) }} />}
+    {supportSelectionOpen && <ClubSupportSelectionDialog onClose={() => setSupportSelectionOpen(false)} onConsult={() => { setSupportSelectionOpen(false); social.markConversationRead('direct-club-support'); setSupportChatOpen(true) }} />}
     {supportChatOpen && <ClubSupportChatPanel conversation={social.conversations.find((item) => item.id === 'direct-club-support')} orders={orders} onClose={() => setSupportChatOpen(false)} onSend={(kind, content, duration, replyTo) => social.sendChatMessageToConversation('direct-club-support', kind, content, duration, replyTo)} onSendOrder={(order) => social.sendSupportCardToConversation('direct-club-support', order)} onReview={(messageId, rating, submitted) => social.updateSupportReviewInConversation('direct-club-support', messageId, rating, submitted)} />}
   </div>
 }

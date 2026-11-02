@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom'
 import { pages, type PageCategory } from '../config/pages'
 import { docModules } from '../config/docs'
 import { getThemeInfo, themeModules } from '../config/themes'
-import { loadMenuTree, moveMenuNode, saveMenuTree, type MenuNode } from '../lib/menuTree'
+import { loadMenuTree, loadMenuTreeFromFile, moveMenuNode, saveMenuTree, type MenuNode } from '../lib/menuTree'
 
 interface SidebarProps {
   projectName: string
@@ -20,9 +20,10 @@ interface PageListProps {
   onMove: (draggedId: string, targetId: string, placement: 'before' | 'after' | 'inside') => void
   expanded: Set<string>
   onToggle: (id: string) => void
+  dragEnabled: boolean
 }
 
-const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle }: PageListProps) => {
+const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle, dragEnabled }: PageListProps) => {
   const [dropTarget, setDropTarget] = useState<{ id: string; placement: 'before' | 'after' | 'inside' } | null>(null)
   const pointerDrag = useRef<{ id: string; pointerId: number; startX: number; startY: number; active: boolean } | null>(null)
   const suppressClick = useRef(false)
@@ -60,11 +61,11 @@ const PageList = ({ filteredPages, icon: Icon, tree, onMove, expanded, onToggle 
     return (
       <div key={node.id}>
         <div
-          className={`group relative flex cursor-grab items-center rounded-xl active:cursor-grabbing ${placement === 'inside' ? 'ring-1 ring-[var(--tool-focus)] bg-[var(--tool-surface-hover)]' : ''} ${placement === 'before' ? 'before:absolute before:inset-x-2 before:top-0 before:border-t-2 before:border-[var(--tool-focus)]' : ''} ${placement === 'after' ? 'after:absolute after:inset-x-2 after:bottom-0 after:border-b-2 after:border-[var(--tool-focus)]' : ''}`}
+          className={`group relative flex items-center rounded-xl ${dragEnabled ? 'cursor-grab active:cursor-grabbing' : ''} ${placement === 'inside' ? 'ring-1 ring-[var(--tool-focus)] bg-[var(--tool-surface-hover)]' : ''} ${placement === 'before' ? 'before:absolute before:inset-x-2 before:top-0 before:border-t-2 before:border-[var(--tool-focus)]' : ''} ${placement === 'after' ? 'after:absolute after:inset-x-2 after:bottom-0 after:border-b-2 after:border-[var(--tool-focus)]' : ''}`}
           style={{ marginLeft: depth * 14 }}
           data-menu-id={node.id}
           onPointerDown={(event) => {
-            if (event.button !== 0 || (event.target as HTMLElement).closest('button')) return
+            if (!dragEnabled || event.button !== 0 || (event.target as HTMLElement).closest('button')) return
             pointerDrag.current = { id: node.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false }
           }}
           onPointerMove={(event) => {
@@ -227,10 +228,12 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
   const [tempName, setTempName] = useState(projectName)
   const [activeTab, setActiveTab] = useState<PageCategory | 'themes' | 'docs'>('frontend')
   const [searchQuery, setSearchQuery] = useState('')
-  const [menuTree, setMenuTree] = useState(() => loadMenuTree({
+  const menuIdsByCategory = useMemo(() => ({
     frontend: pages.filter(page => page.category === 'frontend').map(page => page.path),
     admin: pages.filter(page => page.category === 'admin').map(page => page.path),
-  }))
+  }), [])
+  const [menuTree, setMenuTree] = useState(() => loadMenuTree(menuIdsByCategory))
+  const [menuTreeReady, setMenuTreeReady] = useState(false)
   const [expandedMenuIds, setExpandedMenuIds] = useState<Set<string>>(() => {
     const ids = new Set<string>()
     const collectExpandable = (nodes: MenuNode[]) => nodes.forEach(node => {
@@ -241,7 +244,31 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
     return ids
   })
 
-  useEffect(() => saveMenuTree(menuTree), [menuTree])
+  useEffect(() => {
+    let cancelled = false
+    loadMenuTreeFromFile(menuIdsByCategory).then((tree) => {
+      if (cancelled) return
+      setMenuTree(tree)
+      const expanded = new Set<string>()
+      const collectExpandable = (nodes: MenuNode[]) => nodes.forEach(node => {
+        if (node.children.length) expanded.add(node.id)
+        collectExpandable(node.children)
+      })
+      Object.values(tree).forEach(collectExpandable)
+      setExpandedMenuIds(expanded)
+      setMenuTreeReady(true)
+    }).catch((error) => {
+      if (cancelled) return
+      console.error('菜单文件加载失败，暂用浏览器缓存：', error)
+      setMenuTreeReady(true)
+    })
+    return () => { cancelled = true }
+  }, [menuIdsByCategory])
+
+  useEffect(() => {
+    if (!menuTreeReady) return
+    saveMenuTree(menuTree).catch((error) => console.error('菜单文件保存失败：', error))
+  }, [menuTree, menuTreeReady])
 
   const handleMenuMove = (category: PageCategory, draggedId: string, targetId: string, placement: 'before' | 'after' | 'inside') => {
     setMenuTree(current => moveMenuNode(current, category, draggedId, targetId, placement))
@@ -371,10 +398,10 @@ export const Sidebar = ({ projectName, onProjectNameChange, collapsed }: Sidebar
 
           <nav className="flex-1 overflow-y-auto px-2 pb-4" aria-label="原型工作区导航">
             {activeTab === 'frontend' && (
-              <PageList filteredPages={filteredPages} icon={Smartphone} tree={menuTree.frontend ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('frontend', dragged, target, placement)} />
+              <PageList filteredPages={filteredPages} icon={Smartphone} tree={menuTree.frontend ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('frontend', dragged, target, placement)} dragEnabled={menuTreeReady} />
             )}
             {activeTab === 'admin' && (
-              <PageList filteredPages={filteredPages} icon={Monitor} tree={menuTree.admin ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('admin', dragged, target, placement)} />
+              <PageList filteredPages={filteredPages} icon={Monitor} tree={menuTree.admin ?? []} expanded={expandedMenuIds} onToggle={toggleMenuNode} onMove={(dragged, target, placement) => handleMenuMove('admin', dragged, target, placement)} dragEnabled={menuTreeReady} />
             )}
             {activeTab === 'themes' && (
               <ThemeNav searchQuery={searchQuery} />
