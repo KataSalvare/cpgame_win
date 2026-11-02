@@ -582,6 +582,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-setting-field input { width: 100%; min-width: 0; height: 36px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 10px; background: var(--prototype-surface, #fff); color: var(--client-text); font: inherit; font-size: 13px; }
 .personal-code-field { display: flex; gap: 8px; }
 .personal-code-field .client-button { flex: 0 0 auto; }
+.personal-code-field .client-button:disabled { cursor: not-allowed; opacity: .55; }
 .personal-phone-form > small, .personal-setting-error { grid-column: 1 / -1; }
 .personal-phone-form > small { color: var(--client-muted); font-size: 11px; }
 .personal-setting-error { margin: 0; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
@@ -1069,7 +1070,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .checkout-companion .checkout-companion__details { min-width: 0; flex: 1 1 auto; gap: 6px; }
 .checkout-companion__person { display: flex; align-items: center; gap: 8px; }
 .checkout-companion__person .client-user-name { color: var(--client-text); font-size: 13px; font-weight: 600; }
-.checkout-companion__person .client-status { padding: 2px 6px; font-size: 10px; }
+.checkout-companion__demographics { color: var(--client-muted); font-size: 12px; white-space: nowrap; }
 .checkout-companion__club { color: var(--client-muted); font-size: 11px; }
 .checkout-companion__communicate { flex: 0 0 auto; margin-left: auto; white-space: nowrap; }
 .checkout-companion strong { font-size: 13px; }
@@ -1628,7 +1629,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .identity-flow__field > input::placeholder, .identity-flow__code > input::placeholder { color: var(--prototype-text-subtle, #9ca3af); }
 .identity-flow__code { display: flex; gap: 8px; }
 .identity-flow__code > button { flex: 0 0 auto; min-width: 112px; }
-.identity-flow__code > button:disabled { color: var(--prototype-text-subtle, #9ca3af); cursor: default; }
+.identity-flow__code > button:disabled { color: var(--prototype-text-subtle, #9ca3af); cursor: not-allowed; opacity: .55; }
 .identity-flow__error { margin: -8px 0 0; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
 .identity-flow-dialog > .windows-dialog-panel__footer > .client-button { min-height: 36px; padding-inline: 16px; font-size: 14px; }
 .identity-flow__qr-panel { display: grid; justify-items: center; gap: 12px; padding: 0 0 8px; }

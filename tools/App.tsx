@@ -1,5 +1,5 @@
 import '@/themes/grayscale-prototype/palette.css'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DocDrawer from './components/DocDrawer'
 import { Sidebar } from './shell/Sidebar'
@@ -37,7 +37,47 @@ function ToolToast({ toast, theme }: { toast: Toast; theme: Theme }) {
 
 function AppContent() {
   const location = useLocation()
+  const navigate = useNavigate()
   const currentPage = useMemo(() => pages.find(p => p.path === location.pathname), [location.pathname])
+  const initialPathSyncRef = useRef(true)
+  useEffect(() => {
+    if (!currentPage?.entryView) return
+    const syncToolPath = () => {
+      const params = new URLSearchParams(window.location.hash.slice(1))
+      const hashPage = params.get('page') ?? currentPage.entryView
+      const entryView = hashPage === 'voice-room' && params.get('voiceFrom') === 'club'
+        ? 'club-voice-room'
+        : hashPage === 'recharge' ? 'wallet-recharge'
+          : hashPage === 'club-detail' && params.get('panel') === 'club-cards' ? 'club-cards'
+            : hashPage === 'wallet' && params.get('panel') === 'my-cards' ? 'my-cards'
+              : hashPage
+      const matchingPage = pages.find((page) => page.dirName === currentPage.dirName && page.entryView === entryView)
+      if (matchingPage && matchingPage.path !== window.location.pathname) {
+        navigate(matchingPage.path, { replace: true })
+      }
+    }
+    window.addEventListener('hashchange', syncToolPath)
+    syncToolPath()
+    return () => window.removeEventListener('hashchange', syncToolPath)
+  }, [currentPage, navigate])
+  useEffect(() => {
+    if (!currentPage?.entryView) return
+    if (initialPathSyncRef.current) {
+      initialPathSyncRef.current = false
+      return
+    }
+    const params = new URLSearchParams(window.location.hash.slice(1))
+    const expectedPage = currentPage.entryView === 'club-voice-room' ? 'voice-room'
+      : currentPage.entryView === 'quick-match' ? 'quick-match'
+        : currentPage.entryView === 'wallet-recharge' ? 'recharge'
+          : currentPage.entryView
+    const expectedVoiceFrom = currentPage.entryView === 'club-voice-room' ? 'club' : null
+    if (params.get('page') === expectedPage && (expectedVoiceFrom == null || params.get('voiceFrom') === expectedVoiceFrom)) return
+    params.set('page', expectedPage)
+    if (expectedVoiceFrom) params.set('voiceFrom', expectedVoiceFrom)
+    else params.delete('voiceFrom')
+    window.location.hash = params.toString()
+  }, [currentPage])
   const [previewContainer, setPreviewContainer] = useState<HTMLElement | null>(null)
   const previewRef = useCallback((node: HTMLDivElement | null) => {
     setPreviewContainer(node)

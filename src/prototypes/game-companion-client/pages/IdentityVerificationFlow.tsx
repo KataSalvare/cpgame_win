@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, CheckCircle2, QrCode, ShieldCheck } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 
@@ -9,9 +9,16 @@ export function IdentityVerificationFlow({ onClose }: { onClose?: () => void } =
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
   const [codeSent, setCodeSent] = useState(false)
+  const [codeCountdown, setCodeCountdown] = useState(0)
   const [name, setName] = useState('')
   const [idNumber, setIdNumber] = useState('')
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (step !== 'phone' || codeCountdown <= 0) return
+    const timer = window.setTimeout(() => setCodeCountdown((seconds) => seconds - 1), 1000)
+    return () => window.clearTimeout(timer)
+  }, [codeCountdown, step])
 
   const sendCode = () => {
     if (phone.length !== 11) {
@@ -20,6 +27,7 @@ export function IdentityVerificationFlow({ onClose }: { onClose?: () => void } =
     }
     setError('')
     setCodeSent(true)
+    setCodeCountdown(60)
   }
 
   const bindPhone = () => {
@@ -67,8 +75,8 @@ export function IdentityVerificationFlow({ onClose }: { onClose?: () => void } =
 
     {step === 'phone' && <DialogPanel overlayId="identity-verification-phone" title="绑定手机号" width={480} className="identity-flow-dialog" onClose={closeFlow} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setError(''); setStep('notice') }}><ArrowLeft size={15} />上一步</button><button type="button" className="client-button client-button--primary" onClick={bindPhone}>完成绑定</button></>}>
       <div className="identity-flow__form">
-        <label className="identity-flow__field"><span>手机号</span><input id="identity-phone-input" autoComplete="off" inputMode="numeric" maxLength={11} placeholder="请输入11位手机号" value={phone} onChange={(event) => { setPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setCode(''); setCodeSent(false); setError('') }} /></label>
-        <div className="identity-flow__field"><span className="identity-flow__label"><label htmlFor="identity-code-input">验证码</label></span><span className="identity-flow__code"><input id="identity-code-input" autoComplete="off" inputMode="numeric" maxLength={6} placeholder="6 位验证码" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }} /><button type="button" className="client-button client-button--secondary" onClick={sendCode} disabled={codeSent}>{codeSent ? '已获取' : '获取验证码'}</button></span></div>
+        <label className="identity-flow__field"><span>手机号</span><input id="identity-phone-input" autoComplete="off" inputMode="numeric" maxLength={11} placeholder="请输入11位手机号" value={phone} onChange={(event) => { setPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setCode(''); setCodeSent(false); setCodeCountdown(0); setError('') }} /></label>
+        <div className="identity-flow__field"><span className="identity-flow__label"><label htmlFor="identity-code-input">验证码</label></span><span className="identity-flow__code"><input id="identity-code-input" autoComplete="off" inputMode="numeric" maxLength={6} placeholder="6 位验证码" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }} /><button type="button" className="client-button client-button--secondary" onClick={sendCode} disabled={codeCountdown > 0}>{codeCountdown > 0 ? `${codeCountdown}秒后重新获取` : codeSent ? '重新获取' : '获取验证码'}</button></span></div>
         {error && <p className="identity-flow__error" role="alert">{error}</p>}
       </div>
     </DialogPanel>}

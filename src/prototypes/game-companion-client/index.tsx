@@ -95,7 +95,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [selectedPremiumCardId, setSelectedPremiumCardId] = useState<string | null>(null)
   const [premiumCardToast, setPremiumCardToast] = useState<string | null>(null)
-  const [matchPanelOpen, setMatchPanelOpen] = useState(false)
+  const [matchPanelOpen, setMatchPanelOpen] = useState(() => props.entryView === 'quick-match')
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
   const [personalCenterRequest, setPersonalCenterRequest] = useState({ section: 'profile' as 'profile' | 'wealth' | 'favorites', socialTab: 'clubs' as 'clubs' | 'users' | 'rooms' | 'fans', version: 0 })
   const [selectedSearchUser, setSelectedSearchUser] = useState<GlobalSearchUser | null>(null)
@@ -137,8 +137,8 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const markAnnouncementsRead = (announcements: typeof platformAnnouncements) => setReadAnnouncementIds((ids) => [...new Set([...ids, ...announcements.map((announcement) => announcement.id)])])
   const [rechargeMenuState, setRechargeMenuState] = useState({ entryView: props.entryView, open: props.entryView === 'wallet-recharge' })
   if (rechargeMenuState.entryView !== props.entryView) setRechargeMenuState({ entryView: props.entryView, open: props.entryView === 'wallet-recharge' })
-  const rechargeMenuOpen = rechargeMenuState.open
   const navigation = useClientNavigation(props.entryView)
+  const rechargeMenuOpen = rechargeMenuState.open
   const voiceReturnPage = useRef<ClientPage>(navigation.page === 'voice-room' ? (window.sessionStorage.getItem('voice-room-return-page') as ClientPage | null) ?? 'home' : navigation.page)
   const [voiceRoomMinimized, setVoiceRoomMinimized] = useState(() => window.sessionStorage.getItem('voice-room-minimized') === 'true')
   useEffect(() => {
@@ -266,12 +266,21 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     ? <RightDrawer mode="inline" title={showPremiumCardDetail ? '尊享卡明细' : navigation.panel === 'club-cards' ? `${navigation.club.name} · 尊享卡` : '我的尊享卡'} description={showPremiumCardDetail ? selectedPremiumCard?.name : undefined} onClose={() => { setSelectedPremiumCardId(null); navigation.closePanel() }} className="game-companion-drawer" width="100%">{showPremiumCardDetail && selectedPremiumCard ? <PremiumCardDetailPage transactions={account.premiumCardTransactions.filter((entry) => entry.cardId === selectedPremiumCard.id)} onBack={() => setSelectedPremiumCardId(null)} /> : <PremiumCardsPage pageState={pageState} onRetry={() => setPageState('normal')} clubId={navigation.clubId} ownedOnly={navigation.panel === 'my-cards'} balance={account.diamondBalance} ownedIds={account.ownedPremiumCardIds} cardBalances={account.premiumCardBalances} onBack={navigation.closePanel} onRecharge={() => navigation.goToPage('recharge', navigation.panel === 'my-cards' ? 'my-cards' : 'club-cards')} onPurchase={account.purchasePremiumCard} onTopUp={account.rechargePremiumCard} onOpenDetails={setSelectedPremiumCardId} onNotify={setPremiumCardToast} />}</RightDrawer>
     : null
   const checkoutCompanions = navigation.companionIds.map((id) => companions.find((companion) => companion.id === id)).filter((companion): companion is Companion => Boolean(companion))
-  const isWalletPage = navigation.page === 'wallet' || props.entryView === 'wallet-recharge'
-  const isRechargeModalOpen = navigation.panel === 'diamond-recharge' || rechargeMenuOpen || checkoutRechargeOpen
+  const rechargeRouteOpen = props.entryView === 'wallet-recharge' && navigation.page === 'recharge'
+  const rechargeBackdropPage = rechargeRouteOpen ? navigation.returnTo ?? 'wallet' : navigation.page
+  const isWalletPage = rechargeBackdropPage === 'wallet' || (props.entryView === 'wallet-recharge' && !rechargeRouteOpen)
+  const isRechargeModalOpen = navigation.panel === 'diamond-recharge' || rechargeMenuOpen || checkoutRechargeOpen || rechargeRouteOpen
   const closeRechargeModal = () => {
     setRechargeMenuState({ entryView: props.entryView, open: false })
     setCheckoutRechargeOpen(false)
     if (navigation.panel === 'diamond-recharge') navigation.closePanel()
+    if (rechargeRouteOpen) {
+      if (navigation.returnTo === 'checkout' && navigation.companionId && navigation.serviceId) {
+        navigation.beginOrder(navigation.serviceId, navigation.companionId, navigation.orderSelectionMode)
+      } else {
+        navigation.goToPage(navigation.returnTo ?? 'wallet')
+      }
+    }
   }
   const globalSearchUsers: GlobalSearchUser[] = [
     ...companions.map((companion) => ({
@@ -317,7 +326,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     tags: currentSocialUser.tags,
     intro: currentSocialUser.intro,
   } : null : null
-  const activeNavId = navigation.page === 'system-settings' ? '' : navigation.page === 'woodpecker' ? 'woodpecker' : navigation.page === 'workbench' ? 'workbench' : navigation.page === 'talents' ? 'talents'
+  const activeNavId = navigation.page === 'system-settings' || navigation.page === 'recharge' ? '' : navigation.page === 'woodpecker' ? 'woodpecker' : navigation.page === 'workbench' ? 'workbench' : navigation.page === 'talents' ? 'talents'
     : navigation.page === 'profile' || navigation.page === 'wallet' || navigation.page === 'orders' || props.entryView === 'wallet-recharge'
     ? navigation.page
     : navigation.page === 'messages' || navigation.page === 'voice-room'
@@ -471,7 +480,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     </>}
   >
     <>
-    {navigation.page === 'system-settings' ? <SystemSettingsPage settings={systemSettings} onSave={setSystemSettings} notifications={notificationPreferences} onUpdateNotifications={setNotificationPreferences} onBack={() => { if (systemSettingsReturnHash.current) { window.location.hash = systemSettingsReturnHash.current; systemSettingsReturnHash.current = null } else navigation.goToPage(navigation.returnTo && navigation.returnTo !== 'system-settings' ? navigation.returnTo : 'home') }} /> : navigation.page === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} availableBeanBalance={account.availableBeanBalance} pendingBeanSettlementBalance={account.pendingBeanSettlementBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} onOpenExchange={() => setBeanExchangeOpen(true)} /> : navigation.page === 'woodpecker' ? <WoodpeckerPage pageState={pageState} onRetry={() => setPageState('normal')} /> : navigation.page === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(platformAnnouncements)} onRetry={() => setPageState('normal')} /> : navigation.page === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId))} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : navigation.page === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onOpenGift={openGiftPanel} /> : navigation.page === 'voice-room' ? <VoiceRoomsPage logic={social} ownerSource={navigation.voiceRoomSource} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} onOpenClubSupport={openClubSupportChat} onChatWithCompanion={(id) => { social.startDirectMessageWithCompanion(id); setVoiceRoomMinimized(true); window.sessionStorage.setItem('voice-room-minimized', 'true'); navigation.goToPage('messages') }} onOpenGift={(recipients, fixedRecipient, anchor) => openGiftPanel(recipients, fixedRecipient, anchor)} /> : navigation.page === 'profile' ? <PersonalCenterPage
+    {rechargeBackdropPage === 'system-settings' ? <SystemSettingsPage settings={systemSettings} onSave={setSystemSettings} notifications={notificationPreferences} onUpdateNotifications={setNotificationPreferences} onBack={() => { if (systemSettingsReturnHash.current) { window.location.hash = systemSettingsReturnHash.current; systemSettingsReturnHash.current = null } else navigation.goToPage(navigation.returnTo && navigation.returnTo !== 'system-settings' ? navigation.returnTo : 'home') }} /> : rechargeBackdropPage === 'workbench' ? <WorkbenchPage logic={workbench} pageState={pageState} onRetry={() => setPageState('normal')} balance={account.beanBalance} availableBeanBalance={account.availableBeanBalance} pendingBeanSettlementBalance={account.pendingBeanSettlementBalance} entries={account.beanTransactions} onWithdraw={account.withdrawBeans} onOpenExchange={() => setBeanExchangeOpen(true)} /> : rechargeBackdropPage === 'woodpecker' ? <WoodpeckerPage pageState={pageState} onRetry={() => setPageState('normal')} /> : rechargeBackdropPage === 'announcements' ? <AnnouncementsPage kind="platform" announcements={platformAnnouncements} categories={platformAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(platformAnnouncements)} onRetry={() => setPageState('normal')} /> : rechargeBackdropPage === 'club-announcements' ? <AnnouncementsPage kind="club" clubName={navigation.club.name} announcements={clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId)} categories={clubAnnouncementCategories} pageState={pageState} readIds={readAnnouncementIds} onRead={(id) => setReadAnnouncementIds((ids) => ids.includes(id) ? ids : [...ids, id])} onReadAll={() => markAnnouncementsRead(clubAnnouncements.filter((item) => !item.clubId || item.clubId === navigation.clubId))} onRetry={() => setPageState('normal')} onBack={() => navigation.goToPage('club-detail')} /> : rechargeBackdropPage === 'messages' ? <MessagesPage orders={account.orders} logic={social} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onOpenGift={openGiftPanel} /> : rechargeBackdropPage === 'voice-room' ? <VoiceRoomsPage logic={social} ownerSource={navigation.voiceRoomSource} pageState={pageState} onRetry={() => setPageState('normal')} onOrder={navigation.beginOrder} onMinimizeVoice={minimizeVoiceRoom} onExitVoice={leaveVoiceRoomPage} onOpenClubSupport={openClubSupportChat} onChatWithCompanion={(id) => { social.startDirectMessageWithCompanion(id); setVoiceRoomMinimized(true); window.sessionStorage.setItem('voice-room-minimized', 'true'); navigation.goToPage('messages') }} onOpenGift={(recipients, fixedRecipient, anchor) => openGiftPanel(recipients, fixedRecipient, anchor)} /> : rechargeBackdropPage === 'profile' ? <PersonalCenterPage
       key={personalCenterRequest.version}
       initialSection={personalCenterRequest.section}
       initialSocialTab={personalCenterRequest.socialTab}
@@ -514,36 +523,26 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onExchangeBeans={() => setBeanExchangeOpen(true)}
       onOpenCoupons={() => navigation.goToPage('coupons')}
       onOpenPremiumCards={() => navigation.goToPage('my-cards')}
-    /> : navigation.page === 'recharge' ? <RechargePage
-      pageState={pageState}
-      onRetry={() => setPageState('normal')}
-      diamondBalance={account.diamondBalance}
-      coupons={account.coupons}
-      onBack={() => navigation.returnTo === 'checkout' && navigation.companionId && navigation.serviceId
-        ? navigation.beginOrder(navigation.serviceId, navigation.companionId)
-        : navigation.goToPage(navigation.returnTo === 'profile' ? 'profile' : navigation.returnTo === 'club-cards' || navigation.returnTo === 'my-cards' ? navigation.returnTo : 'wallet')}
-      backLabel={navigation.returnTo === 'profile' ? '返回入驻考核' : navigation.returnTo === 'checkout' ? '返回下单结算' : navigation.returnTo === 'club-cards' || navigation.returnTo === 'my-cards' ? '返回尊享卡' : '返回钱包'}
-      onComplete={account.completeRecharge}
-    /> : navigation.page === 'coupons' ? <CouponsPage
+    /> : rechargeBackdropPage === 'coupons' ? <CouponsPage
       pageState={pageState}
       onRetry={() => setPageState('normal')}
       coupons={account.coupons}
       onBack={() => navigation.goToPage('wallet')}
-    /> : navigation.page === 'club-cards' || navigation.page === 'my-cards' ? <PremiumCardsPage
+    /> : rechargeBackdropPage === 'club-cards' || rechargeBackdropPage === 'my-cards' ? <PremiumCardsPage
       pageState={pageState}
       onRetry={() => setPageState('normal')}
       clubId={navigation.clubId}
-      ownedOnly={navigation.page === 'my-cards'}
+      ownedOnly={rechargeBackdropPage === 'my-cards'}
       balance={account.diamondBalance}
       ownedIds={account.ownedPremiumCardIds}
       cardBalances={account.premiumCardBalances}
-      onBack={() => navigation.goToPage(navigation.page === 'my-cards' ? 'wallet' : 'club-detail')}
+      onBack={() => navigation.goToPage(rechargeBackdropPage === 'my-cards' ? 'wallet' : 'club-detail')}
       onRecharge={() => navigation.goToPage('recharge', navigation.panel === 'my-cards' ? 'my-cards' : 'club-cards')}
       onPurchase={account.purchasePremiumCard}
       onTopUp={account.rechargePremiumCard}
       onOpenDetails={setSelectedPremiumCardId}
       onNotify={setPremiumCardToast}
-    /> : navigation.page === 'orders' ? <OrdersPage
+    /> : rechargeBackdropPage === 'orders' ? <OrdersPage
       pageState={pageState}
       onRetry={() => setPageState('normal')}
       orders={account.orders}
@@ -564,7 +563,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       }}
       onUpdateStatus={account.updateOrderStatus}
       onPayPendingOrder={account.payPendingOrder}
-    /> : navigation.page === 'checkout' ? <CheckoutPage
+    /> : rechargeBackdropPage === 'checkout' ? <CheckoutPage
       key={orderService?.service.id ?? 'missing-service'}
       pageState={pageState}
       onRetry={() => setPageState('normal')}
@@ -577,7 +576,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onBack={() => navigation.goToPage(navigation.returnTo === 'talents' ? 'talents' : 'club-detail')}
       hideRechargePrompt={checkoutRechargePromptDismissed}
       onResetRechargePrompt={() => setCheckoutRechargePromptDismissed(false)}
-      onOpenWallet={() => { setCheckoutRechargePromptDismissed(true); setRechargeReturnLabel('返回下单结算'); setCheckoutRechargeOpen(true) }}
+      onOpenWallet={() => { setCheckoutRechargePromptDismissed(true); navigation.goToPage('recharge', 'checkout') }}
       onSelectService={(serviceId) => navigation.beginOrder(serviceId, navigation.companionId ?? '', navigation.orderSelectionMode)}
       onCommunicate={(companionId) => { setChatCompanionId(companionId); social.startDirectMessageWithCompanion(companionId); setCompanionChatOpen(true) }}
       onComplete={(quantity, amount, remark, _selectedCompanions, tipAmount, paymentSource, premiumCardId) => {
@@ -585,7 +584,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         return account.completePayment(orderService.service, orderService.companion, account.getGameName(orderService.service.gameId), quantity, amount, remark, checkoutCompanions, tipAmount, paymentSource, premiumCardId)?.id ?? null
       }}
       onOpenOrders={() => navigation.goToPage('orders')}
-    /> : navigation.page === 'talents' ? <TalentsPage
+    /> : rechargeBackdropPage === 'talents' ? <TalentsPage
       pageState={pageState}
       onRetry={() => setPageState('normal')}
       onOpenCompanion={navigation.openCompanion}
@@ -593,7 +592,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         social.startDirectMessageWithCompanion(companionId)
         navigation.goToPage('messages')
       }}
-    /> : navigation.page === 'club-detail' ? <ClubDetailPage
+    /> : rechargeBackdropPage === 'club-detail' ? <ClubDetailPage
       club={navigation.club}
       pageState={pageState}
       onBack={navigation.goHome}
