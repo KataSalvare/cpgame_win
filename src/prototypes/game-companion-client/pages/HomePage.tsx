@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { clubTags, games } from '../data/mockData'
+import { clubTags } from '../data/mockData'
 import { useHomeLogic } from '../hooks/useHomeLogic'
 import { ClubCard } from '../components/ClubCard'
 import { PageStatePanel } from '../components/PageStatePanel'
@@ -17,8 +16,6 @@ type Props = {
 
 export function HomePage({ pageState, followedClubIds, onOpenClub, onBrowseClub, onSelfOrderClub, onRetry }: Props) {
   const logic = useHomeLogic(followedClubIds)
-  const gameMap = useMemo(() => new Map(games.map((game) => [game.id, game])), [])
-
   if (pageState !== 'normal') {
     return <div className="client-content client-content--narrow-state">
       <PageStatePanel
@@ -57,7 +54,7 @@ export function HomePage({ pageState, followedClubIds, onOpenClub, onBrowseClub,
       </div>
 
       {logic.visibleClubs.length > 0 ? <div className="client-card-grid client-card-grid--clubs">
-        {logic.visibleClubs.map((club) => <ClubCard key={club.id} club={club} gamesById={gameMap} onOpen={() => onOpenClub(club.id)} onBrowse={onBrowseClub} onSelfOrder={() => onSelfOrderClub(club.id)} />)}
+        {logic.visibleClubs.map((club) => <ClubCard key={club.id} club={club} layout="gallery" onOpen={() => onOpenClub(club.id)} onBrowse={onBrowseClub} onSelfOrder={() => onSelfOrderClub(club.id)} />)}
       </div> : <div className="client-inline-empty"><p>没有符合条件的俱乐部</p><button type="button" className="client-button client-button--secondary" onClick={logic.resetFilters}>恢复默认筛选</button></div>}
     </section>
   </div>

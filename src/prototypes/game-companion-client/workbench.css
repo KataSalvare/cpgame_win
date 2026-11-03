@@ -123,6 +123,16 @@
 .workbench-service-level header { display:flex; align-items:center; justify-content:space-between; gap:16px; }
 .workbench-service-level h4 { margin:0; font-size:14px; font-weight:600; }
 .workbench-service-level-toggle { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--client-muted); }
+.workbench-service-level-actions { display:flex; align-items:center; gap:16px; }
+.workbench-level-voice { display:flex; align-items:center; gap:8px; }
+.workbench-level-voice__entry { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:30px; padding:0 10px; font-size:12px; }
+.workbench-level-voice__status { font-size:12px; white-space:nowrap; }
+.workbench-level-voice__clip { display:flex; align-items:center; gap:8px; min-width:150px; font-size:12px; }
+.workbench-level-voice__play { display:grid; place-items:center; width:26px; height:26px; padding:0; border:1px solid var(--client-border); border-radius:50%; background:var(--client-surface,#fff); color:var(--client-text); cursor:pointer; }
+.workbench-level-voice__progress { position:relative; width:74px; height:3px; overflow:hidden; border-radius:2px; background:var(--client-border); }
+.workbench-level-voice__progress i { display:block; width:0; height:100%; background:var(--client-text-secondary,#4b5563); }
+.workbench-level-voice__progress.is-playing i { width:100%; transition:width 5s linear; }
+.workbench-level-voice button:focus-visible { outline:2px solid var(--prototype-text-muted,#6b7280); outline-offset:2px; }
 .workbench-service-options { display:grid; gap:0; margin-top:8px; }
 .workbench-service-option { display:grid; grid-template-columns:minmax(100px,1fr) minmax(140px,auto) minmax(72px,auto); align-items:center; gap:24px; min-height:44px; font-size:14px; }
 .workbench-service-option-price { color:var(--client-muted); font-size:12px; }

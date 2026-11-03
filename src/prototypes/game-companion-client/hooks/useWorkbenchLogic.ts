@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
 export type WorkOrderAction = '接受' | '拒绝' | '开始服务' | '继续服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
-export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; quantity: number; unit: '小时' | '局' }[]; deadline?: number }
+export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; category: '免单' | '提前结束' | '售后'; amount?: number | null }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
 const initialServiceIds = services.filter(s => s.canAcceptOrders).map(s => s.id)
@@ -122,7 +122,7 @@ export function useWorkbenchLogic() {
     if (!order || !['服务中', '已完成'].includes(order.status) || !Number.isFinite(quantity) || quantity <= 0 || !Number.isSafeInteger(quantity * 2)) return false
     const total = (order.waivedQuantity ?? 0) + quantity
     if (!Number.isSafeInteger(total * 2)) return false
-    const record = { id: `${id}-waiver-${Date.now()}`, recordedAt: new Date().toISOString(), quantity, unit: order.durationUnit }
+    const record = { id: `${id}-waiver-${Date.now()}`, recordedAt: new Date().toISOString(), category: '免单' as const, amount: null }
     setOrders(items => items.map(item => item.id === id && ['服务中', '已完成'].includes(item.status) ? {
       ...item,
       status: '已完成',
@@ -142,12 +142,15 @@ export function useWorkbenchLogic() {
   const agreeEarlyEnd = (id: string, quantity: number) => {
     const order = orders.find(item => item.id === id)
     if (!order || order.status !== '服务中' || !order.earlyEndRequested || !Number.isFinite(quantity) || quantity <= 0 || quantity > order.duration || (order.durationUnit === '局' && !Number.isInteger(quantity))) return false
+    const recordedAt = new Date().toISOString()
+    const record = { id: `${id}-early-end-${Date.now()}`, recordedAt, category: '提前结束' as const, amount: null }
     setOrders(items => items.map(item => item.id === id && item.earlyEndRequested ? {
       ...item,
       status: '待玩家确认',
       earlyEndRequested: false,
       completedQuantity: quantity,
-      completionRequestedAt: new Date().toLocaleString('zh-CN', { hour12: false }),
+      completionRequestedAt: new Date(recordedAt).toLocaleString('zh-CN', { hour12: false }),
+      afterSalesRecords: [...(item.afterSalesRecords ?? []), record],
       deadline: Date.now() + 86400000,
     } : item))
     setFeedback(`已同意提前结束，确认完成 ${quantity} ${order.durationUnit}，等待玩家确认`)

@@ -1,10 +1,30 @@
-import { useState } from 'react'
-import { ChevronRight, Plus, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AudioLines, ChevronRight, Mic, Pause, Play, Plus, Square, X } from 'lucide-react'
 import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
 import { games } from '../data/mockData'
 
 function ServiceSwitch({ label, checked, disabled = false, onToggle }: { label: string; checked: boolean; disabled?: boolean; onToggle: () => void }) {
   return <button type="button" role="switch" aria-label={label} aria-checked={checked} disabled={disabled} className="workbench-service-switch" onClick={onToggle}><span /></button>
+}
+
+function LevelVoiceRecorder({ levelName, initialRecorded = false }: { levelName: string; initialRecorded?: boolean }) {
+  const [recording, setRecording] = useState(false)
+  const [hasRecording, setHasRecording] = useState(initialRecorded)
+  const [playing, setPlaying] = useState(false)
+
+  useEffect(() => {
+    if (!playing) return
+    const timer = window.setTimeout(() => setPlaying(false), 5000)
+    return () => window.clearTimeout(timer)
+  }, [playing])
+
+  return <div className="workbench-level-voice" role="group" aria-label={`${levelName}语音`}>
+    <button type="button" className="client-button client-button--secondary workbench-level-voice__entry" aria-label={recording ? `停止${levelName}录音` : hasRecording ? `重新录制${levelName}语音` : `录制${levelName}语音`} onClick={() => { if (recording) { setRecording(false); setHasRecording(true); setPlaying(false) } else { setRecording(true); setHasRecording(false); setPlaying(false) } }}>
+      {recording ? <><Square size={13} />停止</> : <><Mic size={14} />{hasRecording ? '重新录制' : '录制语音'}</>}
+    </button>
+    {recording && <span className="workbench-level-voice__status" role="status">正在录音</span>}
+    {hasRecording && !recording && <div className="workbench-level-voice__clip"><button type="button" className="workbench-level-voice__play" aria-label={playing ? `暂停${levelName}语音试听` : `播放${levelName}语音试听`} aria-pressed={playing} onClick={() => setPlaying(value => !value)}>{playing ? <Pause size={14} /> : <Play size={14} />}</button><AudioLines size={16} aria-hidden="true" /><span aria-label="语音时长 5 秒">0:05</span><span className={`workbench-level-voice__progress${playing ? ' is-playing' : ''}`} aria-hidden="true"><i /></span></div>}
+  </div>
 }
 
 export function WorkbenchServicesPanel({ logic: w, initialApplicationOpen = false, onApplicationClose }: { logic: WorkbenchLogic; initialApplicationOpen?: boolean; onApplicationClose?: () => void }) {
@@ -36,6 +56,7 @@ export function WorkbenchServicesPanel({ logic: w, initialApplicationOpen = fals
     setApplicationLevel(option.levelName)
   }
   const game = w.serviceGroups.find(g => g.id === w.selectedServiceGameId) ?? w.serviceGroups[0]
+  const firstLevelKey = w.serviceGroups[0]?.plays[0]?.levels[0]?.key
   if (!game) return <section className="client-card account-empty-inline"><strong>暂无可管理的服务</strong><button type="button" className="client-button client-button--primary" onClick={openApplication}><Plus size={16} />申请服务</button></section>
   return <section className="client-card workbench-services-panel" aria-label="接单服务管理">
     <header className="workbench-services-heading"><button type="button" className="client-button client-button--secondary" onClick={openApplication}><Plus size={16} />申请服务</button></header>
@@ -51,7 +72,7 @@ export function WorkbenchServicesPanel({ logic: w, initialApplicationOpen = fals
           const expanded = w.expandedLevelKeys.includes(level.key)
           const optionsId = `service-options-${level.services[0].id}`
           return <section className="workbench-service-level" key={level.key} aria-label={`${play.name} · ${level.name}`}>
-            <header><h4><button type="button" className="workbench-level-disclosure" aria-label={`${level.name}服务`} aria-expanded={expanded} aria-controls={expanded ? optionsId : undefined} disabled={!levelEnabled && !hasPending} onClick={() => w.toggleLevelExpanded(level.key)}><ChevronRight size={16} /><span>{level.name}</span></button></h4><div className="workbench-service-level-toggle"><span>接单</span><ServiceSwitch label={`${game.name} ${play.name} ${level.name}接单`} checked={levelEnabled} disabled={!level.services.some(service => !service.applicationStatus)} onToggle={() => w.toggleLevel(level.key)} /></div></header>
+            <header><h4><button type="button" className="workbench-level-disclosure" aria-label={`${level.name}服务`} aria-expanded={expanded} aria-controls={expanded ? optionsId : undefined} disabled={!levelEnabled && !hasPending} onClick={() => w.toggleLevelExpanded(level.key)}><ChevronRight size={16} /><span>{level.name}</span></button></h4><div className="workbench-service-level-actions"><LevelVoiceRecorder levelName={level.name} initialRecorded={level.key === firstLevelKey} /><div className="workbench-service-level-toggle"><span>接单</span><ServiceSwitch label={`${game.name} ${play.name} ${level.name}接单`} checked={levelEnabled} disabled={!level.services.some(service => !service.applicationStatus)} onToggle={() => w.toggleLevel(level.key)} /></div></div></header>
             <div id={optionsId} className="workbench-service-options" hidden={!expanded}>
               {level.services.map(service => <div className={`workbench-service-option${service.applicationStatus ? ' is-pending' : ''}`} key={service.id}><span>{service.name}</span><span className="workbench-service-option-price">{service.price} 钻石 / {service.unit}</span>{service.applicationStatus ? <span className="workbench-service-pending">{service.applicationStatus}</span> : <ServiceSwitch label={`${game.name} ${play.name} ${level.name} ${service.name}接单`} checked={w.serviceSelections.includes(service.id)} disabled={!levelEnabled} onToggle={() => w.toggleService(service.id)} />}</div>)}
             </div>
