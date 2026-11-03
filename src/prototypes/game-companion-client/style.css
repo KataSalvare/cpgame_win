@@ -216,6 +216,10 @@
 .companion-card__visual::after { position: absolute; inset: 18%; border: 1px solid #d1d5db; border-radius: 50%; content: ''; }
 .companion-card__visual > .client-avatar { z-index: 1; width: 42%; max-width: 176px; height: auto; aspect-ratio: 1; border-radius: 50%; background: #6b7280; color: #fff; font-size: 48px; box-shadow: 0 2px 12px rgb(17 24 39 / 18%); }
 .companion-card__visual-status { position: absolute; z-index: 2; top: 12px; left: 12px; }
+.companion-card__visual > .client-voice-button--compact { position: absolute; z-index: 2; bottom: 40px; left: 12px; }
+.companion-card__name-row { display: flex; min-width: 0; align-items: center; gap: 8px; }
+.companion-card__name-row h3 { min-width: 0; }
+.companion-card__gender-age { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 3px; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; line-height: 1; }
 .companion-card--hero .companion-card__body { position: absolute; z-index: 2; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; border-top: 1px solid rgb(107 114 128 / 30%); padding: 12px 14px 14px; background: linear-gradient(180deg, rgb(255 255 255 / 82%), rgb(255 255 255 / 97%) 28%, #fff 100%); }
 .companion-card--hero .companion-card__heading { padding: 0; }
 .companion-card--hero .companion-card__identity h3 { font-size: 16px; }
