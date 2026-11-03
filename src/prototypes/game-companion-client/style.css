@@ -181,6 +181,7 @@
 .client-filter-pill:hover { border-color: var(--client-border); background: var(--prototype-surface, #fff); }
 .client-filter-pill.is-active { border-color: var(--prototype-text-subtle, #9ca3af); background: var(--prototype-border, #e5e7eb); color: var(--client-text); font-weight: 600; }
 .client-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.client-card-grid--companions { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .client-card { min-width: 0; border: 1px solid var(--client-border); border-radius: 8px; background: var(--client-surface); box-shadow: var(--client-shadow); }
 .club-card, .companion-card { display: flex; min-height: 246px; flex-direction: column; padding: 16px; }
 .club-card { cursor: pointer; transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease; }
