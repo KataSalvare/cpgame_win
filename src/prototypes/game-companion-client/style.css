@@ -1656,9 +1656,11 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .global-search-result:hover { background: var(--prototype-surface-muted, #f9fafb); }
 .global-search-result__icon { display: grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border: 1px solid var(--client-border); border-radius: 8px; color: var(--client-muted); }
 .global-search-result__text { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.global-search-result__meta { display: flex; min-width: 0; align-items: center; gap: 9px; }
 .global-search-result__text strong, .global-search-result__text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .global-search-result__text strong { color: var(--client-text); font-size: 13px; font-weight: 600; }
 .global-search-result__text small { color: var(--client-muted); font-size: 11px; }
+.global-search-result__count { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; color: var(--client-muted); font-size: 11px; }
 .global-search-result__kind { flex: 0 0 auto; color: var(--client-muted); font-size: 11px; }
 .global-search-empty { display: grid; justify-items: center; gap: 8px; padding: 32px 16px 24px; color: var(--client-muted); text-align: center; }
 .global-search-empty strong { color: var(--client-text); font-size: 14px; }
