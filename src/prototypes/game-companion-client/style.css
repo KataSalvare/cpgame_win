@@ -209,6 +209,19 @@
 .companion-card { cursor: pointer; transition: border-color 140ms ease, box-shadow 140ms ease; }
 .companion-card:hover { border-color: var(--prototype-text-subtle, #9ca3af); box-shadow: 0 2px 8px rgba(17, 24, 39, .1); }
 .companion-card:focus-visible { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; }
+.companion-card--hero { position: relative; height: 420px; min-height: 0; padding: 0; overflow: hidden; }
+.companion-card__visual { position: absolute; inset: 0 0 auto; display: grid; height: 280px; place-items: center; overflow: hidden; border-radius: 7px; background: radial-gradient(circle at 50% 42%, #fff 0 12%, #e5e7eb 12.5% 13%, transparent 13.5%), repeating-linear-gradient(135deg, #e5e7eb 0 14px, #f3f4f6 14px 28px); }
+.companion-card__visual::before { position: absolute; inset: 10%; border: 1px solid #9ca3af; border-radius: 50%; content: ''; }
+.companion-card__visual::after { position: absolute; inset: 18%; border: 1px solid #d1d5db; border-radius: 50%; content: ''; }
+.companion-card__visual > .client-avatar { z-index: 1; width: 42%; max-width: 176px; height: auto; aspect-ratio: 1; border-radius: 50%; background: #6b7280; color: #fff; font-size: 48px; box-shadow: 0 2px 12px rgb(17 24 39 / 18%); }
+.companion-card__visual-status { position: absolute; z-index: 2; top: 12px; left: 12px; }
+.companion-card--hero .companion-card__body { position: absolute; z-index: 2; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; border-top: 1px solid rgb(107 114 128 / 30%); padding: 12px 14px 14px; background: linear-gradient(180deg, rgb(255 255 255 / 82%), rgb(255 255 255 / 97%) 28%, #fff 100%); }
+.companion-card--hero .companion-card__heading { padding: 0; }
+.companion-card--hero .companion-card__identity h3 { font-size: 16px; }
+.companion-card--hero .client-tag-row { gap: 5px; margin-top: 8px; }
+.companion-card--hero .companion-card__intro { margin: 8px 0 9px; }
+.companion-card--hero .companion-card__meta { margin-top: auto; padding-top: 9px; }
+.companion-card--hero:focus-visible { outline-offset: -3px; }
 .club-card__heading, .companion-card__heading { display: flex; min-width: 0; align-items: center; gap: 12px; }
 .client-avatar { display: inline-grid; flex: 0 0 auto; place-items: center; overflow: hidden; border: 1px solid var(--prototype-border-strong, #d1d5db); border-radius: 8px; background: var(--prototype-border, #e5e7eb); color: var(--prototype-text-secondary, #374151); font-weight: 600; }
 .client-avatar > img { width: 100%; height: 100%; object-fit: cover; }
