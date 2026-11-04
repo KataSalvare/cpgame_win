@@ -4,7 +4,7 @@ import {
   Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText, Share2,
   Gift, ImagePlus, LockKeyhole, MessageCircle, Mic, MicOff, MoreHorizontal, Pencil,
   PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, Undo2, UserPlus, Users, PanelRightClose, PanelRightOpen,
-  Volume2, VolumeX, X,
+  Volume2, VolumeX, Copy, X,
 } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { currentSocialUser, initialSupportQueue, DEFAULT_VOICE_GROUP_CAPACITY, MAX_VOICE_CHANNEL_MEMBERS, MAX_VOICE_GROUP_MEMBERS, UNASSIGNED_VOICE_ROOM_ID, socialFriends, type ChatMessageKind, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceSubchannel } from '../data/socialMockData'
@@ -81,6 +81,19 @@ const clubAftersaleStaff = [
 ]
 function QuickReplyMenu({ onSelect, className = '' }: { onSelect: (text: string) => void; className?: string }) {
   return <div className={`social-quick-replies ${className}`} role="menu" aria-label="快捷回复">{quickReplies.map((text) => <button key={text} type="button" role="menuitem" onClick={() => onSelect(text)}>{text}</button>)}</div>
+}
+
+function ChatOrderPicker({ orders, selectedOrderId, onSelect, radioName }: { orders: ClientOrder[]; selectedOrderId: string; onSelect: (orderId: string) => void; radioName: string }) {
+  const [query, setQuery] = useState('')
+  const normalizedQuery = query.trim().toLocaleLowerCase()
+  const filteredOrders = normalizedQuery
+    ? orders.filter((order) => [order.companionName, order.companionId, order.id].some((value) => value.toLocaleLowerCase().includes(normalizedQuery)))
+    : orders
+
+  return <div className="chat-order-picker">
+    {orders.length > 0 && <label className="chat-order-search"><Search size={15} aria-hidden="true" /><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索陪玩名称、ID或订单号" aria-label="搜索陪玩名称、ID或订单号" /></label>}
+    <div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? filteredOrders.length ? filteredOrders.map((order) => <label className={`chat-order-option${selectedOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name={radioName} value={order.id} checked={selectedOrderId === order.id} onChange={() => onSelect(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span><UserNameWithLevel name={order.companionName} identityId={order.companionId} /> · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p className="chat-order-empty" role="status">没有匹配的订单</p> : <p className="chat-order-empty">暂无订单</p>}</div>
+  </div>
 }
 
 function VoiceRecordingPanel({ onSendVoice, onTranscribe, onCancel }: { onSendVoice: (duration: number) => void; onTranscribe: () => void; onCancel: () => void }) {
@@ -403,7 +416,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
     {conversationAction && <DialogPanel overlayId="conversation-action-confirm" children={null} title={conversationActionTitle} description={conversationActionDescription} onClose={() => setConversationAction(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConversationAction(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmConversationAction}>{conversationActionConfirmLabel}</button></>} />}
     {contextMessage && <MessageContextMenu point={contextPoint} canRecall={contextMessage.senderId === (conversation?.self?.id ?? currentSocialUser.id)} canReport={contextMessage.senderId !== (conversation?.self?.id ?? currentSocialUser.id)} onClose={() => setContextMessage(null)} onReply={() => { setReplyTarget(contextMessage); setContextMessage(null) }} onCopy={() => copyMessage(contextMessage, setFeedback, () => setContextMessage(null))} onRecall={() => { if (conversation && logic.recallChatMessage(conversation.id, contextMessage.id)) setFeedback('消息已撤回'); setContextMessage(null) }} onReport={() => { setReportTarget(contextMessage); setContextMessage(null) }} />}
     {orderDialogConversationId === conversation?.id && <DialogPanel overlayId="send-chat-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogConversationId(null)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogConversationId(null)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedSendOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedSendOrderId); if (order) { logic.sendSupportCard(order); setOrderDialogConversationId(null) } }}>发送订单</button></>}>
-      <div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? orders.map((order) => <label className={`chat-order-option${selectedSendOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name="chat-order" value={order.id} checked={selectedSendOrderId === order.id} onChange={() => setSelectedSendOrderId(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span><UserNameWithLevel name={order.companionName} identityId={order.companionId} /> · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p>暂无订单</p>}</div>
+      <ChatOrderPicker orders={orders} selectedOrderId={selectedSendOrderId} onSelect={setSelectedSendOrderId} radioName="chat-order" />
     </DialogPanel>}
 
     {reportTarget && <UserReportDialog overlayId="report-chat-message" onClose={() => setReportTarget(null)} onSubmit={() => { setFeedback('举报已提交（仅演示）'); setReportTarget(null) }} />}
@@ -511,7 +524,7 @@ function GroupMemberRemoveDialog({ friends, onClose, onSubmit }: { friends: type
   </DialogPanel>
 }
 
-export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeVoice, onExitVoice, onOpenClubSupport, onOpenGift, onChatWithCompanion, ownerSource = 'personal', userPerspective = false }: PageStateProps & { logic: SocialLogic; onOrder: (serviceId: string, companionId: string) => void; onMinimizeVoice: () => void; onExitVoice: () => void; onOpenClubSupport: () => void; onOpenGift: (recipients: GiftRecipient[], fixedRecipient?: GiftRecipient, anchor?: HTMLButtonElement) => void; onChatWithCompanion: (companionId: string) => void; ownerSource?: 'personal' | 'club'; userPerspective?: boolean }) {
+export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeVoice, onExitVoice, onOpenClubSupport, onOpenCallNotifications, onOpenGift, onChatWithCompanion, ownerSource = 'personal', userPerspective = false, customerServicePerspective = false, callNotificationCount = 0 }: PageStateProps & { logic: SocialLogic; onOrder: (serviceId: string, companionId: string) => void; onMinimizeVoice: () => void; onExitVoice: () => void; onOpenClubSupport: () => void; onOpenCallNotifications: () => void; onOpenGift: (recipients: GiftRecipient[], fixedRecipient?: GiftRecipient, anchor?: HTMLButtonElement) => void; onChatWithCompanion: (companionId: string) => void; ownerSource?: 'personal' | 'club'; userPerspective?: boolean; customerServicePerspective?: boolean; callNotificationCount?: number }) {
   const voicePageRef = useRef<HTMLDivElement>(null)
   const channelMenuRef = useRef<HTMLDivElement>(null)
   const roomMenuRef = useRef<HTMLDivElement>(null)
@@ -561,6 +574,12 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [voiceModeOpen, setVoiceModeOpen] = useState(false)
   const [pendingMicRequest, setPendingMicRequest] = useState<{ channelId: string; member: VoiceMember } | null>(null)
   const [feedback, setFeedback] = useState('')
+  const [ownerIdCopyFeedback, setOwnerIdCopyFeedback] = useState('')
+  useEffect(() => {
+    if (!ownerIdCopyFeedback) return
+    const timer = window.setTimeout(() => setOwnerIdCopyFeedback(''), 1800)
+    return () => window.clearTimeout(timer)
+  }, [ownerIdCopyFeedback])
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false)
   const [collapsedRoomIds, setCollapsedRoomIds] = useState<string[]>([])
   const [collapsedChannelIds, setCollapsedChannelIds] = useState<string[]>([])
@@ -806,6 +825,16 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const roomDialogMinCapacity = Math.max(roomDialogMemberCount, ...((logic.voiceRooms.find((item) => item.id === roomDialogTargetId)?.channels ?? []).map((item) => item.capacity)), 1)
   const roomClub = ownerSource === 'club' ? clubs.find((club) => club.id === room?.clubId) ?? clubs[0] : undefined
   const roomOwner = ownerSource === 'personal' ? undefined : room?.ownerType === 'personal' ? socialFriends.find((friend) => friend.id === room.ownerId) : undefined
+  const roomOwnerId = roomClub?.id ?? roomOwner?.profileId ?? currentSocialUser.profileId
+  const copyRoomOwnerId = async () => {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable')
+      await navigator.clipboard.writeText(roomOwnerId)
+      setOwnerIdCopyFeedback('复制成功')
+    } catch {
+      setOwnerIdCopyFeedback('复制失败，请重试')
+    }
+  }
   const voiceMode = channel ? voiceModes[channel.id] ?? '自由模式' : '自由模式'
   const queueMembers = getMicQueueMembers(channel)
   const activeStageMembers = voiceMode === '麦序模式' ? queueMembers : members.filter((member) => member.micOn)
@@ -1095,7 +1124,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <aside className="voice-room-tree" aria-label="语音分组与房间">
         <section className="voice-owner-card" aria-label="房间归属">
           <AvatarMark initials={roomClub?.initials ?? roomOwner?.initials ?? currentSocialUser.initials} size="md" />
-          <div className="voice-owner-card__identity">{roomClub ? <strong>{roomClub.name}</strong> : <strong><UserNameWithLevel name={roomOwner?.name ?? currentSocialUser.name} identityId={roomOwner?.id ?? currentSocialUser.profileId} /></strong>}<span>ID：{roomClub?.id ?? roomOwner?.profileId ?? currentSocialUser.profileId}</span></div>
+          <div className="voice-owner-card__identity">{roomClub ? <strong>{roomClub.name}</strong> : <strong><UserNameWithLevel name={roomOwner?.name ?? currentSocialUser.name} identityId={roomOwner?.id ?? currentSocialUser.profileId} /></strong>}<span className="voice-owner-card__id-row">ID：<button type="button" className="voice-owner-card__id-copy" onClick={() => void copyRoomOwnerId()} aria-label={`复制 ID ${roomOwnerId}`} title="点击复制 ID">{roomOwnerId}<Copy size={11} /></button>{ownerIdCopyFeedback && <span className="voice-owner-card__copy-feedback" role="status">{ownerIdCopyFeedback === '复制成功' && <Check size={11} />}{ownerIdCopyFeedback}</span>}</span></div>
           {roomClub && <button type="button" className="voice-owner-card__support" aria-label="联系俱乐部客服" onClick={() => setClubSupportSelectionOpen(true)}><Headphones size={14} />客服</button>}
         </section>
         <label className="voice-room-search"><Search size={15} /><input type="search" value={roomSearch} onChange={(event) => setRoomSearch(event.target.value)} placeholder="搜索房间" aria-label="搜索房间" /></label>
@@ -1147,7 +1176,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
         <header className="voice-stage__header">
           <div className="voice-stage__room-identity"><AvatarMark initials={channel?.name.slice(0, 1) ?? '房'} imageUrl={channel?.imageDataUrl} size="md" /><div className="voice-stage__room-copy"><strong className="voice-stage__room-name">{channel?.name ?? '语音房'}</strong><div className="voice-stage__room-meta"><span>ID：{channel?.id ?? '—'}</span><span>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人</span><span><Flame size={12} />热度 {channel?.heat ?? 0}</span></div></div></div>
           <div className="voice-stage__header-actions">
-            <button type="button" className="voice-support-call" onClick={() => setSupportDialogOpen(true)}><Headphones size={14} />{supportQueued ? `排队中 · 第 ${initialSupportQueue.length + 1} 位` : '呼叫客服'}</button>
+            <button type="button" className="voice-support-call" aria-label={customerServicePerspective ? `呼叫通知，${callNotificationCount} 条待处理` : undefined} onClick={customerServicePerspective ? onOpenCallNotifications : () => setSupportDialogOpen(true)}><Headphones size={14} />{customerServicePerspective ? '呼叫通知' : supportQueued ? `排队中 · 第 ${initialSupportQueue.length + 1} 位` : '呼叫客服'}{customerServicePerspective && callNotificationCount > 0 && <span className="voice-support-call__count" aria-hidden="true">{callNotificationCount > 99 ? '99+' : callNotificationCount}</span>}</button>
             {!userPerspective && <div className="voice-mode-control" ref={voiceModeMenuRef}>
             <button type="button" className="voice-mode-trigger" aria-haspopup="menu" aria-expanded={voiceModeOpen} onClick={() => setVoiceModeOpen((open) => !open)}><span>{voiceMode}</span><ChevronDown size={14} /></button>
             {voiceModeOpen && <div className="voice-mode-menu" role="menu" aria-label="选择房间模式">{(['自由模式', '主持人模式', '麦序模式'] as const).map((mode) => <button type="button" role="menuitemradio" aria-checked={voiceMode === mode} className={voiceMode === mode ? 'is-selected' : ''} key={mode} onClick={() => { if (channel) { setVoiceModes((current) => ({ ...current, [channel.id]: mode })); const requester = mode === '主持人模式' && canManage ? channel.members.find((member) => member.id !== currentSocialUser.id && !member.micOn) : undefined; setPendingMicRequest(requester ? { channelId: channel.id, member: requester } : null) } setVoiceModeOpen(false) }}>{mode}{voiceMode === mode && <Check size={14} />}</button>)}</div>}
@@ -1420,7 +1449,7 @@ export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, on
       <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleEnter} placeholder={`发送消息给 ${conversation.title}…`} aria-label={`发送给${conversation.title}的消息内容`} />
       <div className="chat-composer__toolbar"><div className="chat-composer__tools"><button type="button" className="windows-icon-button" aria-label="表情" aria-expanded={emojiOpen} onClick={() => { setQuickRepliesOpen(false); setEmojiOpen((value) => !value) }}><Smile size={18} /></button><button type="button" className="windows-icon-button" aria-label="发送示例图片" title="发送示例图片" onClick={() => onSend('image', '战绩截图 · 示例图片')}><ImagePlus size={18} /></button><button type="button" className="windows-icon-button" aria-label="录制语音" title="录制语音" aria-expanded={voiceRecordingOpen} onClick={() => { setEmojiOpen(false); setQuickRepliesOpen(false); setVoiceRecordingOpen(true) }}><Mic size={18} /></button><button type="button" className="windows-icon-button" aria-label="快捷回复" title="快捷回复" aria-expanded={quickRepliesOpen} onClick={() => { setEmojiOpen(false); setQuickRepliesOpen((open) => !open) }}><MessageSquareText size={17} /></button></div><button type="button" className="client-button client-button--primary chat-send-button" onClick={submit} disabled={!draft.trim()}><Send size={15} />发送</button></div>
     </div>
-    {orderDialogOpen && <DialogPanel overlayId="send-club-support-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogOpen(false)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedOrderId); if (order) { onSendOrder(order); setOrderDialogOpen(false) } }}>发送订单</button></>}><div className="chat-order-options" role="radiogroup" aria-label="选择要发送的订单">{orders.length ? orders.map((order) => <label className={`chat-order-option${selectedOrderId === order.id ? ' is-selected' : ''}`} key={order.id}><input type="radio" name="club-support-order" value={order.id} checked={selectedOrderId === order.id} onChange={() => setSelectedOrderId(order.id)} /><span><strong>{order.gameName} · {order.serviceName}</strong><span><UserNameWithLevel name={order.companionName} identityId={order.companionId} /> · {order.duration} {order.durationUnit} · {order.amount} 钻石</span><small>{order.id}</small></span><span>{order.status}</span></label>) : <p>暂无订单</p>}</div></DialogPanel>}
+    {orderDialogOpen && <DialogPanel overlayId="send-club-support-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogOpen(false)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedOrderId); if (order) { onSendOrder(order); setOrderDialogOpen(false) } }}>发送订单</button></>}><ChatOrderPicker orders={orders} selectedOrderId={selectedOrderId} onSelect={setSelectedOrderId} radioName="club-support-order" /></DialogPanel>}
   </section>
 }
 

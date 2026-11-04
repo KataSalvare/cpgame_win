@@ -98,6 +98,54 @@
       "position": "top-left",
       "createdAt": 1793608283202,
       "route": "page=orders&club=club-001&companion=companion-001"
+    },
+    {
+      "id": "anno-1793703624738-interaction",
+      "pagePath": "/game-companion-club-voice-room-customer-service",
+      "number": 1,
+      "title": "",
+      "content": "客服视角的变化：\n呼叫客服，改为呼叫通知，打开呼叫通知弹窗。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.voice-page > div.voice-workspace > section.voice-stage:nth-of-type(1) > header.voice-stage__header > div.voice-stage__header-actions:nth-of-type(2) > button.voice-support-call",
+      "position": "top-left",
+      "createdAt": 1793703624738,
+      "route": "page=voice-room&voiceFrom=club&voiceView=customer-service"
+    },
+    {
+      "id": "anno-1793703647330-interaction",
+      "pagePath": "/game-companion-user-support",
+      "number": 1,
+      "title": "",
+      "content": "用户视角下的客服会话\n新增发送订单功能",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout > section.chat-panel > div.chat-composer:nth-of-type(2) > div.chat-support-actions:nth-of-type(1) > button.client-button.client-button--secondary.client-button--small",
+      "position": "top-left",
+      "createdAt": 1793703647330,
+      "route": "page=messages&tool=im-user-support-view"
+    },
+    {
+      "id": "anno-1793703664937-interaction",
+      "pagePath": "/game-companion-support-messages",
+      "number": 1,
+      "title": "",
+      "content": "客服视角下的客服会话\n新增发送评价功能",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout > section.chat-panel > div.chat-composer:nth-of-type(2) > div.chat-support-actions:nth-of-type(1) > button.client-button.client-button--secondary.client-button--small",
+      "position": "top-left",
+      "createdAt": 1793703664937,
+      "route": "page=messages&tool=im-support-view"
+    },
+    {
+      "id": "anno-1793704010938-interaction",
+      "pagePath": "/game-companion-checkout",
+      "number": 1,
+      "title": "",
+      "content": "展示\n1. 游戏-玩法-等级-服务\n默认展示，用户选择的游戏-玩法-等级。\n选择服务后，展示为游戏-玩法-等级-服务\n\n2. 通过一键匹配，进入确认订单页，则该选项自动带入游戏-玩法-等级-服务，置灰不可编辑。\n\n3. 通过陪玩详情-下单，进入确认订单页，则需要选择游戏-玩法-等级 下的具体服务项。\n选项读取陪玩配置的，该游戏-服务-等级的可接单的服务。\n\n3. 选择服务后，展示为",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.account-page > div.checkout-grid > section.client-card.checkout-service-card > div.checkout-service-facts:nth-of-type(3) > div.checkout-service-picker > button.checkout-service-picker__trigger",
+      "position": "top-left",
+      "createdAt": 1793704010938,
+      "route": "page=checkout"
     }
   ],
   "categories": [

@@ -42,7 +42,11 @@ export function useMatchLogic() {
   }, [availableServices, levelName, playName])
   const selectedService = serviceOptions.find((service) => service.id === serviceId) ?? serviceOptions[0] ?? availableServices[0] ?? null
   const peopleCount = people === '双陪' ? 2 : people === '选项数量后台配置' ? 3 : 1
-  const recommendedUnitPrice = selectedService ? selectedService.price * peopleCount : 0
+  const genderUnitPrice = gender === '女' ? 100 : 80
+  const recommendedUnitPrice = selectedService ? genderUnitPrice * peopleCount : 0
+  const recommendedUnitPriceLabel = !selectedService ? '0' : gender === '不限'
+    ? `${80 * peopleCount}–${100 * peopleCount}`
+    : (genderUnitPrice * peopleCount).toLocaleString()
 
   const chooseGame = (nextGameId: string) => {
     const nextClubId = clubs.find((club) => club.gameIds.includes(nextGameId))?.id ?? ''
@@ -79,7 +83,7 @@ export function useMatchLogic() {
 
   return {
     gameId, clubId, tryout, playName, levelName, serviceId, people, gender, quantity, remark, addedPrice,
-    availableClubs, availableServices, playOptions, levelOptions, serviceOptions, selectedService, peopleCount, recommendedUnitPrice,
+    availableClubs, availableServices, playOptions, levelOptions, serviceOptions, selectedService, peopleCount, recommendedUnitPrice, recommendedUnitPriceLabel,
     setTryout, setPeople, setGender, setQuantity, setRemark, setAddedPrice,
     chooseGame, chooseClub, choosePlay, chooseLevel, setServiceId,
   }

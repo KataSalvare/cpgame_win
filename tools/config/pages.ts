@@ -109,6 +109,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-room-minimized', label: '房间最小化', entryView: 'voice-room-minimized', defaultHash: '#page=home&tool=voice-room-minimized', states: demoPageStates },
     { path: '/game-companion-club-voice-room', label: '俱乐部房间', entryView: 'club-voice-room', states: demoPageStates },
     { path: '/game-companion-club-voice-room-user', label: '俱乐部房间-用户视角', entryView: 'club-voice-room-user', defaultHash: '#page=voice-room&voiceFrom=club&voiceView=user', states: demoPageStates },
+    { path: '/game-companion-club-voice-room-customer-service', label: '俱乐部房间-客服视角', entryView: 'club-voice-room-customer-service', defaultHash: '#page=voice-room&voiceFrom=club&voiceView=customer-service', states: demoPageStates },
     { path: '/game-companion-woodpecker', label: '啄木鸟', entryView: 'woodpecker', states: demoPageStates },
     { path: '/game-companion-workbench', label: '陪玩工作台', entryView: 'workbench', states: demoPageStates },
     { path: '/game-companion-workbench-matches', label: '匹配请求', entryView: 'workbench-matches', defaultHash: '#page=workbench&workbenchTab=matches', states: demoPageStates },

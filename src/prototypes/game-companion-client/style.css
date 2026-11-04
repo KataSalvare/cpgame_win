@@ -913,6 +913,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .bean-account-type { display: flex; gap: 8px; }
 .bean-account-field { display: grid; gap: 7px; }
 .bean-account-field input { height: 38px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 10px; }
+.bean-account-field input:disabled { background: var(--prototype-surface-muted, #f9fafb); color: var(--client-muted); cursor: not-allowed; }
 .bean-withdraw-overlay, .wallet-recharge-overlay { position: absolute; z-index: 50; background: rgba(17, 24, 39, .34); }
 .bean-withdraw-dialog, .wallet-recharge-dialog { box-sizing: border-box; max-height: calc(100% - 48px); overflow: hidden; }
 .bean-withdraw-dialog { display: flex; width: min(620px, calc(100% - 48px)); height: min(760px, calc(100% - 48px)); flex-direction: column; gap: 16px; overflow-y: auto; }

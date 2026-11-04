@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, CreditCard, Gift, History, ImagePlus, MessageCircle, Search, Star, Ticket, WalletCards, X, Plus, Pencil, Landmark, BadgeCheck } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Clock3, Coins, CreditCard, Gift, History, ImagePlus, MessageCircle, Search, Star, Ticket, WalletCards, X, Plus, Landmark, BadgeCheck, Trash2 } from 'lucide-react'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { OrderNumberCopy } from '../components/OrderNumberCopy'
@@ -89,9 +89,10 @@ function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, o
 }
 
 type PayoutAccount = { id: string; type: '支付宝' | '银行卡'; holder: string; account: string; bankName?: string }
+const mockVerifiedName = '林晚风'
 const initialPayoutAccounts: PayoutAccount[] = [
-  { id: 'alipay-001', type: '支付宝', holder: '林晚', account: 'wanfeng***@alipay.com' },
-  { id: 'bank-001', type: '银行卡', holder: '林晚', account: '**** **** **** 3628', bankName: '招商银行' },
+  { id: 'alipay-001', type: '支付宝', holder: mockVerifiedName, account: 'wanfeng***@alipay.com' },
+  { id: 'bank-001', type: '银行卡', holder: mockVerifiedName, account: '**** **** **** 3628', bankName: '招商银行' },
 ]
 
 export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: number; onWithdraw: (amount: number) => boolean; onClose: () => void }) {
@@ -102,7 +103,7 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   const [view, setView] = useState<'withdraw' | 'accounts' | 'account-form' | 'result'>('withdraw')
   const [editingAccount, setEditingAccount] = useState<PayoutAccount | null>(null)
   const [formType, setFormType] = useState<PayoutAccount['type']>('支付宝')
-  const [holder, setHolder] = useState('')
+  const [holder, setHolder] = useState(mockVerifiedName)
   const [accountValue, setAccountValue] = useState('')
   const [bankName, setBankName] = useState('')
   const [feedback, setFeedback] = useState('')
@@ -112,21 +113,36 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   const selectedAccount = accounts.find((account) => account.id === selectedId)
 
   const openAccountForm = (account?: PayoutAccount) => {
+    if (!account && accounts.length >= 5) {
+      setFeedback('最多只能绑定 5 个账户。')
+      return
+    }
     setEditingAccount(account ?? null)
     setFormType(account?.type ?? '支付宝')
-    setHolder(account?.holder ?? '')
+    setHolder(mockVerifiedName)
     setAccountValue('')
     setBankName(account?.bankName ?? '')
     setView('account-form')
   }
   const saveAccount = () => {
     if (!holder.trim() || !accountValue.trim() || (formType === '银行卡' && !bankName.trim())) return
+    if (!editingAccount && accounts.length >= 5) {
+      setFeedback('最多只能绑定 5 个账户。')
+      setView('accounts')
+      return
+    }
     const saved: PayoutAccount = { id: editingAccount?.id ?? `${formType}-${Date.now()}`, type: formType, holder: holder.trim(), account: accountValue.trim(), ...(formType === '银行卡' ? { bankName: bankName.trim() } : {}) }
     setAccounts((current) => editingAccount ? current.map((item) => item.id === editingAccount.id ? saved : item) : [...current, saved])
     if (!editingAccount) setSelectedId(saved.id)
     setEditingAccount(null)
     setView('accounts')
     setFeedback(editingAccount ? '账户信息已更新。' : '新账户已绑定。')
+  }
+  const deleteAccount = (account: PayoutAccount) => {
+    const remaining = accounts.filter((item) => item.id !== account.id)
+    setAccounts(remaining)
+    if (selectedId === account.id) setSelectedId(remaining[0]?.id ?? '')
+    setFeedback('账户已删除。')
   }
 
   const activeView = view === 'withdraw' && manageAccounts ? 'accounts' : view
@@ -135,11 +151,11 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   return <div className="store-overlay bean-withdraw-overlay" data-overlay="bean-withdraw-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-withdraw-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-withdraw-title">
     <header><div><span className="client-eyebrow">糖豆钱包</span><h2 id="bean-withdraw-title">{activeView === 'withdraw' ? '提现糖豆' : activeView === 'accounts' ? '提现账户管理' : activeView === 'account-form' ? (editingAccount ? '换绑提现账户' : '绑定提现账户') : '提现结果'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭提现弹窗" onClick={onClose}><X size={17} /></button></header>
     {activeView === 'accounts' ? <>
-      <div className="client-section-heading bean-withdraw-panel__subheading"><div><span className="client-eyebrow">收款方式</span><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
-      <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><div className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{account.holder} · {account.account}</span></div><button type="button" className="client-button client-button--secondary" onClick={() => openAccountForm(account)}><Pencil size={14} />换绑</button></article>)}</div>
+      <div className="client-section-heading bean-withdraw-panel__subheading"><div><span className="client-eyebrow">收款方式</span><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" disabled={accounts.length >= 5} title={accounts.length >= 5 ? '最多只能绑定 5 个账户' : undefined} onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
+      <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><div className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{account.holder} · {account.account}</span></div><button type="button" className="client-button client-button--secondary" onClick={() => deleteAccount(account)}><Trash2 size={14} />删除</button></article>)}</div>
       <footer><button type="button" className="client-button client-button--secondary" onClick={() => { setManageAccounts(false); setView('withdraw') }}>返回提现</button></footer>
     </> : activeView === 'account-form' ? <>
-      <div className="bean-account-type" role="group" aria-label="提现账户类型">{(['支付宝', '银行卡'] as const).map((type) => <button type="button" className={`orders-filter-chip${formType === type ? ' is-active' : ''}`} aria-pressed={formType === type} key={type} onClick={() => setFormType(type)}>{type}</button>)}</div><label className="bean-account-field"><span>账户姓名</span><input value={holder} onChange={(event) => setHolder(event.target.value)} placeholder="请输入实名姓名" /></label>{formType === '银行卡' && <label className="bean-account-field"><span>开户银行</span><input value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="请输入银行名称" /></label>}<label className="bean-account-field"><span>{formType === '支付宝' ? '支付宝账号' : '银行卡号'}</span><input value={accountValue} onChange={(event) => setAccountValue(event.target.value)} placeholder={formType === '支付宝' ? `请输入${editingAccount ? '新的' : ''}手机号或支付宝账号` : `请输入${editingAccount ? '新的' : ''}银行卡号`} /></label><footer><button type="button" className="client-button client-button--secondary" onClick={closeForm}>取消</button><button type="button" className="client-button client-button--primary" disabled={!holder.trim() || !accountValue.trim() || (formType === '银行卡' && !bankName.trim())} onClick={saveAccount}>保存账户</button></footer>
+      <div className="bean-account-type" role="group" aria-label="提现账户类型">{(['支付宝', '银行卡'] as const).map((type) => <button type="button" className={`orders-filter-chip${formType === type ? ' is-active' : ''}`} aria-pressed={formType === type} key={type} onClick={() => setFormType(type)}>{type}</button>)}</div><label className="bean-account-field"><span>账户姓名</span><input value={holder} disabled aria-label={`账户姓名，实名：${mockVerifiedName}`} /></label>{formType === '银行卡' && <label className="bean-account-field"><span>开户银行</span><input value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="请输入银行名称" /></label>}<label className="bean-account-field"><span>{formType === '支付宝' ? '支付宝账号' : '银行卡号'}</span><input value={accountValue} onChange={(event) => setAccountValue(event.target.value)} placeholder={formType === '支付宝' ? `请输入${editingAccount ? '新的' : ''}手机号或支付宝账号` : `请输入${editingAccount ? '新的' : ''}银行卡号`} /></label><footer><button type="button" className="client-button client-button--secondary" onClick={closeForm}>取消</button><button type="button" className="client-button client-button--primary" disabled={!accountValue.trim() || (formType === '银行卡' && !bankName.trim())} onClick={saveAccount}>保存账户</button></footer>
     </> : activeView === 'result' && result ? <>
       <div className="bean-withdraw-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><span className="client-eyebrow">本地演示结果</span><h3>提现申请已提交</h3><strong className="bean-withdraw-result__amount">{result.amount.toLocaleString()} <small>糖豆</small></strong><dl><div><dt>收款方式</dt><dd>{result.account.type}{result.account.bankName ? ` · ${result.account.bankName}` : ''}</dd></div><div><dt>收款账户</dt><dd>{result.account.account}</dd></div><div><dt>申请编号</dt><dd>{result.applicationNo}</dd></div></dl><p>申请结果仅用于原型演示，不代表真实提现状态。</p></div><footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
     </> : <>
@@ -386,7 +402,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
 
   return <div className="client-content account-page">
     <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={15} />返回陪玩详情</button>
-    <PageHeading title="下单结算" />
+    <PageHeading title="确认订单" />
     <div className="checkout-grid">
       <section className="client-card checkout-service-card">
         <div className="client-section-heading"><div><h2>服务信息</h2></div><span className="client-badge">{checkoutCompanions.length === 1 ? '单陪服务' : `${checkoutCompanions.length} 人服务`}</span></div>
