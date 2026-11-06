@@ -28,6 +28,7 @@ type Props = {
   onBlock?: () => void
   note?: string
   onSaveNote?: (note: string) => void
+  onClose?: () => void
 }
 
 type DetailTab = 'services' | 'reviews' | 'gifts'
@@ -36,7 +37,7 @@ const tabNames: Record<DetailTab, string> = { services: '服务', reviews: '评�
 const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 const receivedGiftCount = gifts.reduce((total, gift) => total + gift.count, 0)
 
-export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, onGift, followed, blocked, onToggleFollow, onBlock, note, onSaveNote, onShare }: Props) {
+export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, onGift, followed, blocked, onToggleFollow, onBlock, note, onSaveNote, onShare, onClose }: Props) {
   const [activeTab, setActiveTab] = useState<DetailTab>('services')
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all')
   const logic = useCompanionDetailLogic(companion.id)
@@ -63,7 +64,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
 
   return <div className={`client-content companion-detail-page${presentation === 'panel' ? ' companion-detail-page--panel' : ''}`}>
     {presentation !== 'panel' && <button type="button" className="client-back-link" onClick={onBack} aria-label="返回俱乐部详情"><ArrowLeft size={16} /> 俱乐部</button>}
-    <CompanionProfileCard onShare={onShare} profile={{ ...companionToProfileCard(companion), ...profileOverride }} onChat={onChat} followed={followed} blocked={blocked} onToggleFollow={onToggleFollow} onBlock={onBlock} note={note} onSaveNote={onSaveNote} />
+    <CompanionProfileCard onShare={onShare} profile={{ ...companionToProfileCard(companion), ...profileOverride }} onChat={onChat} followed={followed} blocked={blocked} onToggleFollow={onToggleFollow} onBlock={onBlock} note={note} onSaveNote={onSaveNote} immersive={presentation === 'panel'} onClose={presentation === 'panel' ? onClose ?? onBack : undefined} />
 
     <section className="companion-detail-content">
       <div className="companion-tabs" role="tablist" aria-label="陪玩详情内容">

@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Flag, MoreHorizontal, Pencil, Shield, Share2, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flag, MoreHorizontal, Pencil, Shield, Share2, Star, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import type { ProfileCardData } from './profileCardData'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
-import { VoiceMessageButton } from './VoiceMessageButton'
 import { CompanionShareDialog } from './CompanionShareDialog'
 import { UserReportDialog } from './UserReportDialog'
 
@@ -19,9 +18,11 @@ type Props = {
   onBlock?: () => void
   note?: string
   onSaveNote?: (note: string) => void
+  immersive?: boolean
+  onClose?: () => void
 }
 
-export function CompanionProfileCard({ profile, className = '', followed = false, blocked = false, onToggleFollow, onBlock, note = '', onSaveNote, onShare }: Props) {
+export function CompanionProfileCard({ profile, className = '', followed = false, blocked = false, onToggleFollow, onBlock, note = '', onSaveNote, onShare, immersive = false, onClose }: Props) {
   const [lifePhotoIndex, setLifePhotoIndex] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
@@ -84,29 +85,34 @@ export function CompanionProfileCard({ profile, className = '', followed = false
     setMenuOpen(false)
   }
 
+  const moreMenu = <div className="companion-profile-card__more" ref={menuRef}>
+    <button type="button" className="client-icon-button" aria-label="更多功能" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}><MoreHorizontal size={17} /></button>
+    {menuOpen && <div className="companion-profile-card__menu" role="menu" aria-label={`${profile.name}更多功能`}>
+      {onShare && <button type="button" role="menuitem" onClick={() => { setShareOpen(true); setMenuOpen(false) }}><Share2 size={14} />分享</button>}
+      <button type="button" role="menuitem" onClick={openNote}><Pencil size={14} />备注</button>
+      <button type="button" role="menuitem" aria-pressed={isFollowed} onClick={toggleFollow}><Star size={14} />{isFollowed ? '已关注' : '关注'}</button>
+      <button type="button" role="menuitem" className="is-danger" disabled={isBlocked} onClick={() => { setBlockConfirmationOpen(true); setMenuOpen(false) }}><Shield size={14} />{isBlocked ? '已拉黑' : '拉黑'}</button>
+      <button type="button" role="menuitem" onClick={openReportDialog}><Flag size={14} />举报</button>
+    </div>}
+  </div>
+
   return <>
-    <section className={`client-card companion-profile-card${className ? ` ${className}` : ''}`}>
-      <AvatarMark initials={profile.initials} size="lg" />
+    {immersive && <header className="companion-profile-toolbar">
+      <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>
+      <div className="companion-profile-card__toolbar-actions">{moreMenu}{onClose && <button type="button" className="windows-icon-button" aria-label="关闭用户详情" onClick={onClose}><X size={17} /></button>}</div>
+    </header>}
+    <section className={`client-card companion-profile-card${immersive ? ' companion-profile-card--immersive' : ''}${className ? ` ${className}` : ''}`}>
+      <AvatarMark initials={profile.initials} size={immersive ? 'xl' : 'lg'} />
       <div className="companion-profile-card__body">
-        <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>
+        {!immersive && <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>}
         <div className="companion-profile-card__facts"><span aria-label={`${profile.gender}，${profile.age}岁`}><span aria-hidden="true">{profile.gender === '男' ? '♂' : profile.gender === '女' ? '♀' : profile.gender}{profile.age}</span></span><span>ID：{profile.userId}</span><span className="rating-mark"><Star size={14} />{profile.rating.toFixed(2)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div>
         {profile.friendCount !== undefined && profile.followingCount !== undefined && profile.followerCount !== undefined && <div className="companion-profile-card__stats" aria-label="社交数据"><span><strong>{profile.friendCount}</strong>朋友</span><span><strong>{profile.followingCount}</strong>关注</span><span><strong>{profile.followerCount}</strong>粉丝</span></div>}
         {profile.club && <div className="companion-profile-card__club" aria-label={`所属俱乐部：${profile.club.name}`}><AvatarMark initials={profile.club.initials} size="sm" /><span>{profile.club.name}</span></div>}
         <div className="client-tag-row">{profile.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
         <p>{profile.intro}</p>
         {visibleNote && <div className="companion-profile-card__note"><Pencil size={12} /><span>{visibleNote}</span></div>}
-        {profile.voiceMessage && <VoiceMessageButton message={profile.voiceMessage} label="语音介绍" />}
       </div>
-      <div className="companion-profile-card__more" ref={menuRef}>
-        <button type="button" className="client-icon-button" aria-label="更多功能" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}><MoreHorizontal size={17} /></button>
-        {menuOpen && <div className="companion-profile-card__menu" role="menu" aria-label={`${profile.name}更多功能`}>
-          {onShare && <button type="button" role="menuitem" onClick={() => { setShareOpen(true); setMenuOpen(false) }}><Share2 size={14} />分享</button>}
-          <button type="button" role="menuitem" onClick={openNote}><Pencil size={14} />备注</button>
-          <button type="button" role="menuitem" aria-pressed={isFollowed} onClick={toggleFollow}><Star size={14} />{isFollowed ? '已关注' : '关注'}</button>
-          <button type="button" role="menuitem" className="is-danger" disabled={isBlocked} onClick={() => { setBlockConfirmationOpen(true); setMenuOpen(false) }}><Shield size={14} />{isBlocked ? '已拉黑' : '拉黑'}</button>
-          <button type="button" role="menuitem" onClick={openReportDialog}><Flag size={14} />举报</button>
-        </div>}
-      </div>
+      {!immersive && moreMenu}
     </section>
     {lifePhotos.length > 0 && <div className="client-card companion-life-photos" aria-label={`${profile.name}的生活照`}>
       <div className="companion-life-photos__stage" tabIndex={0} aria-label="生活照轮播，使用左右方向键切换" onKeyDown={(event) => {

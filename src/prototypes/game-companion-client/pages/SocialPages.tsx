@@ -358,12 +358,13 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
       </section> : <section className="chat-empty-state"><MessageCircle size={28} /><h2>选择一个会话</h2></section>}
 
       {selectedProfile && <aside className="social-profile-panel" aria-label={`${selectedProfile.name}资料`}>
-        <header><h2><UserNameWithLevel name={selectedProfile.name} identityId={selectedProfile.id} /></h2><button type="button" className="windows-icon-button" aria-label="关闭资料" onClick={() => logic.setSelectedProfileId(null)}><X size={17} /></button></header>
+        {!selectedProfileCard && <header><h2><UserNameWithLevel name={selectedProfile.name} identityId={selectedProfile.id} /></h2><button type="button" className="windows-icon-button" aria-label="关闭资料" onClick={() => logic.setSelectedProfileId(null)}><X size={17} /></button></header>}
         {linkedCompanion && selectedProfileCard ? <CompanionDetailPage
           key={linkedCompanion.id}
           companion={linkedCompanion}
           pageState="normal"
           presentation="panel"
+          onClose={() => logic.setSelectedProfileId(null)}
           onBack={() => logic.setSelectedProfileId(null)}
           onRetry={onRetry}
           onOrder={onOrder}
@@ -375,7 +376,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
           onBlock={() => logic.blockProfile(linkedCompanion.id)}
           onChat={selectedProfile.id === currentSocialUser.id ? undefined : () => logic.startDirectMessage(selectedProfile.id)}
           onGift={(anchor) => onOpenGift([], { id: linkedCompanion.id, name: linkedCompanion.name, initials: linkedCompanion.initials, profileId: linkedCompanion.id.replace('companion-', 'P-') }, anchor)}
-        /> : selectedProfileCard ? <CompanionProfileCard profile={selectedProfileCard} /> : null}
+        /> : selectedProfileCard ? <div className="client-content companion-detail-page companion-detail-page--panel"><CompanionProfileCard profile={selectedProfileCard} immersive onClose={() => logic.setSelectedProfileId(null)} /></div> : null}
       </aside>}
       {!logic.selectedProfile && groupSettingsOpen && conversation?.kind === 'group' && <GroupSettingsPanel
         key={conversation.id}
@@ -1229,12 +1230,13 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
 
       <RoomChatPanel hidden={Boolean(selectedProfile)} collapsed={roomChatCollapsed} userPerspective={userPerspective} onToggleCollapsed={() => setRoomChatCollapsed((value) => !value)} messages={logic.roomMessages} onRecallMessage={logic.recallRoomMessage} onSend={(kind, text, duration, replyTo) => logic.sendRoomMessage(kind, text, duration, replyTo)} onOpenProfile={openMemberProfile} onAvatarContextMenu={openMemberContextMenu} onOpenGift={(anchor) => onOpenGift(members.filter((member) => member.id !== currentSocialUser.id).map((member) => ({ id: member.id, name: member.name, initials: member.initials, profileId: socialFriends.find((friend) => friend.id === member.id)?.profileId })), undefined, anchor)} members={room?.channels.flatMap((subchannel) => subchannel.members) ?? []} />
       {selectedProfile && <aside className="social-profile-panel voice-profile-panel" aria-label={`${selectedProfile.name}陪玩详情`}>
-        <header><h2><UserNameWithLevel name={selectedProfile.name} identityId={selectedProfile.id} /></h2><button type="button" className="windows-icon-button" aria-label="关闭陪玩详情" onClick={() => setVoiceProfileId(null)}><X size={17} /></button></header>
+        {!selectedProfileCard && <header><h2><UserNameWithLevel name={selectedProfile.name} identityId={selectedProfile.id} /></h2><button type="button" className="windows-icon-button" aria-label="关闭陪玩详情" onClick={() => setVoiceProfileId(null)}><X size={17} /></button></header>}
         {linkedCompanion && selectedProfileCard ? <CompanionDetailPage
           key={linkedCompanion.id}
           companion={linkedCompanion}
           pageState="normal"
           presentation="panel"
+          onClose={() => setVoiceProfileId(null)}
           onBack={() => setVoiceProfileId(null)}
           onRetry={onRetry}
           onOrder={onOrder}
@@ -1246,7 +1248,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           onBlock={() => logic.blockProfile(linkedCompanion.id)}
           onChat={() => onChatWithCompanion(linkedCompanion.id)}
           onGift={(anchor) => onOpenGift([], { id: linkedCompanion.id, name: linkedCompanion.name, initials: linkedCompanion.initials, profileId: linkedCompanion.id.replace('companion-', 'P-') }, anchor)}
-        /> : selectedProfileCard ? <CompanionProfileCard profile={selectedProfileCard} /> : null}
+        /> : selectedProfileCard ? <div className="client-content companion-detail-page companion-detail-page--panel"><CompanionProfileCard profile={selectedProfileCard} immersive onClose={() => setVoiceProfileId(null)} /></div> : null}
       </aside>}
     </div>
     {feedback && <div className="social-toast" role="status">{feedback}<button type="button" className="windows-icon-button" onClick={() => setFeedback('')} aria-label="关闭通知"><X size={15} /></button></div>}
