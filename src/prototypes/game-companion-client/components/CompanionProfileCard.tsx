@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Flag, MoreHorizontal, Pencil, Shield, Share2, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flag, MoreHorizontal, Pencil, Shield, Share2, Star } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import type { ProfileCardData } from './profileCardData'
 import { AvatarMark } from './AvatarMark'
@@ -22,6 +22,7 @@ type Props = {
 }
 
 export function CompanionProfileCard({ profile, className = '', followed = false, blocked = false, onToggleFollow, onBlock, note = '', onSaveNote, onShare }: Props) {
+  const [lifePhotoIndex, setLifePhotoIndex] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [blockConfirmationOpen, setBlockConfirmationOpen] = useState(false)
@@ -36,6 +37,14 @@ export function CompanionProfileCard({ profile, className = '', followed = false
   const isFollowed = onToggleFollow ? followed : localFollowed
   const isBlocked = onBlock ? blocked : localBlocked
   const visibleNote = onSaveNote ? note : localNote
+  const lifePhotos = profile.lifePhotos?.slice(0, 9) ?? []
+  const visibleLifePhotoIndex = lifePhotos.length ? lifePhotoIndex % lifePhotos.length : 0
+
+  useEffect(() => {
+    if (lifePhotos.length < 2) return
+    const timer = window.setInterval(() => setLifePhotoIndex((index) => (index + 1) % lifePhotos.length), 5000)
+    return () => window.clearInterval(timer)
+  }, [lifePhotos.length, profile.userId])
 
   const openReportDialog = () => {
     setReportDialogOpen(true)
@@ -99,6 +108,17 @@ export function CompanionProfileCard({ profile, className = '', followed = false
         </div>}
       </div>
     </section>
+    {lifePhotos.length > 0 && <div className="client-card companion-life-photos" aria-label={`${profile.name}的生活照`}>
+      <div className="companion-life-photos__stage" tabIndex={0} aria-label="生活照轮播，使用左右方向键切换" onKeyDown={(event) => {
+        if (lifePhotos.length < 2) return
+        if (event.key === 'ArrowLeft') { event.preventDefault(); setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length) }
+        if (event.key === 'ArrowRight') { event.preventDefault(); setLifePhotoIndex((index) => (index + 1) % lifePhotos.length) }
+      }}>
+        <img src={lifePhotos[visibleLifePhotoIndex]} alt={`${profile.name}的生活照 ${visibleLifePhotoIndex + 1}`} />
+        <button type="button" aria-label="上一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length)}><ChevronLeft size={18} /></button>
+        <button type="button" aria-label="下一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index + 1) % lifePhotos.length)}><ChevronRight size={18} /></button>
+      </div>
+    </div>}
     {feedback && <p className="companion-profile-card__feedback" role="status">{feedback}</p>}
     {blockConfirmationOpen && <DialogPanel overlayId={`companion-block-${profile.userId}`} title="确认拉黑" description={`确定拉黑「${profile.name}」吗？`} onClose={() => setBlockConfirmationOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBlockConfirmationOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBlock}>确认拉黑</button></>}><p className="social-dialog-copy">确认后，该陪玩会标记为已拉黑。</p></DialogPanel>}
     {shareOpen && onShare && <CompanionShareDialog profile={profile} onShare={onShare} onClose={() => setShareOpen(false)} />}

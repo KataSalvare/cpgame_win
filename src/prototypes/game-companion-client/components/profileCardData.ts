@@ -1,5 +1,8 @@
 import type { Companion, VoiceMessage } from '../data/mockData'
 import { clubs } from '../data/mockData'
+import cafeLifePhoto from '../assets/profile-life-photo-cafe.svg'
+import windowLifePhoto from '../assets/profile-life-photo-window.svg'
+import cityLifePhoto from '../assets/profile-life-photo-city.svg'
 
 export type ProfileCardData = {
   name: string
@@ -17,6 +20,7 @@ export type ProfileCardData = {
   tags: string[]
   intro: string
   voiceMessage?: VoiceMessage
+  lifePhotos?: string[]
 }
 
 export function companionToProfileCard(companion: Companion): ProfileCardData {
@@ -49,5 +53,6 @@ export function companionToProfileCard(companion: Companion): ProfileCardData {
     tags: companion.tags,
     intro: companion.intro,
     voiceMessage: companion.voiceMessage,
+    lifePhotos: [cafeLifePhoto, windowLifePhoto, cityLifePhoto].slice(0, 9),
   }
 }

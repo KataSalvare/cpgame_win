@@ -141,7 +141,7 @@ export const servicesByCompanion: Record<string, Service[]> = Object.fromEntries
 )
 
 export const reviews: Review[] = [
-  { id: 'review-01', author: '一颗小行星', initials: '星', rating: 5, date: '2026-10-20', game: '无畏契约', content: '沟通很顺畅，战术思路清楚，整场节奏很舒服。', images: [reviewMatchImage] },
+  { id: 'review-01', author: '一颗小行星', initials: '星', rating: 5, date: '2026-10-20', game: '无畏契约', content: '沟通很顺畅，战术思路清楚，整场节奏很舒服。每次开局都会根据队伍情况制定合适思路，过程中及时同步信息，也会耐心解答问题。结束后还会一起复盘关键回合，整个体验轻松又有收获，下次组队还会优先选择。', images: [reviewMatchImage] },
   { id: 'review-02', author: '白日做梦', initials: '白', rating: 5, date: '2026-10-18', game: '绝地求生', content: '配合很默契，也会及时交流信息，体验不错。' },
   { id: 'review-03', author: '橘子海', initials: '橘', rating: 3, date: '2026-10-16', game: '无畏契约', content: '耐心又细致，复盘建议对我很有帮助。' },
   { id: 'review-04', author: '北方来信', initials: '北', rating: 5, date: '2026-10-12', game: '无畏契约', content: '氛围轻松，沟通清晰，下次还会一起玩。' },
@@ -149,7 +149,7 @@ export const reviews: Review[] = [
 ]
 
 export const clubReviews: Review[] = [
-  { id: 'club-review-01', author: '一颗小行星', initials: '星', rating: 5, date: '2026-10-20', game: '无畏契约', content: '沟通很顺畅，战术思路清楚，整场节奏很舒服。', images: [reviewMatchImage] },
+  { id: 'club-review-01', author: '一颗小行星', initials: '星', rating: 5, date: '2026-10-20', game: '无畏契约', content: '沟通很顺畅，战术思路清楚，整场节奏很舒服。每次开局都会根据队伍情况制定合适思路，过程中及时同步信息，也会耐心解答问题。结束后还会一起复盘关键回合，整个体验轻松又有收获，下次组队还会优先选择。', images: [reviewMatchImage] },
   { id: 'club-review-02', author: '白日做梦', initials: '白', rating: 5, date: '2026-10-18', game: '绝地求生', content: '配合很默契，也会及时交流信息，体验不错。' },
   { id: 'club-review-03', author: '橘子海', initials: '橘', rating: 3, date: '2026-10-16', game: '无畏契约', content: '耐心又细致，复盘建议对我很有帮助。' },
   { id: 'club-review-04', author: '北方来信', initials: '北', rating: 5, date: '2026-10-12', game: '无畏契约', content: '氛围轻松，沟通清晰，下次还会一起玩。' },
