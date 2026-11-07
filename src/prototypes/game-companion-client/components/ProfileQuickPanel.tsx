@@ -82,7 +82,7 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavi
         <span className="client-profile-popover__wealth-caption">{nextLevel ? `财富值 ${currentWealthValue.toLocaleString()} · 再获得 ${(nextLevel.requiredWealth - currentWealthValue).toLocaleString()} 升至 V${nextLevel.level}` : '已达到最高等级'}</span>
       </button>
       <div className="client-profile-popover__balances">
-        <div className="client-profile-popover__asset"><span><Coins size={14} />钻石</span><strong>{diamondBalance.toLocaleString()}</strong><div><button type="button" onClick={() => navigate('recharge')}>充值</button></div></div>
+        <div className="client-profile-popover__asset"><span><Coins size={14} />金豆</span><strong>{diamondBalance.toLocaleString()}</strong><div><button type="button" onClick={() => navigate('recharge')}>充值</button></div></div>
         <div className="client-profile-popover__asset"><span><WalletCards size={14} />糖豆</span><strong>{beanBalance.toLocaleString()}</strong><div><button type="button" onClick={() => navigate('withdraw')}>提现</button><button type="button" onClick={() => navigate('exchange')}>兑换</button></div></div>
       </div>
     </section>}

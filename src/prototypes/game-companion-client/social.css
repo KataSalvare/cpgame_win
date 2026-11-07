@@ -633,9 +633,12 @@
 .companion-share-message header { justify-content: flex-start; }
 .companion-share-message header > .client-avatar { flex: 0 0 auto; margin-left: 0; }
 .companion-share-message header > strong { min-width: 0; }
-.companion-share-message__facts { color: var(--prototype-text-secondary,#4b5563); font-size: 12px; }
+.companion-share-message header > .companion-share-message__facts { flex: 0 0 auto; margin-left: 0; color: var(--prototype-text-secondary,#4b5563); font-size: 12px; }
+.voice-room-share-message header { justify-content: flex-start; }
+.voice-room-share-message header > .client-avatar { flex: 0 0 auto; margin-left: 0; }
+.voice-room-share-message header > strong { min-width: 0; }
 .voice-room-share-message .social-message-card__content{gap:6px;color:var(--prototype-text-secondary,#4b5563);font-size:12px}
-.voice-room-share-message footer{display:flex;justify-content:flex-end}
+.voice-room-share-message .voice-room-share-message__action-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 
 [data-prototype-palette="color"] .voice-room-heading-row:hover,
 [data-prototype-palette="color"] .voice-subchannel > .voice-subchannel__heading-row:hover,

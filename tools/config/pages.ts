@@ -90,7 +90,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-close-app', label: '关闭应用', entryView: 'close-app', defaultHash: '#page=home&tool=close-app', states: demoPageStates },
     { path: '/game-companion-quick-panel', label: '我的快捷面板', entryView: 'quick-panel', defaultHash: '#page=home&tool=quick-panel', states: demoPageStates },
     { path: '/game-companion-wallet', label: '我的钱包', entryView: 'wallet', states: demoPageStates },
-    { path: '/game-companion-recharge', label: '钻石充值', entryView: 'wallet-recharge', states: demoPageStates },
+    { path: '/game-companion-recharge', label: '金豆充值', entryView: 'wallet-recharge', states: demoPageStates },
     { path: '/game-companion-coupons', label: '优惠券', entryView: 'coupons', states: demoPageStates },
     { path: '/game-companion-club-cards', label: '俱乐部尊享卡', entryView: 'club-cards', states: demoPageStates },
     { path: '/game-companion-my-cards', label: '我的尊享卡', entryView: 'my-cards', states: demoPageStates },

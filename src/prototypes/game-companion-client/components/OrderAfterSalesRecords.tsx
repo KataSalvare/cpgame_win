@@ -13,7 +13,7 @@ export function OrderAfterSalesRecords({ records }: { records: OrderAfterSalesRe
         <span role="columnheader">时间</span><span role="columnheader">分类</span><span role="columnheader">金额</span>
       </div>
       {records.map(record => <div className="order-after-sales-table__row" role="row" key={record.id}>
-        <time role="cell">{record.time || '—'}</time><span role="cell">{record.category}</span><span role="cell">{record.amount == null ? '—' : `${record.amount.toLocaleString()} 钻石`}</span>
+        <time role="cell">{record.time || '—'}</time><span role="cell">{record.category}</span><span role="cell">{record.amount == null ? '—' : `${record.amount.toLocaleString()} 金豆`}</span>
       </div>)}
     </div>}
   </section>

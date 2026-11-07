@@ -1,4 +1,4 @@
-# 钻石充值
+# 金豆充值
 
 页面路由：`/game-companion-recharge`
 

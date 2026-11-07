@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
 export type WorkOrderAction = '接受' | '拒绝' | '开始服务' | '继续服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
-export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '钻石钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; category: '免单' | '提前结束' | '售后'; amount?: number | null }[]; deadline?: number }
+export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '金豆钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; category: '免单' | '提前结束' | '售后'; amount?: number | null }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
 const initialServiceIds = services.filter(s => s.canAcceptOrders).map(s => s.id)
@@ -31,22 +31,22 @@ export function useWorkbenchLogic() {
   const [selectedServiceGameId, setSelectedServiceGameId] = useState(serviceGroups[0]?.id ?? '')
   const enabled = services.filter(s => serviceSelections.includes(s.id) && enabledLevelKeys.includes(levelKey(s))).map(s => s.id)
   const [automatic, setAutomatic] = useState(false)
-  const [requests, setRequests] = useState(services.slice(0, 3).map((s, i) => ({ id: `M-${i+1}`, player: ['小宇', '晚风玩家', '星河'][i], playerInitials: ['宇', '晚风', '星河'][i], audition: i % 2 === 0 ? '试音' : '不试音', matchPrice: 150, tipAmount: [100, 0, 100][i], serviceId: s.id, note: ['想练团队配合和沟通，可以先简单磨合。', '熟悉基础操作，希望重点练习对局思路。', '想提升地图点位理解，节奏可以稍快。'][i], status: '待响应' })))
+  const [requests, setRequests] = useState(services.slice(0, 3).map((s, i) => ({ id: `M-${i+1}`, player: ['小宇', '晚风玩家', '星河'][i], playerInitials: ['宇', '晚风', '星河'][i], audition: i % 2 === 0 ? '试音' : '不试音', matchPrice: 150, quantity: 2, quantityUnit: s.unit, tipAmount: [100, 0, 100][i], serviceId: s.id, note: ['想练团队配合和沟通，可以先简单磨合。', '熟悉基础操作，希望重点练习对局思路。', '想提升地图点位理解，节奏可以稍快。'][i], status: '待响应' })))
   const [orders, setOrders] = useState<WorkOrder[]>(() => {
-    const examples = ['待接单', '待服务', '服务中', '待玩家确认', '已完成'].map((status, i) => ({ id: `CW-1028-${100+i}`, player: ['晚风玩家', '小宇', '星河', '阿白', '奶糖'][i], playerId: `P-1028${60 + i}`, playerInitials: ['晚风', '宇', '星河', '白', '糖'][i], playerGender: ['女', '男', '男', '女', '女'][i] as '女' | '男', playerAge: [26, 22, 25, 24, 23][i], serviceId: services[i % services.length]?.id ?? '', clubName: workbenchClubName, status, amount: 120 + i * 20 + (i === 0 ? 20 : 0), tipAmount: i === 0 ? 20 : 0, discountAmount: 0, paymentSource: '钻石钱包' as const, createdAt: `2026-10-28 ${String(14 - i).padStart(2, '0')}:20`, duration: 2, durationUnit: services[i % services.length]?.unit ?? '小时', unitPrice: (120 + i * 20) / 2, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) }))
+    const examples = ['待接单', '待服务', '服务中', '待玩家确认', '已完成'].map((status, i) => ({ id: `CW-1028-${100+i}`, player: ['晚风玩家', '小宇', '星河', '阿白', '奶糖'][i], playerId: `P-1028${60 + i}`, playerInitials: ['晚风', '宇', '星河', '白', '糖'][i], playerGender: ['女', '男', '男', '女', '女'][i] as '女' | '男', playerAge: [26, 22, 25, 24, 23][i], serviceId: services[i % services.length]?.id ?? '', clubName: workbenchClubName, status, amount: 120 + i * 20 + (i === 0 ? 20 : 0), tipAmount: i === 0 ? 20 : 0, discountAmount: 0, paymentSource: '金豆钱包' as const, createdAt: `2026-10-28 ${String(14 - i).padStart(2, '0')}:20`, duration: 2, durationUnit: services[i % services.length]?.unit ?? '小时', unitPrice: (120 + i * 20) / 2, ...(status === '待玩家确认' ? { deadline: Date.now() + 86400000 } : {}) }))
     const hourlyService = services.find(service => service.unit === '小时')
     const roundService = services.find(service => service.unit === '局')
     return [...examples, {
       id: 'CW-1028-105', player: '橘子汽水', playerId: 'P-102865', playerInitials: '橘子', playerGender: '女', playerAge: 23, serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
-      status: '服务中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 09:20', duration: 3,
+      status: '服务中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '金豆钱包', createdAt: '2026-10-28 09:20', duration: 3,
       durationUnit: hourlyService?.unit ?? '小时', unitPrice: 80, startedAt: '2026-10-28 09:35', earlyEndRequested: true, serviceSegmentMinutes: [45, 35, 25],
     }, {
       id: 'CW-1028-106', player: '小满', playerId: 'P-102866', playerInitials: '满', playerGender: '男', playerAge: 25, serviceId: roundService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
-      status: '服务中', amount: 400, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 08:20', duration: 5,
+      status: '服务中', amount: 400, tipAmount: 0, discountAmount: 0, paymentSource: '金豆钱包', createdAt: '2026-10-28 08:20', duration: 5,
       durationUnit: roundService?.unit ?? '局', unitPrice: 80, startedAt: '2026-10-28 08:25', earlyEndRequested: true, serviceSegmentMinutes: [18, 22, 15],
     }, {
       id: 'CW-1028-107', player: '晚风玩家', playerId: 'P-102860', playerInitials: '晚风', playerGender: '女', playerAge: 26, serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
-      status: '暂停中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '钻石钱包', createdAt: '2026-10-28 07:20', duration: 3,
+      status: '暂停中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '金豆钱包', createdAt: '2026-10-28 07:20', duration: 3,
       durationUnit: hourlyService?.unit ?? '小时', unitPrice: 80, startedAt: '2026-10-28 07:35', serviceSegmentMinutes: [45],
     }]
   })

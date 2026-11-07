@@ -11,10 +11,10 @@ export type RechargeCoupon = {
 }
 
 export const rechargePackages = [
-  { id: 'recharge-60', diamonds: 60, price: 6, label: '入门档' },
-  { id: 'recharge-300', diamonds: 300, price: 30, label: '常用档' },
-  { id: 'recharge-980', diamonds: 980, price: 98, label: '进阶档' },
-  { id: 'recharge-1980', diamonds: 1980, price: 198, label: '畅玩档' },
+  { id: 'recharge-60', diamonds: 60, price: 6 },
+  { id: 'recharge-300', diamonds: 300, price: 30 },
+  { id: 'recharge-980', diamonds: 980, price: 98 },
+  { id: 'recharge-1980', diamonds: 1980, price: 198 },
 ]
 
 export const initialCoupons: RechargeCoupon[] = [

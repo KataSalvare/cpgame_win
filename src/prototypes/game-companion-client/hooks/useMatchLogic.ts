@@ -1,33 +1,32 @@
 import { useMemo, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
+import { quickMatchClubs, quickMatchCompanions, quickMatchServicesByCompanion } from '../data/quickMatchMockData'
 
 export type MatchGender = '不限' | '男' | '女'
 export type MatchPeople = '单陪' | '双陪' | '选项数量后台配置'
 
 const firstGameId = games.find((game) => game.id !== 'all')?.id ?? games[0].id
-const firstClubId = clubs.find((club) => club.gameIds.includes(firstGameId))?.id ?? clubs[0].id
-const initialService = companions.filter((companion) => companion.clubId === firstClubId && companion.gameIds.includes(firstGameId))
-  .flatMap((companion) => servicesByCompanion[companion.id] ?? [])
-  .find((service) => service.gameId === firstGameId)
-
+const matchClubs = [...clubs, ...quickMatchClubs]
+const matchCompanions = [...companions, ...quickMatchCompanions]
+const firstClubId = matchClubs.find((club) => club.gameIds.includes(firstGameId))?.id ?? clubs[0].id
 export function useMatchLogic() {
   const [gameId, setGameId] = useState(firstGameId)
   const [clubId, setClubId] = useState(firstClubId)
   const [tryout, setTryout] = useState(false)
-  const [playName, setPlayName] = useState(initialService?.playName ?? '')
-  const [levelName, setLevelName] = useState(initialService?.levelName ?? '')
-  const [serviceId, setServiceId] = useState(initialService?.id ?? '')
+  const [playName, setPlayName] = useState('')
+  const [levelName, setLevelName] = useState('')
+  const [serviceId, setServiceId] = useState('')
   const [people, setPeople] = useState<MatchPeople>('单陪')
   const [gender, setGender] = useState<MatchGender>('不限')
   const [quantity, setQuantity] = useState(1)
   const [remark, setRemark] = useState('')
   const [addedPrice, setAddedPrice] = useState(0)
 
-  const availableClubs = useMemo(() => clubs.filter((club) => club.gameIds.includes(gameId)), [gameId])
+  const availableClubs = useMemo(() => matchClubs.filter((club) => club.gameIds.includes(gameId)), [gameId])
   const availableServices = useMemo(() => {
-    const eligibleCompanions = companions.filter((companion) => companion.clubId === clubId && companion.gameIds.includes(gameId))
+    const eligibleCompanions = matchCompanions.filter((companion) => companion.clubId === clubId && companion.gameIds.includes(gameId))
     const uniqueServices = new Map<string, Service>()
-    eligibleCompanions.forEach((companion) => (servicesByCompanion[companion.id] ?? []).forEach((service) => {
+    eligibleCompanions.forEach((companion) => ([...(servicesByCompanion[companion.id] ?? []), ...(quickMatchServicesByCompanion[companion.id] ?? [])]).forEach((service) => {
       if (service.gameId !== gameId) return
       const key = `${service.gameId}:${service.playName}:${service.levelName}:${service.unit}:${service.price}`
       if (!uniqueServices.has(key)) uniqueServices.set(key, service)
@@ -35,12 +34,9 @@ export function useMatchLogic() {
     return [...uniqueServices.values()]
   }, [clubId, gameId])
   const playOptions = useMemo(() => [...new Set(availableServices.map((service) => service.playName))], [availableServices])
-  const levelOptions = useMemo(() => [...new Set(availableServices.filter((service) => !playName || service.playName === playName).map((service) => service.levelName))], [availableServices, playName])
-  const serviceOptions = useMemo(() => {
-    const matching = availableServices.filter((service) => (!playName || service.playName === playName) && (!levelName || service.levelName === levelName))
-    return matching.length ? matching : availableServices
-  }, [availableServices, levelName, playName])
-  const selectedService = serviceOptions.find((service) => service.id === serviceId) ?? serviceOptions[0] ?? availableServices[0] ?? null
+  const levelOptions = useMemo(() => playName ? [...new Set(availableServices.filter((service) => service.playName === playName).map((service) => service.levelName))] : [], [availableServices, playName])
+  const serviceOptions = useMemo(() => playName && levelName ? availableServices.filter((service) => service.playName === playName && service.levelName === levelName) : [], [availableServices, levelName, playName])
+  const selectedService = serviceOptions.find((service) => service.id === serviceId) ?? null
   const peopleCount = people === '双陪' ? 2 : people === '选项数量后台配置' ? 3 : 1
   const genderUnitPrice = gender === '女' ? 100 : 80
   const recommendedUnitPrice = selectedService ? genderUnitPrice * peopleCount : 0
@@ -49,36 +45,31 @@ export function useMatchLogic() {
     : (genderUnitPrice * peopleCount).toLocaleString()
 
   const chooseGame = (nextGameId: string) => {
-    const nextClubId = clubs.find((club) => club.gameIds.includes(nextGameId))?.id ?? ''
-    const nextServices = nextClubId ? companions.filter((companion) => companion.clubId === nextClubId && companion.gameIds.includes(nextGameId)).flatMap((companion) => servicesByCompanion[companion.id] ?? []).filter((service) => service.gameId === nextGameId) : []
+    const nextClubId = matchClubs.find((club) => club.gameIds.includes(nextGameId))?.id ?? ''
     setGameId(nextGameId)
     setClubId(nextClubId)
-    setPlayName(nextServices[0]?.playName ?? '')
-    setLevelName(nextServices[0]?.levelName ?? '')
-    setServiceId(nextServices[0]?.id ?? '')
+    setPlayName('')
+    setLevelName('')
+    setServiceId('')
   }
   const chooseClub = (nextClubId: string) => {
-    const nextClub = clubs.find((club) => club.id === nextClubId)
+    const nextClub = matchClubs.find((club) => club.id === nextClubId)
     if (!nextClub) return
     const nextGameId = nextClub.gameIds.includes(gameId) ? gameId : nextClub.gameIds[0] ?? firstGameId
-    const nextServices = companions.filter((companion) => companion.clubId === nextClubId && companion.gameIds.includes(nextGameId)).flatMap((companion) => servicesByCompanion[companion.id] ?? []).filter((service) => service.gameId === nextGameId)
     setGameId(nextGameId)
     setClubId(nextClubId)
-    setPlayName(nextServices[0]?.playName ?? '')
-    setLevelName(nextServices[0]?.levelName ?? '')
-    setServiceId(nextServices[0]?.id ?? '')
+    setPlayName('')
+    setLevelName('')
+    setServiceId('')
   }
   const choosePlay = (nextPlayName: string) => {
-    const nextLevel = availableServices.find((service) => service.playName === nextPlayName)?.levelName ?? ''
-    const nextService = availableServices.find((service) => service.playName === nextPlayName && service.levelName === nextLevel)
     setPlayName(nextPlayName)
-    setLevelName(nextLevel)
-    setServiceId(nextService?.id ?? '')
+    setLevelName('')
+    setServiceId('')
   }
   const chooseLevel = (nextLevelName: string) => {
-    const nextService = availableServices.find((service) => service.playName === playName && service.levelName === nextLevelName)
     setLevelName(nextLevelName)
-    setServiceId(nextService?.id ?? '')
+    setServiceId('')
   }
 
   return {

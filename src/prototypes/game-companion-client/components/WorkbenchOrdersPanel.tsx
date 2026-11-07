@@ -28,7 +28,7 @@ export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, label =
             <span className="order-item__companion"><AvatarMark initials={o.playerInitials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={o.player} identityId={o.player} /></strong></span></span>
             <span className="order-item__service"><strong>{game?.name} · {service?.playName}</strong><small>{service?.levelName} · {service?.name}</small></span>
             <span className="order-item__duration">{o.duration} {o.durationUnit}</span>
-            <span className="order-item__price"><strong>{o.unitPrice} 钻石 / {o.durationUnit}</strong><small>合计 {o.amount} 钻石</small></span>
+            <span className="order-item__price"><strong>{o.unitPrice} 金豆 / {o.durationUnit}</strong><small>合计 {o.amount} 金豆</small></span>
             <span className="workbench-order-table-row__status"><span className={`order-item__status order-item__status--${o.status === '已取消' ? 'cancelled' : o.status === '退款' ? 'refund' : o.status === '已完成' ? 'completed' : 'active'}`}>{displayedStatus}</span></span>
           </button><WorkbenchOrderActions logic={w} orderId={o.id} />
         </article>

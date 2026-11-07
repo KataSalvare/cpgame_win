@@ -96,7 +96,7 @@ export function useAccountLogic() {
 
   const completeRecharge = useCallback((diamonds: number, amount: number, couponId: string | null) => {
     setDiamondBalance((balance) => balance + diamonds)
-    setDiamondTransactions((current) => [{ id: `D-${Date.now()}`, title: `钻石充值 · ¥${amount}`, type: '充值', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: diamonds }, ...current])
+    setDiamondTransactions((current) => [{ id: `D-${Date.now()}`, title: `金豆充值 · ¥${amount}`, type: '充值', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: diamonds }, ...current])
     if (couponId) setCoupons((current) => current.map((coupon) => coupon.id === couponId ? { ...coupon, status: '已使用' } : coupon))
   }, [])
 
@@ -156,7 +156,7 @@ export function useAccountLogic() {
       const date = new Date().toLocaleString('zh-CN', { hour12: false })
       setBeanBalance((balance) => balance - amount)
       setDiamondBalance((balance) => balance + amount)
-      setBeanTransactions((current) => [{ id: `B-${Date.now()}`, title: '兑换钻石', type: '兑换钻石', date, amount: -amount }, ...current])
+      setBeanTransactions((current) => [{ id: `B-${Date.now()}`, title: '兑换金豆', type: '兑换金豆', date, amount: -amount }, ...current])
       setDiamondTransactions((current) => [{ id: `D-${Date.now()}`, title: '糖豆兑换', type: '糖豆兑换', date, amount }, ...current])
       return true
     },

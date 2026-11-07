@@ -3,7 +3,7 @@ import { DialogPanel } from '@/components/WindowsClient'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { OrderNumberCopy } from './OrderNumberCopy'
-import { MessageCircle } from 'lucide-react'
+import { Mars, MessageCircle, Venus } from 'lucide-react'
 import type { ExamOrder, ExamSubmission } from '../data/examOrderMockData'
 
 export function ExamOrderDetailPanel({ order, role, onPay, onCancel, onContact, onChat, onSubmit }: {
@@ -21,8 +21,8 @@ export function ExamOrderDetailPanel({ order, role, onPay, onCancel, onContact, 
   return <>
     <div className="order-detail-panel exam-order-detail">
       <section className="order-detail-status-card"><strong className="order-detail-status-card__status">{order.status}</strong><OrderNumberCopy orderId={order.id} /><span className="order-detail-status-card__created">创建时间 {order.createdAt}</span></section>
-      <section className="order-detail-section"><div className="order-detail-section__heading"><span className="client-eyebrow">{title}</span><button type="button" className="client-button client-button--secondary" onClick={onChat}><MessageCircle size={15} />聊一聊</button></div><div className="order-detail-companion"><AvatarMark initials={order.initials} size="md" /><div><strong><UserNameWithLevel name={order.person} identityId={order.personId} /></strong><span>{order.gender} · {order.age} 岁</span><span>ID · {order.personId}</span>{role === '考生订单' && <span>{order.clubName}</span>}</div></div></section>
-      <section className="order-detail-section"><div className="order-detail-section__heading"><span className="client-eyebrow">考试信息</span></div><div className="order-detail-facts"><span>游戏</span><strong>{order.game}</strong><span>玩法</span><strong>{order.play}</strong><span>等级</span><strong>{order.level}</strong><span>服务</span><strong>{order.service}</strong><span>考核费用</span><strong>500 钻石</strong></div></section>
+      <section className="order-detail-section"><div className="order-detail-section__heading"><span className="client-eyebrow">{title}</span><button type="button" className="client-button client-button--secondary" onClick={onChat}><MessageCircle size={15} />聊一聊</button></div><div className="order-detail-companion"><AvatarMark initials={order.initials} size="md" /><div><strong><UserNameWithLevel name={order.person} identityId={order.personId} /></strong><span className="order-detail-companion__demographics" aria-label={`性别${order.gender}，${order.age}岁`}>{order.gender === '女' ? <Venus size={13} aria-hidden="true" /> : <Mars size={13} aria-hidden="true" />}{order.age}</span><span>ID · {order.personId}</span>{role === '考生订单' && <span>{order.clubName}</span>}</div></div></section>
+      <section className="order-detail-section"><div className="order-detail-section__heading"><span className="client-eyebrow">考试信息</span></div><div className="order-detail-facts"><span>游戏</span><strong>{order.game}</strong><span>玩法</span><strong>{order.play}</strong><span>等级</span><strong>{order.level}</strong><span>服务</span><strong>{order.service}</strong><span>考核费用</span><strong>500 金豆</strong></div></section>
       {order.submission && <section className="order-detail-section"><div className="order-detail-section__heading"><span className="client-eyebrow">考核资料</span></div><div className="exam-submission-summary"><span>考核结果：{order.submission.result}</span>{order.submission.recordingUrls.map((url, index) => <a key={`${url}-${index}`} href={url} target="_blank" rel="noreferrer">录屏地址 {index + 1}</a>)}{order.submission.note && <p>{order.submission.note}</p>}{order.submission.images.length > 0 && <div className="exam-submission-summary__images">{order.submission.images.map((src, index) => <img src={src} alt={`考核资料 ${index + 1}`} key={`${order.id}-image-${index}`} />)}</div>}</div></section>}
       <footer className="order-detail-actions exam-order-detail__actions">
         {role === '考生订单' && order.status === '待支付' && <><button type="button" className="client-button client-button--secondary" onClick={() => setCancelConfirm(true)}>取消订单</button><ExamOrderPayButton onPay={onPay} /></>}
@@ -39,7 +39,7 @@ export function ExamOrderPayButton({ onPay }: { onPay: () => void }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   return <>
     <button type="button" className="client-button client-button--primary" onClick={() => setConfirmOpen(true)}>支付</button>
-    {confirmOpen && <DialogPanel overlayId="exam-order-payment-confirm" title="支付" onClose={() => setConfirmOpen(false)} width={380} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmOpen(false)}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { setConfirmOpen(false); onPay() }}>确认支付</button></>}><p>确认支付500钻石吗？</p></DialogPanel>}
+    {confirmOpen && <DialogPanel overlayId="exam-order-payment-confirm" title="支付" onClose={() => setConfirmOpen(false)} width={380} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmOpen(false)}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { setConfirmOpen(false); onPay() }}>确认支付</button></>}><p>确认支付500金豆吗？</p></DialogPanel>}
   </>
 }
 
