@@ -13,7 +13,6 @@ type Props = {
 export function WorkbenchMatchesPanel({ logic: w, filter, onFilterChange, onCancel, onContactMatch }: Props) {
   const requests = w.requests.filter(r => filter === '全部' || r.status === filter)
   return <section className="client-card orders-list-card workbench-matches-table">
-    <div className="orders-list-card__toolbar"><span className="client-count">{requests.length} 条匹配请求</span></div>
     <div className="orders-filter-bar" role="group" aria-label="按匹配请求状态筛选">
       {['全部', '待响应', '已加入候选名单', '已忽略', '已取消匹配'].map(status => <button type="button" key={status} className={`orders-filter-chip${filter === status ? ' is-active' : ''}`} aria-pressed={filter === status} onClick={() => onFilterChange(status)}>{status}</button>)}
     </div>

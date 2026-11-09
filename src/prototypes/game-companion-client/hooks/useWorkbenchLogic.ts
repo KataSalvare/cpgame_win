@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
 export type WorkOrderAction = '接受' | '拒绝' | '开始服务' | '继续服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
-export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '金豆钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; category: '免单' | '提前结束' | '售后'; amount?: number | null }[]; deadline?: number }
+export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '金豆钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; earlyEndSubmittedQuantity?: number; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; category: '免单' | '提前结束' | '售后'; amount?: number | null }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
 const initialServiceIds = services.filter(s => s.canAcceptOrders).map(s => s.id)
@@ -43,7 +43,7 @@ export function useWorkbenchLogic() {
     }, {
       id: 'CW-1028-106', player: '小满', playerId: 'P-102866', playerInitials: '满', playerGender: '男', playerAge: 25, serviceId: roundService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
       status: '服务中', amount: 400, tipAmount: 0, discountAmount: 0, paymentSource: '金豆钱包', createdAt: '2026-10-28 08:20', duration: 5,
-      durationUnit: roundService?.unit ?? '局', unitPrice: 80, startedAt: '2026-10-28 08:25', earlyEndRequested: true, serviceSegmentMinutes: [18, 22, 15],
+      durationUnit: roundService?.unit ?? '局', unitPrice: 80, startedAt: '2026-10-28 08:25', earlyEndRequested: true, earlyEndSubmittedQuantity: 2, serviceSegmentMinutes: [18, 22, 15],
     }, {
       id: 'CW-1028-107', player: '晚风玩家', playerId: 'P-102860', playerInitials: '晚风', playerGender: '女', playerAge: 26, serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
       status: '暂停中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '金豆钱包', createdAt: '2026-10-28 07:20', duration: 3,
@@ -141,7 +141,7 @@ export function useWorkbenchLogic() {
   }
   const agreeEarlyEnd = (id: string, quantity: number) => {
     const order = orders.find(item => item.id === id)
-    if (!order || order.status !== '服务中' || !order.earlyEndRequested || !Number.isFinite(quantity) || quantity <= 0 || quantity > order.duration || (order.durationUnit === '局' && !Number.isInteger(quantity))) return false
+    if (!order || order.status !== '服务中' || !order.earlyEndRequested || !Number.isFinite(quantity) || quantity <= 0 || quantity > order.duration || (order.durationUnit === '局' && !Number.isInteger(quantity * 2))) return false
     const recordedAt = new Date().toISOString()
     const record = { id: `${id}-early-end-${Date.now()}`, recordedAt, category: '提前结束' as const, amount: null }
     setOrders(items => items.map(item => item.id === id && item.earlyEndRequested ? {

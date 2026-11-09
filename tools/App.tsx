@@ -79,6 +79,7 @@ function AppContent() {
                   : hashPage === 'voice-room' && params.get('voiceFrom') === 'club' && params.get('voiceView') === 'user' ? 'club-voice-room-user'
                   : hashPage === 'voice-room' && params.get('voiceFrom') === 'club' ? 'club-voice-room'
         : hashPage === 'recharge' || hashPage === 'wallet' && params.get('panel') === 'diamond-recharge' ? 'wallet-recharge'
+          : hashPage === 'wallet' && params.get('panel') === 'bean-withdraw' ? 'bean-withdraw'
           : hashPage === 'wallet' && params.get('panel') === 'coupons' ? 'coupons'
           : hashPage === 'club-detail' && params.get('panel') === 'club-announcements' ? 'club-announcements'
           : hashPage === 'club-detail' && params.get('panel') === 'club-cards' ? 'club-cards'
@@ -121,7 +122,7 @@ function AppContent() {
         : currentPage.entryView === 'identity-verification' && params.get('page') === 'profile' && params.get('tool') === 'identity-verification' ? 'profile'
           : currentPage.entryView === 'identity-verification' ? 'identity-verification'
       : currentPage.entryView === 'wallet-recharge' ? params.get('page') === 'wallet' && params.get('panel') === 'diamond-recharge' ? 'wallet' : 'recharge'
-        : currentPage.entryView === 'coupons' ? 'wallet'
+        : currentPage.entryView === 'coupons' || currentPage.entryView === 'bean-withdraw' ? 'wallet'
         : currentPage.entryView === 'club-announcements' || currentPage.entryView === 'club-cards' ? 'club-detail'
           : currentPage.entryView === 'my-cards' ? 'wallet'
           : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' || currentPage.entryView === 'profile-clubs' || currentPage.entryView === 'profile-cancel-account' || currentPage.entryView === 'profile-wealth' || currentPage.entryView === 'profile-visits' || currentPage.entryView === 'profile-social' ? 'profile'
@@ -155,6 +156,7 @@ function AppContent() {
       : null
     const expectedCompanion = currentPage.entryView === 'companion-detail' ? params.get('companion') ?? 'companion-001' : null
     const expectedPanel = currentPage.entryView === 'wallet-recharge' && expectedPage === 'wallet' ? 'diamond-recharge'
+      : currentPage.entryView === 'bean-withdraw' ? 'bean-withdraw'
       : currentPage.entryView === 'coupons' ? 'coupons'
         : currentPage.entryView === 'club-announcements' ? 'club-announcements'
           : currentPage.entryView === 'club-cards' ? 'club-cards'

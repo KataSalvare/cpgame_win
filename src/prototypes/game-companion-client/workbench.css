@@ -186,6 +186,8 @@
 .workbench-order-action-overlay { position:absolute; inset:0; z-index:80; display:grid; place-items:center; padding:24px; background:rgba(31,41,55,.28); }
 .workbench-waiver-field { display:grid; gap:10px; margin:20px 0; font-size:14px; }
 .workbench-waiver-field input { min-height:36px; padding:8px 12px; border:1px solid var(--client-border); border-radius:6px; }
+.workbench-waiver-field .checkout-duration__controls { margin:0; }
+.workbench-waiver-field .checkout-duration__controls input { min-height:0; border:0; border-radius:0; padding:8px 0; }
 .workbench-waiver-field small { color:var(--client-muted); font-size:12px; }
 .workbench-early-end-summary { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--client-border); border-radius:6px; padding:11px 12px; background:var(--prototype-surface-muted, #f9fafb); font-size:12px; }
 .workbench-early-end-summary strong { font-weight:500; color:var(--client-muted); }

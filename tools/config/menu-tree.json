@@ -157,6 +157,10 @@
       "id": "/game-companion-wallet",
       "children": [
         {
+          "id": "/game-companion-withdraw",
+          "children": []
+        },
+        {
           "id": "/game-companion-recharge",
           "children": []
         },
