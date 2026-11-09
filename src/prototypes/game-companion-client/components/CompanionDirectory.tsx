@@ -3,6 +3,7 @@ import { useCompanionDirectoryLogic } from '../hooks/useClubDetailLogic'
 import { CompanionCard } from './CompanionCard'
 import { PageStatePanel } from './PageStatePanel'
 import { GameFilter } from './GameFilter'
+import { Search, X } from 'lucide-react'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 
@@ -12,6 +13,7 @@ type Props = {
   onRetry: () => void
   onOpenCompanion: (companionId: string) => void
   onChatWithCompanion: (companionId: string) => void
+  searchable?: boolean
 }
 
 const ages = ['全部年龄', '18-25岁', '26-30岁', '31-35岁', '36-40岁', '40岁以上']
@@ -25,7 +27,7 @@ const sortLabels: Record<string, string> = {
   'rating-asc': '好评从低到高',
 }
 
-export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion }: Props) {
+export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion, searchable = false }: Props) {
   const logic = useCompanionDirectoryLogic(clubId)
 
   if (pageState !== 'normal') {
@@ -40,7 +42,8 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
 
   return <section className="club-members-section" aria-label="陪玩列表">
     <div className="club-game-filter"><GameFilter gameId={logic.gameId} onSelect={logic.setGameId} /></div>
-    <div className="club-filter-panel">
+    <div className={`club-filter-panel${searchable ? ' club-filter-panel--with-search' : ''}`}>
+      {searchable && <label className="companion-directory-search"><Search size={15} aria-hidden="true" /><input type="search" value={logic.searchQuery} onChange={(event) => logic.setSearchQuery(event.target.value)} placeholder="搜索陪玩名称或 ID" aria-label="搜索陪玩名称或 ID" />{logic.searchQuery && <button type="button" className="windows-icon-button" aria-label="清空陪玩搜索" onClick={() => logic.setSearchQuery('')}><X size={14} /></button>}</label>}
       <FilterSelect label="排序" value={logic.sort} onChange={(value) => logic.setSort(value as typeof logic.sort)} options={Object.entries(sortLabels).map(([value, label]) => ({ value, label }))} />
       <FilterSelect label="在线状态" value={logic.onlineStatus} onChange={logic.setOnlineStatus} options={['全部在线状态', '在线', '离线'].map((value) => ({ value, label: value }))} />
       <FilterSelect label="接单状态" value={logic.status} onChange={logic.setStatus} options={['全部接单状态', '接单中', '服务中', '暂不接单'].map((value) => ({ value, label: value }))} />

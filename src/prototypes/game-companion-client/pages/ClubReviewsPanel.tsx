@@ -22,8 +22,23 @@ export function ClubReviewsPanel() {
     { id: 'all', label: '全部' }, { id: 'images', label: '带图评价' }, { id: 'latest', label: '最新' },
     { id: 'good', label: `好评（${goodCount}）` }, { id: 'middle', label: `中评（${middleCount}）` }, { id: 'poor', label: `差评（${poorCount}）` },
   ]
+  const scoreDimensions = [
+    { label: '服务态度', score: 4.9 },
+    { label: '游戏体验', score: 4.9 },
+    { label: '接单效率', score: 4.9 },
+  ]
 
   return <section className="detail-list-section club-reviews-panel" aria-label="俱乐部评价">
+    <div className="club-review-scores" aria-label="俱乐部评价维度得分">
+      {scoreDimensions.map(({ label, score }) => <div className="club-review-score" key={label}>
+        <span>{label}</span>
+        <strong>{score.toFixed(1)}</strong>
+        <div className="club-review-score__track" role="img" aria-label={`${label} ${score.toFixed(1)} 分，共 5 分`}>
+          <span style={{ width: `${score / 5 * 100}%` }} />
+        </div>
+        <span className="club-review-score__level">高</span>
+      </div>)}
+    </div>
     <div className="review-filters" role="group" aria-label="评价筛选">
       {filters.map((item) => <button key={item.id} type="button" aria-pressed={filter === item.id} className={filter === item.id ? 'is-active' : ''} onClick={() => setFilter(item.id)}>{item.label}</button>)}
     </div>

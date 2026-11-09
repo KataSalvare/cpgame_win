@@ -1,4 +1,5 @@
 import type { ClientOrder } from '../data/accountMockData'
+import { groupMembersMockData } from '../data/groupMembersMockData'
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText, Share2,
@@ -7,7 +8,7 @@ import {
   Volume2, VolumeX, Copy, X,
 } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
-import { currentSocialUser, initialSupportQueue, DEFAULT_VOICE_GROUP_CAPACITY, MAX_VOICE_CHANNEL_MEMBERS, MAX_VOICE_GROUP_MEMBERS, UNASSIGNED_VOICE_ROOM_ID, socialFriends, type ChatMessageKind, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceSubchannel } from '../data/socialMockData'
+import { currentSocialUser, initialSupportQueue, DEFAULT_VOICE_GROUP_CAPACITY, MAX_VOICE_CHANNEL_MEMBERS, MAX_VOICE_GROUP_MEMBERS, UNASSIGNED_VOICE_ROOM_ID, socialFriends, type ChatMessageKind, type SocialFriend, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceSubchannel } from '../data/socialMockData'
 import { clubs, companions } from '../data/mockData'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { useSocialLogic } from '../hooks/useSocialLogic'
@@ -169,7 +170,12 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
     intro: selectedProfile.intro,
   } : undefined
   const filteredConversations = logic.visibleConversations.filter((item) => kindFilter === 'all' || item.kind === kindFilter)
-  const groupMemberCandidates = conversation?.kind === 'group' ? conversation.members.map((id) => socialFriends.find((friend) => friend.id === id)).filter((friend): friend is (typeof socialFriends)[number] => Boolean(friend)) : []
+  const groupMemberCandidates: SocialFriend[] = conversation?.kind === 'group' ? conversation.members.map((id) => {
+    const friend = socialFriends.find((item) => item.id === id)
+    if (friend) return friend
+    const member = groupMembersMockData[conversation.id]?.find((item) => item.id === id)
+    return member ? { ...member, status: member.online ? '在线' : '离线', role: '好友', gender: '女', age: 0, rating: 0, tags: [], intro: '' } : undefined
+  }).filter((friend): friend is SocialFriend => Boolean(friend)) : []
   const conversationGiftRecipient: GiftRecipient | undefined = conversation?.kind === 'direct' ? (() => {
     const memberId = conversation.members[0]
     const friend = socialFriends.find((item) => item.id === memberId)
@@ -313,7 +319,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
         </> : <div className="social-friend-list">
           <div className="social-list-caption">好友 · {logic.visibleFriends.length}</div>
           {logic.visibleFriends.map((friend) => <div className={`social-friend-row${logic.selectedFriendId === friend.id ? ' is-active' : ''}`} key={friend.id}>
-            <button type="button" className="social-friend-identity" onClick={() => { logic.startDirectMessage(friend.id); logic.setSelectedProfileId(friend.id); setGroupSettingsOpen(false) }} aria-label={`打开与${friend.name}的聊天和资料`}><span className="social-avatar-wrap"><AvatarMark initials={friend.initials} size="md" /><i className={friend.online ? 'is-online' : ''} /></span><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></button>
+            <button type="button" className="social-friend-identity" onClick={() => { logic.startDirectMessage(friend.id); logic.setSelectedProfileId(friend.id); setGroupSettingsOpen(false) }} aria-label={`打开与${friend.name}的聊天和资料`}><span className="social-avatar-wrap"><AvatarMark initials={friend.initials} size="md" /><i className={friend.online ? 'is-online' : ''} /></span><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><FriendPresence online={friend.online} /></span></button>
             <button type="button" className="windows-icon-button" aria-label={`查看${friend.name}资料`} onClick={() => showFriendProfile(friend.id)}><MoreHorizontal size={18} /></button>
           </div>)}
         </div>}
@@ -332,6 +338,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
               {directUserTags.length > 0 && <div className="chat-user-tags" aria-label="用户标签">{directUserTags.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}</div>}
             </> : <><h2>{conversation.title}</h2><small>{conversation.members.length + 1} 位成员</small></>}</div>
           </div>
+          {!logic.selectedProfile && !(conversation.kind === 'group' && groupSettingsOpen) && <button type="button" className="windows-icon-button" aria-label={conversation.kind === 'group' ? '更多功能：群聊管理' : '更多功能：用户详情'} title="更多功能" onClick={() => conversation.kind === 'group' ? openGroupSettings() : showFriendProfile(conversation.members[0])}><MoreHorizontal size={18} /></button>}
         </header>
         <div className="chat-message-list" aria-live="polite">
           {conversation.messages.map((message) => <ChatMessage key={message.id} selfId={conversation.self?.id} onReviewChange={(rating, submitted) => logic.updateSupportReview(message.id, rating, submitted)} message={message} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onAvatarClick={() => message.senderId !== currentSocialUser.id && showFriendProfile(message.senderId)} onOpenVoiceRoom={openVoiceRoomFromMessage} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />)}
@@ -425,7 +432,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
 }
 
 function FriendPreview({ friend, onMessage, onOpenProfile }: { friend: (typeof socialFriends)[number]; onMessage: () => void; onOpenProfile: () => void }) {
-  return <section className="friend-preview"><button type="button" className="friend-preview__avatar" onClick={onOpenProfile} aria-label={`查看${friend.name}资料`}><AvatarMark initials={friend.initials} size="lg" /></button><h2><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></h2><span>{friend.status}</span><div className="friend-preview__actions"><button type="button" className="client-button client-button--primary" onClick={onMessage}><MessageCircle size={15} />发起私聊</button><button type="button" className="client-button client-button--secondary" onClick={onOpenProfile}>查看资料</button></div></section>
+  return <section className="friend-preview"><button type="button" className="friend-preview__avatar" onClick={onOpenProfile} aria-label={`查看${friend.name}资料`}><AvatarMark initials={friend.initials} size="lg" /></button><h2><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></h2><FriendPresence online={friend.online} /><div className="friend-preview__actions"><button type="button" className="client-button client-button--primary" onClick={onMessage}><MessageCircle size={15} />发起私聊</button><button type="button" className="client-button client-button--secondary" onClick={onOpenProfile}>查看资料</button></div></section>
 }
 
 function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdateAvatar, onOpenProfile, onSetJoinApproval, onSetMuted, onSetPinned, onOpenMemberDialog, onLeave, onDissolve }: {
@@ -444,8 +451,13 @@ function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdat
 }) {
   const [name, setName] = useState(conversation.title)
   const [isEditingName, setIsEditingName] = useState(false)
+  const [showAllMembers, setShowAllMembers] = useState(false)
   const isOwner = conversation.ownerId === currentSocialUser.id
-  const members = conversation.members.map((id) => socialFriends.find((friend) => friend.id === id)).filter((friend): friend is (typeof socialFriends)[number] => Boolean(friend))
+  const extraMembers = groupMembersMockData[conversation.id] ?? []
+  const members = conversation.members.map((id) => socialFriends.find((friend) => friend.id === id) ?? extraMembers.find((member) => member.id === id)).filter((member): member is NonNullable<typeof member> => Boolean(member))
+  const memberTiles = [{ id: currentSocialUser.id, name: `${currentSocialUser.name}（我）`, initials: currentSocialUser.initials, profileId: currentSocialUser.profileId, online: currentSocialUser.online }, ...members]
+  const visibleMemberTiles = showAllMembers ? memberTiles : memberTiles.slice(0, 20)
+  const hasMoreMembers = memberTiles.length > 20
 
   return <aside className="group-settings-panel" aria-label="群聊设置">
     <header><div><h2>群聊设置</h2><small>{conversation.members.length + 1} 位成员</small></div><button type="button" className="windows-icon-button" aria-label="关闭群聊设置" onClick={onClose}><X size={17} /></button></header>
@@ -458,17 +470,16 @@ function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdat
       </form> : <div><h3>{conversation.title}</h3><small className="group-settings-id">群聊ID：{conversation.id}</small>{isOwner && <div className="group-settings-identity-actions"><button type="button" className="group-settings-edit-name" onClick={() => setIsEditingName(true)}><Pencil size={13} />修改群名称</button><label className="group-settings-edit-name group-settings-avatar-upload"><ImagePlus size={13} />更换群头像<input type="file" accept="image/*" aria-label="上传群头像图片" onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') onUpdateAvatar(reader.result) }; reader.readAsDataURL(file); input.value = '' }} /></label></div>}</div>}
     </section>
     <section className="group-settings-members" aria-label="群成员列表">
-      <div className="group-settings-section-heading"><strong>群聊成员</strong><div><span>{conversation.members.length + 1} 人</span></div></div>
+      <div className="group-settings-section-heading"><strong>群聊成员</strong><div><span>{memberTiles.length} 人</span></div></div>
       <div className="group-settings-member-grid">
-        <GroupMemberTile initials={currentSocialUser.initials} name={`${currentSocialUser.name}（我）`} identityId={currentSocialUser.profileId} role={isOwner ? '群主' : conversation.adminIds?.includes(currentSocialUser.id) ? '管理员' : '成员'} onClick={() => onOpenProfile(currentSocialUser.id)} />
-        {members.map((friend) => {
-          const isAdmin = conversation.adminIds?.includes(friend.id) ?? false
-          return <GroupMemberTile key={friend.id} initials={friend.initials} name={friend.name} identityId={friend.profileId} role={friend.id === conversation.ownerId ? '群主' : isAdmin ? '管理员' : '成员'} onClick={() => onOpenProfile(friend.id)} />
+        {visibleMemberTiles.map((member) => {
+          const isKnownMember = member.id === currentSocialUser.id || socialFriends.some((friend) => friend.id === member.id)
+          const role = member.id === conversation.ownerId ? '群主' : conversation.adminIds?.includes(member.id) ? '管理员' : undefined
+          return <GroupMemberTile key={member.id} initials={member.initials} name={member.name} identityId={member.profileId} role={role} online={member.online} onClick={isKnownMember ? () => onOpenProfile(member.id) : undefined} />
         })}
-        {conversation.id !== 'group-ordinary' && <button type="button" className="group-settings-member-tile group-settings-member-add" onClick={onInvite}><span className="group-settings-member-avatar"><UserPlus size={19} /></span><strong>添加</strong></button>}
-        {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('remove')}><span className="group-settings-member-avatar"><X size={19} /></span><strong>移除</strong></button>}
-        {isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('admin')}><span className="group-settings-member-avatar"><Users size={19} /></span><strong>管理</strong></button>}
       </div>
+      {hasMoreMembers && <button type="button" className="group-settings-members-more" aria-expanded={showAllMembers} onClick={() => setShowAllMembers((expanded) => !expanded)}>{showAllMembers ? '收起' : '查看更多'}<ChevronDown size={14} className={showAllMembers ? 'is-expanded' : ''} /></button>}
+      <div className="group-settings-member-actions">{conversation.id !== 'group-ordinary' && <button type="button" className="group-settings-member-tile group-settings-member-add" onClick={onInvite}><span className="group-settings-member-avatar"><UserPlus size={19} /></span><strong>添加</strong></button>}{isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('remove')}><span className="group-settings-member-avatar"><X size={19} /></span><strong>移除</strong></button>}{isOwner && <button type="button" className="group-settings-member-tile group-settings-member-action" onClick={() => onOpenMemberDialog('admin')}><span className="group-settings-member-avatar"><Users size={19} /></span><strong>管理</strong></button>}</div>
     </section>
     {isOwner && <section className="group-settings-options" aria-label="群聊选项">
       <div><strong>加入群聊验证</strong><small>{conversation.joinApprovalRequired ? '新成员申请加入后，需要群主确认' : '好友可直接加入群聊'}</small></div>
@@ -486,42 +497,67 @@ function GroupSettingsPanel({ conversation, onClose, onInvite, onRename, onUpdat
   </aside>
 }
 
-function GroupMemberTile({ initials, name, identityId, role, onClick }: { initials: string; name: string; identityId: string; role: string; onClick: () => void }) {
-  return <div className="group-settings-member-tile"><button type="button" className="group-settings-member-profile" onClick={onClick} aria-label={`查看${name}资料`}><span className="group-settings-member-avatar"><AvatarMark initials={initials} size="sm" /></span><strong title={name}><UserNameWithLevel name={name} identityId={identityId} /></strong><small>{role}</small></button></div>
+function GroupMemberTile({ initials, name, identityId, role, online, onClick }: { initials: string; name: string; identityId: string; role?: string; online: boolean; onClick?: () => void }) {
+  const content = <><span className="group-settings-member-avatar"><AvatarMark initials={initials} size="sm" /></span><strong title={name}><UserNameWithLevel name={name} identityId={identityId} /></strong>{role && <small>{role}</small>}<FriendPresence online={online} /></>
+  return <div className="group-settings-member-tile">{onClick ? <button type="button" className="group-settings-member-profile" onClick={onClick} aria-label={`查看${name}资料`}>{content}</button> : <div className="group-settings-member-profile is-static">{content}</div>}</div>
+}
+
+function FriendPresence({ online }: { online: boolean }) {
+  return <small className={`social-friend-presence${online ? ' is-online' : ''}`}>{online ? '在线' : '离线'}</small>
+}
+
+function matchesMemberSearch(member: Pick<SocialFriend, 'name' | 'id' | 'profileId'>, query: string) {
+  const normalized = query.trim().toLocaleLowerCase()
+  return !normalized || [member.name, member.id, member.profileId].some((value) => value.toLocaleLowerCase().includes(normalized))
+}
+
+function MemberSearch({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return <label className="social-search social-member-search"><Search size={15} /><input type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder="搜索用户名称或ID" aria-label="搜索用户名称或ID" /></label>
 }
 
 function GroupCreateDialog({ name, members, onNameChange, onToggle, onClose, onSubmit }: { name: string; members: string[]; onNameChange: (value: string) => void; onToggle: (id: string) => void; onClose: () => void; onSubmit: () => void }) {
+  const [query, setQuery] = useState('')
+  const friends = socialFriends.filter((friend) => matchesMemberSearch(friend, query))
   return <DialogPanel overlayId="create-group" title="创建群聊" onClose={onClose} width={520} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={onSubmit} disabled={!name.trim() || members.length < 2}>创建群聊</button></>}>
     <label className="social-form-field">群名称<input value={name} onChange={(event) => onNameChange(event.target.value)} placeholder="例如：周末开黑小队" maxLength={24} /></label>
     <div className="social-dialog-section-title">选择好友 <span>已选 {members.length}/至少 2 位</span></div>
-    <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={members.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>
+    <MemberSearch value={query} onChange={setQuery} />
+    <div className="social-select-friends">{friends.length ? friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={members.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><FriendPresence online={friend.online} /></span></label>) : <p className="social-dialog-copy">没有匹配的用户。</p>}</div>
   </DialogPanel>
 }
 
 function GroupInviteDialog({ friends, selected, onToggle, onClose, onSubmit }: { friends: typeof socialFriends; selected: string[]; onToggle: (id: string) => void; onClose: () => void; onSubmit: () => void }) {
+  const [query, setQuery] = useState('')
+  const filteredFriends = friends.filter((friend) => matchesMemberSearch(friend, query))
   return <DialogPanel overlayId="invite-group-members" title="邀请好友入群" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={onSubmit} disabled={!selected.length}>邀请（{selected.length}）</button></>}>
-    {friends.length ? <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div> : <p className="social-dialog-copy">所有好友都已在群聊中。</p>}
+    {friends.length ? <><MemberSearch value={query} onChange={setQuery} /><div className="social-select-friends">{filteredFriends.length ? filteredFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => onToggle(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><FriendPresence online={friend.online} /></span></label>) : <p className="social-dialog-copy">没有匹配的用户。</p>}</div></> : <p className="social-dialog-copy">所有好友都已在群聊中。</p>}
   </DialogPanel>
 }
 
-function GroupMemberAdminDialog({ friends, adminIds, onClose, onSubmit }: { friends: typeof socialFriends; adminIds: string[]; onClose: () => void; onSubmit: (action: Extract<GroupManagementAction, { type: 'admin-batch' }>) => void }) {
+function GroupMemberAdminDialog({ friends, adminIds, onClose, onSubmit }: { friends: SocialFriend[]; adminIds: string[]; onClose: () => void; onSubmit: (action: Extract<GroupManagementAction, { type: 'admin-batch' }>) => void }) {
   const [selected, setSelected] = useState<string[]>([])
+  const [query, setQuery] = useState('')
+  const filteredFriends = friends.filter((friend) => matchesMemberSearch(friend, query))
   const selectedMembers = friends.filter((friend) => selected.includes(friend.id))
   const regularMembers = selectedMembers.filter((friend) => !adminIds.includes(friend.id))
   const admins = selectedMembers.filter((friend) => adminIds.includes(friend.id))
-  const toActionMembers = (items: typeof friends) => items.map(({ id, name }) => ({ id, name }))
+  const toActionMembers = (items: SocialFriend[]) => items.map(({ id, name }) => ({ id, name }))
   return <DialogPanel overlayId="group-member-admin-select" title="设置群管理员" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--secondary" disabled={!admins.length} onClick={() => onSubmit({ type: 'admin-batch', members: toActionMembers(admins), makeAdmin: false })}>取消管理员（{admins.length}）</button><button type="button" className="client-button client-button--primary" disabled={!regularMembers.length} onClick={() => onSubmit({ type: 'admin-batch', members: toActionMembers(regularMembers), makeAdmin: true })}>设为管理员（{regularMembers.length}）</button></>}>
     <div className="social-dialog-section-title">群成员 <span>已选 {selected.length} 位</span></div>
-    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{adminIds.includes(friend.id) ? '管理员' : friend.status}</small></span></label>)}</div>
+    <MemberSearch value={query} onChange={setQuery} />
+    <div className="social-select-friends">{filteredFriends.length ? filteredFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><FriendPresence online={friend.online} /></span>{adminIds.includes(friend.id) && <em className="social-select-role">管理员</em>}</label>) : <p className="social-dialog-copy">没有匹配的成员。</p>}</div>
   </DialogPanel>
 }
 
-function GroupMemberRemoveDialog({ friends, onClose, onSubmit }: { friends: typeof socialFriends; onClose: () => void; onSubmit: (action: Extract<GroupManagementAction, { type: 'remove-batch' }>) => void }) {
+function GroupMemberRemoveDialog({ friends, onClose, onSubmit }: { friends: SocialFriend[]; onClose: () => void; onSubmit: (action: Extract<GroupManagementAction, { type: 'remove-batch' }>) => void }) {
   const [selected, setSelected] = useState<string[]>([])
+  const [query, setQuery] = useState('')
+  const filteredFriends = friends.filter((friend) => matchesMemberSearch(friend, query))
   const selectedMembers = friends.filter((friend) => selected.includes(friend.id))
   return <DialogPanel overlayId="group-member-remove-select" title="移除群成员" onClose={onClose} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!selectedMembers.length} onClick={() => onSubmit({ type: 'remove-batch', members: selectedMembers.map(({ id, name }) => ({ id, name })) })}>移除（{selected.length}）</button></>}>
     <div className="social-dialog-section-title">群成员 <span>已选 {selected.length} 位</span></div>
-    <div className="social-select-friends">{friends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>
+    <MemberSearch value={query} onChange={setQuery} />
+    <div className="social-select-friends">{filteredFriends.length ? filteredFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => setSelected((items) => items.includes(friend.id) ? items.filter((id) => id !== friend.id) : [...items, friend.id])} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><FriendPresence online={friend.online} /></span></label>) : <p className="social-dialog-copy">没有匹配的成员。</p>}</div>
   </DialogPanel>
 }
 

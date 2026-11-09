@@ -14,6 +14,30 @@ export type WalletTransaction = {
   relatedOrderId?: string
 }
 
+export type PendingBeanSettlementEntry = {
+  id: string
+  orderId: string
+  type: '服务订单' | '礼物赠送' | '考试订单'
+  amount: number
+  createdAt: string
+  expectedSettlementAt: string
+}
+
+export type BeanWithdrawalRecord = {
+  applicationNo: string
+  amount: number
+  time: string
+  status: '待审核' | '成功' | '驳回'
+  account: string
+  rejectionReason?: string
+}
+
+export const mockBeanWithdrawalRecords: readonly BeanWithdrawalRecord[] = [
+  { applicationNo: 'WD202610300001', amount: 1200, time: '2026-10-30 14:30', status: '待审核', account: '支付宝 · wan****' },
+  { applicationNo: 'WD202610250002', amount: 2500, time: '2026-10-25 10:20', status: '成功', account: '银行卡 · 招商银行 **** 3628' },
+  { applicationNo: 'WD202610200003', amount: 800, time: '2026-10-20 16:45', status: '驳回', account: '支付宝 · wan****', rejectionReason: '账户信息有误' },
+]
+
 export type OrderTimeSegment = {
   id: string
   startAt: string | null
@@ -92,6 +116,11 @@ export const walletEntries = {
     { id: 'bean-002', title: '礼物分账', type: '礼物分账', date: '2026-10-22 18:44', amount: -300 },
     { id: 'bean-003', title: '人工冻结', type: '人工冻结', date: '2026-10-20 14:12', amount: 500 },
   ],
+  pendingBeans: [
+    { id: 'pending-bean-001', orderId: 'GC-20261023-0031', type: '服务订单', amount: 1800, createdAt: '2026-10-23 09:10', expectedSettlementAt: '2026-11-10 09:10' },
+    { id: 'pending-bean-002', orderId: 'GF-20261022-0018', type: '礼物赠送', amount: 800, createdAt: '2026-10-22 18:44', expectedSettlementAt: '2026-11-11 18:44' },
+    { id: 'pending-bean-003', orderId: 'EX-20261020-0006', type: '考试订单', amount: 400, createdAt: '2026-10-20 14:12', expectedSettlementAt: '2026-11-12 14:12' },
+  ] satisfies PendingBeanSettlementEntry[],
 }
 
 export const initialOrders: ClientOrder[] = [

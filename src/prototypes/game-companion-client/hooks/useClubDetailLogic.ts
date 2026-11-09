@@ -11,11 +11,15 @@ export function useCompanionDirectoryLogic(clubId?: string) {
   const [gender, setGender] = useState('全部性别')
   const [region, setRegion] = useState('全部地区')
   const [age, setAge] = useState('全部年龄')
+  const [searchQuery, setSearchQuery] = useState('')
   const [sort, setSort] = useState<CompanionSort>('recommended')
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
 
   const visibleCompanions = useMemo(() => {
     const filtered = companions.filter((person) => {
       if (clubId && person.clubId !== clubId) return false
+      const companionProfileId = person.id.replace(/^companion-/i, 'P-').toLocaleLowerCase()
+      if (normalizedQuery && !person.name.toLocaleLowerCase().includes(normalizedQuery) && !person.id.toLocaleLowerCase().includes(normalizedQuery) && !companionProfileId.includes(normalizedQuery)) return false
       if (gameId !== 'all' && !person.gameIds.includes(gameId)) return false
       if (onlineStatus !== '全部在线状态' && person.onlineStatus !== onlineStatus) return false
       if (status !== '全部接单状态' && person.status !== status) return false
@@ -35,7 +39,7 @@ export function useCompanionDirectoryLogic(clubId?: string) {
       if (sort === 'orders-desc') return b.orderCount - a.orderCount
       return b.rating - a.rating
     })
-  }, [clubId, gameId, onlineStatus, status, gender, region, age, sort])
+  }, [clubId, gameId, onlineStatus, status, gender, region, age, sort, normalizedQuery])
 
   const resetFilters = () => {
     setGameId('all')
@@ -44,10 +48,11 @@ export function useCompanionDirectoryLogic(clubId?: string) {
     setGender('全部性别')
     setRegion('全部地区')
     setAge('全部年龄')
+    setSearchQuery('')
     setSort('recommended')
   }
 
-  return { gameId, setGameId, onlineStatus, setOnlineStatus, status, setStatus, gender, setGender, region, setRegion, age, setAge, sort, setSort, visibleCompanions, resetFilters }
+  return { gameId, setGameId, onlineStatus, setOnlineStatus, status, setStatus, gender, setGender, region, setRegion, age, setAge, searchQuery, setSearchQuery, sort, setSort, visibleCompanions, resetFilters }
 }
 
 export const useClubDetailLogic = useCompanionDirectoryLogic

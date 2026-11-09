@@ -12,6 +12,8 @@ export type GlobalSearchUser = {
   initials: string
   profileId: string
   kind: '玩家' | '陪玩'
+  gender: '女' | '男'
+  age: number
   companionId?: string
   friendId?: string
 }
@@ -143,7 +145,7 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
             <RecommendedClubs clubs={recommendedClubs} onSelect={(clubId) => openResult(() => onOpenClub(clubId))} />
           </> : activeTab === 'rooms' ? counts.rooms ? results.rooms.map((room) => <button type="button" className="global-search-result" key={room.id} onClick={() => openResult(() => onOpenRoom(room.targetRoomId))}><span className="global-search-result__icon"><UsersRound size={17} /></span><span className="global-search-result__text"><strong>{room.name}</strong><small>{room.description}</small></span><span className="global-search-result__kind">语音房</span></button>) : <CategoryEmpty label="语音房" />
             : activeTab === 'clubs' ? counts.clubs ? results.clubs.map((club) => <button type="button" className="global-search-result" key={club.id} onClick={() => openResult(() => onOpenClub(club.id))}><AvatarMark initials={club.initials} size="md" /><span className="global-search-result__text"><strong>{club.name}</strong><span className="global-search-result__meta"><small>ID：{clubPublicId(club.id)}</small><span className="global-search-result__count" aria-label={`${club.companionCount} 位陪玩`}><UsersRound size={12} aria-hidden="true" />{club.companionCount}</span></span></span><span className="global-search-result__kind">俱乐部</span></button>) : <CategoryEmpty label="俱乐部" />
-              : counts.users ? results.users.map((user) => <button type="button" className="global-search-result" key={user.id} onClick={() => openResult(() => onOpenUser(user))}><AvatarMark initials={user.initials} size="md" /><span className="global-search-result__text"><strong><UserNameWithLevel name={user.name} identityId={user.profileId} /></strong><small>ID：{user.profileId}</small></span><span className="global-search-result__kind">{user.kind}</span></button>) : <CategoryEmpty label="用户" />}
+              : counts.users ? results.users.map((user) => <button type="button" className="global-search-result" key={user.id} onClick={() => openResult(() => onOpenUser(user))}><AvatarMark initials={user.initials} size="md" /><span className="global-search-result__text"><strong><UserNameWithLevel name={user.name} identityId={user.profileId} /><span className={`global-search-result__demographic is-${user.gender === '女' ? 'female' : 'male'}`} aria-label={`${user.gender}，${user.age}岁`}><span aria-hidden="true">{user.gender === '女' ? '♀' : '♂'}</span>{user.age}</span></strong><small>ID：{user.profileId}</small></span><span className="global-search-result__kind">{user.kind}</span></button>) : <CategoryEmpty label="用户" />}
         </div>
       </>}
     </section>

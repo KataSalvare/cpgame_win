@@ -99,7 +99,7 @@ export function useSocialLogic(initialConversationId?: string) {
   }, [chatSearch, conversations])
   const visibleFriends = useMemo(() => {
     const query = chatSearch.trim().toLocaleLowerCase()
-    return socialFriends.filter((friend) => !query || friend.name.toLocaleLowerCase().includes(query))
+    return socialFriends.filter((friend) => !query || [friend.name, friend.id, friend.profileId].some((value) => value.toLocaleLowerCase().includes(query)))
   }, [chatSearch])
   const activeVoiceRoom = voiceRooms.find((room) => room.id === activeVoiceRoomId) ?? voiceRooms[0]
   const activeSubchannel = activeVoiceRoom?.channels.find((channel) => channel.id === activeSubchannelId) ?? activeVoiceRoom?.channels[0]

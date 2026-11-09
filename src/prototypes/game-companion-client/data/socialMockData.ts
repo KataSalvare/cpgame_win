@@ -1,4 +1,5 @@
 import { initialOrders, type ClientOrder } from './accountMockData'
+import { groupMemberExtraIds } from './groupMembersMockData'
 
 export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review' | 'companion-share' | 'room-share'
 
@@ -182,7 +183,7 @@ export const initialConversations: SocialConversation[] = [
   },
   { id: 'direct-friend-1', kind: 'direct', title: '聊天枚举', initials: '风', members: ['friend-1'], unread: 2, messages: seedMessages },
   {
-    id: 'group-squad', kind: 'group', title: '周末五排小队', initials: '五', members: ['friend-1', 'friend-2', 'friend-3', 'friend-5'], unread: 1, ownerId: 'player', adminIds: ['friend-1'], joinApprovalRequired: true,
+    id: 'group-squad', kind: 'group', title: '周末五排小队', initials: '五', members: ['friend-1', 'friend-2', 'friend-3', 'friend-5', ...groupMemberExtraIds['group-squad']], unread: 1, ownerId: 'player', adminIds: ['friend-1'], joinApprovalRequired: true,
     messages: [
       { id: 'gmsg-1', senderId: 'friend-2', senderName: '青柠汽水', initials: '柠', time: '18:26', kind: 'text', content: '我拉了一个新房间，大家到了说一声。' },
       { id: 'gmsg-2', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '18:31', kind: 'image', content: '战绩截图' },
@@ -190,7 +191,7 @@ export const initialConversations: SocialConversation[] = [
     ],
   },
   {
-    id: 'group-ordinary', kind: 'group', title: '普通用户群', initials: '普', members: ['friend-1', 'friend-2', 'friend-3'], unread: 0, ownerId: 'friend-3', adminIds: ['friend-1'], joinApprovalRequired: false,
+    id: 'group-ordinary', kind: 'group', title: '普通用户群', initials: '普', members: ['friend-1', 'friend-2', 'friend-3', ...groupMemberExtraIds['group-ordinary']], unread: 0, ownerId: 'friend-3', adminIds: ['friend-1'], joinApprovalRequired: false,
     messages: [
       { id: 'ordinary-1', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '昨天', kind: 'text', content: '晚上还有人一起玩吗？' },
       { id: 'ordinary-2', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '昨天', kind: 'text', content: '我可以，晚点进房间。' },

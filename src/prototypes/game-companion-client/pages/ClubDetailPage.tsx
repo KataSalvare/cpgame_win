@@ -72,7 +72,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
       </div>
     </section>
 
-    <CompanionDirectory clubId={club.id} pageState="normal" onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
+    <CompanionDirectory clubId={club.id} pageState="normal" searchable onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
     {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
   </div>
 }

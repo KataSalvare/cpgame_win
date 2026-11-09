@@ -8,7 +8,7 @@ import { PageStatePanel } from '../components/PageStatePanel'
 import { DialogPanel } from '@/components/WindowsClient'
 import { WorkbenchOrdersPanel } from '../components/WorkbenchOrdersPanel'
 import { ExamOrderPayButton, ExamSubmissionDialog } from '../components/ExamOrderDetailPanel'
-import { type ClientOrder, type OrderStatus, type WalletTransaction } from '../data/accountMockData'
+import { mockBeanWithdrawalRecords, type ClientOrder, type OrderStatus, type PendingBeanSettlementEntry, type WalletTransaction } from '../data/accountMockData'
 import type { ExamOrder, ExamOrderStatus, ExamSubmission } from '../data/examOrderMockData'
 import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
 import { clubs, companions, games, type Companion, type Service } from '../data/mockData'
@@ -99,6 +99,7 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   const [accounts, setAccounts] = useState(initialPayoutAccounts)
   const [selectedId, setSelectedId] = useState(initialPayoutAccounts[0].id)
   const [amount, setAmount] = useState('')
+  const [amountMode, setAmountMode] = useState<'beans' | 'rmb'>('beans')
   const [manageAccounts, setManageAccounts] = useState(false)
   const [view, setView] = useState<'withdraw' | 'accounts' | 'account-form' | 'result'>('withdraw')
   const [editingAccount, setEditingAccount] = useState<PayoutAccount | null>(null)
@@ -110,6 +111,9 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   const [agreementAccepted, setAgreementAccepted] = useState(false)
   const [result, setResult] = useState<{ amount: number; account: PayoutAccount; applicationNo: string } | null>(null)
   const parsedAmount = Number(amount)
+  const withdrawBeans = amountMode === 'beans' ? parsedAmount : Math.round(parsedAmount * 10)
+  const convertedRmb = amountMode === 'beans' ? parsedAmount / 10 : parsedAmount
+  const maskedAccount = (account: PayoutAccount) => account.type === '支付宝' ? `${account.account.slice(0, 3)}****` : account.account
   const selectedAccount = accounts.find((account) => account.id === selectedId)
 
   const openAccountForm = (account?: PayoutAccount) => {
@@ -152,20 +156,21 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
     <header><div><span className="client-eyebrow">糖豆钱包</span><h2 id="bean-withdraw-title">{activeView === 'withdraw' ? '提现糖豆' : activeView === 'accounts' ? '提现账户管理' : activeView === 'account-form' ? (editingAccount ? '换绑提现账户' : '绑定提现账户') : '提现结果'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭提现弹窗" onClick={onClose}><X size={17} /></button></header>
     {activeView === 'accounts' ? <>
       <div className="client-section-heading bean-withdraw-panel__subheading"><div><span className="client-eyebrow">收款方式</span><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" disabled={accounts.length >= 5} title={accounts.length >= 5 ? '最多只能绑定 5 个账户' : undefined} onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
-      <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><div className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{account.holder} · {account.account}</span></div><button type="button" className="client-button client-button--secondary" onClick={() => deleteAccount(account)}><Trash2 size={14} />删除</button></article>)}</div>
+      <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><button type="button" className="bean-payout-card__select" aria-label={`选择${account.type} ${maskedAccount(account)}`} onClick={() => { setSelectedId(account.id); setManageAccounts(false); setView('withdraw'); setFeedback('') }}><span className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{maskedAccount(account)}</span></span>{selectedId === account.id && <span className="bean-payout-card__selected">已选</span>}</button><button type="button" className="client-button client-button--secondary" onClick={() => deleteAccount(account)}><Trash2 size={14} />删除</button></article>)}</div>
       <footer><button type="button" className="client-button client-button--secondary" onClick={() => { setManageAccounts(false); setView('withdraw') }}>返回提现</button></footer>
     </> : activeView === 'account-form' ? <>
-      <div className="bean-account-type" role="group" aria-label="提现账户类型">{(['支付宝', '银行卡'] as const).map((type) => <button type="button" className={`orders-filter-chip${formType === type ? ' is-active' : ''}`} aria-pressed={formType === type} key={type} onClick={() => setFormType(type)}>{type}</button>)}</div><label className="bean-account-field"><span>账户姓名</span><input value={holder} disabled aria-label={`账户姓名，实名：${mockVerifiedName}`} /></label>{formType === '银行卡' && <label className="bean-account-field"><span>开户银行</span><input value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="请输入银行名称" /></label>}<label className="bean-account-field"><span>{formType === '支付宝' ? '支付宝账号' : '银行卡号'}</span><input value={accountValue} onChange={(event) => setAccountValue(event.target.value)} placeholder={formType === '支付宝' ? `请输入${editingAccount ? '新的' : ''}手机号或支付宝账号` : `请输入${editingAccount ? '新的' : ''}银行卡号`} /></label><footer><button type="button" className="client-button client-button--secondary" onClick={closeForm}>取消</button><button type="button" className="client-button client-button--primary" disabled={!accountValue.trim() || (formType === '银行卡' && !bankName.trim())} onClick={saveAccount}>保存账户</button></footer>
+      <div className="bean-account-type" role="group" aria-label="提现账户类型">{(['支付宝', '银行卡'] as const).map((type) => <button type="button" className={`orders-filter-chip${formType === type ? ' is-active' : ''}`} aria-pressed={formType === type} key={type} onClick={() => setFormType(type)}>{type}</button>)}</div><div className="bean-account-name-row"><label className="bean-account-field"><span>账户姓名</span><input value={holder} disabled aria-label={`账户姓名，实名：${mockVerifiedName}`} /></label><span className="bean-realname-status"><BadgeCheck size={14} />已实名</span></div>{formType === '银行卡' && <label className="bean-account-field"><span>开户银行</span><input value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="请输入银行名称" /></label>}<label className="bean-account-field"><span>{formType === '支付宝' ? '支付宝账号' : '银行卡号'}</span><input value={accountValue} onChange={(event) => setAccountValue(event.target.value)} placeholder={formType === '支付宝' ? `请输入${editingAccount ? '新的' : ''}手机号或支付宝账号` : `请输入${editingAccount ? '新的' : ''}银行卡号`} /></label><footer><button type="button" className="client-button client-button--secondary" onClick={closeForm}>取消</button><button type="button" className="client-button client-button--primary" disabled={!accountValue.trim() || (formType === '银行卡' && !bankName.trim())} onClick={saveAccount}>保存账户</button></footer>
     </> : activeView === 'result' && result ? <>
-      <div className="bean-withdraw-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><span className="client-eyebrow">本地演示结果</span><h3>提现申请已提交</h3><strong className="bean-withdraw-result__amount">{result.amount.toLocaleString()} <small>糖豆</small></strong><dl><div><dt>收款方式</dt><dd>{result.account.type}{result.account.bankName ? ` · ${result.account.bankName}` : ''}</dd></div><div><dt>收款账户</dt><dd>{result.account.account}</dd></div><div><dt>申请编号</dt><dd>{result.applicationNo}</dd></div></dl><p>申请结果仅用于原型演示，不代表真实提现状态。</p></div><footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
+      <div className="bean-withdraw-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><span className="client-eyebrow">本地演示结果</span><h3>提现申请已提交</h3><strong className="bean-withdraw-result__amount">{result.amount.toLocaleString()} <small>糖豆</small></strong><dl><div><dt>收款方式</dt><dd>{result.account.type}{result.account.bankName ? ` · ${result.account.bankName}` : ''}</dd></div><div><dt>收款账户</dt><dd>{maskedAccount(result.account)}</dd></div><div><dt>申请编号</dt><dd>{result.applicationNo}</dd></div></dl><p>申请结果仅用于原型演示，不代表真实提现状态。</p></div><footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
     </> : <>
-      <section className="client-card bean-withdraw-balance"><span className="client-eyebrow">可用糖豆</span><strong>{balance.toLocaleString()} <small>糖豆</small></strong></section>
+      <section className="client-card bean-withdraw-balance"><span className="client-eyebrow">可提现糖豆</span><strong>{balance.toLocaleString()} <small>糖豆</small><em>= ¥ {(balance / 10).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</em></strong></section>
       <section className="client-card bean-withdraw-form">
-        <div className="client-section-heading"><div><span className="client-eyebrow">提现信息</span><h2>收款账户</h2></div><button type="button" className="client-text-button" onClick={() => { setManageAccounts(true); setView('accounts'); setFeedback('') }}>管理账户 <ChevronRight size={15} /></button></div>
-        {accounts.length ? <div className="bean-payout-choices" role="group" aria-label="选择收款账户">{accounts.map((account) => <button type="button" key={account.id} className={`bean-payout-choice${selectedId === account.id ? ' is-active' : ''}`} aria-pressed={selectedId === account.id} onClick={() => setSelectedId(account.id)}><span className="bean-payout-choice__radio" /><span><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><small>{account.account}</small></span></button>)}</div> : <div className="account-empty-inline"><strong>还没有提现账户</strong><span>请先绑定支付宝或银行卡。</span></div>}
-        <div className="bean-withdraw-amount"><label htmlFor="bean-withdraw-amount">提现糖豆数</label><div><input id="bean-withdraw-amount" inputMode="numeric" type="number" min="1" max={balance} step="1" value={amount} onChange={(event) => { setAmount(event.target.value); setFeedback('') }} placeholder="请输入糖豆数" /><button type="button" className="client-text-button" onClick={() => setAmount(String(balance))}>全部提现</button></div></div>
+        <div className="client-section-heading"><h2>收款账户</h2></div>
+        <div className="bean-payout-choice is-active"><span className="bean-payout-card__icon">{selectedAccount?.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><span className="bean-payout-choice__details">{selectedAccount ? <><strong>{selectedAccount.type}{selectedAccount.bankName ? ` · ${selectedAccount.bankName}` : ''}</strong><small>{maskedAccount(selectedAccount)}</small></> : <><strong>还没有提现账户</strong><small>请先绑定支付宝或银行卡。</small></>}</span><button type="button" className="client-text-button" onClick={() => { setManageAccounts(true); setView('accounts'); setFeedback('') }}>{selectedAccount ? '更换' : '绑定'} <ChevronRight size={15} /></button></div>
+        <div className="bean-withdraw-amount"><div className="bean-withdraw-amount__heading"><label htmlFor="bean-withdraw-amount">提现{amountMode === 'beans' ? '糖豆数' : '金额（元）'}</label><div role="group" aria-label="提现金额单位"><button type="button" className={amountMode === 'beans' ? 'is-active' : ''} onClick={() => { setAmount(amount ? String(Math.round(Number(amountMode === 'rmb' ? Number(amount) * 10 : Number(amount)))) : ''); setAmountMode('beans') }}>糖豆</button><button type="button" className={amountMode === 'rmb' ? 'is-active' : ''} onClick={() => { setAmount(amount ? (amountMode === 'beans' ? (Number(amount) / 10).toFixed(1) : amount) : ''); setAmountMode('rmb') }}>人民币</button></div></div><div><input id="bean-withdraw-amount" inputMode="decimal" type="number" min="0.1" step={amountMode === 'beans' ? '1' : '0.1'} value={amount} onChange={(event) => { setAmount(event.target.value); setFeedback('') }} placeholder={amountMode === 'beans' ? '请输入糖豆数' : '请输入人民币金额'} /><button type="button" className="client-text-button" onClick={() => setAmount(amountMode === 'beans' ? String(balance) : (balance / 10).toFixed(1))}>全部提现</button></div><p>换算金额：{amount ? `¥ ${convertedRmb.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} = ${withdrawBeans.toLocaleString()} 糖豆` : '1 元 = 10 糖豆'}</p></div>
+        <div className="bean-withdraw-notes" aria-label="提现说明">{['提现说明：', 'xxxx', 'xxxx', 'xxxx'].map((line, index) => <p key={index}>{line}</p>)}</div>
         <label className="transaction-agreement"><input type="checkbox" checked={agreementAccepted} onChange={(event) => setAgreementAccepted(event.target.checked)} /><span>我已阅读并同意《提现协议》</span></label>
-        <button type="button" className="client-button client-button--primary bean-withdraw-submit" disabled={!agreementAccepted || !selectedAccount || !Number.isInteger(parsedAmount) || parsedAmount <= 0 || parsedAmount > balance} onClick={() => { if (agreementAccepted && selectedAccount && onWithdraw(parsedAmount)) { setResult({ amount: parsedAmount, account: selectedAccount, applicationNo: `WD${Date.now().toString().slice(-10)}` }); setAmount(''); setView('result') } else setFeedback('请检查提现糖豆数后重试。') }}>提交提现申请</button>
+        <button type="button" className="client-button client-button--primary bean-withdraw-submit" disabled={!agreementAccepted || !selectedAccount || !Number.isInteger(withdrawBeans) || withdrawBeans <= 0 || withdrawBeans > balance} onClick={() => { if (agreementAccepted && selectedAccount && onWithdraw(withdrawBeans)) { setResult({ amount: withdrawBeans, account: selectedAccount, applicationNo: `WD${Date.now().toString().slice(-10)}` }); setAmount(''); setView('result') } else setFeedback('请检查提现金额后重试。') }}>提交提现申请</button>
       </section>
     </>}
     {feedback && <p className="account-inline-feedback" role="status">{feedback}</p>}
@@ -192,15 +197,29 @@ export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBa
   </section></div>
 }
 
-export function WalletLedgerPanel({ entries }: { entries: readonly WalletTransaction[] }) {
+export function WalletLedgerPanel({ entries, pendingEntries }: { entries: readonly WalletTransaction[]; pendingEntries?: readonly PendingBeanSettlementEntry[] }) {
   const [filter, setFilter] = useState<'全部' | '收入' | '支出'>('全部')
+  const [activeTab, setActiveTab] = useState<'available' | 'pending' | 'withdrawals'>('available')
   const filteredEntries = entries.filter((entry) => filter === '全部' || (filter === '收入' ? entry.amount > 0 : entry.amount < 0))
+  const hasPendingTab = pendingEntries !== undefined
   return <div className="client-content account-page wallet-ledger-panel">
-    <div className="transaction-filter-heading">
-    <div className="transaction-filter-tabs" role="group" aria-label="收支类型筛选">{(['全部', '收入', '支出'] as const).map((item) => <button type="button" key={item} className={filter === item ? 'is-active' : ''} aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</button>)}</div>
-    </div>
-    {filteredEntries.length ? <TransactionList entries={filteredEntries} /> : <div className="account-empty-inline"><History size={22} /><strong>{entries.length ? `暂无${filter}记录` : '暂无收支记录'}</strong></div>}
+    {hasPendingTab && <div className="wallet-ledger-type-tabs" role="tablist" aria-label="糖豆明细类型"><button type="button" role="tab" aria-selected={activeTab === 'available'} className={activeTab === 'available' ? 'is-active' : ''} onClick={() => setActiveTab('available')}>可提现糖豆</button><button type="button" role="tab" aria-selected={activeTab === 'pending'} className={activeTab === 'pending' ? 'is-active' : ''} onClick={() => setActiveTab('pending')}>待结算糖豆</button><button type="button" role="tab" aria-selected={activeTab === 'withdrawals'} className={activeTab === 'withdrawals' ? 'is-active' : ''} onClick={() => setActiveTab('withdrawals')}>提现记录</button></div>}
+    {activeTab === 'available' ? <><div className="transaction-filter-heading"><div className="transaction-filter-tabs" role="group" aria-label="收支类型筛选">{(['全部', '收入', '支出'] as const).map((item) => <button type="button" key={item} className={filter === item ? 'is-active' : ''} aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</button>)}</div></div>{filteredEntries.length ? <TransactionList entries={filteredEntries} /> : <div className="account-empty-inline"><History size={22} /><strong>{entries.length ? `暂无${filter}记录` : '暂无收支记录'}</strong></div>}</> : activeTab === 'pending' ? <PendingBeanSettlementList entries={pendingEntries ?? []} /> : <BeanWithdrawalList />}
   </div>
+}
+
+function BeanWithdrawalList() {
+  return mockBeanWithdrawalRecords.length ? <div className="wallet-transaction-list">{mockBeanWithdrawalRecords.map((record) => <article className="wallet-transaction" key={record.applicationNo}>
+    <header><span>{record.status}</span><strong>¥ {(record.amount / 10).toFixed(2)}</strong></header>
+    <dl><div><dt>提现金额</dt><dd>{record.amount.toLocaleString()} 糖豆（¥ {(record.amount / 10).toFixed(2)}）</dd></div><div><dt>申请编号</dt><dd>{record.applicationNo}</dd></div><div><dt>提现时间</dt><dd>{record.time}</dd></div><div><dt>状态</dt><dd>{record.status}</dd></div><div><dt>提现账户</dt><dd>{record.account}</dd></div>{record.status === '驳回' && <div><dt>驳回原因</dt><dd>{record.rejectionReason ?? '—'}</dd></div>}</dl>
+  </article>)}</div> : <div className="account-empty-inline"><History size={22} /><strong>暂无提现记录</strong></div>
+}
+
+function PendingBeanSettlementList({ entries }: { entries: readonly PendingBeanSettlementEntry[] }) {
+  return entries.length ? <div className="wallet-transaction-list pending-bean-settlement-list">{entries.map((entry) => <article className="wallet-transaction" key={entry.id}>
+    <header><span>{entry.type}</span></header>
+    <dl><div><dt>订单号</dt><dd>{entry.orderId}</dd></div><div><dt>待结算金额</dt><dd>{entry.amount.toLocaleString()} 糖豆</dd></div><div><dt>创建时间</dt><dd>{entry.createdAt}</dd></div><div><dt>预期分账时间</dt><dd>{entry.expectedSettlementAt}</dd></div></dl>
+  </article>)}</div> : <div className="account-empty-inline"><History size={22} /><strong>暂无待结算记录</strong></div>
 }
 
 type OrdersPageProps = StateProps & {
@@ -317,7 +336,7 @@ type CheckoutPageProps = StateProps & {
 export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionMode, selectedCompanions, availableServices, diamondBalance, paymentCards, onBack, onOpenWallet, hideRechargePrompt, onResetRechargePrompt, onSelectService, onCommunicate, onComplete, onOpenOrders }: CheckoutPageProps) {
   const [quantity, setQuantity] = useState(1)
   const [remark, setRemark] = useState('')
-  const [tipInput, setTipInput] = useState('0')
+  const [tipInput, setTipInput] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('wallet')
   const [servicePickerOpen, setServicePickerOpen] = useState(false)
   const [serviceSearchQuery, setServiceSearchQuery] = useState('')
@@ -343,7 +362,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
   const discountedServiceAmount = Math.round(serviceAmount * discountRate)
   const amount = discountedServiceAmount + tipAmount
   const selectedPaymentBalance = selectedPaymentCard?.balance ?? diamondBalance
-  const validTip = Number.isInteger(parsedTipAmount) && parsedTipAmount >= 0
+  const validTip = tipInput === '' || (Number.isInteger(parsedTipAmount) && parsedTipAmount >= 10 && parsedTipAmount <= 1_000_000)
   const beginPayment = () => {
     onResetRechargePrompt()
     if (selectedPaymentBalance < amount) {
@@ -352,8 +371,9 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
     }
     setCheckoutDialog(noticeSkipped ? 'payment' : 'notice')
   }
-  const serviceTree = [...new Set(availableServices.map((item) => item.gameId))].map((gameId) => {
-    const gameServices = availableServices.filter((item) => item.gameId === gameId)
+  const orderableServices = availableServices.filter((item) => item.canAcceptOrders)
+  const serviceTree = [...new Set(orderableServices.map((item) => item.gameId))].map((gameId) => {
+    const gameServices = orderableServices.filter((item) => item.gameId === gameId)
     return {
       gameId,
       gameName: games.find((game) => game.id === gameId)?.name ?? gameId,
@@ -378,7 +398,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
   })))))
   const normalizedServiceQuery = serviceSearchQuery.trim().toLocaleLowerCase()
   const filteredServicePaths = normalizedServiceQuery ? servicePaths.filter((path) => path.label.toLocaleLowerCase().includes(normalizedServiceQuery)) : []
-  const serviceOnlyOptions = availableServices.filter((item) => item.gameId === service.gameId && item.playName === service.playName && item.levelName === service.levelName)
+  const serviceOnlyOptions = orderableServices.filter((item) => item.gameId === service.gameId && item.playName === service.playName && item.levelName === service.levelName)
   const filteredServiceOptions = serviceOnlyOptions.filter((item) => `${item.unit}服务 ${item.price} 金豆 / ${item.unit}`.toLocaleLowerCase().includes(normalizedServiceQuery))
   const openServicePicker = () => {
     if (orderSelectionMode === 'locked') return
@@ -413,29 +433,29 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
             {orderSelectionMode === 'service' ? <>
               <label className="checkout-cascader-search"><Search size={14} /><input type="search" value={serviceSearchQuery} onChange={(event) => setServiceSearchQuery(event.target.value)} placeholder="搜索服务" aria-label="搜索具体服务" />{serviceSearchQuery && <button type="button" aria-label="清除搜索" onClick={() => setServiceSearchQuery('')}><X size={14} /></button>}</label>
               <div className="checkout-cascader-results" role="listbox" aria-label="可选的具体服务">
-                {(normalizedServiceQuery ? filteredServiceOptions : serviceOnlyOptions).map((item) => <button type="button" role="option" aria-selected={item.id === service.id} disabled={!item.canAcceptOrders} key={item.id} className="checkout-cascader-result" onClick={() => selectService(item.id)}><span>{item.unit}服务 · {item.price.toLocaleString()} 金豆 / {item.unit}</span>{!item.canAcceptOrders && <small>暂不可接单</small>}</button>)}
+                {(normalizedServiceQuery ? filteredServiceOptions : serviceOnlyOptions).map((item) => <button type="button" role="option" aria-selected={item.id === service.id} key={item.id} className="checkout-cascader-result" onClick={() => selectService(item.id)}><span>{item.unit}服务 · {item.price.toLocaleString()} 金豆 / {item.unit}</span></button>)}
                 {serviceOnlyOptions.length === 0 && <p className="checkout-cascader-empty">没有其他可选服务</p>}
                 {normalizedServiceQuery && filteredServiceOptions.length === 0 && serviceOnlyOptions.length > 0 && <p className="checkout-cascader-empty">没有匹配的服务</p>}
               </div>
             </> : <>
             <label className="checkout-cascader-search"><Search size={14} /><input type="search" value={serviceSearchQuery} onChange={(event) => setServiceSearchQuery(event.target.value)} placeholder="搜索游戏、玩法、等级或服务" aria-label="搜索游戏、玩法、等级或服务" />{serviceSearchQuery && <button type="button" aria-label="清除搜索" onClick={() => setServiceSearchQuery('')}><X size={14} /></button>}</label>
             {normalizedServiceQuery ? <div className="checkout-cascader-results" role="listbox" aria-label="匹配的服务路径">
-              {filteredServicePaths.map((path) => <button type="button" role="option" disabled={!path.serviceItem.canAcceptOrders} key={path.serviceItem.id} className="checkout-cascader-result" onClick={() => selectService(path.serviceItem.id)}><span>{path.label}</span>{!path.serviceItem.canAcceptOrders && <small>暂不可接单</small>}</button>)}
+              {filteredServicePaths.map((path) => <button type="button" role="option" key={path.serviceItem.id} className="checkout-cascader-result" onClick={() => selectService(path.serviceItem.id)}><span>{path.label}</span></button>)}
               {!filteredServicePaths.length && <p className="checkout-cascader-empty">没有匹配的服务</p>}
             </div> : <div className="checkout-cascader" aria-label="按游戏、玩法、等级和服务选择">
               <div className="checkout-cascader__column" role="listbox" aria-label="游戏">{serviceTree.map((gameNode) => <button type="button" role="option" aria-selected={selectedGameId === gameNode.gameId} key={gameNode.gameId} className={`checkout-cascader__option${selectedGameId === gameNode.gameId ? ' is-selected' : ''}`} onClick={() => { setSelectedGameId(gameNode.gameId); setSelectedPlayName(''); setSelectedLevelName('') }}><span>{gameNode.gameName}</span><ChevronRight size={14} /></button>)}</div>
               <div className="checkout-cascader__column" role="listbox" aria-label="玩法">{selectedGame?.plays.map((playNode) => <button type="button" role="option" aria-selected={selectedPlayName === playNode.playName} key={playNode.playName} className={`checkout-cascader__option${selectedPlayName === playNode.playName ? ' is-selected' : ''}`} onClick={() => { setSelectedPlayName(playNode.playName); setSelectedLevelName('') }}><span>{playNode.playName}</span><ChevronRight size={14} /></button>)}</div>
               <div className="checkout-cascader__column" role="listbox" aria-label="等级">{selectedPlay?.levels.map((levelNode) => <button type="button" role="option" aria-selected={selectedLevelName === levelNode.levelName} key={levelNode.levelName} className={`checkout-cascader__option${selectedLevelName === levelNode.levelName ? ' is-selected' : ''}`} onClick={() => setSelectedLevelName(levelNode.levelName)}><span>{levelNode.levelName}</span><ChevronRight size={14} /></button>)}</div>
-              <div className="checkout-cascader__column" role="listbox" aria-label="服务">{selectedLevel?.services.map((item) => <button type="button" role="option" disabled={!item.canAcceptOrders} key={item.id} className="checkout-cascader__option checkout-cascader__option--service" onClick={() => selectService(item.id)}><span>服务 · {item.price} 金豆 / {item.unit}</span>{!item.canAcceptOrders && <small>暂不可接单</small>}</button>)}</div>
+              <div className="checkout-cascader__column" role="listbox" aria-label="服务">{selectedLevel?.services.map((item) => <button type="button" role="option" key={item.id} className="checkout-cascader__option checkout-cascader__option--service" onClick={() => selectService(item.id)}><span>服务 · {item.price} 金豆 / {item.unit}</span></button>)}</div>
             </div>}
             </>}
           </div>}
         </div></div>
         <div className="checkout-service-unit-price"><span>服务单价</span><strong>{service.price} 金豆 / {service.unit}</strong></div>
         <div className="checkout-order-parameters"><fieldset className="checkout-duration"><legend>服务时长</legend><div className="checkout-duration__controls"><button type="button" className="checkout-duration__stepper" aria-label="减少服务时长" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}><span aria-hidden="true">−</span></button><label><input type="number" min="1" step="1" value={quantity} aria-label={`服务时长，${service.unit}`} onChange={(event) => { const value = Number(event.target.value); if (Number.isInteger(value) && value >= 1) setQuantity(value) }} /><span>{service.unit}</span></label><button type="button" className="checkout-duration__stepper" aria-label="增加服务时长" onClick={() => setQuantity((value) => value + 1)}><span aria-hidden="true">+</span></button></div>{service.unit === '小时' && <div className="checkout-duration__shortcuts">{[3, 6, 12].map((value) => <button type="button" key={value} className={`client-choice-button${quantity === value ? ' is-active' : ''}`} aria-pressed={quantity === value} onClick={() => setQuantity(value)}>{value} 小时</button>)}</div>}</fieldset>
-          <label className="checkout-tip"><span>每位陪玩加价 <small>选填</small></span><div><input aria-label="每位陪玩加价金额，金豆" type="number" min="0" step="1" inputMode="numeric" value={tipInput} onChange={(event) => setTipInput(event.target.value)} /><span>金豆 / 人</span></div></label>
+          <label className="checkout-tip"><span>加价 <small>选填</small></span><div><input aria-label="加价金额，金豆" type="number" min="10" max="1000000" step="1" inputMode="numeric" value={tipInput} onChange={(event) => setTipInput(event.target.value)} placeholder="加价范围10～100万" /><span>金豆 / 人</span></div></label>
         </div>
-        {!validTip && <p className="checkout-tip-error" role="alert">请输入不小于 0 的整数金豆。</p>}
+        {!validTip && <p className="checkout-tip-error" role="alert">加价需为 10～1,000,000 的整数金豆。</p>}
         <label className="checkout-remark"><span>订单备注 <small>选填</small></span><textarea value={remark} maxLength={100} onChange={(event) => setRemark(event.target.value)} placeholder="告诉陪玩你的需求，最多100字" rows={3} /><small className="checkout-remark__count">{remark.length}/100</small></label>
       </section>
       <aside className="client-card checkout-summary-card">
