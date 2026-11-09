@@ -19,7 +19,7 @@ export const personalFans = [
 ]
 
 export const favoriteVoiceRooms = [
-  { id: 'favorite-room-001', name: '深夜上分车队', owner: '晚风玩家', category: '排位组队', occupants: '5 / 8 人' },
-  { id: 'favorite-room-002', name: '周末轻松开黑', owner: '月光小队', category: '休闲娱乐', occupants: '3 / 8 人' },
-  { id: 'favorite-room-003', name: '新手友好练习房', owner: '北境教练组', category: '战术交流', occupants: '6 / 8 人' },
+  { id: 'favorite-room-001', name: '深夜上分车队', owner: '晚风玩家', occupants: '5 / 8 人' },
+  { id: 'favorite-room-002', name: '周末轻松开黑', owner: '月光小队', occupants: '3 / 8 人' },
+  { id: 'favorite-room-003', name: '新手友好练习房', owner: '北境教练组', occupants: '6 / 8 人' },
 ]

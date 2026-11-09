@@ -33,11 +33,11 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
 
   return <div className={`client-content announcement-page${presentation === 'panel' ? ' announcement-page--panel' : ''}`}>
     {presentation === 'page' && onBack && <button type="button" className="client-back-link" onClick={onBack}>返回俱乐部</button>}
-    {presentation === 'page' && <header className="client-page-heading"><div><span className="client-eyebrow">{kind === 'platform' ? '平台消息' : clubName}</span><h1>{title}</h1></div><button type="button" className="client-button client-button--secondary client-button--small" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button></header>}
+    {presentation === 'page' && kind === 'club' && <header className="client-page-heading"><div><span className="client-eyebrow">{clubName}</span><h1>{title}</h1></div></header>}
     <section className="announcement-card client-card" aria-label={`${title}列表`}>
-      <div className="announcement-filters" role="tablist" aria-label="公告分类">
+      <div className="announcement-tabs-row"><div className="announcement-filters" role="tablist" aria-label="公告分类">
         {(['全部', ...categories] as const).map((category) => <button key={category} type="button" role="tab" aria-selected={activeCategory === category} className={`announcement-filter${activeCategory === category ? ' is-active' : ''}`} onClick={() => setActiveCategory(category)}>{category}</button>)}
-      </div>
+      </div>{presentation === 'page' && kind === 'platform' && <button type="button" className="client-button client-button--secondary client-button--small announcement-read-all" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button>}</div>
       {visibleAnnouncements.length ? <ul className="announcement-list">
         {visibleAnnouncements.map((announcement) => {
           const isRead = readIds.includes(announcement.id)

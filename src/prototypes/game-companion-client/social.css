@@ -545,6 +545,10 @@
 .social-select-friend small{color:var(--client-muted);font-size:10px}
 .social-member-search{margin:0 0 8px}
 .social-select-role{margin-left:auto;border:1px solid var(--client-border);border-radius:4px;padding:2px 5px;color:var(--client-muted);font-size:9px;font-style:normal;white-space:nowrap}
+.voice-invite-dialog .windows-dialog-panel__content{display:grid;grid-template-rows:auto minmax(0,1fr);gap:8px}
+.voice-invite-search{margin:0}
+.voice-invite-friends{min-height:240px;max-height:300px;gap:0}
+.voice-invite-empty{display:grid;min-height:240px;place-items:center;margin:0}
 .voice-privacy-choice{display:grid;gap:8px;border:0;margin:18px 0 0;padding:0}
 .voice-privacy-choice legend{margin-bottom:8px;font-size:12px;font-weight:600}
 .voice-privacy-choice label{display:flex;align-items:center;gap:10px;border:1px solid var(--client-border);border-radius:6px;padding:10px;cursor:pointer}
@@ -553,6 +557,7 @@
 .voice-privacy-choice strong{font-size:11px}
 .voice-privacy-choice small,.social-dialog-copy{color:var(--client-muted);font-size:10px}
 .voice-channel-form{display:grid;gap:14px}
+.voice-channel-form .social-required-mark{margin-left:3px;color:#d14343}
 .voice-channel-form .social-form-field small{color:var(--client-muted);font-size:10px;font-weight:400}
 .voice-frequency-field input{min-height:36px;border:1px solid var(--client-border);border-radius:6px;padding:0 9px;background:var(--prototype-surface, #fff);color:var(--client-text);font:inherit;font-size:12px}
 .voice-frequency-field input:focus-visible{outline:2px solid var(--prototype-text-subtle, #9ca3af);outline-offset:1px}

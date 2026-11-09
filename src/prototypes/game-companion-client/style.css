@@ -40,6 +40,9 @@
   margin-inline: auto;
   padding-bottom: 32px;
 }
+.client-back-to-top { position:fixed; z-index:35; right:34px; bottom:34px; display:inline-flex; min-height:40px; align-items:center; justify-content:center; gap:7px; border:1px solid var(--prototype-border-strong,#d1d5db); border-radius:7px; padding:0 14px; background:var(--prototype-surface,#fff); color:var(--prototype-text-secondary,#374151); box-shadow:0 2px 8px rgb(17 24 39 / 12%); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.client-back-to-top:hover { border-color:var(--prototype-text-subtle,#9ca3af); background:var(--prototype-surface-muted,#f9fafb); }
+.client-back-to-top:focus-visible { outline:2px solid var(--prototype-text-muted,#6b7280); outline-offset:2px; }
 
 /* 登录入口 */
 .gc-login-page { display: grid; width: 100%; min-height: 100%; place-items: center; background: var(--prototype-canvas, #f3f4f6); padding: 48px; color: var(--prototype-text, #1f2937); font-family: "Segoe UI", Arial, sans-serif; }
@@ -166,6 +169,11 @@
 .home-game-choice__mark small { font-size: 7px; font-weight: 700; line-height: 1; letter-spacing: 0; }
 @media (prefers-reduced-motion: reduce) { .home-game-list { scroll-behavior: auto; } .home-game-expand svg { transition: none; } }
 .club-game-filter { display: grid; gap: 8px; }
+.talent-category-filter { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.talent-category-filter__option { display:inline-flex; min-height:38px; align-items:center; justify-content:center; gap:8px; border:1px solid var(--client-border); border-radius:7px; padding:0 14px; background:var(--prototype-surface,#fff); color:var(--client-text); font:inherit; font-size:13px; cursor:pointer; }
+.talent-category-filter__option:hover,.talent-category-filter__option.is-active { border-color:var(--prototype-text-subtle,#9ca3af); background:var(--prototype-surface-muted,#f9fafb); }
+.talent-category-filter__option.is-active { box-shadow:inset 0 0 0 1px var(--prototype-text-subtle,#9ca3af); font-weight:600; }
+.talent-category-filter__option:focus-visible { outline:2px solid var(--prototype-text-muted,#6b7280); outline-offset:2px; }
 .club-game-list { max-width: 100%; }
 .game-choice { display: flex; min-width: 0; min-height: 64px; align-items: center; gap: 10px; border: 1px solid var(--client-border); border-radius: 8px; padding: 10px 12px; background: var(--client-surface); color: var(--client-text); font: inherit; text-align: left; cursor: pointer; }
 .game-choice:hover, .game-choice.is-active { border-color: var(--prototype-text-subtle, #9ca3af); background: var(--prototype-surface-muted, #f9fafb); }
@@ -747,7 +755,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-module-heading__actions .client-eyebrow { white-space: nowrap; }
 .personal-profile-card { min-height: 136px; }
 .personal-profile-card > .account-profile-card__identity { display: grid; justify-items: start; gap: 4px; }
-.personal-profile-name { display: flex; align-items: center; gap: 9px; }
+.personal-profile-name { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.personal-profile-name .personal-profile-edit { min-height: 28px; flex: 0 0 auto; margin-left: 8px; padding-inline: 8px; font-size: 10px; }
 .personal-profile-name h2 { margin: 0; font-size: 18px; font-weight: 600; }
 .personal-wealth-badge { display: inline-flex; min-height: 22px; align-items: center; gap: 4px; border: 1px solid var(--prototype-border-strong, #d1d5db); border-radius: 5px; padding: 2px 7px; background: var(--prototype-canvas, #f3f4f6); color: var(--prototype-text-secondary, #4b5563); font-size: 11px; font-weight: 600; white-space: nowrap; }
 .personal-wealth-badge--large { min-width: 64px; min-height: 48px; justify-content: center; border-radius: 8px; font-size: 15px; }
@@ -802,6 +811,9 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-order-stats button:hover { border-color: var(--prototype-text-subtle, #9ca3af); background: var(--prototype-canvas, #f3f4f6); }
 .personal-list-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .personal-segmented-control, .personal-record-tabs { display: flex; align-items: center; gap: 4px; border-bottom: 1px solid var(--client-border); }
+.personal-record-tabs-row { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--client-border); }
+.personal-record-tabs-row .personal-record-tabs { min-width: 0; flex: 1; border-bottom: 0; }
+.personal-record-tabs-row > .client-button { flex: 0 0 auto; }
 .personal-segmented-control button, .personal-record-tabs button { position: relative; display: inline-flex; min-height: 38px; align-items: center; gap: 7px; border: 0; padding: 0 12px; background: transparent; color: var(--client-muted); font: inherit; font-size: 12px; cursor: pointer; }
 .personal-segmented-control button.is-active, .personal-record-tabs button.is-active { color: var(--client-text); font-weight: 600; }
 .personal-segmented-control button.is-active::after, .personal-record-tabs button.is-active::after { position: absolute; right: 10px; bottom: -1px; left: 10px; height: 2px; background: var(--prototype-primary, #374151); content: ''; }
@@ -837,6 +849,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-visit-row { display: flex; min-height: 64px; align-items: center; gap: 12px; padding: 12px 14px; }
 .personal-visit-row__main { display: grid; min-width: 0; flex: 1; gap: 4px; }
 .personal-visit-row__main strong, .personal-gift-card__sender strong { overflow: hidden; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.personal-visit-row__main > strong { display: flex; align-items: center; gap: 6px; }
+.personal-visit-person-meta { flex: 0 0 auto; color: var(--client-muted); font-size: 11px; font-weight: 400; }
 .personal-visit-row__main small { color: var(--client-muted); font-size: 10px; }
 .personal-visit-row time { color: var(--client-muted); font-size: 11px; white-space: nowrap; }
 .personal-record-kind { display: inline-flex; align-items: center; gap: 4px; color: var(--client-muted); font-size: 10px; }
@@ -1410,6 +1424,10 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .bean-exchange-amount input { flex: 1; }
 .bean-exchange-preview { display: flex; min-height: 52px; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--client-border); border-radius: 6px; background: var(--prototype-surface-muted, #f9fafb); padding: 0 14px; font-size: 13px; font-weight: 600; }
 .bean-exchange-preview strong { color: var(--client-muted); font-size: 12px; }
+.bean-exchange-notes { display: grid; gap: 6px; margin: 0; padding: 14px 16px; }
+.bean-exchange-notes h3, .bean-exchange-notes p { margin: 0; }
+.bean-exchange-notes h3 { font-size: 13px; font-weight: 600; }
+.bean-exchange-notes p { color: var(--client-muted); font-size: 12px; }
 .bean-exchange-dialog > footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--client-border); padding-top: 14px; }
 .bean-exchange-result { display: grid; justify-items: center; gap: 10px; padding: 12px; text-align: center; }
 .bean-exchange-result > strong { font-size: 26px; }
@@ -1829,6 +1847,11 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .announcement-page--panel { gap: 0; }
 .announcement-page--panel .announcement-card { width: 100%; }
 .announcement-page--panel .announcement-filters { gap: 18px; padding-inline: 16px; }
+.announcement-tabs-row { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--client-border); padding: 0 24px; }
+.announcement-filters { flex: 1; min-width: 0; border-bottom: 0; padding-inline: 0; }
+.announcement-read-all { flex: 0 0 auto; }
+.announcement-page--panel .announcement-tabs-row { border-bottom: 0; padding-inline: 0; }
+.announcement-page--panel .announcement-filters { flex: initial; }
 .announcement-page--panel .announcement-filter { min-height: 48px; font-size: 12px; }
 .announcement-page--panel .announcement-row { gap: 10px; padding: 14px 16px; }
 .announcement-page--panel .announcement-row.has-cover { min-height: 100px; grid-template-columns: 12px 112px minmax(0, 1fr); }
@@ -1842,6 +1865,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .announcement-page > .client-back-link { align-self: flex-start; }
 .announcement-card { overflow: hidden; padding: 0; }
 .announcement-filters { display: flex; align-items: center; gap: 24px; border-bottom: 1px solid var(--client-border); padding: 0 24px; }
+.announcement-filters { border-bottom: 0; padding-inline: 0; }
 .announcement-filter { position: relative; min-height: 56px; border: 0; padding: 0 2px; background: transparent; color: var(--client-muted); font: inherit; font-size: 14px; cursor: pointer; }
 .announcement-filter:hover, .announcement-filter.is-active { color: var(--client-text); }
 .announcement-filter.is-active { font-weight: 600; }
@@ -2069,7 +2093,9 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 /* 啄木鸟工单 */
 .woodpecker-page { gap: 18px; }
 .woodpecker-page__heading { align-items: center; }
-.woodpecker-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 220px)); border-bottom: 1px solid var(--client-border); }
+.woodpecker-tabs-row { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--client-border); }
+.woodpecker-tabs { display: grid; flex: 1; grid-template-columns: repeat(2, minmax(0, 220px)); }
+.woodpecker-submit-button { flex: 0 0 auto; margin-bottom: 8px; }
 .woodpecker-tabs button { position: relative; min-height: 48px; border: 0; background: transparent; color: var(--client-muted); font: inherit; font-size: 14px; cursor: pointer; }
 .woodpecker-tabs button.is-active { color: var(--client-text); font-weight: 600; }
 .woodpecker-tabs button.is-active::after { position: absolute; right: 24px; bottom: -1px; left: 24px; height: 2px; background: var(--client-primary); content: ''; }
@@ -2079,6 +2105,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .woodpecker-filter.is-active { border-color: var(--client-text); background: #e5e7eb; color: var(--client-text); font-weight: 600; }
 .woodpecker-count { margin-left: auto; color: var(--client-muted); font-size: 12px; }
 .woodpecker-ticket-list { display: grid; gap: 12px; }
+.voice-group-dialog .social-form-field + .social-form-field { margin-top: 16px; }
 .woodpecker-ticket { display: grid; gap: 14px; padding: 18px 20px; }
 .woodpecker-ticket__header { display: flex; align-items: center; gap: 12px; }
 .woodpecker-ticket__header > strong { font-size: 14px; }

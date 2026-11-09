@@ -76,7 +76,7 @@ export interface VoiceSubchannel {
   heat?: number
   isDefault?: boolean
   imageDataUrl?: string
-  capacity: number
+  capacity: number | null
   messageFrequencySeconds: number
   micQueueDurationSeconds: number
   micQueueMemberIds?: string[]
@@ -96,6 +96,9 @@ export interface VoiceRoom {
   ownerId?: string
   channels: VoiceSubchannel[]
 }
+
+export const voiceSubchannelIsFull = (channel: VoiceSubchannel, memberCount = channel.members.length) => channel.capacity !== null && memberCount >= channel.capacity
+export const voiceSubchannelOpenSeats = (channel: VoiceSubchannel) => channel.capacity === null ? Number.POSITIVE_INFINITY : Math.max(0, channel.capacity - channel.members.length)
 
 export interface VoiceInvitation {
   id: string

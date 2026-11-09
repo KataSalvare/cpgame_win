@@ -1,4 +1,6 @@
 import { CompanionDirectory } from '../components/CompanionDirectory'
+import { companions, talentsPageCompanionMockData } from '../data/mockData'
+import { BackToTopButton } from '../components/BackToTopButton'
 
 type Props = {
   pageState: 'normal' | 'loading' | 'empty' | 'error'
@@ -12,9 +14,12 @@ export function TalentsPage({ pageState, onRetry, onOpenCompanion, onChatWithCom
     <h1 className="client-visually-hidden">大神</h1>
     <CompanionDirectory
       pageState={pageState}
+      showTalentCategoryFilter
+      companionSource={[...companions, ...talentsPageCompanionMockData]}
       onRetry={onRetry}
       onOpenCompanion={onOpenCompanion}
       onChatWithCompanion={onChatWithCompanion}
     />
+    <BackToTopButton />
   </div>
 }

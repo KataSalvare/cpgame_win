@@ -4,6 +4,7 @@ import { ClubCard } from '../components/ClubCard'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
 import { GameFilter } from '../components/GameFilter'
+import { BackToTopButton } from '../components/BackToTopButton'
 
 type Props = {
   followedClubIds?: string[]
@@ -57,5 +58,6 @@ export function HomePage({ pageState, followedClubIds, onOpenClub, onBrowseClub,
         {logic.visibleClubs.map((club) => <ClubCard key={club.id} club={club} layout="gallery" onOpen={() => onOpenClub(club.id)} onBrowse={onBrowseClub} onSelfOrder={() => onSelfOrderClub(club.id)} />)}
       </div> : <div className="client-inline-empty"><p>没有符合条件的俱乐部</p><button type="button" className="client-button client-button--secondary" onClick={logic.resetFilters}>恢复默认筛选</button></div>}
     </section>
+    <BackToTopButton />
   </div>
 }

@@ -1,9 +1,10 @@
-import { regions } from '../data/mockData'
+import { companions, regions, type Companion } from '../data/mockData'
 import { useCompanionDirectoryLogic } from '../hooks/useClubDetailLogic'
 import { CompanionCard } from './CompanionCard'
 import { PageStatePanel } from './PageStatePanel'
 import { GameFilter } from './GameFilter'
-import { Search, X } from 'lucide-react'
+import { Flame, LayoutGrid, Search, Star, X } from 'lucide-react'
+import { useState } from 'react'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 
@@ -14,6 +15,8 @@ type Props = {
   onOpenCompanion: (companionId: string) => void
   onChatWithCompanion: (companionId: string) => void
   searchable?: boolean
+  showTalentCategoryFilter?: boolean
+  companionSource?: Companion[]
 }
 
 const ages = ['全部年龄', '18-25岁', '26-30岁', '31-35岁', '36-40岁', '40岁以上']
@@ -27,8 +30,19 @@ const sortLabels: Record<string, string> = {
   'rating-asc': '好评从低到高',
 }
 
-export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion, searchable = false }: Props) {
-  const logic = useCompanionDirectoryLogic(clubId)
+const talentCategories = [
+  { id: 'all', label: '全部', icon: LayoutGrid },
+  { id: 'popular', label: '人气陪玩', icon: Flame },
+  { id: 'star', label: '明星大神', icon: Star },
+] as const
+
+export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion, searchable = false, showTalentCategoryFilter = false, companionSource = companions }: Props) {
+  const logic = useCompanionDirectoryLogic(clubId, companionSource)
+  const [talentCategory, setTalentCategory] = useState<(typeof talentCategories)[number]['id']>('all')
+  const visibleCompanions = showTalentCategoryFilter && talentCategory !== 'all'
+    ? logic.visibleCompanions.filter(person => person.talentCategories?.includes(talentCategory))
+    : logic.visibleCompanions
+  const resetFilters = () => { logic.resetFilters(); setTalentCategory('all') }
 
   if (pageState !== 'normal') {
     return <PageStatePanel
@@ -36,11 +50,12 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
       title={pageState === 'empty' ? '暂时没有陪玩' : '陪玩列表暂不可用'}
       description={pageState === 'error' ? '陪玩列表暂时无法加载，请重试。' : '当前筛选条件下没有陪玩，清除筛选后再看看。'}
       actionLabel={pageState === 'error' ? '重新加载' : '清除筛选'}
-      onAction={pageState === 'error' ? onRetry : logic.resetFilters}
+      onAction={pageState === 'error' ? onRetry : resetFilters}
     />
   }
 
   return <section className="club-members-section" aria-label="陪玩列表">
+    {showTalentCategoryFilter && <div className="talent-category-filter" role="group" aria-label="陪玩分类筛选">{talentCategories.map(({ id, label, icon: Icon }) => <button type="button" key={id} className={`talent-category-filter__option${talentCategory === id ? ' is-active' : ''}`} aria-pressed={talentCategory === id} onClick={() => setTalentCategory(id)}><Icon size={17} aria-hidden="true" /><span>{label}</span></button>)}</div>}
     <div className="club-game-filter"><GameFilter gameId={logic.gameId} onSelect={logic.setGameId} /></div>
     <div className={`club-filter-panel${searchable ? ' club-filter-panel--with-search' : ''}`}>
       {searchable && <label className="companion-directory-search"><Search size={15} aria-hidden="true" /><input type="search" value={logic.searchQuery} onChange={(event) => logic.setSearchQuery(event.target.value)} placeholder="搜索陪玩名称或 ID" aria-label="搜索陪玩名称或 ID" />{logic.searchQuery && <button type="button" className="windows-icon-button" aria-label="清空陪玩搜索" onClick={() => logic.setSearchQuery('')}><X size={14} /></button>}</label>}
@@ -52,14 +67,14 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
       <FilterSelect label="地区" value={logic.region} onChange={logic.setRegion} options={['全部地区', ...regions].map((value) => ({ value, label: value }))} />
     </div>
 
-    {logic.visibleCompanions.length > 0 ? <div className="client-card-grid client-card-grid--companions">
-      {logic.visibleCompanions.map((person) => <CompanionCard
+    {visibleCompanions.length > 0 ? <div className="client-card-grid client-card-grid--companions">
+      {visibleCompanions.map((person) => <CompanionCard
         key={person.id}
         companion={person}
         onOpen={() => onOpenCompanion(person.id)}
         onChat={() => onChatWithCompanion(person.id)}
       />)}
-    </div> : <div className="client-inline-empty"><p>没有符合筛选条件的陪玩</p><button type="button" className="client-button client-button--secondary" onClick={logic.resetFilters}>清除筛选</button></div>}
+    </div> : <div className="client-inline-empty"><p>没有符合筛选条件的陪玩</p><button type="button" className="client-button client-button--secondary" onClick={resetFilters}>清除筛选</button></div>}
   </section>
 }
 

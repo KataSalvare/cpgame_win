@@ -204,11 +204,12 @@
         },
         {
           "id": "/game-companion-workbench-services",
-          "children": []
-        },
-        {
-          "id": "/game-companion-workbench-apply-service",
-          "children": []
+          "children": [
+            {
+              "id": "/game-companion-workbench-apply-service",
+              "children": []
+            }
+          ]
         }
       ]
     },

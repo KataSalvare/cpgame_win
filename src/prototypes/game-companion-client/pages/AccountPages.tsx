@@ -49,7 +49,6 @@ export function WalletPage({ pageState, onRetry, diamondBalance, beanBalance, av
   if (pageState !== 'normal') return <div className="client-content account-page"><PageState pageState={pageState} onRetry={onRetry} /></div>
 
   return <div className="client-content account-page wallet-page">
-    <PageHeading eyebrow="账户资产" title="我的钱包" />
     <div className="wallet-card-grid">
       <WalletBalanceCard
         title="金豆钱包"
@@ -153,7 +152,7 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   const closeForm = () => { setEditingAccount(null); setView('accounts') }
 
   return <div className="store-overlay bean-withdraw-overlay" data-overlay="bean-withdraw-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-withdraw-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-withdraw-title">
-    <header><div><span className="client-eyebrow">糖豆钱包</span><h2 id="bean-withdraw-title">{activeView === 'withdraw' ? '提现糖豆' : activeView === 'accounts' ? '提现账户管理' : activeView === 'account-form' ? (editingAccount ? '换绑提现账户' : '绑定提现账户') : '提现结果'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭提现弹窗" onClick={onClose}><X size={17} /></button></header>
+    <header><div><h2 id="bean-withdraw-title">{activeView === 'withdraw' ? '提现糖豆' : activeView === 'accounts' ? '提现账户管理' : activeView === 'account-form' ? (editingAccount ? '换绑提现账户' : '绑定提现账户') : '提现结果'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭提现弹窗" onClick={onClose}><X size={17} /></button></header>
     {activeView === 'accounts' ? <>
       <div className="client-section-heading bean-withdraw-panel__subheading"><div><span className="client-eyebrow">收款方式</span><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" disabled={accounts.length >= 5} title={accounts.length >= 5 ? '最多只能绑定 5 个账户' : undefined} onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
       <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><button type="button" className="bean-payout-card__select" aria-label={`选择${account.type} ${maskedAccount(account)}`} onClick={() => { setSelectedId(account.id); setManageAccounts(false); setView('withdraw'); setFeedback('') }}><span className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{maskedAccount(account)}</span></span>{selectedId === account.id && <span className="bean-payout-card__selected">已选</span>}</button><button type="button" className="client-button client-button--secondary" onClick={() => deleteAccount(account)}><Trash2 size={14} />删除</button></article>)}</div>
@@ -184,11 +183,11 @@ export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBa
   const validAmount = Number.isInteger(parsedAmount) && parsedAmount > 0 && parsedAmount <= beanBalance
 
   return <div className="store-overlay bean-exchange-overlay" data-overlay="bean-exchange-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-exchange-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-exchange-title">
-    <header><div><span className="client-eyebrow">糖豆钱包</span><h2 id="bean-exchange-title">{exchangedAmount === null ? '兑换金豆' : '兑换完成'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭兑换弹窗" onClick={onClose}><X size={17} /></button></header>
+    <header><div><h2 id="bean-exchange-title">{exchangedAmount === null ? '兑换金豆' : '兑换完成'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭兑换弹窗" onClick={onClose}><X size={17} /></button></header>
     {exchangedAmount === null ? <>
-      <section className="client-card bean-exchange-balance"><span className="client-eyebrow">可用糖豆</span><strong>{beanBalance.toLocaleString()} <small>糖豆</small></strong></section>
+      <section className="client-card bean-exchange-balance"><span className="client-eyebrow">可提现糖豆</span><strong>{beanBalance.toLocaleString()} <small>糖豆</small></strong></section>
       <label className="bean-withdraw-amount bean-exchange-amount"><span>兑换糖豆数</span><div><input aria-label="兑换糖豆数" inputMode="numeric" type="number" min="1" max={beanBalance} step="1" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="请输入糖豆数" /><span>糖豆</span></div></label>
-      <div className="bean-exchange-preview" aria-live="polite"><span>{validAmount ? parsedAmount.toLocaleString() : '—'} 糖豆</span><strong>1 : 1</strong><span>{validAmount ? parsedAmount.toLocaleString() : '—'} 金豆</span></div>
+      <section className="client-card bean-exchange-notes"><h3>兑换说明</h3><p>xxxx</p><p>xxxx</p><p>xxxx</p></section>
       <footer><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!validAmount} onClick={() => { if (onExchange(parsedAmount)) setExchangedAmount(parsedAmount) }}>确认兑换</button></footer>
     </> : <>
       <div className="bean-exchange-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><strong>{exchangedAmount.toLocaleString()} <small>糖豆</small></strong><span>已兑换为 {exchangedAmount.toLocaleString()} 金豆</span></div>
@@ -267,7 +266,6 @@ export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单
 
   return <>
   <div className="client-content account-page">
-    <PageHeading title="我的订单" />
     <nav className="personal-center-tabs orders-role-tabs" role="tablist" aria-label="订单类型">
       {(['我的下单', '我的接单', '考生订单', '考官订单'] as const).map(item => <button type="button" role="tab" key={item} className={`personal-center-tab${tab === item ? ' is-active' : ''}`} aria-selected={tab === item} onClick={() => { onTabChange(item); onSelectOrder(null); workbench.setSelectedOrderId(null); onSelectExamOrder(null, null) }}>{item}</button>)}
     </nav>

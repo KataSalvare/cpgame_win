@@ -54,7 +54,9 @@
 
 
 
-.workbench-page > .personal-module-heading { min-height:38px; }
+.workbench-tab-row { display:flex; min-width:0; align-items:center; gap:16px; }
+.workbench-tab-row .personal-center-tabs { flex:1; min-width:0; }
+.workbench-tab-row .workbench-auto-grab { flex:0 0 auto; }
 .workbench-switch { color:var(--client-text); font-size:13px; }
 .workbench-page .workbench-request strong, .workbench-page .workbench-order__identity strong { font-size:14px; font-weight:600; }
 .workbench-page .workbench-request .workbench-request__service { font-size:14px; font-weight:400; }

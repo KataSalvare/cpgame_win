@@ -1,13 +1,14 @@
 import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useState, type ReactNode } from 'react'
 import { ArrowLeft, Bell, Headphones, MessageCircle, ShieldCheck, ShoppingCart, Star, UsersRound } from 'lucide-react'
-import type { Club } from '../data/mockData'
+import { companions, northernClubCompanionMockData, type Club } from '../data/mockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { FollowIconButton } from '../components/FollowIconButton'
 import { ClubInfoDialog, ClubMoreActions, type ClubInfoTab } from '../components/ClubMoreActions'
 import { CompanionDirectory } from '../components/CompanionDirectory'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { PromotionBanner } from '../components/PromotionBanner'
+import { BackToTopButton } from '../components/BackToTopButton'
 import type { useSocialLogic } from '../hooks/useSocialLogic'
 
 type Props = {
@@ -52,7 +53,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
         <AvatarMark initials={club.initials} size="lg" />
         <div className="club-profile-card__body">
           <div className="club-card__name-row"><h1>{club.name}</h1>{club.selfOperated && <span className="client-badge"><ShieldCheck size={13} /> 自营</span>}</div>
-          <div className="club-profile-card__subline"><span>ID：{club.id.replace('club-', 'C-')}</span><span className="client-inline-meta"><UsersRound size={14} />{club.companionCount} 位陪玩</span><button type="button" className="rating-mark club-profile-rating-button" onClick={onOpenClubReviews} aria-label={`查看俱乐部评价，评分 ${club.rating.toFixed(1)}`}><Star size={14} />{club.rating.toFixed(1)}</button></div>
+          <div className="club-profile-card__subline"><span>ID：{club.id.replace('club-', 'C-')}</span><button type="button" className="rating-mark club-profile-rating-button" onClick={onOpenClubReviews} aria-label={`查看俱乐部评价，评分 ${club.rating.toFixed(1)}`}><Star size={14} />{club.rating.toFixed(1)}</button></div>
           <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
           <p>{club.intro}</p>
         </div>
@@ -75,7 +76,8 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
       </div>
     </section>
 
-    <CompanionDirectory clubId={club.id} pageState="normal" searchable onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
+    <CompanionDirectory clubId={club.id} companionSource={[...companions, ...northernClubCompanionMockData]} pageState="normal" searchable onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
+    <BackToTopButton />
     {removalDialog}
     {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
   </div>

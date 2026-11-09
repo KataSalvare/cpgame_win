@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { clubs } from '../data/mockData'
+import { homepageClubs } from '../data/mockData'
 
 export type HomeScope = 'featured' | 'followed'
 
@@ -10,7 +10,7 @@ export function useHomeLogic(followedClubIds?: string[]) {
 
   const setTagScope = (nextTag: string | null) => setTag(nextTag)
 
-  const visibleClubs = useMemo(() => clubs.filter((club) => {
+  const visibleClubs = useMemo(() => homepageClubs.filter((club) => {
     const matchesGame = gameId === 'all' || club.gameIds.includes(gameId)
     const matchesScope = scope === 'featured'
       ? club.featured

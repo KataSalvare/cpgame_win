@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { clubs, companions, servicesByCompanion } from './data/mockData'
+import { directoryCompanions, homepageClubs, servicesByCompanion } from './data/mockData'
 
 export type ClientPage = 'system-settings' | 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements' | 'woodpecker'
 
@@ -18,12 +18,12 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   let page: ClientPage = clientPages.includes(initialView as ClientPage)
     ? initialView as ClientPage
     : initialView === 'companion-detail' ? 'club-detail' : 'home'
-  const defaultCompanion = companions.find((companion) => companion.id === DEFAULT_COMPANION_ID) ?? companions[0]
+  const defaultCompanion = directoryCompanions.find((companion) => companion.id === DEFAULT_COMPANION_ID) ?? directoryCompanions[0]
   const defaultClubId = initialView === 'companion-detail' ? defaultCompanion.clubId : DEFAULT_CLUB_ID
-  const clubId = clubs.some((club) => club.id === params.get('club')) ? params.get('club')! : defaultClubId
+  const clubId = homepageClubs.some((club) => club.id === params.get('club')) ? params.get('club')! : defaultClubId
   const requestedCompanionId = params.get('companion')
-  const requestedCompanion = companions.find((companion) => companion.id === requestedCompanionId && (page === 'talents' || companion.clubId === clubId))
-  const requestedCompanionIds = (params.get('companions') ?? '').split(',').filter(Boolean).filter((id) => companions.some((companion) => companion.id === id && (page === 'talents' || companion.clubId === clubId)))
+  const requestedCompanion = directoryCompanions.find((companion) => companion.id === requestedCompanionId && (page === 'talents' || companion.clubId === clubId))
+  const requestedCompanionIds = (params.get('companions') ?? '').split(',').filter(Boolean).filter((id) => directoryCompanions.some((companion) => companion.id === id && (page === 'talents' || companion.clubId === clubId)))
   const initialCompanionId = initialView === 'companion-detail' || initialView === 'checkout' ? DEFAULT_COMPANION_ID : null
   const companionId = requestedCompanionIds[0] ?? requestedCompanion?.id ?? initialCompanionId
   const companionIds = requestedCompanionIds.length ? requestedCompanionIds : companionId ? [companionId] : []
@@ -69,7 +69,7 @@ export function useClientNavigation(entryView?: string) {
   const goHome = useCallback(() => writeRoute('home', route.clubId, null), [route.clubId])
   const openClub = useCallback((clubId: string) => writeRoute('club-detail', clubId, route.companionId), [route.companionId])
   const openCompanion = useCallback((companionId: string) => {
-    const companion = companions.find((item) => item.id === companionId)
+    const companion = directoryCompanions.find((item) => item.id === companionId)
     if (!companion) return
     const page = route.page === 'talents' ? 'talents' : 'club-detail'
     writeRoute(page, companion.clubId, companionId)
@@ -97,21 +97,21 @@ export function useClientNavigation(entryView?: string) {
   const openClubAnnouncements = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-announcements'), [route.clubId])
   const openClubReviews = useCallback(() => writeRoute('club-detail', route.clubId, null, null, null, 'club-reviews'), [route.clubId])
   const beginOrder = useCallback((serviceId: string, companionId: string, orderSelectionMode: OrderSelectionMode = 'service') => {
-    const companionClubId = companions.find((item) => item.id === companionId)?.clubId ?? route.clubId
+    const companionClubId = directoryCompanions.find((item) => item.id === companionId)?.clubId ?? route.clubId
     const companionIds = route.page === 'checkout' && route.companionIds.includes(companionId) ? route.companionIds : undefined
     const returnTo = route.page === 'checkout' ? route.returnTo : route.page === 'talents' ? 'talents' : null
     writeRoute('checkout', companionClubId, companionId, serviceId, returnTo, null, companionIds, undefined, orderSelectionMode)
   }, [route.clubId, route.companionIds, route.page, route.returnTo])
   const beginMatchOrder = useCallback((serviceId: string, companionIds: string[]) => {
-    const primaryCompanion = companions.find((item) => item.id === companionIds[0])
+    const primaryCompanion = directoryCompanions.find((item) => item.id === companionIds[0])
     if (!primaryCompanion) return
     writeRoute('checkout', primaryCompanion.clubId, primaryCompanion.id, serviceId, null, null, companionIds, undefined, 'locked')
   }, [])
 
   return {
     ...route,
-    club: clubs.find((club) => club.id === route.clubId) ?? clubs[0],
-    companion: route.companionId ? companions.find((companion) => companion.id === route.companionId) ?? null : null,
+    club: homepageClubs.find((club) => club.id === route.clubId) ?? homepageClubs[0],
+    companion: route.companionId ? directoryCompanions.find((companion) => companion.id === route.companionId) ?? null : null,
     goHome,
     openClub,
     openCompanion,

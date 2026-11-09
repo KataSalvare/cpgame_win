@@ -84,17 +84,14 @@ export function WoodpeckerPage({ pageState, onRetry }: Props) {
   if (pageState !== 'normal') return <div className="client-content woodpecker-state"><PageStatePanel state={pageState} title={pageState === 'empty' ? '暂无工单' : '啄木鸟暂不可用'} description={pageState === 'loading' ? '正在加载工单…' : pageState === 'error' ? '暂时无法加载，请重试。' : '当前没有可显示的工单。'} actionLabel={pageState === 'error' ? '重新加载' : '查看全部'} onAction={onRetry} /></div>
 
   return <div className="client-content woodpecker-page">
-    <header className="client-page-heading woodpecker-page__heading"><h1>啄木鸟</h1>{activeTab === 'mine' && <button type="button" className="client-button client-button--primary" onClick={() => setFormOpen(true)}>我要建议/举报</button>}</header>
-
-    <div className="woodpecker-tabs" role="tablist" aria-label="啄木鸟分类">
+    <div className="woodpecker-tabs-row"><div className="woodpecker-tabs" role="tablist" aria-label="啄木鸟分类">
       <button type="button" role="tab" aria-selected={activeTab === 'mine'} className={activeTab === 'mine' ? 'is-active' : ''} onClick={() => setActiveTab('mine')}>我的啄木鸟</button>
       <button type="button" role="tab" aria-selected={activeTab === 'public'} className={activeTab === 'public' ? 'is-active' : ''} onClick={() => setActiveTab('public')}>啄木鸟公示</button>
-    </div>
+    </div>{activeTab === 'mine' && <button type="button" className="client-button client-button--primary woodpecker-submit-button" onClick={() => setFormOpen(true)}>我要建议/举报</button>}</div>
 
     {activeTab === 'mine' ? <section className="woodpecker-panel" role="tabpanel" aria-label="我的啄木鸟">
       <div className="woodpecker-filter-row" role="group" aria-label="工单类型">
         {(['全部工单', '建议工单', '啄木鸟工单'] as const).map((filter) => <button key={filter} type="button" className={`woodpecker-filter${activeFilter === filter ? ' is-active' : ''}`} aria-pressed={activeFilter === filter} onClick={() => setActiveFilter(filter)}>{filter}</button>)}
-        <span className="woodpecker-count">{visibleTickets.length} 条</span>
       </div>
       {visibleTickets.length ? <div className="woodpecker-ticket-list">{visibleTickets.map((ticket) => <TicketCard key={ticket.id} ticket={ticket} />)}</div> : <div className="woodpecker-empty"><TreeDeciduous size={30} /><strong>暂无{activeFilter === '全部工单' ? '' : activeFilter.replace('工单', '')}工单</strong></div>}
     </section> : <section className="woodpecker-panel" role="tabpanel" aria-label="啄木鸟公示">

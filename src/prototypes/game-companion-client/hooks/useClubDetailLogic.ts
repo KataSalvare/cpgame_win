@@ -4,7 +4,7 @@ import { companions } from '../data/mockData'
 
 export type CompanionSort = 'recommended' | 'price-asc' | 'price-desc' | 'orders-asc' | 'orders-desc' | 'rating-desc' | 'rating-asc'
 
-export function useCompanionDirectoryLogic(clubId?: string) {
+export function useCompanionDirectoryLogic(clubId?: string, companionSource: Companion[] = companions) {
   const [gameId, setGameId] = useState('all')
   const [onlineStatus, setOnlineStatus] = useState('全部在线状态')
   const [status, setStatus] = useState('全部接单状态')
@@ -16,7 +16,7 @@ export function useCompanionDirectoryLogic(clubId?: string) {
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
 
   const visibleCompanions = useMemo(() => {
-    const filtered = companions.filter((person) => {
+    const filtered = companionSource.filter((person) => {
       if (clubId && person.clubId !== clubId) return false
       const companionProfileId = person.id.replace(/^companion-/i, 'P-').toLocaleLowerCase()
       if (normalizedQuery && !person.name.toLocaleLowerCase().includes(normalizedQuery) && !person.id.toLocaleLowerCase().includes(normalizedQuery) && !companionProfileId.includes(normalizedQuery)) return false
@@ -39,7 +39,7 @@ export function useCompanionDirectoryLogic(clubId?: string) {
       if (sort === 'orders-desc') return b.orderCount - a.orderCount
       return b.rating - a.rating
     })
-  }, [clubId, gameId, onlineStatus, status, gender, region, age, sort, normalizedQuery])
+  }, [clubId, companionSource, gameId, onlineStatus, status, gender, region, age, sort, normalizedQuery])
 
   const resetFilters = () => {
     setGameId('all')

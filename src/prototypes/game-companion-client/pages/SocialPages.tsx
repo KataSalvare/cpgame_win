@@ -3,13 +3,13 @@ import type { ClientOrder } from '../data/accountMockData'
 import { groupMembersMockData } from '../data/groupMembersMockData'
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
-  Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText, Share2,
+  Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText,
   Gift, ImagePlus, LockKeyhole, MessageCircle, Mic, MicOff, MoreHorizontal, Pencil,
   PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, Undo2, UserPlus, Users, PanelRightClose, PanelRightOpen,
   Volume2, VolumeX, Copy, X,
 } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
-import { currentSocialUser, initialSupportQueue, DEFAULT_VOICE_GROUP_CAPACITY, MAX_VOICE_CHANNEL_MEMBERS, MAX_VOICE_GROUP_MEMBERS, UNASSIGNED_VOICE_ROOM_ID, socialFriends, type ChatMessageKind, type SocialFriend, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceSubchannel } from '../data/socialMockData'
+import { currentSocialUser, initialSupportQueue, DEFAULT_VOICE_GROUP_CAPACITY, MAX_VOICE_CHANNEL_MEMBERS, MAX_VOICE_GROUP_MEMBERS, UNASSIGNED_VOICE_ROOM_ID, socialFriends, voiceSubchannelIsFull, voiceSubchannelOpenSeats, type ChatMessageKind, type SocialFriend, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceSubchannel } from '../data/socialMockData'
 import { clubs, companions } from '../data/mockData'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { useSocialLogic } from '../hooks/useSocialLogic'
@@ -62,7 +62,7 @@ function VoiceDestinationCascade({ groups, selectedGroupId, selectedChannelId, o
       <div className="voice-destination-cascade__options">
         {selectedGroup ? selectedGroup.channels.map((channel) => {
           const unavailableReason = getUnavailableReason(selectedGroup, channel)
-          return <button type="button" key={channel.id} className={`${selectedChannelId === channel.id ? 'is-selected ' : ''}${unavailableReason ? 'is-disabled' : ''}`} aria-pressed={selectedChannelId === channel.id} disabled={Boolean(unavailableReason)} onClick={() => onSelectChannel(channel.id)}><span>{channel.name}<small>{channel.members.length}/{channel.capacity}{unavailableReason ? ` · ${unavailableReason}` : ''}</small></span><ChevronRight size={14} /></button>
+          return <button type="button" key={channel.id} className={`${selectedChannelId === channel.id ? 'is-selected ' : ''}${unavailableReason ? 'is-disabled' : ''}`} aria-pressed={selectedChannelId === channel.id} disabled={Boolean(unavailableReason)} onClick={() => onSelectChannel(channel.id)}><span>{channel.name}<small>{channel.members.length}/{channel.capacity ?? '不限'}{unavailableReason ? ` · ${unavailableReason}` : ''}</small></span><ChevronRight size={14} /></button>
         }) : <p className="voice-destination-cascade__empty">选择分组</p>}
       </div>
     </section>
@@ -577,9 +577,9 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [roomCapacity, setRoomCapacity] = useState(DEFAULT_VOICE_GROUP_CAPACITY)
   const [channelDialog, setChannelDialog] = useState<{ mode: 'create' | 'edit'; id?: string; roomId?: string } | null>(null)
   const [channelName, setChannelName] = useState('')
-  const [channelCapacity, setChannelCapacity] = useState(MAX_VOICE_CHANNEL_MEMBERS)
+  const [channelCapacity, setChannelCapacity] = useState('')
   const [channelMessageFrequency, setChannelMessageFrequency] = useState('')
-  const [channelMicQueueDuration, setChannelMicQueueDuration] = useState('60')
+  const [channelMicQueueDuration, setChannelMicQueueDuration] = useState('')
   const [channelPrivacy, setChannelPrivacy] = useState<VoiceSubchannel['privacy']>('公开')
   const [channelPassword, setChannelPassword] = useState('')
   const [privateRoomPasswordTarget, setPrivateRoomPasswordTarget] = useState<{ roomId: string; channelId: string } | null>(null)
@@ -589,12 +589,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const [inviteDialog, setInviteDialog] = useState(false)
   const [inviteTargetChannel, setInviteTargetChannel] = useState<{ roomName: string; channelName: string } | null>(null)
   const [invitees, setInvitees] = useState<string[]>([])
+  const [inviteSearch, setInviteSearch] = useState('')
   const { requestRemoval, dialog: removalDialog } = useRemovalConfirmation()
   const [moreFeaturesOpen, setMoreFeaturesOpen] = useState(false)
   const [roomBlacklistOpen, setRoomBlacklistOpen] = useState(false)
-  const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [shareFriendIds, setShareFriendIds] = useState<string[]>([])
-  const [shareSent, setShareSent] = useState(false)
   const [blockedRoomMembers, setBlockedRoomMembers] = useState<Record<string, typeof socialFriends>>({ 'channel-main': [socialFriends[5]] })
   const [removeBlockedMember, setRemoveBlockedMember] = useState<{ channelId: string; friend: typeof socialFriends[number] } | null>(null)
   const [deleteChannelId, setDeleteChannelId] = useState<string | null>(null)
@@ -858,10 +856,12 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const channelDialogRoom = logic.voiceRooms.find((item) => item.id === channelDialog?.roomId)
   const channelDialogIsUngrouped = channelDialogRoom?.isUngrouped || channelDialog?.roomId === UNASSIGNED_VOICE_ROOM_ID
   const channelCapacityLimit = channelDialogIsUngrouped ? MAX_VOICE_CHANNEL_MEMBERS : channelDialogRoom?.capacity ?? 0
+  const channelCapacityValue = channelCapacity.trim() === '' ? null : Number(channelCapacity)
+  const channelDialogCanSave = Boolean(channelDialog && channelName.trim() && (channelDialog.mode !== 'create' || channelImageDataUrl) && (channelCapacityValue === null || Number.isSafeInteger(channelCapacityValue) && channelCapacityValue >= Math.max(1, channelDialog.mode === 'edit' ? channelDialogRoom?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) && channelCapacityValue <= channelCapacityLimit) && (channelMessageFrequency.trim() === '' || Number.isSafeInteger(Number(channelMessageFrequency)) && Number(channelMessageFrequency) >= 1) && (channelMicQueueDuration.trim() === '' || Number.isSafeInteger(Number(channelMicQueueDuration)) && Number(channelMicQueueDuration) >= 1) && (channelPrivacy !== '私密' || /^\d{4}$/.test(channelPassword)))
   const members = channel?.members ?? []
   const roomMemberCount = room?.channels.reduce((total, item) => total + item.members.length, 0) ?? 0
   const roomDialogMemberCount = logic.voiceRooms.find((item) => item.id === roomDialogTargetId)?.channels.reduce((total, item) => total + item.members.length, 0) ?? 0
-  const roomDialogMinCapacity = Math.max(roomDialogMemberCount, ...((logic.voiceRooms.find((item) => item.id === roomDialogTargetId)?.channels ?? []).map((item) => item.capacity)), 1)
+  const roomDialogMinCapacity = Math.max(roomDialogMemberCount, ...((logic.voiceRooms.find((item) => item.id === roomDialogTargetId)?.channels ?? []).map((item) => item.capacity ?? 0)), 1)
   const roomClub = ownerSource === 'club' ? clubs.find((club) => club.id === room?.clubId) ?? clubs[0] : undefined
   const roomOwner = ownerSource === 'personal' ? undefined : room?.ownerType === 'personal' ? socialFriends.find((friend) => friend.id === room.ownerId) : undefined
   const roomOwnerId = roomClub?.id ?? roomOwner?.profileId ?? currentSocialUser.profileId
@@ -888,7 +888,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const remainingVoiceRooms = logic.voiceRooms.filter((item) => item.id !== deleteVoiceRoomId)
   const canPreserveVoiceGroupRooms = Boolean(deletingVoiceRoom && !deletingVoiceRoom.isUngrouped)
   const canDeleteVoiceGroup = deleteVoiceRoomWithChannels
-    ? remainingVoiceRooms.reduce((total, target) => total + Math.min(target.capacity - target.channels.reduce((count, child) => count + child.members.length, 0), target.channels.reduce((count, child) => count + child.capacity - child.members.length, 0)), 0) >= deletingRoomMemberCount
+    ? remainingVoiceRooms.reduce((total, target) => total + Math.min(target.capacity - target.channels.reduce((count, child) => count + child.members.length, 0), target.channels.reduce((count, child) => count + voiceSubchannelOpenSeats(child), 0)), 0) >= deletingRoomMemberCount
     : canPreserveVoiceGroupRooms
   const batchMoveSourceRoom = batchMoveDialog ? logic.voiceRooms.find((item) => item.id === batchMoveDialog.roomId) : undefined
   const batchMoveSourceChannel = batchMoveSourceRoom?.channels.find((item) => item.id === batchMoveDialog?.channelId)
@@ -903,7 +903,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     if (!batchMoveMemberIds.length) return '先选择成员'
     const groupCount = group.channels.reduce((total, item) => total + item.members.length, 0)
     if (group.id !== batchMoveSourceRoom?.id && group.capacity - groupCount < batchMoveMemberIds.length) return '分组容量不足'
-    if (target.capacity - target.members.length < batchMoveMemberIds.length) return '房间容量不足'
+    if (voiceSubchannelOpenSeats(target) < batchMoveMemberIds.length) return '房间容量不足'
     return null
   }
   const batchMovePageSize = 6
@@ -919,7 +919,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     if (group.id === singleMoveSourceRoom?.id && target.id === singleMoveSourceChannel?.id) return '当前房间'
     if (group.id !== singleMoveSourceRoom?.id && singleMoveDialog && group.channels.some((item) => item.members.some((member) => member.id === singleMoveDialog.member.id))) return '成员已在此分组'
     const groupCount = group.channels.reduce((total, item) => total + item.members.length, 0)
-    if (target.members.length >= target.capacity) return '房间已满'
+    if (voiceSubchannelIsFull(target)) return '房间已满'
     if (group.id !== singleMoveSourceRoom?.id && group.capacity - groupCount < 1) return '分组已满'
     return null
   }
@@ -927,7 +927,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const deletingChannel = room?.channels.find((item) => item.id === deleteChannelId)
   const deleteAvailableCapacity = room?.channels
     .filter((item) => item.id !== deleteChannelId)
-    .reduce((total, item) => total + item.capacity - item.members.length, 0) ?? 0
+    .reduce((total, item) => total + voiceSubchannelOpenSeats(item), 0) ?? 0
   const canDeleteChannel = Boolean(deletingChannel && deletingChannel.members.length <= deleteAvailableCapacity)
   const canManage = !userPerspective && room?.currentRole !== 'member'
   const isOwner = !userPerspective && room?.currentRole === 'owner'
@@ -949,7 +949,15 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   } : undefined
   const openInviteForChannel = (roomName: string, channelName: string) => {
     setInviteTargetChannel({ roomName, channelName })
+    setInvitees([])
+    setInviteSearch('')
     setInviteDialog(true)
+  }
+  const closeInviteDialog = () => {
+    setInviteDialog(false)
+    setInviteTargetChannel(null)
+    setInvitees([])
+    setInviteSearch('')
   }
   const openCreateRoom = () => { setRoomName(''); setRoomCapacity(DEFAULT_VOICE_GROUP_CAPACITY); setRoomDialogTargetId(undefined); setRoomDialog('create') }
   const openEditRoom = (targetRoom = room) => { if (!targetRoom) return; setRoomName(targetRoom.name); setRoomCapacity(targetRoom.capacity); setRoomDialogTargetId(targetRoom.id); setRoomDialog('edit') }
@@ -963,11 +971,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     const targetRoom = logic.voiceRooms.find((item) => item.id === roomId)
     if (mode === 'create' && targetRoom) logic.selectVoiceRoom(targetRoom.id)
     const targetChannel = mode === 'edit' ? targetRoom?.channels.find((item) => item.id === id) : undefined
-    setChannelName(targetChannel?.name ?? (mode === 'create' ? logic.nextVoiceChannelName : ''))
-    const targetIsUngrouped = roomId === UNASSIGNED_VOICE_ROOM_ID || targetRoom?.isUngrouped
-    setChannelCapacity(targetChannel?.capacity ?? Math.min(MAX_VOICE_CHANNEL_MEMBERS, targetIsUngrouped ? MAX_VOICE_CHANNEL_MEMBERS : targetRoom?.capacity ?? 1))
-    setChannelMessageFrequency(targetChannel ? String(targetChannel.messageFrequencySeconds || '') : '5')
-    setChannelMicQueueDuration(String(targetChannel?.micQueueDurationSeconds ?? 60))
+    setChannelName(targetChannel?.name ?? '')
+    setChannelCapacity(targetChannel?.capacity == null ? '' : String(targetChannel.capacity))
+    setChannelMessageFrequency(targetChannel ? String(targetChannel.messageFrequencySeconds || '') : '')
+    setChannelMicQueueDuration(targetChannel ? String(targetChannel.micQueueDurationSeconds) : '')
     setChannelPrivacy(targetChannel?.privacy ?? '公开')
     setChannelPassword(targetChannel?.password ?? '')
     setChannelImageDataUrl(targetChannel?.imageDataUrl ?? '')
@@ -976,8 +983,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
   const saveChannel = () => {
     if (!channelName.trim() || !channelDialog) return
     const messageFrequencySeconds = channelMessageFrequency.trim() === '' ? 0 : Number(channelMessageFrequency)
-    const micQueueDurationSeconds = Number(channelMicQueueDuration)
-    if (!Number.isSafeInteger(messageFrequencySeconds) || messageFrequencySeconds < 0 || !Number.isSafeInteger(micQueueDurationSeconds) || micQueueDurationSeconds < 1) return
+    const micQueueDurationSeconds = channelMicQueueDuration.trim() === '' ? 60 : Number(channelMicQueueDuration)
+    const capacity = channelCapacity.trim() === '' ? null : Number(channelCapacity)
+    if (!Number.isSafeInteger(messageFrequencySeconds) || messageFrequencySeconds < 0 || !Number.isSafeInteger(micQueueDurationSeconds) || micQueueDurationSeconds < 1 || (capacity !== null && (!Number.isSafeInteger(capacity) || capacity < 1))) return
+    if (!channelName.trim() || (channelDialog.mode === 'create' && !channelImageDataUrl) || (channelPrivacy === '私密' && !/^\d{4}$/.test(channelPassword))) return
     const editingChannel = channelDialog.mode === 'edit'
       ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)
       : undefined
@@ -987,8 +996,8 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     }
     const targetRoom = logic.voiceRooms.find((item) => item.id === channelDialog.roomId)
     const capacityLimit = channelDialog.roomId === UNASSIGNED_VOICE_ROOM_ID || targetRoom?.isUngrouped ? MAX_VOICE_CHANNEL_MEMBERS : targetRoom?.capacity ?? 0
-    if (channelCapacity < Math.max(1, editingChannel?.members.length ?? 1) || channelCapacity > capacityLimit) return
-    const details = { name: channelName, imageDataUrl: channelImageDataUrl || undefined, capacity: channelCapacity, messageFrequencySeconds, micQueueDurationSeconds, privacy: channelPrivacy, password: channelPassword }
+    if ((capacity !== null && (capacity < Math.max(1, editingChannel?.members.length ?? 1) || capacity > capacityLimit))) return
+    const details = { name: channelName, imageDataUrl: channelImageDataUrl || undefined, capacity, messageFrequencySeconds, micQueueDurationSeconds, privacy: channelPrivacy, password: channelPassword }
     if (channelDialog.mode === 'create') logic.createSubchannel(details, channelDialog.roomId)
     else if (channelDialog.id) logic.updateSubchannel(channelDialog.roomId, channelDialog.id, details)
     setChannelDialog(null)
@@ -997,12 +1006,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     if (!invitees.length) return
     const count = logic.inviteFriendsToRoom(invitees)
     setFeedback(`已向 ${count} 位好友发送加入「${inviteTargetChannel?.roomName || (room?.isUngrouped ? '' : room?.name)}${inviteTargetChannel?.roomName || (!room?.isUngrouped && room?.name) ? ' · ' : ''}${inviteTargetChannel?.channelName ?? channel?.name}」的邀请（仅演示）。`)
-    setInviteDialog(false)
-    setInviteTargetChannel(null)
-    setInvitees([])
+    closeInviteDialog()
   }
   const toggleInvitee = (id: string) => setInvitees((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id])
-  const toggleShareFriend = (id: string) => setShareFriendIds((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id])
+  const filteredInviteFriends = socialFriends.filter((friend) => matchesMemberSearch(friend, inviteSearch))
   const onDropMember = (targetChannelId: string) => {
     if (!logic.draggedMemberId) return
     logic.moveMember(logic.draggedMemberId, targetChannelId)
@@ -1141,7 +1148,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
     setChannelContextMenu(null)
   }
   const setBatchMoveSelection = (next: string[]) => {
-    if (batchMoveTargetChannelId && (!next.length || next.length > (batchMoveTarget?.capacity ?? 0) - (batchMoveTarget?.members.length ?? 0) || (batchMoveTargetRoom?.id !== batchMoveSourceRoom?.id && next.length > (batchMoveTargetRoom?.capacity ?? 0) - batchMoveTargetRoomCount))) setBatchMoveTargetChannelId('')
+    if (batchMoveTargetChannelId && (!next.length || !batchMoveTarget || next.length > voiceSubchannelOpenSeats(batchMoveTarget) || (batchMoveTargetRoom?.id !== batchMoveSourceRoom?.id && next.length > (batchMoveTargetRoom?.capacity ?? 0) - batchMoveTargetRoomCount))) setBatchMoveTargetChannelId('')
     setBatchMoveMemberIds(next)
   }
   const toggleBatchMoveMember = (memberId: string) => setBatchMoveSelection(batchMoveMemberIds.includes(memberId) ? batchMoveMemberIds.filter((id) => id !== memberId) : [...batchMoveMemberIds, memberId])
@@ -1180,10 +1187,10 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
           {(!roomQuery && !item.isUngrouped && collapsedRoomIds.includes(item.id)) ? null : <div className={`voice-subchannel-list${item.isUngrouped ? ' is-direct-room-list' : ''}`}>{item.channels.map((subchannel) => <div className={`voice-subchannel${selectedVoiceChannel.channelId === subchannel.id && selectedVoiceChannel.roomId === item.id ? ' is-active' : ''}${logic.draggedMemberId && room?.id === item.id && logic.draggedMemberId !== currentSocialUser.id ? ' is-drop-target' : ''}${draggedVoiceChannel?.channelId === subchannel.id ? ' is-channel-dragging' : ''}${draggedVoiceChannel && draggedVoiceChannel.channelId !== subchannel.id && item.currentRole !== 'member' ? ' is-channel-drop-target' : ''}`} key={subchannel.id} onContextMenu={(event) => openChannelContextMenu(event, item.id, subchannel.id)} onDragOver={(event) => { if (event.dataTransfer.types.includes('application/x-voice-room-channel') && item.currentRole !== 'member') event.preventDefault(); else if (room?.id === item.id && canManage) event.preventDefault() }} onDrop={(event) => { if (event.dataTransfer.types.includes('application/x-voice-room-channel')) { event.preventDefault(); event.stopPropagation(); moveDraggedVoiceChannel(item.id, subchannel.id); return } event.preventDefault(); if (room?.id === item.id) onDropMember(subchannel.id) }}>
             <div className="voice-subchannel__heading-row">
               <button type="button" className="voice-subchannel__collapse" aria-label={`${collapsedChannelIds.includes(subchannel.id) ? '展开' : '折叠'}${subchannel.name}成员`} aria-expanded={!collapsedChannelIds.includes(subchannel.id)} onClick={() => setCollapsedChannelIds((ids) => ids.includes(subchannel.id) ? ids.filter((id) => id !== subchannel.id) : [...ids, subchannel.id])}><ChevronRight size={13} className={`voice-room-chevron${collapsedChannelIds.includes(subchannel.id) ? '' : ' is-expanded'}`} /></button>
-              <button type="button" className="voice-subchannel__heading" draggable={!userPerspective && item.currentRole !== 'member'} onDragStart={(event) => { if (userPerspective || item.currentRole === 'member') { event.preventDefault(); return } event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('application/x-voice-room-channel', subchannel.id); setDraggedVoiceChannel({ roomId: item.id, channelId: subchannel.id }) }} onDragEnd={() => setDraggedVoiceChannel(null)} onClick={() => setTreeSelection({ roomId: item.id, channelId: subchannel.id, activeRoomId: logic.activeVoiceRoomId, activeChannelId: logic.activeSubchannelId })} onDoubleClick={() => selectVoiceSubchannel(item.id, subchannel.id)}>{subchannel.privacy === '私密' ? <LockKeyhole size={14} /> : <Volume2 size={14} />}<span><span>{subchannel.name}</span>{subchannel.isDefault && <em className="voice-default-room-badge"><Star size={10} fill="currentColor" />默认</em>}</span><small>{subchannel.members.length}/{subchannel.capacity}</small></button>
+              <button type="button" className="voice-subchannel__heading" draggable={!userPerspective && item.currentRole !== 'member'} onDragStart={(event) => { if (userPerspective || item.currentRole === 'member') { event.preventDefault(); return } event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('application/x-voice-room-channel', subchannel.id); setDraggedVoiceChannel({ roomId: item.id, channelId: subchannel.id }) }} onDragEnd={() => setDraggedVoiceChannel(null)} onClick={() => setTreeSelection({ roomId: item.id, channelId: subchannel.id, activeRoomId: logic.activeVoiceRoomId, activeChannelId: logic.activeSubchannelId })} onDoubleClick={() => selectVoiceSubchannel(item.id, subchannel.id)}>{subchannel.privacy === '私密' ? <LockKeyhole size={14} /> : <Volume2 size={14} />}<span><span>{subchannel.name}</span>{subchannel.isDefault && <em className="voice-default-room-badge"><Star size={10} fill="currentColor" />默认</em>}</span><small>{subchannel.members.length}/{subchannel.capacity ?? '不限'}</small></button>
               <span className="voice-subchannel__hover-hint" aria-hidden="true">双击进入房间</span>
               {!userPerspective && <div className="voice-subchannel__tools">
-                <button type="button" className="voice-subchannel__action" aria-label={`邀请好友加入${item.isUngrouped ? '' : `${item.name}的`}${subchannel.name}`} title="邀请好友" onClick={() => openInviteForChannel(item.isUngrouped ? '' : item.name, subchannel.name)}><UserPlus size={13} /></button>
+                <button type="button" className="voice-subchannel__action" aria-label={`邀请好友加入${item.isUngrouped ? '' : `${item.name}的`}${subchannel.name}`} title="邀请好友进房" onClick={() => openInviteForChannel(item.isUngrouped ? '' : item.name, subchannel.name)}><UserPlus size={13} /></button>
                 <button type="button" className="voice-subchannel__action" aria-label={`编辑${subchannel.name}`} title="编辑房间" onClick={() => openChannelDialog('edit', subchannel.id, item.id)}><Pencil size={13} /></button>
               </div>}
             </div>
@@ -1207,13 +1214,13 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
               <div className="voice-volume-popover"><label><output>{outputVolume}</output><input type="range" min="0" max="100" value={outputVolume} onChange={(event) => setOutputVolume(Number(event.target.value))} aria-label="扬声器音量" /></label></div>
             </div>
           </div>
-          <div className="voice-device-panel__join"><span>{logic.isInVoice ? logic.isMicOn ? '麦克风已开启' : '当前在听' : '正在浏览房间'}</span><button type="button" onClick={logic.isInVoice ? logic.toggleMic : logic.joinVoice} disabled={!logic.isInVoice && (members.length >= (channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS) || roomMemberCount >= (room?.capacity ?? MAX_VOICE_GROUP_MEMBERS))} aria-label={logic.isInVoice ? logic.isMicOn ? '下麦' : '上麦' : '加入语音'}>{logic.isInVoice ? logic.isMicOn ? <><MicOff size={14} />下麦</> : <><Mic size={14} />上麦</> : <><Headphones size={14} />加入语音</>}</button></div>
+          <div className="voice-device-panel__join"><span>{logic.isInVoice ? logic.isMicOn ? '麦克风已开启' : '当前在听' : '正在浏览房间'}</span><button type="button" onClick={logic.isInVoice ? logic.toggleMic : logic.joinVoice} disabled={!logic.isInVoice && (voiceSubchannelIsFull(channel!) || roomMemberCount >= (room?.capacity ?? MAX_VOICE_GROUP_MEMBERS))} aria-label={logic.isInVoice ? logic.isMicOn ? '下麦' : '上麦' : '加入语音'}>{logic.isInVoice ? logic.isMicOn ? <><MicOff size={14} />下麦</> : <><Mic size={14} />上麦</> : <><Headphones size={14} />加入语音</>}</button></div>
         </section>
       </aside>
 
       <section className="voice-stage" aria-label="语音房麦位">
         <header className="voice-stage__header">
-          <div className="voice-stage__room-identity"><AvatarMark initials={channel?.name.slice(0, 1) ?? '房'} imageUrl={channel?.imageDataUrl} size="md" /><div className="voice-stage__room-copy"><strong className="voice-stage__room-name">{channel?.name ?? '语音房'}</strong><div className="voice-stage__room-meta"><span>ID：{channel?.id ?? '—'}</span><span>{members.length}/{channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS} 人</span><span><Flame size={12} />热度 {channel?.heat ?? 0}</span></div></div></div>
+          <div className="voice-stage__room-identity"><AvatarMark initials={channel?.name.slice(0, 1) ?? '房'} imageUrl={channel?.imageDataUrl} size="md" /><div className="voice-stage__room-copy"><strong className="voice-stage__room-name">{channel?.name ?? '语音房'}</strong><div className="voice-stage__room-meta"><span>ID：{channel?.id ?? '—'}</span><span>{members.length}/{channel?.capacity ?? '不限'} 人</span><span><Flame size={12} />热度 {channel?.heat ?? 0}</span></div></div></div>
           <div className="voice-stage__header-actions">
             <button type="button" className="voice-support-call" aria-label={customerServicePerspective ? `呼叫通知，${callNotificationCount} 条待处理` : undefined} onClick={customerServicePerspective ? onOpenCallNotifications : () => setSupportDialogOpen(true)}><Headphones size={14} />{customerServicePerspective ? '呼叫通知' : supportQueued ? `排队中 · 第 ${initialSupportQueue.length + 1} 位` : '呼叫客服'}{customerServicePerspective && callNotificationCount > 0 && <span className="voice-support-call__count" aria-hidden="true">{callNotificationCount > 99 ? '99+' : callNotificationCount}</span>}</button>
             {!userPerspective && <div className="voice-mode-control" ref={voiceModeMenuRef}>
@@ -1224,14 +1231,14 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
               <button type="button" className="voice-more-trigger" aria-label="更多功能" data-tooltip="更多功能" aria-haspopup="menu" aria-expanded={moreFeaturesOpen} onClick={() => { setMoreFeaturesOpen((open) => !open); setVoiceModeOpen(false) }}><MoreHorizontal size={16} /></button>
               {moreFeaturesOpen && <div className="voice-more-menu" role="menu" aria-label="房间更多功能">
                 <button type="button" role="menuitem" onClick={() => { if (room && channel) { const id = `${room.id}:${channel.id}`; if (logic.followedChannelIds.includes(id)) requestRemoval('取消收藏', channel.name, () => logic.toggleChannelFollow(id)); else logic.toggleChannelFollow(id) }; setMoreFeaturesOpen(false) }}><Star size={15} fill={room && channel && logic.followedChannelIds.includes(`${room.id}:${channel.id}`) ? 'currentColor' : 'none'} />{room && channel && logic.followedChannelIds.includes(`${room.id}:${channel.id}`) ? '取消收藏' : '收藏房间'}</button>
-                <button type="button" role="menuitem" onClick={() => { setShareFriendIds([]); setShareSent(false); setShareDialogOpen(true); setMoreFeaturesOpen(false) }}><Share2 size={15} />分享房间</button>
+                <button type="button" role="menuitem" onClick={() => { openInviteForChannel(room?.isUngrouped ? '' : room?.name ?? '', channel?.name ?? ''); setMoreFeaturesOpen(false) }}><UserPlus size={15} />邀请好友进房</button>
                 <button type="button" role="menuitem" onClick={() => { setMoreFeaturesOpen(false); setRoomBlacklistOpen(true) }}><Flag size={15} />房间黑名单 <span>{channel ? blockedRoomMembers[channel.id]?.length ?? 0 : 0}</span></button>
               </div>}
             </div>}
           </div>
         </header>
         {voiceMode === '主持人模式' && activeMicRequest && <div className="voice-mic-request" role="status"><div><AvatarMark initials={activeMicRequest.initials} size="sm" /><span className="voice-mic-request__copy"><strong>{activeMicRequest.name}</strong> 请求上麦</span></div><div><button type="button" onClick={() => setPendingMicRequest(null)}>拒绝</button><button type="button" className="is-primary" onClick={() => { logic.setVoiceMemberMic(activeMicRequest.id, true); setPendingMicRequest(null); setFeedback(`已同意 ${activeMicRequest.name} 上麦。`) }}>同意</button></div></div>}
-        <div className="voice-member-grid">{Array.from({ length: voiceMode === '麦序模式' ? channel?.capacity ?? MAX_VOICE_CHANNEL_MEMBERS : activeStageMembers.length }, (_, index) => {
+        <div className="voice-member-grid">{Array.from({ length: voiceMode === '麦序模式' ? channel?.capacity ?? activeStageMembers.length : activeStageMembers.length }, (_, index) => {
           const member = activeStageMembers[index]
           return <div className={`voice-seat${member ? ' is-occupied' : ''}${member?.micOn && !member.muted ? ' is-speaking' : ''}`} key={member?.id ?? `seat-${index}`}>
             {member ? <>
@@ -1297,7 +1304,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
         <button type="button" role="menuitem" onClick={collapseAllVoiceChannels}>收起所有房间</button>
         <button type="button" role="menuitem" onClick={locateMyVoicePosition}>定位我的位置</button>
       </> : <>
-        <button type="button" role="menuitem" onClick={() => { openInviteForChannel(contextRoom.isUngrouped ? '' : contextRoom.name, contextChannel.name); setChannelContextMenu(null) }}><UserPlus size={15} />邀请</button>
+        <button type="button" role="menuitem" onClick={() => { openInviteForChannel(contextRoom.isUngrouped ? '' : contextRoom.name, contextChannel.name); setChannelContextMenu(null) }}><UserPlus size={15} />邀请好友进房</button>
         {contextRoom.currentRole !== 'member' && <>
           <button type="button" role="menuitem" disabled={!contextChannel.members.length || !contextRoom.channels.some((item) => item.id !== contextChannel.id)} onClick={openBatchMoveDialog}>批量移动用户至</button>
         </>}
@@ -1335,7 +1342,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <label className="social-form-field">房间密码<input autoFocus type="password" inputMode="numeric" autoComplete="current-password" value={privateRoomPasswordInput} onChange={(event) => { setPrivateRoomPasswordInput(event.target.value); setPrivateRoomPasswordError('') }} onKeyDown={(event) => { if (event.key === 'Enter' && privateRoomPasswordInput) confirmPrivateRoomPassword() }} placeholder="请输入房间密码" aria-invalid={Boolean(privateRoomPasswordError)} aria-describedby={privateRoomPasswordError ? 'voice-private-room-password-error' : undefined} /></label>
       {privateRoomPasswordError && <p id="voice-private-room-password-error" className="voice-private-room-password-error" role="alert">{privateRoomPasswordError}</p>}
     </DialogPanel>}
-    {roomDialog && <DialogPanel overlayId="voice-room-dialog" title={roomDialog === 'create' ? '创建分组' : '编辑分组'} description={roomDialog === 'create' ? '创建后自动添加一个公开房间。' : undefined} onClose={() => setRoomDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setRoomDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveRoom} disabled={!roomName.trim() || !Number.isInteger(roomCapacity) || roomCapacity < (roomDialog === 'edit' ? roomDialogMinCapacity : 1) || roomCapacity > MAX_VOICE_GROUP_MEMBERS}>{roomDialog === 'create' ? '创建分组' : '保存'}</button></>}>
+    {roomDialog && <DialogPanel overlayId="voice-room-dialog" title={roomDialog === 'create' ? '创建分组' : '编辑分组'} description={roomDialog === 'create' ? '创建后自动添加一个公开房间。' : undefined} onClose={() => setRoomDialog(null)} width={500} className="voice-group-dialog" footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setRoomDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveRoom} disabled={!roomName.trim() || !Number.isInteger(roomCapacity) || roomCapacity < (roomDialog === 'edit' ? roomDialogMinCapacity : 1) || roomCapacity > MAX_VOICE_GROUP_MEMBERS}>{roomDialog === 'create' ? '创建分组' : '保存'}</button></>}>
       <label className="social-form-field">分组名称<input value={roomName} onChange={(event) => setRoomName(event.target.value)} maxLength={24} placeholder="输入分组名称" /></label>
       <label className="social-form-field">分组最大人数（含所有房间）<input type="number" inputMode="numeric" min={roomDialog === 'edit' ? roomDialogMinCapacity : 1} max={MAX_VOICE_GROUP_MEMBERS} step={1} value={roomCapacity} onChange={(event) => setRoomCapacity(Number(event.target.value))} aria-label="分组最大人数，包含分组内所有房间" /></label>
     </DialogPanel>}
@@ -1354,15 +1361,15 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <button type="button" role="menuitem" disabled={!canManage || memberContextMenu.member.id === currentSocialUser.id || !logic.voiceRooms.some((voiceRoom) => voiceRoom.channels.some((target) => voiceRoom.id !== memberContextMenu.roomId || target.id !== memberContextMenu.channelId))} onClick={openSingleMoveDialog}>移动至其他房间<ChevronRight size={14} /></button>
     </div>}
 
-    {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' && !channelDialogIsUngrouped ? `添加到「${channelDialogRoom?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelName.trim() || (channelMessageFrequency.trim() !== '' && (!Number.isSafeInteger(Number(channelMessageFrequency)) || Number(channelMessageFrequency) < 1)) || !Number.isSafeInteger(Number(channelMicQueueDuration)) || Number(channelMicQueueDuration) < 1 || channelCapacity < Math.max(1, channelDialog.mode === 'edit' ? logic.voiceRooms.find((item) => item.id === channelDialog.roomId)?.channels.find((item) => item.id === channelDialog.id)?.members.length ?? 1 : 1) || channelCapacity > channelCapacityLimit}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>
+    {channelDialog && <DialogPanel overlayId="voice-channel-dialog" title={channelDialog.mode === 'create' ? '创建房间' : '编辑房间'} description={channelDialog.mode === 'create' && !channelDialogIsUngrouped ? `添加到「${channelDialogRoom?.name ?? ''}」` : undefined} onClose={() => setChannelDialog(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setChannelDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveChannel} disabled={!channelDialogCanSave}>{channelDialog.mode === 'create' ? '创建房间' : '保存'}</button></>}>
       <div className="voice-channel-form">
-        <label className="social-form-field">房间名称<input value={channelName} onChange={(event) => setChannelName(event.target.value)} maxLength={20} placeholder="例如：战术讨论" /></label>
-        <div className="social-form-field"><span>房间图片</span><label className="voice-room-image-upload">{channelImageDataUrl ? <img src={channelImageDataUrl} alt="房间图片预览" /> : <ImagePlus size={20} />}<span>{channelImageDataUrl ? '更换图片' : '上传图片'}</span><input type="file" accept="image/*" aria-label="上传房间图片" onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') setChannelImageDataUrl(reader.result) }; reader.readAsDataURL(file); input.value = '' }} /></label></div>
-        <label className="social-form-field">人数上限<input type="number" min={1} max={channelCapacityLimit} value={channelCapacity} onChange={(event) => setChannelCapacity(event.target.value === '' ? 0 : Number(event.target.value))} aria-label="人数上限" /><small>{channelDialogIsUngrouped ? `单个房间最多 ${channelCapacityLimit} 人。` : `不能超过分组上限（${channelCapacityLimit} 人）。`}</small></label>
-        <label className="social-form-field voice-frequency-field">发言频控（秒）<input type="number" min={1} step={1} value={channelMessageFrequency} onChange={(event) => setChannelMessageFrequency(event.target.value)} placeholder="不限制" aria-label="发言频控秒数，留空表示不限制" /><small>留空表示不限制。</small></label>
-        <label className="social-form-field">麦序时长（秒）<input type="number" min={1} step={1} value={channelMicQueueDuration} onChange={(event) => setChannelMicQueueDuration(event.target.value)} aria-label="麦序时长秒数" /></label>
-        <fieldset className="voice-privacy-choice"><legend>房间权限</legend><div className="voice-privacy-choice__options"><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '公开'} onChange={() => { setChannelPrivacy('公开'); setChannelPassword('') }} /><Globe2 size={17} /><span><strong>公开房间</strong><small>可在房间列表中浏览</small></span></label><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '私密'} onChange={() => setChannelPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密房间</strong><small>可选设置进入密码</small></span></label></div></fieldset>
-        {channelPrivacy === '私密' && <label className="social-form-field">房间密码<input type="password" value={channelPassword} onChange={(event) => setChannelPassword(event.target.value)} maxLength={32} placeholder="设置房间密码（可选）" autoComplete="new-password" /></label>}
+        <label className="social-form-field"><span>房间名称<span className="social-required-mark" aria-hidden="true">*</span></span><input value={channelName} onChange={(event) => setChannelName(event.target.value)} maxLength={20} placeholder="请输入房间名称" required /></label>
+        <div className="social-form-field"><span>房间图片<span className="social-required-mark" aria-hidden="true">*</span></span><label className="voice-room-image-upload" aria-required={channelDialog.mode === 'create' ? 'true' : undefined}>{channelImageDataUrl ? <img src={channelImageDataUrl} alt="房间图片预览" /> : <ImagePlus size={20} />}<span>{channelImageDataUrl ? '更换图片' : '上传图片'}</span><input type="file" accept="image/*" aria-label="上传房间图片（必填）" onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') setChannelImageDataUrl(reader.result) }; reader.readAsDataURL(file); input.value = '' }} /></label></div>
+        <label className="social-form-field">人数上限<input type="number" min={1} max={channelCapacityLimit} value={channelCapacity} onChange={(event) => setChannelCapacity(event.target.value)} placeholder="控制进入房间的人数上限，置空表示不限制。" aria-label="人数上限，置空表示不限制" /></label>
+        <label className="social-form-field voice-frequency-field">发言频控（秒）<input type="number" min={1} step={1} value={channelMessageFrequency} onChange={(event) => setChannelMessageFrequency(event.target.value)} placeholder="控制房间内连续发言的频率，置空表示不限制。" aria-label="发言频控秒数，置空表示不限制" /></label>
+        <label className="social-form-field">麦序时长（秒）<input type="number" min={1} step={1} value={channelMicQueueDuration} onChange={(event) => setChannelMicQueueDuration(event.target.value)} placeholder="控制房间内麦序模式的发言时长，置空表示默认值60秒。" aria-label="麦序时长秒数，置空表示默认值60秒" /></label>
+        <fieldset className="voice-privacy-choice"><legend>房间权限</legend><div className="voice-privacy-choice__options"><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '公开'} onChange={() => { setChannelPrivacy('公开'); setChannelPassword('') }} /><Globe2 size={17} /><span><strong>公开房间</strong></span></label><label><input type="radio" name="channelPrivacy" checked={channelPrivacy === '私密'} onChange={() => setChannelPrivacy('私密')} /><LockKeyhole size={17} /><span><strong>私密房间</strong><small>需设置4位数字密码</small></span></label></div></fieldset>
+        {channelPrivacy === '私密' && <label className="social-form-field"><span>房间密码<span className="social-required-mark" aria-hidden="true">*</span></span><input type="text" inputMode="numeric" value={channelPassword} onChange={(event) => setChannelPassword(event.target.value.replace(/\D/g, '').slice(0, 4))} maxLength={4} pattern="[0-9]{4}" placeholder="请设置房间密码，4位数字" autoComplete="new-password" required aria-invalid={Boolean(channelPassword) && !/^\d{4}$/.test(channelPassword)} /></label>}
       </div>
     </DialogPanel>}
 
@@ -1370,7 +1377,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <VoiceDestinationCascade groups={singleMoveTargetGroups} selectedGroupId={singleMoveTargetRoomId} selectedChannelId={singleMoveTargetChannelId} onSelectGroup={(id) => { setSingleMoveTargetRoomId(id); setSingleMoveTargetChannelId('') }} onSelectChannel={setSingleMoveTargetChannelId} getUnavailableReason={singleMoveUnavailableReason} />
     </DialogPanel>}
 
-    {batchMoveDialog && batchMoveSourceChannel && <DialogPanel overlayId="voice-batch-move-dialog" title="批量移动成员" description={`从「${batchMoveSourceRoom?.name ?? ''} · ${batchMoveSourceChannel.name}」选择成员和目标位置。`} onClose={() => setBatchMoveDialog(null)} width={520} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBatchMoveDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBatchMove} disabled={!batchMoveMemberIds.length || !batchMoveTarget || !batchMoveGroupFits || batchMoveTarget.capacity - batchMoveTarget.members.length < batchMoveMemberIds.length}>确认移动（{batchMoveMemberIds.length}）</button></>}>
+    {batchMoveDialog && batchMoveSourceChannel && <DialogPanel overlayId="voice-batch-move-dialog" title="批量移动成员" description={`从「${batchMoveSourceRoom?.name ?? ''} · ${batchMoveSourceChannel.name}」选择成员和目标位置。`} onClose={() => setBatchMoveDialog(null)} width={520} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBatchMoveDialog(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBatchMove} disabled={!batchMoveMemberIds.length || !batchMoveTarget || !batchMoveGroupFits || voiceSubchannelOpenSeats(batchMoveTarget) < batchMoveMemberIds.length}>确认移动（{batchMoveMemberIds.length}）</button></>}>
       <div className="voice-batch-move-form">
         <fieldset className="voice-batch-move-section">
           <legend>选择成员（{batchMoveMemberIds.length}/{batchMoveSourceChannel.members.length}）</legend>
@@ -1395,12 +1402,12 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onMinimizeV
       <div className="support-queue-summary"><Headphones size={18} /><strong>{supportQueued ? `正在排队 · 第 ${initialSupportQueue.length + 1} 位` : `当前 ${initialSupportQueue.length} 人排队`}</strong>{!supportQueued && <span>预计排在第 {initialSupportQueue.length + 1} 位</span>}</div>
       <div className="support-queue-list" aria-label="客服排队列表">{initialSupportQueue.map((person, index) => <div className="support-queue-row" key={person.id}><AvatarMark initials={person.initials} size="sm" /><strong><UserNameWithLevel name={person.name} identityId={person.name} /></strong><span>第 {index + 1} 位</span></div>)}{supportQueued && <div className="support-queue-row is-self"><AvatarMark initials={currentSocialUser.initials} size="sm" /><strong><UserNameWithLevel name={`${currentSocialUser.name}（我）`} identityId={currentSocialUser.profileId} /></strong><span>第 {initialSupportQueue.length + 1} 位</span></div>}</div>
     </DialogPanel>}
-    {inviteDialog && <DialogPanel overlayId="invite-friends-dialog" title="邀请好友进入语音房" description={`邀请好友加入「${inviteTargetChannel?.roomName || (room?.isUngrouped ? '' : room?.name) ? `${inviteTargetChannel?.roomName || (room?.isUngrouped ? '' : room?.name)} · ` : ''}${inviteTargetChannel?.channelName ?? channel?.name ?? ''}」。`} onClose={() => { setInviteDialog(false); setInviteTargetChannel(null) }} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setInviteDialog(false); setInviteTargetChannel(null) }}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveInvites} disabled={!invitees.length}>发送邀请（{invitees.length}）</button></>}>
-      <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={invitees.includes(friend.id)} onChange={() => toggleInvitee(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>
+    {inviteDialog && <DialogPanel overlayId="invite-friends-dialog" title="邀请好友进房" description={`邀请好友加入「${inviteTargetChannel?.roomName || (room?.isUngrouped ? '' : room?.name) ? `${inviteTargetChannel?.roomName || (room?.isUngrouped ? '' : room?.name)} · ` : ''}${inviteTargetChannel?.channelName ?? channel?.name ?? ''}」。`} onClose={closeInviteDialog} width={500} className="voice-invite-dialog" footer={<><button type="button" className="client-button client-button--secondary" onClick={closeInviteDialog}>取消</button><button type="button" className="client-button client-button--primary" onClick={saveInvites} disabled={!invitees.length}>发送邀请（{invitees.length}）</button></>}>
+      <label className="social-search social-member-search voice-invite-search"><Search size={15} /><input type="search" aria-label="搜索好友" placeholder="搜索好友昵称或 ID" value={inviteSearch} onChange={(event) => setInviteSearch(event.target.value)} /></label>
+      <div className="social-select-friends voice-invite-friends">{filteredInviteFriends.length ? filteredInviteFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={invitees.includes(friend.id)} onChange={() => toggleInvitee(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><FriendPresence online={friend.online} /></span></label>) : <p className="social-dialog-copy voice-invite-empty">没有匹配的好友。</p>}</div>
+
     </DialogPanel>}
-    {shareDialogOpen && <DialogPanel overlayId="voice-room-share-dialog" title="分享房间" description={`选择好友，分享「${room?.isUngrouped ? '' : `${room?.name} · `}${channel?.name ?? '语音房'}」。`} onClose={() => setShareDialogOpen(false)} width={500} footer={shareSent ? <button type="button" className="client-button client-button--primary" onClick={() => setShareDialogOpen(false)}>完成</button> : <><button type="button" className="client-button client-button--secondary" onClick={() => setShareDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!shareFriendIds.length} onClick={() => { if (room && channel) { logic.shareVoiceRoomToFriends(shareFriendIds, { roomId: room.id, channelId: channel.id, avatarInitials: channel.name.slice(0, 1), avatarDataUrl: channel.imageDataUrl, name: channel.name, onlineCount: channel.members.length }) }; setShareSent(true); setFeedback(`已向 ${shareFriendIds.length} 位好友分享房间（仅演示）。`) }}>分享（{shareFriendIds.length}）</button></>}>
-      {shareSent ? <div className="voice-room-share-success" role="status"><Check size={18} />已分享给 {shareFriendIds.length} 位好友</div> : <div className="social-select-friends">{socialFriends.map((friend) => <label className="social-select-friend" key={friend.id}><input type="checkbox" checked={shareFriendIds.includes(friend.id)} onChange={() => toggleShareFriend(friend.id)} /><AvatarMark initials={friend.initials} size="sm" /><span><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>{friend.status}</small></span></label>)}</div>}
-    </DialogPanel>}
+
     {roomBlacklistOpen && <DialogPanel overlayId="voice-room-blacklist" title="房间黑名单" onClose={() => setRoomBlacklistOpen(false)} width={520} footer={<button type="button" className="client-button client-button--secondary" onClick={() => setRoomBlacklistOpen(false)}>关闭</button>}>
       <div className="voice-room-blacklist-list">{(channel ? blockedRoomMembers[channel.id] ?? [] : []).map((friend) => <div className="voice-room-blacklist-row" key={friend.id}><AvatarMark initials={friend.initials} size="sm" /><div><strong><UserNameWithLevel name={friend.name} identityId={friend.profileId} /></strong><small>ID：{friend.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => setRemoveBlockedMember({ channelId: channel!.id, friend })}>移除</button></div>)}{(!channel || !(blockedRoomMembers[channel.id]?.length)) && <div className="voice-room-blacklist-empty">当前房间暂无黑名单用户</div>}</div>
     </DialogPanel>}
