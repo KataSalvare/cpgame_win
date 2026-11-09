@@ -26,13 +26,14 @@ type Props = {
   logic: MatchLogic
   onMinimize: () => void
   onRestore: () => void
+  onCandidatesAvailable: (available: boolean) => void
   onStartMatching: () => void
   onGoToVoiceRoom: () => void
   onCancel: () => void
   onChooseCompanions: (companionIds: string[]) => void
 }
 
-export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onStartMatching, onGoToVoiceRoom, onCancel, onChooseCompanions }: Props) {
+export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCandidatesAvailable, onStartMatching, onGoToVoiceRoom, onCancel, onChooseCompanions }: Props) {
   const [dialog, setDialog] = useState<'price' | 'cancel' | 'notice' | null>(null)
   const [noticeTab, setNoticeTab] = useState<NoticeTab>('tab1')
   const [dontRemind, setDontRemind] = useState(false)
@@ -63,7 +64,9 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
     if (logic.gender !== '不限' && companion.gender !== logic.gender) return false
     return true
   })
-  const hasCandidateList = candidatesReady && candidates.length > 0
+  const hasCandidateList = matching && candidatesReady && candidates.length > 0
+
+  useEffect(() => { onCandidatesAvailable(hasCandidateList) }, [hasCandidateList, onCandidatesAvailable])
 
   const startMiniDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return
@@ -258,7 +261,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
       onKeyDown={handleMiniKeyDown}
     >
       <span className="match-mini-card__icon"><Swords size={16} /></span>
-      <span className="match-mini-card__content"><strong>{hasCandidateList ? '等待选人' : '匹配中'}</strong>{hasCandidateList && <small>已匹配 {candidates.length} 位 · 已选 {selectedIds.length}/{expectedCount}</small>}</span>
+      <span className="match-mini-card__content"><strong>{hasCandidateList ? '等待选人' : '匹配中'}</strong>{hasCandidateList && <small>已匹配 {candidates.length} 位</small>}</span>
       <Maximize2 className="match-mini-card__restore" size={15} aria-hidden="true" />
     </div>}
     {open && <section className={`match-panel${matchPanelDragging ? ' is-dragging' : ''}`} style={matchPanelPosition ? { left: matchPanelPosition.left, top: matchPanelPosition.top, right: 'auto' } : undefined} aria-label={matching ? '匹配中' : '一键匹配'}>
@@ -302,7 +305,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onSta
         <div className="match-field"><span>是否试音</span><div className="match-choice-row" role="group" aria-label="是否试音">{(['否', '是'] as const).map((value) => <button type="button" key={value} className={`match-choice${logic.tryout === (value === '是') ? ' is-active' : ''}`} aria-pressed={logic.tryout === (value === '是')} onClick={() => logic.setTryout(value === '是')}>{value === '是' ? '试音' : '不试音'}</button>)}</div></div>
         <section className="match-field match-field--wide match-service-field" aria-label="选择服务" ref={servicePickerRef} onKeyDown={(event) => { if (event.key === 'Escape') setServicePickerOpen(false) }}>
           <span>选择服务</span>
-          <button type="button" className="match-service-trigger" aria-haspopup="dialog" aria-expanded={servicePickerOpen} onClick={() => setServicePickerOpen((open) => !open)}><span>{logic.selectedService ? `${logic.playName} · ${logic.levelName} · ${logic.selectedService.unit}服务 · ${logic.selectedService.price} 金豆` : '请选择玩法、等级和服务'}</span><ChevronDown size={14} /></button>
+          <button type="button" className="match-service-trigger" aria-haspopup="dialog" aria-expanded={servicePickerOpen} onClick={() => setServicePickerOpen((open) => !open)}><span>{logic.selectedService ? `${logic.playName} · ${logic.levelName} · ${logic.selectedService.unit}服务 · ${logic.selectedService.price} 金豆` : '请选择您想要下单的服务'}</span><ChevronDown size={14} /></button>
           {servicePickerOpen && <div className="match-service-cascade" role="dialog" aria-label="玩法、等级和服务级联选择">
             <section className="match-service-cascade__column" role="listbox" aria-label="玩法">
               {logic.playOptions.map((option) => <button type="button" role="option" aria-selected={logic.playName === option} key={option} className={`match-service-cascade__option${logic.playName === option ? ' is-selected' : ''}`} onClick={() => logic.choosePlay(option)}><span>{option}</span><ChevronRight size={13} /></button>)}

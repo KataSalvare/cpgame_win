@@ -67,9 +67,9 @@ export function useWorkbenchLogic() {
     }
     setRequests(items => {
       if (accept && items.some(r => r.status === '已加入候选名单')) return items
-      return items.map(r => r.id === id && r.status === '待响应' ? { ...r, status: accept ? '已加入候选名单' : '已忽略' } : r)
+      return items.map(r => r.id === id && r.status === '待响应' ? { ...r, status: accept ? '已加入候选名单' : '已拒绝' } : r)
     })
-    setFeedback(accept ? '已加入候选名单，等待玩家选择并下单' : '已忽略匹配请求')
+    setFeedback(accept ? '已加入候选名单，等待玩家选择并下单' : '已拒绝匹配请求')
     return true
   }
   const cancelMatch = (id: string) => {

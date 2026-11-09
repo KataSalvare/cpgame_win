@@ -35,6 +35,18 @@ export function ExamOrderDetailPanel({ order, role, onPay, onCancel, onContact, 
   </>
 }
 
+export function ExamSubmissionViewDialog({ order, onClose }: { order: ExamOrder; onClose: () => void }) {
+  const submission = order.submission
+  return <DialogPanel overlayId="exam-order-materials" title="考核资料" onClose={onClose} width={600} footer={<button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button>}>
+    {submission ? <div className="exam-submission-summary">
+      <span>考核结果：{submission.result}</span>
+      {submission.recordingUrls.map((url, index) => <a key={`${url}-${index}`} href={url} target="_blank" rel="noreferrer">录屏地址 {index + 1}</a>)}
+      {submission.note && <p>{submission.note}</p>}
+      {submission.images.length > 0 && <div className="exam-submission-summary__images">{submission.images.map((src, index) => <img src={src} alt={`考核资料 ${index + 1}`} key={`${order.id}-image-${index}`} />)}</div>}
+    </div> : <p>暂无考核资料</p>}
+  </DialogPanel>
+}
+
 export function ExamOrderPayButton({ onPay }: { onPay: () => void }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   return <>

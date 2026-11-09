@@ -55,8 +55,8 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
       </header>
       <p className="workbench-notice-service">{w.serviceLabel(message.serviceId)}{message.kind === 'order' && ` · ${service?.name ?? '组队开黑'}`}</p>
       <footer className={`workbench-notice-footer${compact ? ' workbench-notice-footer--compact' : ''}`}>
-        <dl className={`workbench-notice-prices${compact ? ' workbench-notice-prices--compact' : ''}`}>{message.kind === 'match' ? <><div><dt className="sr-only">匹配单价</dt><dd>{message.matchPrice} 金豆 / {service?.unit ?? '小时'}</dd></div><div className="workbench-notice-tip"><dt>加价</dt><dd>{message.tipAmount} 金豆</dd></div></> : <div><dt className="sr-only">金额</dt><dd>{message.amount} 金豆</dd></div>}</dl>
-        <div className="workbench-notice-actions">{!compact && <button type="button" className="client-button client-button--secondary" onClick={() => respond(message, false)}>忽略</button>}{message.kind === 'order' && <button type="button" className="client-button client-button--secondary" onClick={() => w.setOrderAction({ id: message.id, action: '拒绝' })}>拒绝</button>}<button type="button" className="client-button client-button--primary" title={message.kind === 'match' && w.activeMatch ? '请先取消当前匹配' : undefined} disabled={message.kind === 'match' && (Boolean(w.activeMatch) || !w.enabled.includes(message.serviceId))} onClick={() => respond(message, true)}>{message.kind === 'match' ? '抢单' : '接受'}</button></div>
+        <dl className={`workbench-notice-prices${compact ? ' workbench-notice-prices--compact' : ''}`}>{message.kind === 'match' ? <><div><dt className="sr-only">总金额</dt><dd>{(message.matchPrice * message.quantity + message.tipAmount).toLocaleString()} 金豆（含加价 {message.tipAmount.toLocaleString()} 金豆）</dd></div><div className="workbench-notice-calculation"><dt className="sr-only">计算方式</dt><dd>{message.matchPrice.toLocaleString()} 金豆 × {message.quantity} {message.quantityUnit}</dd></div></> : <div><dt className="sr-only">金额</dt><dd>{message.amount} 金豆</dd></div>}</dl>
+        <div className="workbench-notice-actions">{!compact && message.kind === 'match' && <button type="button" className="client-button client-button--secondary" onClick={() => respond(message, false)}>拒绝</button>}{message.kind === 'order' && <button type="button" className="client-button client-button--secondary" onClick={() => w.setOrderAction({ id: message.id, action: '拒绝' })}>拒绝</button>}<button type="button" className="client-button client-button--primary" title={message.kind === 'match' && w.activeMatch ? '请先取消当前匹配' : undefined} disabled={message.kind === 'match' && (Boolean(w.activeMatch) || !w.enabled.includes(message.serviceId))} onClick={() => respond(message, true)}>{message.kind === 'match' ? '抢单' : '接受'}</button></div>
       </footer>
     </NotificationCard>
   }
@@ -64,7 +64,7 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
   const renderCallCard = (notification: VoiceCallNotification, compact = false) => <NotificationCard key={notification.id} label={`呼叫通知：${notification.callerName}`}>
     <header className="workbench-notice-heading">{!compact && <AvatarMark initials={notification.callerInitials} size="sm" />}<strong><UserNameWithLevel name={notification.callerName} identityId={notification.callerName} /></strong><span className="workbench-notice-type">呼叫通知</span></header>
     <p className="workbench-global-notice__message">正在呼叫客服</p>
-    <footer className={`workbench-notice-actions${compact ? ' workbench-notice-actions--compact' : ''}`}>{!compact && <button type="button" className="client-button client-button--secondary" onClick={onIgnoreVoiceCall}>忽略</button>}<button type="button" className="client-button client-button--primary" onClick={onOpenVoiceCall}>查看</button></footer>
+    <footer className={`workbench-notice-actions${compact ? ' workbench-notice-actions--compact' : ''}`}><button type="button" className="client-button client-button--primary" onClick={onOpenVoiceCall}>查看</button></footer>
   </NotificationCard>
 
   const renderInvitationCard = (invitation: VoiceInvitation, compact = false) => <NotificationCard key={invitation.id} label={`邀请进房：${invitation.inviter}`}>
@@ -74,7 +74,7 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
       <span className="workbench-notice-type">邀请进房</span>
     </header>
     <p className="workbench-notice-service">{invitation.roomName}{invitation.channelName && ` · ${invitation.channelName}`} · {invitation.time}</p>
-    <footer className={`workbench-notice-actions${compact ? ' workbench-notice-actions--compact' : ''}`}>{!compact && <button type="button" className="client-button client-button--secondary" onClick={() => onIgnoreVoiceInvitation(invitation.id)}>忽略</button>}<button type="button" className="client-button client-button--primary" onClick={() => onAcceptVoiceInvitation(invitation)}><Headphones size={14} />加入</button></footer>
+    <footer className={`workbench-notice-actions${compact ? ' workbench-notice-actions--compact' : ''}`}><button type="button" className="client-button client-button--primary" onClick={() => onAcceptVoiceInvitation(invitation)}><Headphones size={14} />加入</button></footer>
   </NotificationCard>
   const renderInvitationCardCompact = (invitation: VoiceInvitation) => renderInvitationCard(invitation, true)
 
@@ -113,7 +113,7 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
     {voiceCallNotifications.length > 0 && <NotificationCard label="呼叫通知">
       <header className="workbench-notice-heading"><PhoneCall size={17} /><strong>呼叫通知</strong><span className="workbench-notice-type">{voiceCallNotifications.length} 条</span></header>
       <p className="workbench-global-notice__message">{voiceCallNotifications.length === 1 ? <><UserNameWithLevel name={voiceCallNotifications[0].callerName} identityId={voiceCallNotifications[0].callerName} /> 正在呼叫客服</> : <><UserNameWithLevel name={voiceCallNotifications[0].callerName} identityId={voiceCallNotifications[0].callerName} /> 等{voiceCallNotifications.length}位用户正在呼叫客服</>}</p>
-      <footer className="workbench-notice-actions"><button type="button" className="client-button client-button--secondary" onClick={onIgnoreVoiceCall}>忽略</button><button type="button" className="client-button client-button--primary" onClick={onOpenVoiceCall}>查看</button></footer>
+      <footer className="workbench-notice-actions"><button type="button" className="client-button client-button--primary" onClick={onOpenVoiceCall}>查看</button></footer>
     </NotificationCard>}
     {voiceInvitations.slice(0, 1).map(invitation => renderInvitationCard(invitation))}
     {systemCard}

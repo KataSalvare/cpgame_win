@@ -1,3 +1,4 @@
+import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useState } from 'react'
 import { ArrowLeft, BatteryCharging, ChevronLeft, ChevronRight, Gift, HandHeart, MessageCircle, Orbit, Sparkles, Star, UsersRound } from 'lucide-react'
 import type { Companion } from '../data/mockData'
@@ -38,6 +39,7 @@ const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit
 const receivedGiftCount = gifts.reduce((total, gift) => total + gift.count, 0)
 
 export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, onGift, followed, blocked, onToggleFollow, onBlock, note, onSaveNote, onShare, onClose }: Props) {
+  const { requestRemoval, dialog: removalDialog } = useRemovalConfirmation()
   const [activeTab, setActiveTab] = useState<DetailTab>('services')
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all')
   const logic = useCompanionDetailLogic(companion.id)
@@ -131,8 +133,9 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
         </section>}
       </div>
     </section>
+    {removalDialog}
     <footer className="companion-detail-page__actions" aria-label="陪玩操作">
-      <button type="button" className={`client-button client-button--secondary${followed ? ' is-followed' : ''}`} aria-pressed={Boolean(followed)} onClick={onToggleFollow}><Star size={15} />{followed ? '已关注' : '关注'}</button>
+      <button type="button" className={`client-button client-button--secondary${followed ? ' is-followed' : ''}`} aria-pressed={Boolean(followed)} onClick={() => { if (followed && onToggleFollow) requestRemoval('取消关注', companion.name, onToggleFollow); else onToggleFollow?.() }}><Star size={15} />{followed ? '已关注' : '关注'}</button>
       <button type="button" className="client-button client-button--primary" onClick={onChat}><MessageCircle size={15} />找TA开黑</button>
       <button type="button" className="client-button client-button--secondary" onClick={(event) => onGift?.(event.currentTarget)}><Gift size={15} />送礼</button>
     </footer>

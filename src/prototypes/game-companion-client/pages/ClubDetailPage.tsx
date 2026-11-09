@@ -1,3 +1,4 @@
+import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useState, type ReactNode } from 'react'
 import { ArrowLeft, Bell, Headphones, MessageCircle, ShieldCheck, ShoppingCart, Star, UsersRound } from 'lucide-react'
 import type { Club } from '../data/mockData'
@@ -27,6 +28,8 @@ type Props = {
 }
 
 export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onChatWithCompanion, onOpenVoiceRoom, onOpenClubGroups, onOpenMatch, onOpenClubSupport, onOpenPremiumCards, onOpenAnnouncements, onOpenClubReviews, social, onRetry }: Props) {
+  const { requestRemoval, dialog: removalDialog } = useRemovalConfirmation()
+  const toggleFollow = () => social.followedClubIds.includes(club.id) ? requestRemoval('取消关注', club.name, () => social.toggleClubFollow(club.id)) : social.toggleClubFollow(club.id)
   const [clubInfoTab, setClubInfoTab] = useState<ClubInfoTab | null>(null)
   if (pageState !== 'normal') {
     return <div className="client-content client-content--narrow-state">
@@ -53,7 +56,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
           <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
           <p>{club.intro}</p>
         </div>
-        <div className="club-profile-card__tools"><FollowIconButton followed={social.followedClubIds.includes(club.id)} name={club.name} onToggle={() => social.toggleClubFollow(club.id)} /><ClubMoreActions club={club} followed={social.followedClubIds.includes(club.id)} onToggleFollow={() => social.toggleClubFollow(club.id)} onOpenInfo={setClubInfoTab} /></div>
+        <div className="club-profile-card__tools"><FollowIconButton followed={social.followedClubIds.includes(club.id)} name={club.name} onToggle={toggleFollow} /><ClubMoreActions club={club} followed={social.followedClubIds.includes(club.id)} onToggleFollow={toggleFollow} onOpenInfo={setClubInfoTab} /></div>
       </div>
       <div className="club-profile-card__actions" role="group" aria-label="俱乐部操作">
         <div className="club-profile-card__primary-actions" role="group" aria-label="主要操作">
@@ -73,6 +76,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
     </section>
 
     <CompanionDirectory clubId={club.id} pageState="normal" searchable onRetry={onRetry} onOpenCompanion={onOpenCompanion} onChatWithCompanion={onChatWithCompanion} />
+    {removalDialog}
     {clubInfoTab && <ClubInfoDialog key={`${club.id}-${clubInfoTab}`} club={club} initialTab={clubInfoTab} onClose={() => setClubInfoTab(null)} />}
   </div>
 }

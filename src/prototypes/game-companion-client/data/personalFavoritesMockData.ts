@@ -12,7 +12,7 @@ export const favoriteUsers = [
 ]
 
 export const personalFans = [
-  { id: 'fan-001', name: '橘子汽水', initials: '橘子', detail: '女 · 23 岁', followedAt: '刚刚关注了你' },
+  { id: 'favorite-user-001', name: '林间晚风', initials: '晚风', detail: '女 · 24 岁', followedAt: '刚刚关注了你' },
   { id: 'fan-002', name: '山海入梦', initials: '山海', detail: '男 · 26 岁', followedAt: '今天关注了你' },
   { id: 'fan-003', name: '星野', initials: '星野', detail: '女 · 21 岁', followedAt: '昨天关注了你' },
   { id: 'fan-004', name: '小满同学', initials: '小满', detail: '男 · 25 岁', followedAt: '3 天前关注了你' },

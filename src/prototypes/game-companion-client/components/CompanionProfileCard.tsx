@@ -1,3 +1,4 @@
+import { useRemovalConfirmation } from './RemovalConfirmation'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Flag, MoreHorizontal, Pencil, Shield, Share2, Star, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
@@ -23,6 +24,7 @@ type Props = {
 }
 
 export function CompanionProfileCard({ profile, className = '', followed = false, blocked = false, onToggleFollow, onBlock, note = '', onSaveNote, onShare, immersive = false, onClose }: Props) {
+  const { requestRemoval, dialog: removalDialog } = useRemovalConfirmation()
   const [lifePhotoIndex, setLifePhotoIndex] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
@@ -69,8 +71,9 @@ export function CompanionProfileCard({ profile, className = '', followed = false
   }, [menuOpen])
 
   const toggleFollow = () => {
-    if (onToggleFollow) onToggleFollow()
-    else setLocalFollowed((value) => !value)
+    const apply = () => { if (onToggleFollow) onToggleFollow(); else setLocalFollowed((value) => !value) }
+    if (isFollowed) requestRemoval('取消关注', profile.name, apply)
+    else apply()
     setMenuOpen(false)
   }
   const openNote = () => {
@@ -126,6 +129,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
       </div>
     </div>}
     {feedback && <p className="companion-profile-card__feedback" role="status">{feedback}</p>}
+    {removalDialog}
     {blockConfirmationOpen && <DialogPanel overlayId={`companion-block-${profile.userId}`} title="确认拉黑" description={`确定拉黑「${profile.name}」吗？`} onClose={() => setBlockConfirmationOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBlockConfirmationOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBlock}>确认拉黑</button></>}><p className="social-dialog-copy">确认后，该陪玩会标记为已拉黑。</p></DialogPanel>}
     {shareOpen && onShare && <CompanionShareDialog profile={profile} onShare={onShare} onClose={() => setShareOpen(false)} />}
     {noteDialogOpen && <DialogPanel overlayId={`companion-note-${profile.userId}`} title="设置备注" onClose={() => setNoteDialogOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setNoteDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { if (onSaveNote) onSaveNote(noteDraft.trim()); else setLocalNote(noteDraft.trim()); setNoteDialogOpen(false) }}>保存备注</button></>}><label className="companion-note-field"><span>备注</span><input autoFocus maxLength={20} value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="输入备注名称" /></label></DialogPanel>}
