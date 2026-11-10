@@ -698,37 +698,60 @@ function formatServedClock(minutes = 0) {
 
 function OrderReviewDialog({ order, clubName, onClose }: { order: ClientOrder; clubName: string; onClose: () => void }) {
   const dialogRef = useOrderDialogFocus(onClose)
-  const [target, setTarget] = useState<ReviewTarget>('companion')
   const [drafts, setDrafts] = useState<Record<ReviewTarget, ReviewDraft>>({ companion: emptyReviewDraft(), club: emptyReviewDraft() })
   const previewUrls = useRef<string[]>([])
-  const draft = drafts[target]
-  const subject = target === 'companion' ? order.companionName : clubName
+  const companion = companions.find((item) => item.id === order.companionId)
+  const club = clubs.find((item) => item.id === companion?.clubId)
 
   useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), [])
   useEffect(() => {
-    if (draft.submitted) dialogRef.current?.querySelector<HTMLElement>('footer button:not(:disabled)')?.focus()
-  }, [dialogRef, draft.submitted])
+    if (drafts.companion.submitted && drafts.club.submitted) dialogRef.current?.querySelector<HTMLElement>('footer button:not(:disabled)')?.focus()
+  }, [dialogRef, drafts.companion.submitted, drafts.club.submitted])
 
-  const updateDraft = (update: Partial<ReviewDraft>) => setDrafts((current) => ({
+  const updateDraft = (target: ReviewTarget, update: Partial<ReviewDraft>) => setDrafts((current) => ({
     ...current,
     [target]: { ...current[target], ...update },
   }))
+  const addImages = (target: ReviewTarget, event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget
+    const selectedFiles = Array.from(input.files ?? []).filter((file) => file.type.startsWith('image/'))
+    input.value = ''
+    const addedImages = selectedFiles.map((file, index) => {
+      const url = URL.createObjectURL(file)
+      previewUrls.current.push(url)
+      return { id: `${Date.now()}-${index}-${file.name}`, url }
+    })
+    if (addedImages.length) updateDraft(target, { images: [...drafts[target].images, ...addedImages] })
+  }
+  const removeImage = (target: ReviewTarget, image: ReviewImage) => {
+    URL.revokeObjectURL(image.url)
+    previewUrls.current = previewUrls.current.filter((url) => url !== image.url)
+    updateDraft(target, { images: drafts[target].images.filter((item) => item.id !== image.id) })
+  }
+  const submitted = drafts.companion.submitted && drafts.club.submitted
+  const canSubmit = (['companion', 'club'] as const).every((target) => drafts[target].rating > 0 && drafts[target].content.trim().length > 0)
+  const reviewTargets: { id: ReviewTarget; label: string; name: string; initials: string; identityId: string }[] = [
+    { id: 'companion', label: '陪玩', name: order.companionName, initials: companion?.initials ?? order.companionInitials, identityId: order.companionId },
+    { id: 'club', label: '俱乐部', name: club?.name ?? clubName, initials: club?.initials ?? clubName.slice(0, 2), identityId: '' },
+  ]
+
+  const renderReviewImages = (target: ReviewTarget) => <div className="order-review-images"><span>评价图片</span><div className="order-review-image-list">{drafts[target].images.map((image, index) => <div className="order-review-image" key={image.id}><img src={image.url} alt={`待提交图片 ${index + 1}`} /><button type="button" aria-label={`移除图片 ${index + 1}`} onClick={() => removeImage(target, image)}><X size={14} /></button></div>)}<label className="order-review-upload"><input type="file" accept="image/*" multiple aria-label={`选择${reviewTargets.find((item) => item.id === target)?.label}评价图片`} onChange={(event) => addImages(target, event)} /><ImagePlus size={20} /><span>添加图片</span></label></div></div>
 
   return <div className="order-action-overlay" data-overlay="order-review" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
     <section ref={dialogRef} className="order-action-dialog order-review-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-review-title">
-      <header><h2 id="order-review-title">评价</h2><button type="button" className="order-action-dialog__close" aria-label="关闭评价" onClick={onClose}><X size={17} /></button></header>
-      <div className="order-review-order-id">订单 {order.id}</div>
-      <div className="order-review-tabs" role="tablist" aria-label="选择评价对象">
-        <button type="button" role="tab" aria-selected={target === 'companion'} className={target === 'companion' ? 'is-active' : ''} onClick={() => setTarget('companion')}>陪玩评价{drafts.companion.submitted && <span>已提交</span>}</button>
-        <button type="button" role="tab" aria-selected={target === 'club'} className={target === 'club' ? 'is-active' : ''} onClick={() => setTarget('club')}>俱乐部评价{drafts.club.submitted && <span>已提交</span>}</button>
-      </div>
-      {draft.submitted ? <div className="order-review-submitted" role="status"><CheckCircle2 size={22} /><strong>{target === 'companion' ? '陪玩' : '俱乐部'}评价已提交</strong><span>本次仅作原型演示，评价内容和图片未保存。</span></div> : <div className="order-review-form">
-        <strong className="order-review-subject">{subject}</strong>
-        <fieldset className="order-review-rating" aria-required="true"><legend>评分</legend><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`${score} 分`} aria-pressed={draft.rating === score} className={draft.rating >= score ? 'is-selected' : ''} onClick={() => updateDraft({ rating: score })}><Star size={22} fill={draft.rating >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{draft.rating ? `${draft.rating} 分` : '请选择分数'}</span></fieldset>
-        <label className="order-review-content"><span>评价内容</span><textarea required aria-required="true" value={draft.content} onChange={(event) => updateDraft({ content: event.target.value })} placeholder={`分享你对${target === 'companion' ? '陪玩' : '俱乐部'}服务的感受`} rows={4} /></label>
-        <div className="order-review-images"><span>评价图片</span><div className="order-review-image-list">{draft.images.map((image, index) => <div className="order-review-image" key={image.id}><img src={image.url} alt={`待提交图片 ${index + 1}`} /><button type="button" aria-label={`移除图片 ${index + 1}`} onClick={() => { URL.revokeObjectURL(image.url); previewUrls.current = previewUrls.current.filter((url) => url !== image.url); updateDraft({ images: draft.images.filter((item) => item.id !== image.id) }) }}><X size={14} /></button></div>)}<label className="order-review-upload"><input type="file" accept="image/*" multiple aria-label="选择评价图片" disabled={draft.submitted} onChange={(event) => { const selectedFiles = Array.from(event.currentTarget.files ?? []).filter((file) => file.type.startsWith('image/')); const addedImages = selectedFiles.map((file, index) => { const url = URL.createObjectURL(file); previewUrls.current.push(url); return { id: `${Date.now()}-${index}-${file.name}`, url } }); if (addedImages.length) updateDraft({ images: [...draft.images, ...addedImages] }); event.currentTarget.value = '' }} /><ImagePlus size={20} /><span>添加图片</span></label></div><small>图片仅在本地预览，不会上传。</small></div>
+      <header><h2 id="order-review-title">服务评价</h2><button type="button" className="order-action-dialog__close" aria-label="关闭服务评价" onClick={onClose}><X size={17} /></button></header>
+      {submitted ? <div className="order-review-submitted" role="status"><CheckCircle2 size={22} /><strong>服务评价已提交</strong><span>本次仅作原型演示，评价内容和图片未保存。</span></div> : <div className="order-review-form">
+        {reviewTargets.map(({ id, label, name, initials, identityId }) => {
+          const draft = drafts[id]
+          return <section className="order-review-section" key={id} aria-label={`${label}评价`}>
+            <div className="order-review-subject">{id === 'companion' ? <AvatarMark initials={initials} size="md" /> : <AvatarMark initials={initials} size="md" />}<div><strong>{id === 'companion' ? <UserNameWithLevel name={name} identityId={identityId} /> : name}</strong>{id === 'companion' && companion && <span className="order-review-demographic" aria-label={`性别${companion.gender}，${companion.age}岁`}>{companion.gender === '女' ? <Venus size={13} aria-hidden="true" /> : <Mars size={13} aria-hidden="true" />}{companion.age}</span>}</div></div>
+            <fieldset className="order-review-rating" aria-required="true"><legend>{label}评分</legend><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`${label}${score}分`} aria-pressed={draft.rating === score} className={draft.rating >= score ? 'is-selected' : ''} onClick={() => updateDraft(id, { rating: score })}><Star size={22} fill={draft.rating >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{draft.rating ? `${draft.rating} 分` : '请选择分数'}</span></fieldset>
+            <label className="order-review-content"><span>{label}评价内容</span><span className="order-review-textarea-wrap"><textarea maxLength={100} value={draft.content} onChange={(event) => updateDraft(id, { content: event.target.value })} placeholder={`分享你对${label}服务的感受`} rows={3} /><small aria-live="polite">{Array.from(draft.content).length}/100</small></span></label>
+            {renderReviewImages(id)}
+          </section>
+        })}
       </div>}
-      <footer>{draft.submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!draft.rating || !draft.content.trim()} onClick={() => updateDraft({ submitted: true })}>提交{target === 'companion' ? '陪玩' : '俱乐部'}评价</button></>}</footer>
+      <footer>{submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!canSubmit} onClick={() => setDrafts((current) => ({ companion: { ...current.companion, submitted: true }, club: { ...current.club, submitted: true } }))}>提交</button></>}</footer>
     </section>
   </div>
 }

@@ -342,7 +342,10 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
           {!logic.selectedProfile && !(conversation.kind === 'group' && groupSettingsOpen) && <button type="button" className="windows-icon-button" aria-label={conversation.kind === 'group' ? '更多功能：群聊管理' : '更多功能：用户详情'} title="更多功能" onClick={() => conversation.kind === 'group' ? openGroupSettings() : showFriendProfile(conversation.members[0])}><MoreHorizontal size={18} /></button>}
         </header>
         <div className="chat-message-list" aria-live="polite">
-          {conversation.messages.map((message) => <ChatMessage key={message.id} selfId={conversation.self?.id} onReviewChange={(rating, submitted) => logic.updateSupportReview(message.id, rating, submitted)} message={message} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onAvatarClick={() => message.senderId !== currentSocialUser.id && showFriendProfile(message.senderId)} onOpenVoiceRoom={openVoiceRoomFromMessage} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />)}
+          {conversation.messages.map((message, index) => <div className="chat-message-group" key={message.id}>
+            {shouldShowChatTimestamp(message, conversation.messages[index - 1]) && <time className="social-message__time social-message__time--grouped">{formatChatMessageTime(message.time)}</time>}
+            <ChatMessage selfId={conversation.self?.id} identityMode={conversation.kind === 'direct' ? 'direct' : 'group'} showInlineTime={false} onReviewChange={(rating, submitted) => logic.updateSupportReview(message.id, rating, submitted)} message={message} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onAvatarClick={() => message.senderId !== currentSocialUser.id && showFriendProfile(message.senderId)} onOpenVoiceRoom={openVoiceRoomFromMessage} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />
+          </div>)}
         </div>
         <div className="chat-composer">
           {conversation.supportAction && <div className="chat-support-actions"><button type="button" className="client-button client-button--secondary client-button--small" onClick={() => { if (conversation.supportAction === 'order') { setSelectedSendOrderId(''); setOrderDialogConversationId(conversation.id) } else logic.sendSupportCard() }}>{conversation.supportAction === 'order' ? <ReceiptText size={15} /> : <Star size={15} />}{conversation.supportAction === 'order' ? '发送订单' : '评价'}</button></div>}
@@ -1533,11 +1536,12 @@ function RoomChatPanel({ messages, onSend, onRecallMessage, hidden = false, coll
   </section>
 }
 
-function ChatMessage({ message, selfId = currentSocialUser.id, onReviewChange, playing, onTogglePlay, onAvatarClick, onAvatarContextMenu, onOpenVoiceRoom, onContextMenu }: { message: SocialMessage; selfId?: string; onReviewChange?: (rating: number, submitted: boolean) => void; playing: boolean; onTogglePlay: () => void; onAvatarClick?: () => void; onAvatarContextMenu?: (event: ReactMouseEvent<HTMLButtonElement>) => void; onOpenVoiceRoom?: (roomId: string, channelId: string) => void; onContextMenu?: (event: ReactMouseEvent<HTMLElement>) => void }) {
+function ChatMessage({ message, selfId = currentSocialUser.id, identityMode = 'all', showInlineTime = true, onReviewChange, playing, onTogglePlay, onAvatarClick, onAvatarContextMenu, onOpenVoiceRoom, onContextMenu }: { message: SocialMessage; selfId?: string; identityMode?: 'all' | 'direct' | 'group'; showInlineTime?: boolean; onReviewChange?: (rating: number, submitted: boolean) => void; playing: boolean; onTogglePlay: () => void; onAvatarClick?: () => void; onAvatarContextMenu?: (event: ReactMouseEvent<HTMLButtonElement>) => void; onOpenVoiceRoom?: (roomId: string, channelId: string) => void; onContextMenu?: (event: ReactMouseEvent<HTMLElement>) => void }) {
   const isSelf = message.senderId === selfId
+  const showIdentity = identityMode === 'all' || (identityMode === 'group' && !isSelf)
   return <article className={`social-message${isSelf ? ' is-self' : ''}${message.recalled ? ' is-recalled' : ''}`} onContextMenu={message.recalled ? undefined : onContextMenu}>
-    <button type="button" className="social-message__avatar" onClick={onAvatarClick} onContextMenu={(event) => { if (onAvatarContextMenu) { event.preventDefault(); event.stopPropagation(); onAvatarContextMenu(event) } }} disabled={!onAvatarClick} aria-label={`查看${message.senderName}陪玩详情`}><AvatarMark initials={message.initials} size="sm" /></button>
-    <div className="social-message__body"><div className="social-message__meta"><strong><UserNameWithLevel name={message.senderName} identityId={message.senderId} /></strong><time>{message.time}</time></div>
+    <button type="button" className="social-message__avatar" onClick={onAvatarClick} onContextMenu={(event) => { if (onAvatarContextMenu) { event.preventDefault(); event.stopPropagation(); onAvatarContextMenu(event) } }} disabled={!onAvatarClick} aria-label={`查看${message.senderName}资料`}><AvatarMark initials={message.initials} size="sm" /></button>
+    <div className="social-message__body">{(showIdentity || showInlineTime) && <div className="social-message__meta">{showIdentity && <strong><UserNameWithLevel name={message.senderName} identityId={message.senderId} /></strong>}{showInlineTime && <time>{message.time}</time>}</div>}
       {!message.recalled && message.replyTo && <div className="social-message__reply"><strong>回复 <UserNameWithLevel name={message.replyTo.senderName} identityId={message.replyTo.senderName} /></strong><span>{message.replyTo.kind === 'image' ? '[图片]' : message.replyTo.kind === 'voice' ? '[语音消息]' : message.replyTo.content}</span></div>}
       {!message.recalled && message.kind === 'companion-share' && message.companionShare && <a className="social-message-card companion-share-message" href={`#page=talents&club=${message.companionShare.clubId}&companion=${message.companionShare.id}`} aria-label={`查看${message.companionShare.name}陪玩详情`}><header><AvatarMark initials={message.companionShare.initials} size="sm" /><strong><UserNameWithLevel name={message.companionShare.name} identityId={message.companionShare.id} /></strong><span className="companion-share-message__facts" aria-label={`${message.companionShare.gender}，${message.companionShare.age}岁`}>{message.companionShare.gender === '女' ? '♀' : '♂'}{message.companionShare.age}</span></header><div className="social-message-card__content"><p>{message.companionShare.intro}</p></div></a>}
       {!message.recalled && message.kind === 'room-share' && message.roomShare && <div className="social-message-card voice-room-share-message" aria-label="房间分享"><header><AvatarMark initials={message.roomShare.avatarInitials} imageUrl={message.roomShare.avatarDataUrl} size="sm" /><strong>{message.roomShare.name}</strong></header><div className="social-message-card__content voice-room-share-message__action-row"><span>{message.roomShare.onlineCount} 人在线</span><button type="button" className="client-button client-button--secondary client-button--small" onClick={() => onOpenVoiceRoom?.(message.roomShare!.roomId, message.roomShare!.channelId)} disabled={!onOpenVoiceRoom}>进入房间</button></div></div>}
@@ -1549,6 +1553,58 @@ function ChatMessage({ message, selfId = currentSocialUser.id, onReviewChange, p
       {message.kind === 'voice' && <button type="button" className="social-message__voice" onClick={onTogglePlay} aria-label={`${playing ? '暂停' : '播放'}语音消息`}><span>{playing ? <VolumeX size={16} /> : <Play size={15} />}</span><i className={playing ? 'is-playing' : ''} /><b>{message.duration ?? 5}″</b><small>{playing ? '播放中' : '语音消息'}</small></button>}
     </div>
   </article>
+}
+
+function shouldShowChatTimestamp(message: SocialMessage, previous?: SocialMessage) {
+  if (!previous) return true
+  const current = parseChatMessageTime(message.time)
+  const prior = parseChatMessageTime(previous.time)
+  if (!current || !prior || current.day !== prior.day) return true
+  return current.minutes - prior.minutes >= 5
+}
+
+function parseChatMessageTime(value: string) {
+  const localizedDate = value.match(/^(\d{1,2})月(\d{1,2})日\s+(\d{1,2}):(\d{2})$/)
+  const fullDate = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})$/)
+  const relativeDate = value.match(/^(昨天)?\s*(\d{1,2}):(\d{2})$/)
+  if (localizedDate) {
+    const [, month, day, hour, minute] = localizedDate
+    return { day: `${new Date().getFullYear()}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`, minutes: Number(hour) * 60 + Number(minute) }
+  }
+  if (fullDate) {
+    const [, year, month, day, hour, minute] = fullDate
+    return { day: `${year}-${month}-${day}`, minutes: Number(hour) * 60 + Number(minute) }
+  }
+  if (relativeDate) {
+    const [, yesterday, hour, minute] = relativeDate
+    const today = new Date()
+    const date = yesterday ? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1) : today
+    return { day: date.toDateString(), minutes: Number(hour) * 60 + Number(minute) }
+  }
+  if (value === '昨天') return { day: 'yesterday', minutes: 0 }
+  return null
+}
+
+function formatChatMessageTime(value: string) {
+  const now = new Date()
+  const localizedDate = value.match(/^(\d{1,2})月(\d{1,2})日\s+(\d{1,2}):(\d{2})$/)
+  if (localizedDate) return `${localizedDate[1]}月${localizedDate[2]}日 ${localizedDate[3].padStart(2, '0')}:${localizedDate[4]}`
+  const yesterdayMatch = value.match(/^昨天\s+(\d{1,2}):(\d{2})$/)
+  if (yesterdayMatch) return `昨天 ${yesterdayMatch[1].padStart(2, '0')}:${yesterdayMatch[2]}`
+  const match = value.match(/^(?:(\d{4})-(\d{2})-(\d{2})\s+)?(\d{1,2}):(\d{2})$/)
+  if (match) {
+    const [, year, month, day, hour, minute] = match
+    const date = year ? new Date(Number(year), Number(month) - 1, Number(day)) : new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const isToday = date.toDateString() === new Date(now.getFullYear(), now.getMonth(), now.getDate()).toDateString()
+    const isYesterday = date.toDateString() === new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toDateString()
+    const time = `${hour.padStart(2, '0')}:${minute}`
+    if (isToday) return time
+    if (isYesterday) return `昨天 ${time}`
+    return `${month}-${day} ${time}`
+  }
+  if (value === '昨天') return value
+  if (value === '现在') return now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
+  return value
 }
 
 function openMessageMenu(event: ReactMouseEvent<HTMLElement>, message: SocialMessage, setMessage: (message: SocialMessage | null) => void, setPoint: (point: { x: number; y: number }) => void) {

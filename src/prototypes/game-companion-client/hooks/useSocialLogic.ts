@@ -1,5 +1,5 @@
 import type { ClientOrder } from '../data/accountMockData'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   currentSocialUser,
   initialBlockedProfileIds,
@@ -69,6 +69,7 @@ export function useSocialLogic(initialConversationId?: string) {
   const [clubGroups, setClubGroups] = useState(initialClubGroups)
   const [selectedConversationId, setSelectedConversationId] = useState(initialConversationId ?? 'direct-friend-1')
   const [activeMessagesTab, setActiveMessagesTab] = useState<'messages' | 'friends'>('messages')
+  useEffect(() => { const selectRequestedTab = () => { const params = new URLSearchParams(window.location.hash.slice(1)); if (params.get('page') === 'messages' && params.get('tab') === 'friends') { setActiveFixedFeed(null); setActiveMessagesTab('friends') } }; selectRequestedTab(); window.addEventListener('hashchange', selectRequestedTab); return () => window.removeEventListener('hashchange', selectRequestedTab) }, [])
   const [chatSearch, setChatSearch] = useState('')
   const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null)
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)

@@ -26,6 +26,10 @@
             {
               "id": "/game-companion-club-announcements",
               "children": []
+            },
+            {
+              "id": "/game-companion-club-reviews",
+              "children": []
             }
           ]
         },

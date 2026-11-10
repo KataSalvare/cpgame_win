@@ -122,6 +122,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-workbench-apply-service', label: '申请服务', entryView: 'workbench-apply-service', defaultHash: '#page=workbench&workbenchTab=services&applyService=1', states: demoPageStates },
     { path: '/game-companion-announcements', label: '平台公告', entryView: 'announcements', states: demoPageStates },
     { path: '/game-companion-club-announcements', label: '俱乐部公告', entryView: 'club-announcements', defaultHash: '#page=club-detail&club=club-001&panel=club-announcements', states: demoPageStates },
+    { path: '/game-companion-club-reviews', label: '俱乐部评价', entryView: 'club-reviews', defaultHash: '#page=club-detail&club=club-001&panel=club-reviews', states: demoPageStates },
   ],
 }
 

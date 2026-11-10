@@ -1,6 +1,6 @@
 import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
-import { BadgeCheck, BatteryCharging, Bookmark, Building2, CalendarDays, Check, ChevronLeft, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gem, Gift, HandHeart, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Orbit, Pencil, Search, Shield, ShieldCheck, Sparkles, Star, Trash2, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
+import { BadgeCheck, BatteryCharging, Bookmark, Building2, CalendarDays, Check, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gem, Gift, HandHeart, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Orbit, Pencil, Search, Shield, ShieldCheck, Sparkles, Star, Trash2, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { CompanionOnboarding } from '../components/CompanionOnboarding'
 import { OnboardingApplicationRecords } from '../components/OnboardingApplicationRecords'
@@ -42,6 +42,7 @@ type PersonalCenterProps = {
   beanBalance: number
   onOpenWallet: () => void
   onOpenOrders: () => void
+  onOpenFriends: () => void
   onOpenClub: (clubId: string) => void
   boundPhone: string
   onSaveBoundPhone: (phone: string) => void
@@ -70,7 +71,7 @@ const sectionItems: { id: CenterSection; label: string; icon: typeof UserRound }
 
 const personalGiftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 
-export function PersonalCenterPage({ pageState, initialSection, initialRecruitmentOpen = false, initialClubApplicationOpen = false, initialSecurityView, initialSocialTab, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
+export function PersonalCenterPage({ pageState, initialSection, initialRecruitmentOpen = false, initialClubApplicationOpen = false, initialSecurityView, initialSocialTab, onRetry, profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, onOpenFriends, onOpenClub, boundPhone, onSaveBoundPhone, endedDeviceIds, onEndDevice, blockedProfiles, onUnblockProfile, onAssessmentChat, onAssessmentRecharge, onAssessmentPay, onboardingApplications, onSubmitOnboarding, onNotify, onLogout }: PersonalCenterProps) {
   const { requestRemoval, dialog: removalDialog } = useRemovalConfirmation()
   const [section, setSection] = useState<CenterSection>(() => initialSection === 'wealth' || initialSection === 'favorites' || initialSection === 'clubs' || initialSection === 'onboarding' || initialSection === 'visits' || initialSection === 'gifts' ? initialSection : sessionStorage.getItem('companion-assessment-recharge-draft') ? 'onboarding' : initialSection)
   const [recruitmentOpen, setRecruitmentOpen] = useState(() => initialRecruitmentOpen || Boolean(sessionStorage.getItem('companion-assessment-recharge-draft')))
@@ -194,7 +195,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   if (pageState !== 'normal') return <div className="client-content account-page"><PageStatePanel state={pageState} title={pageState === 'empty' ? '暂时没有内容' : '页面暂不可用'} description={pageState === 'error' ? '加载遇到问题，请重试。' : '当前没有可展示的内容。'} actionLabel={pageState === 'error' ? '重新加载' : '返回个人中心'} onAction={onRetry} /></div>
 
   return <div className="client-content account-page personal-center-page">
-    <ProfileIdentityCard profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} onOpenFollowing={() => { selectSection('favorites'); setFavoriteTab('users') }} onOpenFans={() => { selectSection('favorites'); setFavoriteTab('fans') }} />
+    <ProfileIdentityCard profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} onOpenFriends={onOpenFriends} onOpenFollowing={() => { selectSection('favorites'); setFavoriteTab('users') }} onOpenFans={() => { selectSection('favorites'); setFavoriteTab('fans') }} />
     <nav className="personal-center-tabs" role="tablist" aria-label="个人中心模块">
       {sectionItems.map(({ id, label, icon: Icon }) => <button type="button" role="tab" key={id} className={`personal-center-tab${section === id ? ' is-active' : ''}`} aria-selected={section === id} onClick={() => selectSection(id)}><Icon size={16} /><span>{label}</span></button>)}
     </nav>
@@ -249,25 +250,25 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
     {confirmClearVisitRecords && <DialogPanel overlayId="clear-personal-visit-records-dialog" title="清除访问记录" description="确认清除足迹、访客和进房记录中的全部内容吗？清除后无法恢复。" onClose={() => setConfirmClearVisitRecords(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmClearVisitRecords(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { setFootprints([]); setVisitors([]); setRoomVisits([]); setConfirmClearVisitRecords(false); onNotify('访问记录已清除') }}>确认清除</button></>}>三类访问记录将同时清空。</DialogPanel>}
     {editingProfile && <DialogPanel overlayId="edit-player-profile-dialog" title="编辑个人资料" onClose={closeProfileEditor} width={560} footer={<><button type="button" className="client-button client-button--secondary" onClick={closeProfileEditor}>取消</button><button type="submit" form="edit-player-profile" className="client-button client-button--primary" disabled={!profileDraft.nickname.trim()}>保存资料</button></>}>
       <form id="edit-player-profile" className="personal-profile-form" onSubmit={submitProfile}>
-        <div className="personal-avatar-editor"><ProfileAvatar profile={profileDraft} size="lg" /><label className="client-button client-button--secondary personal-upload-button"><ImagePlus size={15} />更换头像<input type="file" accept="image/*" aria-label="上传头像图片" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => setProfileDraft((current) => ({ ...current, avatarDataUrl: String(reader.result) })); reader.readAsDataURL(file) }} /></label></div>
-        <label className="personal-field">昵称<input required maxLength={20} disabled={nicknameEditsRemaining === 0} value={profileDraft.nickname} onChange={(event) => setProfileDraft((current) => ({ ...current, nickname: event.target.value }))} /><small className="personal-field__hint">剩余修改次数 {nicknameEditsRemaining} 次</small></label>
+        <div className="personal-avatar-editor"><label className="personal-avatar-editor__upload" aria-label="更换头像"><ProfileAvatar profile={profileDraft} size="lg" /><span className="personal-avatar-editor__edit-icon" aria-hidden="true"><Pencil size={13} /></span><input type="file" accept="image/*" aria-label="更换头像" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => setProfileDraft((current) => ({ ...current, avatarDataUrl: String(reader.result) })); reader.readAsDataURL(file) }} /></label></div>
+        <label className="personal-field">昵称<span className="personal-counted-field"><input required maxLength={16} disabled={nicknameEditsRemaining === 0} value={profileDraft.nickname} onChange={(event) => setProfileDraft((current) => ({ ...current, nickname: event.target.value }))} /><small className="personal-field__counter" aria-live="polite">{Array.from(profileDraft.nickname).length}/16</small></span><small className="personal-field__hint">剩余修改次数 {nicknameEditsRemaining} 次</small></label>
         <label className="personal-field">生日<span className="personal-date-picker"><input ref={birthdayInputRef} type="date" value={profileDraft.birthday} onChange={(event) => setProfileDraft((current) => ({ ...current, birthday: event.target.value }))} aria-label="生日" /><button type="button" aria-label="选择生日" title="选择生日" onClick={() => birthdayInputRef.current?.showPicker?.()}><CalendarDays size={15} /></button></span></label>
-        <label className="personal-field personal-field--full">签名<textarea rows={3} value={profileDraft.signature} onChange={(event) => setProfileDraft((current) => ({ ...current, signature: event.target.value }))} placeholder="写一句介绍自己" /></label>
-        <section className="personal-life-photo-editor personal-field--full" aria-label="编辑生活照"><div className="personal-life-photo-editor__heading"><strong>生活照</strong><label className="client-button client-button--secondary personal-upload-button"><ImagePlus size={14} />添加照片<input type="file" accept="image/*" multiple aria-label="添加生活照，可多选" onChange={(event) => { const files = Array.from(event.currentTarget.files ?? []); event.currentTarget.value = ''; void Promise.all(files.map(readImageFile)).then((images) => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: [...current.lifePhotoDataUrls, ...images] }))).catch(() => setFeedback('部分生活照无法读取，请重新选择')) }} /></label></div><div className="personal-life-photo-grid">{profileDraft.lifePhotoDataUrls.map((image, index) => <div className="personal-life-photo" key={`${index}-${image.slice(-24)}`}><img src={image} alt={`生活照 ${index + 1}`} /><button type="button" aria-label={`移除第 ${index + 1} 张生活照`} onClick={() => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: current.lifePhotoDataUrls.filter((_, photoIndex) => photoIndex !== index) }))}><X size={13} /></button></div>)}</div><small>可一次选择多张，图片只在当前原型会话中预览</small></section>
+        <label className="personal-field personal-field--full">签名<span className="personal-counted-field personal-counted-field--textarea"><textarea rows={3} maxLength={50} value={profileDraft.signature} onChange={(event) => setProfileDraft((current) => ({ ...current, signature: event.target.value }))} placeholder="写一句介绍自己" /><small className="personal-field__counter" aria-live="polite">{Array.from(profileDraft.signature).length}/50</small></span></label>
+        <section className="personal-life-photo-editor personal-field--full" aria-label="编辑生活照"><div className="personal-life-photo-editor__heading"><strong>生活照</strong><label className="client-button client-button--secondary personal-upload-button"><ImagePlus size={14} />添加照片<input type="file" accept="image/*" multiple aria-label="添加生活照，可多选" onChange={(event) => { const files = Array.from(event.currentTarget.files ?? []); event.currentTarget.value = ''; void Promise.all(files.map(readImageFile)).then((images) => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: [...current.lifePhotoDataUrls, ...images] }))).catch(() => setFeedback('部分生活照无法读取，请重新选择')) }} /></label></div><div className="personal-life-photo-grid">{profileDraft.lifePhotoDataUrls.map((image, index) => <div className="personal-life-photo" key={`${index}-${image.slice(-24)}`}><img src={image} alt={`生活照 ${index + 1}`} /><button type="button" aria-label={`移除第 ${index + 1} 张生活照`} onClick={() => setProfileDraft((current) => ({ ...current, lifePhotoDataUrls: current.lifePhotoDataUrls.filter((_, photoIndex) => photoIndex !== index) }))}><X size={13} /></button></div>)}</div></section>
       </form>
     </DialogPanel>}
     {applicationKind && <DialogPanel overlayId="onboarding-application-dialog" className={applicationKind === 'club' ? 'personal-onboarding-dialog' : ''} title={applicationKind === 'companion' ? '陪玩入驻申请' : '俱乐部入驻申请'} description={applicationKind === 'companion' ? '填写基础资料并提交演示申请。' : undefined} onClose={() => setApplicationKind(null)} width={applicationKind === 'club' ? 920 : 560} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setApplicationKind(null)}>取消</button><button type="submit" form="onboarding-application" className="client-button client-button--primary" disabled={applicationKind === 'companion' && (!applicationName.trim() || !applicationIntro.trim())}>提交申请</button></>}>
-      {applicationKind === 'club' ? <form id="onboarding-application" className="club-onboarding-form" onSubmit={submitApplication}>
+      {applicationKind === 'club' ? <form id="onboarding-application" className="club-onboarding-form" noValidate onSubmit={submitApplication}>
         <ApplicationSection title="经营主体">
           <ApplicationTextField label="经营主体名称" value={clubApplication.entityName} required onChange={(value) => setClubApplication((current) => ({ ...current, entityName: value }))} />
           <ApplicationTextField label="法人手机号" value={clubApplication.legalPhone} required type="tel" onChange={(value) => setClubApplication((current) => ({ ...current, legalPhone: value }))} />
-          <ApplicationFileField label="入驻申请表" value={clubApplication.applicationForm} required accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, applicationForm: value }))} />
-          <ApplicationFileField label="营业执照" value={clubApplication.businessLicense} required accept=".pdf,.jpg,.jpeg,.png" onChange={(value) => setClubApplication((current) => ({ ...current, businessLicense: value }))} />
+          <ApplicationFileField label="入驻申请表" value={clubApplication.applicationForm} description="仅支持PDF格式，需加盖公章，单个文件大小限制≤20MB" required accept=".pdf" allowedExtensions={['pdf']} maxSizeBytes={20 * 1024 * 1024} onInvalidFile={(message) => onNotify(message)} onChange={(value) => setClubApplication((current) => ({ ...current, applicationForm: value }))} />
+          <ApplicationFileField label="营业执照" value={clubApplication.businessLicense} description="上传营业执照原件，需完整展示执照边框，文字、印章等清晰、无遮挡、无反光，支持jpg/jpeg/png" required accept=".jpg,.jpeg,.png" allowedExtensions={['jpg', 'jpeg', 'png']} onChange={(value) => setClubApplication((current) => ({ ...current, businessLicense: value }))} />
           <ApplicationFileField label="法人身份证（人像面）" value={clubApplication.legalIdFront} required accept="image/*" onChange={(value) => setClubApplication((current) => ({ ...current, legalIdFront: value }))} />
           <ApplicationFileField label="法人身份证（国徽面）" value={clubApplication.legalIdBack} required accept="image/*" onChange={(value) => setClubApplication((current) => ({ ...current, legalIdBack: value }))} />
-          <ApplicationFileField label="授权委托书" value={clubApplication.authorizationLetter} required accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, authorizationLetter: value }))} />
-          <ApplicationFileField label="服务价目表" value={clubApplication.servicePriceList} required accept=".pdf,.xls,.xlsx,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, servicePriceList: value }))} />
-          <ApplicationFileField label="售后服务标准" value={clubApplication.afterSalesStandard} required accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, afterSalesStandard: value }))} />
+          <ApplicationFileField label="授权委托书" value={clubApplication.authorizationLetter} accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, authorizationLetter: value }))} />
+          <ApplicationFileField label="服务价目表" value={clubApplication.servicePriceList} accept=".pdf,.xls,.xlsx,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, servicePriceList: value }))} />
+          <ApplicationFileField label="售后服务标准" value={clubApplication.afterSalesStandard} accept=".pdf,.doc,.docx" onChange={(value) => setClubApplication((current) => ({ ...current, afterSalesStandard: value }))} />
         </ApplicationSection>
         <ApplicationSection title="俱乐部信息">
           <ApplicationTextField label="俱乐部名称" value={clubApplication.clubName} required onChange={(value) => setClubApplication((current) => ({ ...current, clubName: value }))} />
@@ -291,9 +292,10 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   </div>
 }
 
-function ProfileIdentityCard({ profile, onEdit, onOpenFollowing, onOpenFans }: {
+function ProfileIdentityCard({ profile, onEdit, onOpenFriends, onOpenFollowing, onOpenFans }: {
   profile: PlayerProfile
   onEdit: () => void
+  onOpenFriends: () => void
   onOpenFollowing: () => void
   onOpenFans: () => void
 }) {
@@ -303,7 +305,7 @@ function ProfileIdentityCard({ profile, onEdit, onOpenFollowing, onOpenFans }: {
     const timer = window.setTimeout(() => setPlayerIdCopyFeedback(''), 1800)
     return () => window.clearTimeout(timer)
   }, [playerIdCopyFeedback])
-  return <section className="client-card account-profile-card personal-profile-card"><ProfileAvatar profile={profile} size="lg" /><div className="account-profile-card__identity"><div className="personal-profile-name"><h2><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></h2><button type="button" className="client-button client-button--secondary personal-profile-edit" onClick={onEdit}><Pencil size={14} />编辑资料</button></div><div className="personal-profile-meta"><span className="personal-user-id"><button type="button" className="client-profile-popover__user-id" onClick={() => { void (async () => { try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(profile.userId); setPlayerIdCopyFeedback('复制成功') } catch { setPlayerIdCopyFeedback('复制失败，请重试') } })() }} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{playerIdCopyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{playerIdCopyFeedback === '复制成功' && <Check size={12} />}{playerIdCopyFeedback}</span>}</span><span aria-label={`${profile.gender}，${calculateAge(profile.birthday)}岁`}>{profile.gender === '女' ? '♀' : profile.gender === '男' ? '♂' : profile.gender}{calculateAge(profile.birthday)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div><p className="personal-profile-signature">{profile.signature || '暂无签名'}</p></div><div className="account-social-stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} onClick={onOpenFollowing} /><Metric label="粉丝" value={profile.followers} onClick={onOpenFans} /></div></section>
+  return <section className="client-card account-profile-card personal-profile-card"><ProfileAvatar profile={profile} size="lg" /><div className="account-profile-card__identity"><div className="personal-profile-name"><h2><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></h2><button type="button" className="client-button client-button--secondary personal-profile-edit" onClick={onEdit}><Pencil size={14} />编辑资料</button></div><div className="personal-profile-meta"><span className="personal-user-id"><button type="button" className="client-profile-popover__user-id" onClick={() => { void (async () => { try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(profile.userId); setPlayerIdCopyFeedback('复制成功') } catch { setPlayerIdCopyFeedback('复制失败，请重试') } })() }} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{playerIdCopyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{playerIdCopyFeedback === '复制成功' && <Check size={12} />}{playerIdCopyFeedback}</span>}</span><span aria-label={`${profile.gender}，${calculateAge(profile.birthday)}岁`}>{profile.gender === '女' ? '♀' : profile.gender === '男' ? '♂' : profile.gender}{calculateAge(profile.birthday)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div><p className="personal-profile-signature">{profile.signature || '暂无签名'}</p></div><div className="account-social-stats"><Metric label="朋友" value={profile.friends} onClick={onOpenFriends} /><Metric label="关注" value={profile.following} onClick={onOpenFollowing} /><Metric label="粉丝" value={profile.followers} onClick={onOpenFans} /></div></section>
 }
 
 function ProfileOverview({ profile, onSaveProfile, orders, diamondBalance, beanBalance, onOpenWallet, onOpenOrders, feedback, onFeedback, onOpenSetting }: {
@@ -334,9 +336,9 @@ function ProfileOverview({ profile, onSaveProfile, orders, diamondBalance, beanB
   const visibleLifePhotoIndex = lifePhotoCount ? lifePhotoIndex % lifePhotoCount : 0
   useEffect(() => {
     if (lifePhotoCount < 2) return
-    const timer = window.setInterval(() => setLifePhotoIndex((index) => (index % lifePhotoCount + 1) % lifePhotoCount), 3000)
-    return () => window.clearInterval(timer)
-  }, [lifePhotoCount])
+    const timer = window.setTimeout(() => setLifePhotoIndex((index) => (index % lifePhotoCount + 1) % lifePhotoCount), 10000)
+    return () => window.clearTimeout(timer)
+  }, [lifePhotoCount, visibleLifePhotoIndex])
   const pendingOrderCount = orders.filter((order) => order.status === '待接单' || order.status === '待服务').length
   const activeOrderCount = orders.filter((order) => order.status === '服务中').length
   const settings = [
@@ -346,7 +348,7 @@ function ProfileOverview({ profile, onSaveProfile, orders, diamondBalance, beanB
   ]
   return <section className="personal-module personal-profile-module">
     <div className="personal-account-overview">
-      <section className="client-card personal-life-photos"><header><h3>生活照</h3><label className="client-button client-button--secondary client-button--small personal-life-photo-upload"><ImagePlus size={14} />上传<input type="file" accept="image/*" multiple aria-label="上传生活照，可多选" onChange={handleLifePhotoUpload} /></label></header>{lifePhotoCount ? <div className="personal-life-photo-stage"><img src={profile.lifePhotoDataUrls[visibleLifePhotoIndex]} alt={`生活照 ${visibleLifePhotoIndex + 1}`} /></div> : <p>暂无生活照</p>}<div className="personal-life-photo-controls"><button type="button" aria-label="上一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex - 1 + lifePhotoCount) % lifePhotoCount)}><ChevronLeft size={15} /></button><span>{lifePhotoCount ? `${visibleLifePhotoIndex + 1} / ${lifePhotoCount}` : '0 张'}</span><button type="button" aria-label="下一张生活照" disabled={lifePhotoCount < 2} onClick={() => setLifePhotoIndex((visibleLifePhotoIndex + 1) % lifePhotoCount)}><ChevronRight size={15} /></button></div></section>
+      <section className="client-card personal-life-photos"><header><h3>生活照</h3><label className="client-button client-button--secondary client-button--small personal-life-photo-upload"><ImagePlus size={14} />上传<input type="file" accept="image/*" multiple aria-label="上传生活照，可多选" onChange={handleLifePhotoUpload} /></label></header>{lifePhotoCount ? <><div className="personal-life-photo-stage"><img src={profile.lifePhotoDataUrls[visibleLifePhotoIndex]} alt={`生活照 ${visibleLifePhotoIndex + 1}`} /></div><div className="personal-life-photo-thumbnails" role="group" aria-label="选择生活照">{profile.lifePhotoDataUrls.map((image, index) => <button type="button" key={`${index}-${image.slice(-24)}`} className={index === visibleLifePhotoIndex ? 'is-selected' : ''} aria-label={`查看生活照 ${index + 1}`} aria-pressed={index === visibleLifePhotoIndex} onClick={() => setLifePhotoIndex(index)}><img src={image} alt="" /></button>)}</div></> : <p>暂无生活照</p>}</section>
       <div className="personal-summary-stack">
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><h2>钱包</h2></div><button type="button" className="client-text-button" onClick={onOpenWallet}>钱包总览 <ChevronRight size={15} /></button></div><div className="personal-summary-values"><BalanceMini icon={<Coins size={16} />} label="金豆" value={diamondBalance} /><BalanceMini icon={<WalletCards size={16} />} label="糖豆" value={beanBalance} /></div></section>
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><h2>订单</h2></div><button type="button" className="client-text-button" onClick={onOpenOrders}>全部订单 <ChevronRight size={15} /></button></div><div className="personal-order-stats"><button type="button" onClick={onOpenOrders}><span>全部订单</span><strong>{orders.length}</strong></button><button type="button" onClick={onOpenOrders}><span>待处理</span><strong>{pendingOrderCount}</strong></button><button type="button" onClick={onOpenOrders}><span>服务中</span><strong>{activeOrderCount}</strong></button></div></section>
@@ -529,11 +531,28 @@ function ApplicationSection({ title, children }: { title: string; children: Reac
 }
 
 function ApplicationTextField({ label, value, onChange, type = 'text', required = false, min }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; min?: string }) {
-  return <label className="club-onboarding-field"><span>{label}</span><input type={type} min={min} required={required} value={value} onChange={(event) => onChange(event.target.value)} /></label>
+  return <label className="club-onboarding-field"><span>{label}{required && <span className="club-onboarding-required" aria-hidden="true">*</span>}</span><input type={type} min={min} value={value} placeholder="请输入" onChange={(event) => onChange(event.target.value)} /></label>
 }
 
-function ApplicationFileField({ label, value, onChange, accept, required = false }: { label: string; value: string; onChange: (value: string) => void; accept: string; required?: boolean }) {
-  return <label className="club-onboarding-field"><span>{label}</span><span className={`club-onboarding-file${value ? ' has-file' : ''}`}><span className="club-onboarding-file__name">{value || '选择文件'}</span><span className="club-onboarding-file__action">浏览</span><input type="file" accept={accept} required={required} aria-label={label} onChange={(event) => onChange(event.currentTarget.files?.[0]?.name ?? '')} /></span></label>
+function ApplicationFileField({ label, value, onChange, accept, required = false, description, allowedExtensions, maxSizeBytes, onInvalidFile }: { label: string; value: string; onChange: (value: string) => void; accept: string; required?: boolean; description?: string; allowedExtensions?: string[]; maxSizeBytes?: number; onInvalidFile?: (message: string) => void }) {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget
+    const file = input.files?.[0]
+    if (!file) return
+    const extension = file.name.split('.').pop()?.toLocaleLowerCase() ?? ''
+    if (allowedExtensions && !allowedExtensions.includes(extension)) {
+      input.value = ''
+      onInvalidFile?.(`${label}仅支持${allowedExtensions.join('/')}格式。`)
+      return
+    }
+    if (maxSizeBytes !== undefined && file.size > maxSizeBytes) {
+      input.value = ''
+      onInvalidFile?.(`${label}单个文件大小不能超过20MB。`)
+      return
+    }
+    onChange(file.name)
+  }
+  return <label className="club-onboarding-field"><span>{label}{required && <span className="club-onboarding-required" aria-hidden="true">*</span>}</span><span className={`club-onboarding-file${value ? ' has-file' : ''}`}><span className="club-onboarding-file__name">{value || '请选择'}</span><span className="club-onboarding-file__action">浏览</span><input type="file" accept={accept} aria-label={label} onChange={handleFileChange} /></span>{description && <small className="club-onboarding-field__description">{description}</small>}</label>
 }
 
 function VisitList({ tab, records }: { tab: VisitTab; records: typeof profileFootprints }) {

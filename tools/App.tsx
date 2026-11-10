@@ -85,6 +85,7 @@ function AppContent() {
           : hashPage === 'wallet' && params.get('panel') === 'bean-withdraw' ? 'bean-withdraw'
           : hashPage === 'wallet' && params.get('panel') === 'coupons' ? 'coupons'
           : hashPage === 'club-detail' && params.get('panel') === 'club-announcements' ? 'club-announcements'
+          : hashPage === 'club-detail' && params.get('panel') === 'club-reviews' ? 'club-reviews'
           : hashPage === 'club-detail' && params.get('panel') === 'club-cards' ? 'club-cards'
             : hashPage === 'wallet' && params.get('panel') === 'my-cards' ? 'my-cards'
               : (hashPage === 'club-detail' || hashPage === 'talents') && params.has('companion') ? 'companion-detail'
@@ -128,7 +129,7 @@ function AppContent() {
           : currentPage.entryView === 'identity-verification' ? 'identity-verification'
       : currentPage.entryView === 'wallet-recharge' ? params.get('page') === 'wallet' && params.get('panel') === 'diamond-recharge' ? 'wallet' : 'recharge'
         : currentPage.entryView === 'coupons' || currentPage.entryView === 'bean-withdraw' ? 'wallet'
-        : currentPage.entryView === 'club-announcements' || currentPage.entryView === 'club-cards' ? 'club-detail'
+        : currentPage.entryView === 'club-announcements' || currentPage.entryView === 'club-cards' || currentPage.entryView === 'club-reviews' ? 'club-detail'
           : currentPage.entryView === 'my-cards' ? 'wallet'
           : currentPage.entryView === 'profile-onboarding' || currentPage.entryView === 'profile-onboarding-center' || currentPage.entryView === 'profile-club-onboarding' || currentPage.entryView === 'profile-clubs' || currentPage.entryView === 'profile-cancel-account' || currentPage.entryView === 'profile-wealth' || currentPage.entryView === 'profile-visits' || currentPage.entryView === 'profile-social' ? 'profile'
       : currentPage.entryView === 'platform-support' || currentPage.entryView === 'club-support' || currentPage.entryView === 'help-center' || currentPage.entryView === 'screen-recording' || currentPage.entryView === 'client-notifications' || currentPage.entryView === 'close-app' || currentPage.entryView === 'quick-panel' || currentPage.entryView === 'global-search' || currentPage.entryView === 'voice-room-minimized' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) ? params.get('page') ?? (currentPage.entryView === 'club-support' || messagePerspectiveEntryViews.includes(currentPage.entryView as typeof messagePerspectiveEntryViews[number]) ? 'messages' : 'home')
@@ -166,6 +167,7 @@ function AppContent() {
       : currentPage.entryView === 'bean-withdraw' ? 'bean-withdraw'
       : currentPage.entryView === 'coupons' ? 'coupons'
         : currentPage.entryView === 'club-announcements' ? 'club-announcements'
+          : currentPage.entryView === 'club-reviews' ? 'club-reviews'
           : currentPage.entryView === 'club-cards' ? 'club-cards'
             : currentPage.entryView === 'my-cards' ? 'my-cards' : null
     if (params.get('page') === expectedPage

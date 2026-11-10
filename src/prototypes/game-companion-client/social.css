@@ -67,6 +67,9 @@
 .social-message__reply span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .social-message__meta{display:flex;align-items:center;gap:8px;margin-bottom:5px}
 .social-message__meta strong{font-size:11px;font-weight:600}
+.social-message__time{display:block;margin-bottom:5px;color:var(--prototype-text-subtle, #9ca3af);font-size:10px;line-height:1.2}
+.chat-message-group{display:contents}
+.social-message__time--grouped{width:100%;margin:0 0 -10px;text-align:center}
 .social-message__meta time{color:var(--prototype-text-subtle, #9ca3af);font-size:10px}
 .social-message__text{max-width:540px;margin:0;border:1px solid var(--prototype-border, #e5e7eb);border-radius:2px 9px 9px 9px;padding:9px 12px;background:var(--prototype-surface-muted, #f9fafb);font-size:13px;line-height:1.55;overflow-wrap:anywhere}
 .social-message.is-self .social-message__text{border-radius:9px 2px 9px 9px;background:#eef0f2}

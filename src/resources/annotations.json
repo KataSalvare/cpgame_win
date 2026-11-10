@@ -321,6 +321,18 @@
       "createdAt": 1794277379985,
       "overlayId": "wallet-recharge-modal",
       "route": "page=wallet&club=club-001&panel=diamond-recharge"
+    },
+    {
+      "id": "anno-1794297077722-interaction",
+      "pagePath": "/game-companion-club-detail",
+      "number": 1,
+      "title": "",
+      "content": "点击打开俱乐部评价",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.club-detail-page > section.client-card.club-profile-card:nth-of-type(2) > div.club-profile-card__main:nth-of-type(1) > div.club-profile-card__body:nth-of-type(1) > div.club-profile-card__subline:nth-of-type(2) > button.rating-mark.club-profile-rating-button",
+      "position": "top-left",
+      "createdAt": 1794297077722,
+      "route": "page=club-detail"
     }
   ],
   "categories": [

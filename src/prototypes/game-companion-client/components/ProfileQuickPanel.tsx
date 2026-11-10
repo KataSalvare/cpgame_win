@@ -5,7 +5,7 @@ import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/pe
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 
-type QuickAction = 'profile' | 'wealth' | 'following' | 'fans' | 'recharge' | 'withdraw' | 'exchange'
+type QuickAction = 'profile' | 'wealth' | 'friends' | 'following' | 'fans' | 'recharge' | 'withdraw' | 'exchange'
 
 export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavigate, children, initialOpen = false, onDismiss }: {
   initialOpen?: boolean
@@ -75,7 +75,7 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavi
         </button>
         <div><strong><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></strong><span className="client-profile-popover__meta"><button type="button" className="client-profile-popover__user-id" onClick={() => void copyUserId()} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{copyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{copyFeedback === '复制成功' && <Check size={12} />}{copyFeedback}</span>}</span></div>
       </div>
-      <div className="client-profile-popover__stats"><Metric label="朋友" value={profile.friends} /><Metric label="关注" value={profile.following} onClick={() => navigate('following')} /><Metric label="粉丝" value={profile.followers} onClick={() => navigate('fans')} /></div>
+      <div className="client-profile-popover__stats"><Metric label="朋友" value={profile.friends} onClick={() => navigate('friends')} /><Metric label="关注" value={profile.following} onClick={() => navigate('following')} /><Metric label="粉丝" value={profile.followers} onClick={() => navigate('fans')} /></div>
       <button type="button" className="client-profile-popover__wealth" onClick={() => navigate('wealth')} aria-label={`当前财富等级 V${currentWealthLevel}，财富值 ${currentWealthValue.toLocaleString()}，${nextLevel ? `再获得 ${(nextLevel.requiredWealth - currentWealthValue).toLocaleString()} 财富值升至 V${nextLevel.level}` : '已达到最高等级'}，查看财富等级`}>
         <span className="client-profile-popover__wealth-heading"><span><Gem size={14} />财富等级</span><strong>V{currentWealthLevel}</strong></span>
         <span className="client-profile-popover__wealth-progress" role="progressbar" aria-label="升至下一财富等级" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(wealthProgress)}><span style={{ width: `${wealthProgress}%` }} /></span>

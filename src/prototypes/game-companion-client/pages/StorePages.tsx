@@ -69,7 +69,7 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
     </section>
   </div> : <div className="client-content account-page store-page">
     {presentation === 'page' && <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={15} />{backLabel}</button>}
-    {presentation === 'modal' ? <div className="wallet-recharge-intro"><span className="store-balance-chip"><Coins size={15} /><span>金豆钱包</span><strong>{diamondBalance.toLocaleString()} 金豆</strong><BalanceRefreshButton /></span></div> : <Heading eyebrow="账户资产" title="购买金豆"><span className="store-balance-chip"><Coins size={15} /><span>金豆钱包</span><strong>{diamondBalance.toLocaleString()} 金豆</strong><BalanceRefreshButton /></span></Heading>}
+    {presentation === 'page' && <Heading eyebrow="账户资产" title="购买金豆"><span className="store-balance-chip"><Coins size={15} /><span>金豆钱包</span><strong>{diamondBalance.toLocaleString()} 金豆</strong><BalanceRefreshButton /></span></Heading>}
     <div className="store-checkout-grid">
       <section className="client-card store-main-card">
         <div className="client-section-heading recharge-package-heading"><div><h2>快捷金额</h2></div></div>
