@@ -165,6 +165,10 @@
           "children": []
         },
         {
+          "id": "/game-companion-bean-exchange",
+          "children": []
+        },
+        {
           "id": "/game-companion-my-cards",
           "children": []
         },
@@ -178,8 +182,17 @@
       "id": "/game-companion-orders",
       "children": [
         {
-          "id": "/game-companion-orders-receiving",
+          "id": "/game-companion-order-detail",
           "children": []
+        },
+        {
+          "id": "/game-companion-orders-receiving",
+          "children": [
+            {
+              "id": "/game-companion-receiving-order-detail",
+              "children": []
+            }
+          ]
         },
         {
           "id": "/game-companion-orders-exam-candidate",

@@ -21,7 +21,7 @@ const buildServiceGroups = (items: WorkbenchService[]) => games.filter(game => i
 }))
 const applicationTemplates = Object.values(servicesByCompanion).flat().filter((service, index, all) => all.findIndex(other => other.playName === service.playName && other.levelName === service.levelName && other.unit === service.unit) === index)
 const serviceApplicationOptions: WorkbenchService[] = games.filter(game => game.id !== 'all').flatMap(game => applicationTemplates.map((template, index) => ({ ...template, id: `apply-${game.id}-${index}`, gameId: game.id, name: template.unit === '局' ? '按局服务' : '按小时服务', canAcceptOrders: false })))
-export function useWorkbenchLogic() {
+export function useWorkbenchLogic(initialSelectedOrderId: string | null = null) {
   const [serviceApplications, setServiceApplications] = useState<WorkbenchService[]>([])
   const allWorkbenchServices: WorkbenchService[] = [...services, ...serviceApplications]
   const serviceGroups = buildServiceGroups(allWorkbenchServices)
@@ -50,7 +50,7 @@ export function useWorkbenchLogic() {
       durationUnit: hourlyService?.unit ?? '小时', unitPrice: 80, startedAt: '2026-10-28 07:35', serviceSegmentMinutes: [45],
     }]
   })
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(initialSelectedOrderId)
   const [orderAction, setOrderAction] = useState<{ id: string; action: WorkOrderAction } | null>(null)
   const [feedback, setFeedback] = useState('')
   useEffect(() => {

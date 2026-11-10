@@ -3,7 +3,7 @@ import { useCompanionDirectoryLogic } from '../hooks/useClubDetailLogic'
 import { CompanionCard } from './CompanionCard'
 import { PageStatePanel } from './PageStatePanel'
 import { GameFilter } from './GameFilter'
-import { Flame, LayoutGrid, Search, Star, X } from 'lucide-react'
+import { Flame, LayoutGrid, RotateCcw, Search, Star, X } from 'lucide-react'
 import { useState } from 'react'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
@@ -65,6 +65,7 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
       <FilterSelect label="性别" value={logic.gender} onChange={logic.setGender} options={['全部性别', '女', '男'].map((value) => ({ value, label: value }))} />
       <FilterSelect label="年龄" value={logic.age} onChange={logic.setAge} options={ages.map((value) => ({ value, label: value }))} />
       <FilterSelect label="地区" value={logic.region} onChange={logic.setRegion} options={['全部地区', ...regions].map((value) => ({ value, label: value }))} />
+      <button type="button" className="client-button client-button--secondary companion-directory-reset" onClick={resetFilters} aria-label="重置陪玩搜索和筛选"><RotateCcw size={14} />重置</button>
     </div>
 
     {visibleCompanions.length > 0 ? <div className="client-card-grid client-card-grid--companions">

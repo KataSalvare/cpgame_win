@@ -108,7 +108,7 @@ export const initialPendingBeanSettlementBalance = 3000
 
 export const walletEntries = {
   diamonds: [
-    { id: 'diamond-001', title: '充值', type: '充值', date: '2026-10-22 20:16', amount: -160, relatedOrderId: 'GC-20261022-0182' },
+    { id: 'diamond-001', title: '购买', type: '购买', date: '2026-10-22 20:16', amount: -160, relatedOrderId: 'GC-20261022-0182' },
     { id: 'diamond-002', title: '服务订单', type: '服务订单', date: '2026-10-21 12:30', amount: 200 },
     { id: 'diamond-003', title: '购买尊享卡', type: '购买尊享卡', date: '2026-10-19 22:05', amount: -240 },
   ],

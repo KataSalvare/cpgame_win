@@ -3,7 +3,7 @@ import { directoryCompanions, homepageClubs, servicesByCompanion } from './data/
 
 export type ClientPage = 'system-settings' | 'workbench' | 'home' | 'talents' | 'club-detail' | 'checkout' | 'profile' | 'wallet' | 'orders' | 'messages' | 'voice-room' | 'recharge' | 'coupons' | 'club-cards' | 'my-cards' | 'announcements' | 'club-announcements' | 'woodpecker'
 
-type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | 'club-reviews' | null
+type StorePanel = 'coupons' | 'club-cards' | 'my-cards' | 'diamond-ledger' | 'bean-ledger' | 'bean-withdraw' | 'bean-exchange' | 'diamond-recharge' | 'club-groups' | 'club-announcements' | 'club-reviews' | null
 type OrderSelectionMode = 'locked' | 'service' | 'cascade'
 type RouteSnapshot = { page: ClientPage; clubId: string; companionId: string | null; companionIds: string[]; serviceId: string | null; orderSelectionMode: OrderSelectionMode; returnTo: ClientPage | null; panel: StorePanel; voiceRoomSource: 'personal' | 'club' }
 
@@ -38,7 +38,7 @@ const readRoute = (entryView: string | undefined): RouteSnapshot => {
   if (page === 'club-detail' && requestedPanel === 'club-groups') panel = 'club-groups'
   if (page === 'club-detail' && requestedPanel === 'club-announcements') panel = 'club-announcements'
   if (page === 'club-detail' && requestedPanel === 'club-reviews') panel = 'club-reviews'
-  if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger' || requestedPanel === 'bean-withdraw' || requestedPanel === 'diamond-recharge')) panel = requestedPanel
+  if (page === 'wallet' && (requestedPanel === 'coupons' || requestedPanel === 'my-cards' || requestedPanel === 'diamond-ledger' || requestedPanel === 'bean-ledger' || requestedPanel === 'bean-withdraw' || requestedPanel === 'bean-exchange' || requestedPanel === 'diamond-recharge')) panel = requestedPanel
   const voiceRoomSource = params.get('voiceFrom') === 'club' || (!params.has('voiceFrom') && page === 'voice-room' && params.has('club')) ? 'club' : 'personal'
   const requestedOrderMode = params.get('orderMode')
   const orderSelectionMode = requestedOrderMode === 'cascade' ? 'cascade' : requestedOrderMode === 'locked' || requestedOrderMode === 'fixed' ? 'locked' : 'service'

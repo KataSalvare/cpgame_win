@@ -1,4 +1,4 @@
-# 金豆充值
+# 购买金豆
 
 页面路由：`/game-companion-recharge`
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Clock3, Search, Trash2, UsersRound, X } from 'lucide-react'
+import { Clock3, Search, Trash2, UsersRound } from 'lucide-react'
 import { AvatarMark } from './AvatarMark'
 import { ClubCard } from './ClubCard'
 import { UserNameWithLevel } from './UserNameWithLevel'
@@ -127,7 +127,6 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
       <form className="global-search-input" onSubmit={(event) => { event.preventDefault(); rememberQuery() }}>
         <Search size={18} aria-hidden="true" />
         <input autoFocus type="search" value={query} onChange={(event) => { setQuery(event.target.value); selectFirstMatchingTab(event.target.value) }} placeholder="搜索语音房、俱乐部或用户昵称 / ID" aria-label="搜索语音房、俱乐部或用户" />
-        {query && <button type="button" className="windows-icon-button" aria-label="清空搜索内容" onClick={() => { setQuery(''); selectFirstMatchingTab('') }}><X size={16} /></button>}
         <button type="button" className="global-search-escape" onClick={onClose}>Esc</button>
       </form>
 

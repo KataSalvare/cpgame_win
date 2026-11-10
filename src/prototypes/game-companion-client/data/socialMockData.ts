@@ -42,6 +42,8 @@ export interface SocialConversation {
   kind: 'direct' | 'group'
   title: string
   initials: string
+  label?: string
+  status?: string
   members: string[]
   unread: number
   messages: SocialMessage[]
@@ -114,8 +116,8 @@ export interface VoiceInvitation {
 export const currentSocialUser = { id: 'player', name: '林小满', initials: '满', gender: '女' as const, age: 24, profileId: 'P-102860', rating: 4.96, tags: ['稳定在线', '团队协作'], intro: '喜欢和熟悉的队友一起开黑，沟通配合，享受每一局。', status: '在线', online: true }
 
 export const socialFriends: SocialFriend[] = [
-  { id: 'friend-1', companionId: 'companion-001', name: '晚风', initials: '风', status: '空闲中', online: true, role: '好友', gender: '女', age: 24, profileId: 'P-102861', rating: 4.99, tags: ['战术指挥', '稳定在线'], intro: '擅长信息沟通和团队配合，节奏清晰，交流轻松。' },
-  { id: 'friend-2', companionId: 'companion-004', name: '青柠汽水', initials: '柠', status: '在线', online: true, role: '好友', gender: '女', age: 22, profileId: 'P-102862', rating: 4.97, tags: ['轻松聊天', '新手友好'], intro: '喜欢轻松开黑，也乐于陪队友熟悉玩法。' },
+  { id: 'friend-1', companionId: 'companion-001', name: '晚风', initials: '风', status: '空闲中', online: true, role: '好友', gender: '女', age: 24, profileId: 'P-102861', rating: 4.99, tags: [], intro: '擅长信息沟通和团队配合，节奏清晰，交流轻松。' },
+  { id: 'friend-2', companionId: 'companion-004', name: '青柠汽水', initials: '柠', status: '在线', online: true, role: '好友', gender: '女', age: 22, profileId: 'P-102862', rating: 4.97, tags: [], intro: '喜欢轻松开黑，也乐于陪队友熟悉玩法。' },
   { id: 'friend-3', companionId: 'companion-002', name: '北岸', initials: '北', status: '组队中', online: true, role: '好友', gender: '男', age: 27, profileId: 'P-102863', rating: 4.96, tags: ['团队协作', '思路清晰'], intro: '熟悉地图点位，重视沟通和团队配合。' },
   { id: 'friend-4', companionId: 'companion-007', name: '一颗糖', initials: '糖', status: '2 小时前在线', online: false, role: '好友', gender: '女', age: 23, profileId: 'P-102864', rating: 4.93, tags: ['周末组队', '轻松娱乐'], intro: '喜欢探索新玩法，周末经常和好友组队。' },
   { id: 'friend-5', companionId: 'companion-008', name: '小熊饼干', initials: '熊', status: '在线', online: true, role: '好友', gender: '女', age: 25, profileId: 'P-102865', rating: 4.98, tags: ['耐心教学', '稳定在线'], intro: '愿意分享游戏经验，喜欢默契配合的队伍。' },
@@ -148,7 +150,7 @@ const customerIdentity = { id: 'customer-kata', name: '卡塔', initials: '卡' 
 
 export const initialConversations: SocialConversation[] = [
   {
-    id: 'direct-club-support', kind: 'direct', title: 'GM-客服-用户视角', initials: 'GM', members: ['club-support'], unread: 0, supportAction: 'order',
+    id: 'direct-club-support', kind: 'direct', title: 'GM-客服-用户视角', initials: 'GM', label: '客服', status: '在线', members: ['club-support'], unread: 0, supportAction: 'order',
     messages: [
       { id: 'support-1', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '14:20', kind: 'text', content: '你好，想咨询一下这笔订单。' },
       { id: 'support-2', senderId: 'club-support', senderName: 'GM-客服', initials: 'GM', time: '14:21', kind: 'text', content: '您好，请发送订单，我帮您查看。' },
@@ -158,7 +160,7 @@ export const initialConversations: SocialConversation[] = [
     ],
   },
   {
-    id: 'direct-customer-kata', kind: 'direct', title: '卡塔-客服视角', initials: '卡', members: ['customer-kata'], unread: 0, self: supportIdentity, supportAction: 'support-review',
+    id: 'direct-customer-kata', kind: 'direct', title: '卡塔-客服视角', initials: '卡', status: '在线', members: ['customer-kata'], unread: 0, self: supportIdentity, supportAction: 'support-review',
     messages: [
       { id: 'kata-1', senderId: customerIdentity.id, senderName: '卡塔', initials: '卡', time: '15:10', kind: 'text', content: '你好，帮我看一下这笔订单。' },
       { id: 'kata-2', senderId: customerIdentity.id, senderName: '卡塔', initials: '卡', time: '15:11', ...supportOrderSample },
@@ -175,7 +177,7 @@ export const initialConversations: SocialConversation[] = [
     ],
   },
   {
-    id: 'direct-companion-view', kind: 'direct', title: '林小满', initials: '满', members: ['player'], unread: 0,
+    id: 'direct-companion-view', kind: 'direct', title: '林小满', initials: '满', status: '空闲中', members: ['player'], unread: 0,
     self: { id: 'companion-001', name: '林间晚风', initials: '风' },
     messages: [
       { id: 'companion-view-1', senderId: 'player', senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '16:20', kind: 'text', content: '你好，想约一局排位，今晚有时间吗？' },

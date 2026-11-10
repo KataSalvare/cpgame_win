@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, CalendarDays, CheckCheck } from 'lucide-react'
+import { Bell, BellRing, CalendarDays, CheckCheck, ClipboardList, LayoutDashboard, Megaphone, ShieldAlert, Siren, type LucideIcon } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { Announcement, AnnouncementCategory } from '../data/announcementMockData'
@@ -19,6 +19,15 @@ type Props = {
   onBack?: () => void
 }
 
+const categoryIcons: Record<string, LucideIcon> = {
+  全部: LayoutDashboard,
+  平台活动: Megaphone,
+  规则更新: ClipboardList,
+  紧急通知: Siren,
+  处罚通知: ShieldAlert,
+  俱乐部活动: BellRing,
+}
+
 export function AnnouncementsPage({ kind, clubName, announcements, categories, pageState, readIds, onRead, onReadAll, onRetry, onBack, presentation = 'page' }: Props) {
   const [activeCategory, setActiveCategory] = useState<AnnouncementCategory | '全部'>('全部')
   const [selected, setSelected] = useState<Announcement | null>(null)
@@ -34,18 +43,17 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
   return <div className={`client-content announcement-page${presentation === 'panel' ? ' announcement-page--panel' : ''}`}>
     {presentation === 'page' && onBack && <button type="button" className="client-back-link" onClick={onBack}>返回俱乐部</button>}
     {presentation === 'page' && kind === 'club' && <header className="client-page-heading"><div><span className="client-eyebrow">{clubName}</span><h1>{title}</h1></div></header>}
+    <div className="announcement-tabs-row workbench-tab-row"><div className="announcement-filters personal-center-tabs" role="tablist" aria-label="公告分类">
+        {(['全部', ...categories] as const).map((category) => { const Icon = categoryIcons[category] ?? Bell; return <button key={category} type="button" role="tab" aria-selected={activeCategory === category} className={`personal-center-tab${activeCategory === category ? ' is-active' : ''}`} onClick={() => setActiveCategory(category)}><Icon size={16} /><span>{category}</span></button> })}
+      </div>{presentation === 'page' && kind === 'platform' && <button type="button" className="client-button client-button--secondary announcement-read-all" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button>}</div>
     <section className="announcement-card client-card" aria-label={`${title}列表`}>
-      <div className="announcement-tabs-row"><div className="announcement-filters" role="tablist" aria-label="公告分类">
-        {(['全部', ...categories] as const).map((category) => <button key={category} type="button" role="tab" aria-selected={activeCategory === category} className={`announcement-filter${activeCategory === category ? ' is-active' : ''}`} onClick={() => setActiveCategory(category)}>{category}</button>)}
-      </div>{presentation === 'page' && kind === 'platform' && <button type="button" className="client-button client-button--secondary client-button--small announcement-read-all" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button>}</div>
       {visibleAnnouncements.length ? <ul className="announcement-list">
         {visibleAnnouncements.map((announcement) => {
           const isRead = readIds.includes(announcement.id)
           return <li key={announcement.id}>
             <button type="button" className={`announcement-row${isRead ? '' : ' is-unread'}${announcement.coverImage ? ' has-cover' : ''}`} onClick={() => { onRead(announcement.id); setSelected(announcement) }}>
-              <span className="announcement-row__status" aria-label={isRead ? '已读' : '未读'}>{!isRead && <i />}</span>
               {announcement.coverImage && <img className="announcement-row__cover" src={announcement.coverImage} alt={announcement.coverAlt ?? ''} />}
-              <span className="announcement-row__main"><span className="announcement-row__copy"><span className="announcement-row__title-line"><span className={`announcement-category announcement-category--${announcement.category === '紧急通知' || announcement.category === '处罚通知' ? 'important' : 'default'}`}>{announcement.category}</span><strong>{announcement.title}</strong></span><span className="announcement-row__summary">{announcement.summary}</span></span></span>
+              <span className="announcement-row__main"><span className="announcement-row__copy"><span className="announcement-row__title-line">{!isRead && <span className="announcement-row__status" role="img" aria-label="未读" />}<span className={`announcement-category announcement-category--${announcement.category === '紧急通知' || announcement.category === '处罚通知' ? 'important' : 'default'}`}>{announcement.category}</span><strong>{announcement.title}</strong></span><span className="announcement-row__summary">{announcement.summary}</span></span></span>
               <time className="announcement-row__time" dateTime={announcement.publishedAt.replace(' ', 'T')}><CalendarDays size={14} />{announcement.publishedAt}</time>
             </button>
           </li>

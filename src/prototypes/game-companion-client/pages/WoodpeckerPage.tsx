@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { CalendarDays, ImagePlus, Search, ThumbsDown, ThumbsUp, TreeDeciduous, X } from 'lucide-react'
+import { CalendarDays, ClipboardList, ImagePlus, Megaphone, Search, ThumbsDown, ThumbsUp, TreeDeciduous, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { AvatarMark } from '../components/AvatarMark'
@@ -84,9 +84,9 @@ export function WoodpeckerPage({ pageState, onRetry }: Props) {
   if (pageState !== 'normal') return <div className="client-content woodpecker-state"><PageStatePanel state={pageState} title={pageState === 'empty' ? '暂无工单' : '啄木鸟暂不可用'} description={pageState === 'loading' ? '正在加载工单…' : pageState === 'error' ? '暂时无法加载，请重试。' : '当前没有可显示的工单。'} actionLabel={pageState === 'error' ? '重新加载' : '查看全部'} onAction={onRetry} /></div>
 
   return <div className="client-content woodpecker-page">
-    <div className="woodpecker-tabs-row"><div className="woodpecker-tabs" role="tablist" aria-label="啄木鸟分类">
-      <button type="button" role="tab" aria-selected={activeTab === 'mine'} className={activeTab === 'mine' ? 'is-active' : ''} onClick={() => setActiveTab('mine')}>我的啄木鸟</button>
-      <button type="button" role="tab" aria-selected={activeTab === 'public'} className={activeTab === 'public' ? 'is-active' : ''} onClick={() => setActiveTab('public')}>啄木鸟公示</button>
+    <div className="woodpecker-tabs-row"><div className="woodpecker-tabs personal-center-tabs" role="tablist" aria-label="啄木鸟分类">
+      <button type="button" role="tab" aria-selected={activeTab === 'mine'} className={`personal-center-tab${activeTab === 'mine' ? ' is-active' : ''}`} onClick={() => setActiveTab('mine')}><ClipboardList size={16} /><span>我的啄木鸟</span></button>
+      <button type="button" role="tab" aria-selected={activeTab === 'public'} className={`personal-center-tab${activeTab === 'public' ? ' is-active' : ''}`} onClick={() => setActiveTab('public')}><Megaphone size={16} /><span>啄木鸟公示</span></button>
     </div>{activeTab === 'mine' && <button type="button" className="client-button client-button--primary woodpecker-submit-button" onClick={() => setFormOpen(true)}>我要建议/举报</button>}</div>
 
     {activeTab === 'mine' ? <section className="woodpecker-panel" role="tabpanel" aria-label="我的啄木鸟">

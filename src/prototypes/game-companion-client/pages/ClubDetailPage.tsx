@@ -46,7 +46,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
   }
 
   return <div className="client-content club-detail-page">
-    <button type="button" className="client-back-link" onClick={onBack} aria-label="返回首页"><ArrowLeft size={16} /> 首页</button>
+    <div className="club-detail-page__heading"><button type="button" className="client-back-link" onClick={onBack} aria-label="返回首页"><ArrowLeft size={16} /></button><h1>俱乐部</h1></div>
     <PromotionBanner />
     <section className="client-card club-profile-card">
       <div className="club-profile-card__main">

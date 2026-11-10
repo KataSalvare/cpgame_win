@@ -30,12 +30,14 @@ export function ClubGroupsPanel({ groups, onApply, onOpenChat }: Props) {
   return <div className="club-groups-panel">
     <div className="club-group-list">
       {groups.map((group) => <article className="club-group-card" key={group.id}>
-        <AvatarMark initials={group.initials} size="md" />
-        <div className="club-group-card__body">
-          <div className="club-group-card__title"><h3>{group.name}</h3><span className={`client-badge club-group-card__status club-group-card__status--${group.membership}`}>{membershipLabel[group.membership]}</span></div>
-          <span className="club-group-card__meta"><UsersRound size={13} />{group.memberCount} 人</span>
+        <div className="club-group-card__identity">
+          <AvatarMark initials={group.initials} size="md" />
+          <div className="club-group-card__body">
+            <div className="club-group-card__title"><h3>{group.name}</h3><span className={`client-badge club-group-card__status club-group-card__status--${group.membership}`}>{membershipLabel[group.membership]}</span></div>
+            <span className="club-group-card__meta"><UsersRound size={13} />{group.memberCount} 人</span>
+          </div>
         </div>
-        {group.membership === 'joined' ? <button type="button" className="client-button client-button--primary club-group-card__action" onClick={() => onOpenChat(group.id)}><MessageCircle size={14} />进入群聊<ChevronRight size={14} /></button>
+        {group.membership === 'joined' ? <button type="button" className="client-button client-button--primary club-group-card__action" onClick={() => onOpenChat(group.id)}><MessageCircle size={14} />进入<ChevronRight size={14} /></button>
           : group.membership === 'pending' ? <button type="button" className="client-button client-button--secondary club-group-card__action" disabled><Check size={14} />等待审核</button>
           : <button type="button" className="client-button client-button--secondary club-group-card__action" onClick={() => { setApplyingGroup(group); setReason('') }}>申请加入</button>}
       </article>)}

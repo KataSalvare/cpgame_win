@@ -270,6 +270,57 @@
       "createdAt": 1793844804781,
       "overlayId": "quick-match-matching",
       "route": "page=checkout&tool=quick-match"
+    },
+    {
+      "id": "anno-1794275328576-interaction",
+      "pagePath": "/game-companion-system-settings",
+      "number": 1,
+      "title": "",
+      "content": "更改路径的按钮，点击后，拉起windows系统自带的选择文件夹的弹窗。（演示无法做到）",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.system-settings-page > form > section.client-card.system-settings-card:nth-of-type(2) > div.system-settings-row:nth-of-type(1) > div.system-settings-path > button.client-button.client-button--secondary:nth-of-type(1)",
+      "position": "top-left",
+      "createdAt": 1794275328576,
+      "route": "page=system-settings&returnHash=page%3Dorders%26club%3Dclub-001"
+    },
+    {
+      "id": "anno-1794276658320-interaction",
+      "pagePath": "/game-companion-search",
+      "number": 1,
+      "title": "",
+      "content": "按ESC关闭弹窗",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.global-search-overlay:nth-of-type(3) > section.global-search-panel > form.global-search-input > button.global-search-escape",
+      "position": "top-left",
+      "createdAt": 1794276658320,
+      "overlayId": "game-companion-global-search",
+      "route": "page=orders&tool=global-search"
+    },
+    {
+      "id": "anno-1794277361006-interaction",
+      "pagePath": "/game-companion-recharge",
+      "number": 1,
+      "title": "",
+      "content": "根据后台-支付配置来展示",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.store-overlay.wallet-recharge-overlay:nth-of-type(4) > section.store-benefit-dialog.wallet-recharge-dialog > div.client-content.account-page.store-page > div.store-checkout-grid:nth-of-type(2) > section.client-card.store-main-card > div.payment-method-list:nth-of-type(8)",
+      "position": "top-left",
+      "createdAt": 1794277361006,
+      "overlayId": "wallet-recharge-modal",
+      "route": "page=wallet&club=club-001&panel=diamond-recharge"
+    },
+    {
+      "id": "anno-1794277379985-interaction",
+      "pagePath": "/game-companion-recharge",
+      "number": 2,
+      "title": "",
+      "content": "根据后台-支付配置来展示",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.store-overlay.wallet-recharge-overlay:nth-of-type(4) > section.store-benefit-dialog.wallet-recharge-dialog > div.client-content.account-page.store-page > div.store-checkout-grid:nth-of-type(2) > section.client-card.store-main-card > div.recharge-package-grid:nth-of-type(2)",
+      "position": "top-left",
+      "createdAt": 1794277379985,
+      "overlayId": "wallet-recharge-modal",
+      "route": "page=wallet&club=club-001&panel=diamond-recharge"
     }
   ],
   "categories": [

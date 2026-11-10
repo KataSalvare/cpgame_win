@@ -96,7 +96,7 @@ export function useAccountLogic() {
 
   const completeRecharge = useCallback((diamonds: number, amount: number, couponId: string | null) => {
     setDiamondBalance((balance) => balance + diamonds)
-    setDiamondTransactions((current) => [{ id: `D-${Date.now()}`, title: `金豆充值 · ¥${amount}`, type: '充值', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: diamonds }, ...current])
+    setDiamondTransactions((current) => [{ id: `D-${Date.now()}`, title: `购买金豆 · ¥${amount}`, type: '购买', date: new Date().toLocaleString('zh-CN', { hour12: false }), amount: diamonds }, ...current])
     if (couponId) setCoupons((current) => current.map((coupon) => coupon.id === couponId ? { ...coupon, status: '已使用' } : coupon))
   }, [])
 

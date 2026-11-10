@@ -18,10 +18,10 @@ export const rechargePackages = [
 ]
 
 export const initialCoupons: RechargeCoupon[] = [
-  { id: 'coupon-001', title: '充值立减 5 元', description: '充值满 30 元可用', threshold: 30, discount: 5, status: '可用', expiresAt: '2026-11-30' },
-  { id: 'coupon-002', title: '充值立减 2 元', description: '充值满 10 元可用', threshold: 10, discount: 2, status: '可用', expiresAt: '2026-12-15' },
-  { id: 'coupon-003', title: '充值立减 10 元', description: '充值满 98 元可用', threshold: 98, discount: 10, status: '已使用', expiresAt: '2026-10-20' },
-  { id: 'coupon-004', title: '充值立减 3 元', description: '充值满 30 元可用', threshold: 30, discount: 3, status: '已过期', expiresAt: '2026-10-01' },
+  { id: 'coupon-001', title: '购买立减 5 元', description: '购买满 30 元可用', threshold: 30, discount: 5, status: '可用', expiresAt: '2026-11-30' },
+  { id: 'coupon-002', title: '购买立减 2 元', description: '购买满 10 元可用', threshold: 10, discount: 2, status: '可用', expiresAt: '2026-12-15' },
+  { id: 'coupon-003', title: '购买立减 10 元', description: '购买满 98 元可用', threshold: 98, discount: 10, status: '已使用', expiresAt: '2026-10-20' },
+  { id: 'coupon-004', title: '购买立减 3 元', description: '购买满 30 元可用', threshold: 30, discount: 3, status: '已过期', expiresAt: '2026-10-01' },
 ]
 
 export type PremiumCard = {

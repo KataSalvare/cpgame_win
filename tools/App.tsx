@@ -65,6 +65,9 @@ function AppContent() {
           : hashPage === 'orders' && params.get('orderTab') === 'receiving' ? 'orders-receiving'
             : hashPage === 'orders' && params.get('orderTab') === 'exam-candidate' ? 'orders-exam-candidate'
               : hashPage === 'orders' && params.get('orderTab') === 'exam-proctor' ? 'orders-exam-proctor'
+            : hashPage === 'orders' && params.get('detail') === 'client' ? 'order-detail'
+              : hashPage === 'orders' && params.get('detail') === 'receiving' ? 'receiving-order-detail'
+          : hashPage === 'wallet' && params.get('panel') === 'bean-exchange' ? 'bean-exchange'
           : hashTool && ['help-center', 'screen-recording', 'client-notifications', 'close-app', 'quick-panel', 'quick-match', 'quick-match-in-progress', 'identity-verification', 'global-search', 'voice-room-minimized', ...messagePerspectiveEntryViews].includes(hashTool) ? hashTool
         : hashPage === 'profile' && params.get('section') === 'onboarding' ? params.get('onboarding') === 'companion' ? 'profile-onboarding' : params.get('onboarding') === 'club' ? 'profile-club-onboarding' : 'profile-onboarding-center'
         : hashPage === 'profile' && params.get('section') === 'clubs' ? 'profile-clubs'
@@ -114,8 +117,10 @@ function AppContent() {
       const requestedPage = pages.find((page) => page.dirName === currentPage.dirName && page.entryView === requestedView)
       if (requestedPage && requestedPage.path !== currentPage.path) return
     }
-    const expectedPage = workbenchEntryViews.includes(currentPage.entryView as typeof workbenchEntryViews[number]) ? 'workbench'
+    const expectedPage = currentPage.entryView === 'bean-exchange' ? 'wallet'
+      : workbenchEntryViews.includes(currentPage.entryView as typeof workbenchEntryViews[number]) ? 'workbench'
       : orderTabEntryViews.includes(currentPage.entryView as typeof orderTabEntryViews[number]) ? 'orders'
+      : currentPage.entryView === 'order-detail' || currentPage.entryView === 'receiving-order-detail' ? 'orders'
       : currentPage.entryView === 'club-voice-room' || currentPage.entryView === 'club-voice-room-user' || currentPage.entryView === 'club-voice-room-customer-service' ? 'voice-room'
       : currentPage.entryView === 'quick-match' || currentPage.entryView === 'quick-match-in-progress' ? params.get('tool') === currentPage.entryView ? params.get('page') ?? 'home' : 'home'
       : currentPage.entryView === 'companion-detail' ? params.get('page') === 'talents' ? 'talents' : 'club-detail'
@@ -147,6 +152,7 @@ function AppContent() {
     const expectedOrderTab = currentPage.entryView === 'orders-receiving' ? 'receiving'
       : currentPage.entryView === 'orders-exam-candidate' ? 'exam-candidate'
         : currentPage.entryView === 'orders-exam-proctor' ? 'exam-proctor' : null
+    const expectedOrderDetail = currentPage.entryView === 'order-detail' ? 'client' : currentPage.entryView === 'receiving-order-detail' ? 'receiving' : null
     const expectedWorkbenchTab = currentPage.entryView === 'workbench-matches' ? 'matches'
       : currentPage.entryView === 'workbench-orders' ? 'orders'
         : currentPage.entryView === 'workbench-services' || currentPage.entryView === 'workbench-apply-service' ? 'services' : null
@@ -155,7 +161,8 @@ function AppContent() {
       ? params.get('security') === 'flow' ? 'flow' : 'real-name'
       : null
     const expectedCompanion = currentPage.entryView === 'companion-detail' ? params.get('companion') ?? 'companion-001' : null
-    const expectedPanel = currentPage.entryView === 'wallet-recharge' && expectedPage === 'wallet' ? 'diamond-recharge'
+    const expectedPanel = currentPage.entryView === 'bean-exchange' ? 'bean-exchange'
+      : currentPage.entryView === 'wallet-recharge' && expectedPage === 'wallet' ? 'diamond-recharge'
       : currentPage.entryView === 'bean-withdraw' ? 'bean-withdraw'
       : currentPage.entryView === 'coupons' ? 'coupons'
         : currentPage.entryView === 'club-announcements' ? 'club-announcements'
@@ -171,6 +178,7 @@ function AppContent() {
       && (expectedSecurity == null ? !params.has('security') : params.get('security') === expectedSecurity)
       && (expectedCompanion == null ? !params.has('companion') : params.get('companion') === expectedCompanion)
       && (expectedOrderTab == null ? !params.has('orderTab') : params.get('orderTab') === expectedOrderTab)
+      && (expectedOrderDetail == null ? !params.has('detail') : params.get('detail') === expectedOrderDetail)
       && (expectedWorkbenchTab == null ? !params.has('workbenchTab') : params.get('workbenchTab') === expectedWorkbenchTab)
       && (expectedApplyService ? params.get('applyService') === '1' : !params.has('applyService'))
       && (expectedTool == null ? !params.has('tool') : params.get('tool') === expectedTool)) return
@@ -192,6 +200,8 @@ function AppContent() {
     if (expectedCompanion) params.set('companion', expectedCompanion)
     if (expectedOrderTab) params.set('orderTab', expectedOrderTab)
     else params.delete('orderTab')
+    if (expectedOrderDetail) params.set('detail', expectedOrderDetail)
+    else if (currentPage.entryView !== 'order-detail' && currentPage.entryView !== 'receiving-order-detail') params.delete('detail')
     if (expectedWorkbenchTab) params.set('workbenchTab', expectedWorkbenchTab)
     else params.delete('workbenchTab')
     if (expectedApplyService) params.set('applyService', '1')
