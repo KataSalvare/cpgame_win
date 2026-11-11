@@ -330,6 +330,19 @@
       "route": "page=checkout&tool=quick-match"
     },
     {
+      "id": "anno-1794368074256-interaction",
+      "pagePath": "/game-companion-quick-match",
+      "number": 6,
+      "title": "",
+      "content": "根据用户选择的游戏，动态加载支持该游戏的俱乐部列表。\n1、通过左上角一键匹配进入的，需要选择游戏，选择俱乐部\n2、通过俱乐部-自助下单进入的，锁定并隐藏俱乐部信息。只展示该俱乐部支持的游戏。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.match-panel-host:nth-of-type(3) > section.match-panel > div.match-panel__form > section.match-field.match-field--wide:nth-of-type(2) > div.match-club-browser > div.match-club-strip",
+      "position": "top-left",
+      "createdAt": 1794368074256,
+      "overlayId": "quick-match",
+      "route": "page=home&tool=quick-match"
+    },
+    {
       "id": "anno-1794275328576-interaction",
       "pagePath": "/game-companion-system-settings",
       "number": 1,
@@ -611,6 +624,18 @@
       "position": "top-left",
       "createdAt": 1794362499147,
       "route": "page=profile&club=club-001&section=clubs"
+    },
+    {
+      "id": "anno-1794368203879-interaction",
+      "pagePath": "/game-companion-workbench-services",
+      "number": 1,
+      "title": "",
+      "content": "申请服务后，会在对应的游戏-玩法-等级下，生成一条待审核的服务。\n\n审核通过，可以开启服务。\n审核拒绝，则消失",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.client-content.account-page.personal-center-page.workbench-page > section.client-card.workbench-services-panel > header.workbench-services-heading > button.client-button.client-button--secondary",
+      "position": "top-left",
+      "createdAt": 1794368203879,
+      "route": "page=workbench&workbenchTab=services"
     }
   ],
   "categories": [
