@@ -169,81 +169,9 @@
       "route": "page=checkout"
     },
     {
-      "id": "anno-1793842529778-interaction",
-      "pagePath": "/game-companion-messages",
-      "number": 1,
-      "title": "",
-      "content": "点击好友后，跳转到该好友的会话，并打开第三栏展示用户主页",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout.messages-layout--profile-open > aside.messages-list-panel:nth-of-type(1) > div.social-friend-list:nth-of-type(2) > div.social-friend-row:nth-of-type(2) > button.social-friend-identity:nth-of-type(1)",
-      "position": "top-left",
-      "createdAt": 1793842529778,
-      "route": "page=messages&club=club-001"
-    },
-    {
-      "id": "anno-1793842553405-interaction",
-      "pagePath": "/game-companion-messages",
-      "number": 2,
-      "title": "",
-      "content": "会话消息枚举值",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout.messages-layout--profile-open > aside.messages-list-panel:nth-of-type(1) > div.conversation-list:nth-of-type(3) > button.conversation-row:nth-of-type(8)",
-      "position": "top-left",
-      "createdAt": 1793842553405,
-      "route": "page=messages&club=club-001"
-    },
-    {
-      "id": "anno-1793842568406-interaction",
-      "pagePath": "/game-companion-messages",
-      "number": 3,
-      "title": "",
-      "content": "联系俱乐部客户- 客户的视角",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout.messages-layout--profile-open > aside.messages-list-panel:nth-of-type(1) > div.conversation-list:nth-of-type(3) > button.conversation-row:nth-of-type(5)",
-      "position": "top-left",
-      "createdAt": 1793842568406,
-      "route": "page=messages&club=club-001"
-    },
-    {
-      "id": "anno-1793842574622-interaction",
-      "pagePath": "/game-companion-messages",
-      "number": 4,
-      "title": "",
-      "content": "联系俱乐部客户- 用户的视角",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout.messages-layout--profile-open > aside.messages-list-panel:nth-of-type(1) > div.conversation-list:nth-of-type(3) > button.conversation-row:nth-of-type(4)",
-      "position": "top-left",
-      "createdAt": 1793842574622,
-      "route": "page=messages&club=club-001"
-    },
-    {
-      "id": "anno-1793842594722-interaction",
-      "pagePath": "/game-companion-messages",
-      "number": 5,
-      "title": "",
-      "content": "群聊设置，群管理员视角",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout.messages-layout--profile-open > aside.messages-list-panel:nth-of-type(1) > div.conversation-list:nth-of-type(3) > button.conversation-row:nth-of-type(9)",
-      "position": "top-left",
-      "createdAt": 1793842594722,
-      "route": "page=messages&club=club-001"
-    },
-    {
-      "id": "anno-1793842605259-interaction",
-      "pagePath": "/game-companion-messages",
-      "number": 6,
-      "title": "",
-      "content": "群聊设置，普通用户视角",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout.messages-layout--profile-open > aside.messages-list-panel:nth-of-type(1) > div.conversation-list:nth-of-type(3) > button.conversation-row:nth-of-type(10)",
-      "position": "top-left",
-      "createdAt": 1793842605259,
-      "route": "page=messages&club=club-001"
-    },
-    {
       "id": "anno-1794362100875-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 7,
+      "number": 1,
       "title": "",
       "content": "鼠标右键，回复，复制，举报",
       "category": "interaction",
@@ -255,7 +183,7 @@
     {
       "id": "anno-1794362107534-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 8,
+      "number": 2,
       "title": "",
       "content": "鼠标右键，回复，复制，撤回",
       "category": "interaction",
@@ -267,7 +195,7 @@
     {
       "id": "anno-1794362125744-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 9,
+      "number": 3,
       "title": "",
       "content": "这是群主/管理员视角",
       "category": "interaction",
@@ -279,7 +207,7 @@
     {
       "id": "anno-1794362138583-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 10,
+      "number": 4,
       "title": "",
       "content": "这是群成员视角",
       "category": "interaction",
@@ -291,7 +219,7 @@
     {
       "id": "anno-1794362154961-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 11,
+      "number": 5,
       "title": "",
       "content": "联系俱乐部客服时，俱乐部客服视角",
       "category": "interaction",
@@ -303,7 +231,7 @@
     {
       "id": "anno-1794362161935-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 12,
+      "number": 6,
       "title": "",
       "content": "联系俱乐部客服时，用户视角",
       "category": "interaction",
@@ -315,7 +243,7 @@
     {
       "id": "anno-1794362180759-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 13,
+      "number": 7,
       "title": "",
       "content": "私聊，点击，第三栏打开用户详情\n\n群聊，点击，第三栏打开群管理",
       "category": "interaction",
@@ -327,7 +255,7 @@
     {
       "id": "anno-1794362271650-interaction",
       "pagePath": "/game-companion-messages",
-      "number": 14,
+      "number": 8,
       "title": "",
       "content": "私聊，头像，点击，第三栏打开用户详情\n\n群聊，头像，点击，第三栏打开群管理",
       "category": "interaction",
