@@ -1588,7 +1588,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .service-offer__price { color: var(--client-text); font-size: 12px; font-weight: 700; }
 .service-offer__heading .service-offer__play-level { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .service-offer__play-level > span + span { border-left: 1px solid var(--client-border); padding-left: 6px; }
-.club-detail-page__heading { position: sticky; z-index: 11; top: -24px; align-self: flex-start; margin-bottom: 8px; padding: 8px 0; background: var(--client-canvas); }
+.club-detail-page__heading { position: sticky; z-index: 11; top: -24px; width: 100%; box-sizing: border-box; align-self: flex-start; margin-bottom: 8px; padding: 8px 0; background: var(--client-canvas); }
 
 .club-groups-panel { display: grid; align-content: start; padding: 8px; }
 .club-group-list { display: grid; gap: 10px; }

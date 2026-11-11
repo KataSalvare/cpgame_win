@@ -73,6 +73,18 @@
       "route": "page=home"
     },
     {
+      "id": "anno-1794376127761-interaction",
+      "pagePath": "/game-companion-client",
+      "number": 7,
+      "title": "",
+      "content": "点击打开快捷面板",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > aside.windows-client-frame__sidebar > nav.windows-sidebar > div.windows-sidebar__footer:nth-of-type(2) > div.client-profile-quick.client-profile-quick--sidebar > button.client-sidebar-account",
+      "position": "top-left",
+      "createdAt": 1794376127761,
+      "route": "page=home&club=club-001"
+    },
+    {
       "id": "anno-1793608158027-interaction",
       "pagePath": "/game-companion-orders",
       "number": 1,
