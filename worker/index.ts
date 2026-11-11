@@ -3,6 +3,8 @@ import defaultMenuTree from '../tools/config/menu-tree.json'
 import { mergeMenuTreeWithDefaults } from '../tools/lib/menuTree'
 
 const ANNOTATIONS_KEY = 'annotations'
+const ANNOTATIONS_LEGACY_BACKUP_KEY = 'annotations:legacy-backup'
+const ANNOTATIONS_FORMAT = 'annotations-v1'
 const MENU_TREE_KEY = 'tool-menu-tree'
 const SPEC_KEY_PREFIX = 'spec:'
 const EDITABLE_SPECS = new Set<string>()
@@ -10,6 +12,13 @@ const EDITABLE_SPECS = new Set<string>()
 interface AnnotationsData {
   annotations: unknown[]
   categories: unknown[]
+}
+
+interface StoredAnnotations {
+  format: typeof ANNOTATIONS_FORMAT
+  revision: string
+  baseline: AnnotationsData
+  data: AnnotationsData
 }
 
 type MenuNode = { id: string; children: MenuNode[]; label?: string }
@@ -37,6 +46,96 @@ function isAnnotationsData(value: unknown): value is AnnotationsData {
     Array.isArray(value.annotations) &&
     Array.isArray(value.categories)
   )
+}
+
+function annotationSeedRevision(): string {
+  const input = JSON.stringify(defaultAnnotations)
+  let hash = 2166136261
+  for (let index = 0; index < input.length; index += 1) {
+    hash = Math.imul(hash ^ input.charCodeAt(index), 16777619)
+  }
+  return (hash >>> 0).toString(36)
+}
+
+function isStoredAnnotations(value: unknown): value is StoredAnnotations {
+  return (
+    isRecord(value) &&
+    value.format === ANNOTATIONS_FORMAT &&
+    typeof value.revision === 'string' &&
+    isAnnotationsData(value.baseline) &&
+    isAnnotationsData(value.data)
+  )
+}
+
+function sameValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function mergeByKey<T>(
+  baseline: T[],
+  current: T[],
+  saved: T[],
+  keyOf: (item: T) => string,
+): T[] {
+  const baselineByKey = new Map(baseline.map((item) => [keyOf(item), item]))
+  const currentByKey = new Map(current.map((item) => [keyOf(item), item]))
+  const savedByKey = new Map(saved.map((item) => [keyOf(item), item]))
+  const merged = new Map<string, T>()
+
+  current.forEach((item) => {
+    const key = keyOf(item)
+    const oldValue = baselineByKey.get(key)
+    if (oldValue === undefined) {
+      if (!savedByKey.has(key)) merged.set(key, item)
+      return
+    }
+
+    const savedValue = savedByKey.get(key)
+    if (savedValue === undefined) return // A deliberate deletion.
+    merged.set(key, sameValue(savedValue, oldValue) ? item : savedValue)
+  })
+
+  // Append user additions and edits to entries removed from the shipped defaults.
+  saved.forEach((item) => {
+    const key = keyOf(item)
+    const isAddition = !baselineByKey.has(key)
+    const isEditedRemoval = !currentByKey.has(key) && !sameValue(item, baselineByKey.get(key))
+    if ((isAddition || isEditedRemoval) && !merged.has(key)) {
+      merged.set(key, item)
+    }
+  })
+
+  return [...merged.values()]
+}
+
+function mergeAnnotations(
+  baseline: AnnotationsData,
+  current: AnnotationsData,
+  saved: AnnotationsData,
+): AnnotationsData {
+  return {
+    annotations: mergeByKey(
+      baseline.annotations,
+      current.annotations,
+      saved.annotations,
+      (item) => String((item as { id?: unknown })?.id ?? ''),
+    ),
+    categories: mergeByKey(
+      baseline.categories,
+      current.categories,
+      saved.categories,
+      (item) => String((item as { key?: unknown })?.key ?? ''),
+    ),
+  }
+}
+
+function currentAnnotationsEnvelope(data: AnnotationsData = defaultAnnotations): StoredAnnotations {
+  return {
+    format: ANNOTATIONS_FORMAT,
+    revision: annotationSeedRevision(),
+    baseline: defaultAnnotations,
+    data,
+  }
 }
 
 function isMenuTree(value: unknown): value is MenuTree {
@@ -76,11 +175,25 @@ async function handleAnnotations(request: Request, env: WorkerEnv): Promise<Resp
       return jsonResponse(defaultAnnotations)
     }
 
+    if (isStoredAnnotations(stored)) {
+      if (stored.revision === annotationSeedRevision()) {
+        return jsonResponse(stored.data)
+      }
+
+      const data = mergeAnnotations(stored.baseline, defaultAnnotations, stored.data)
+      const migrated = currentAnnotationsEnvelope(data)
+      await env.ANNOTATIONS_KV.put(ANNOTATIONS_KEY, JSON.stringify(migrated))
+      return jsonResponse(data)
+    }
+
     if (!isAnnotationsData(stored)) {
       return jsonResponse({ error: 'Stored annotations data is invalid' }, 500)
     }
 
-    return jsonResponse(stored)
+    // Older deployments stored only the mutable snapshot. The current bundled
+    // file is the latest authored seed; retain the legacy value for recovery
+    // when the first write migrates the KV entry to the versioned format.
+    return jsonResponse(defaultAnnotations)
   }
 
   if (request.method === 'POST') {
@@ -98,7 +211,11 @@ async function handleAnnotations(request: Request, env: WorkerEnv): Promise<Resp
       )
     }
 
-    await env.ANNOTATIONS_KV.put(ANNOTATIONS_KEY, JSON.stringify(body))
+    const stored = await env.ANNOTATIONS_KV.get(ANNOTATIONS_KEY, 'json')
+    if (isAnnotationsData(stored) && !(await env.ANNOTATIONS_KV.get(ANNOTATIONS_LEGACY_BACKUP_KEY, 'json'))) {
+      await env.ANNOTATIONS_KV.put(ANNOTATIONS_LEGACY_BACKUP_KEY, JSON.stringify(stored))
+    }
+    await env.ANNOTATIONS_KV.put(ANNOTATIONS_KEY, JSON.stringify(currentAnnotationsEnvelope(body)))
     return jsonResponse({ success: true })
   }
 

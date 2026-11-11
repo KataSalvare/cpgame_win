@@ -23,7 +23,8 @@
 ## 2. 数据行为
 
 - KV 没有 `annotations` Key 时，GET 回退到 `src/resources/annotations.json`。
-- 第一次合法 POST 后，完整数据写入 KV 的 `annotations` Key。
+- 批注 KV 使用带种子版本和基线快照的 envelope 保存：部署中的批注默认值变化时，Worker 会把默认值更新与 KV 中的用户增删改做三方合并，再写回 KV。
+- 旧版 KV 若仍是裸批注 JSON，GET 使用当前部署内的 `src/resources/annotations.json`；第一次合法 POST 前，会将旧值备份到 `annotations:legacy-backup`，再以新版 envelope 保存提交内容。
 - `/api/menu-tree` 的 GET 在 KV 没有 `tool-menu-tree` 时返回构建时打包的 `tools/config/menu-tree.json`；合法 POST 将菜单树写入该 Key。
 - 菜单树校验节点路径、嵌套深度和同分类重复 ID；无效请求返回 400，未知 API 方法返回 405。
 - 非法 JSON 或缺少 `annotations`、`categories` 数组时返回 400。
