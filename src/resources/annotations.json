@@ -337,22 +337,9 @@
       "route": ""
     },
     {
-      "id": "anno-1793844283559-interaction",
-      "pagePath": "/game-companion-quick-match",
-      "number": 1,
-      "title": "",
-      "content": "1、通过一键匹配进入的，需要用户选择游戏，然后根据选择游戏加载支持的俱乐部，再让用户选择俱乐部。\n\n2、通过俱乐部详情-自助下单进入的，就锁定并隐藏俱乐部，根据该俱乐部，读取支持的游戏列表",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.match-panel-host:nth-of-type(3) > section.match-panel > div.match-panel__form > section.match-field.match-field--wide:nth-of-type(2) > button.match-club-trigger",
-      "position": "top-left",
-      "createdAt": 1793844283559,
-      "overlayId": "quick-match",
-      "route": "page=checkout&tool=quick-match"
-    },
-    {
       "id": "anno-1793844430486-interaction",
       "pagePath": "/game-companion-quick-match",
-      "number": 2,
+      "number": 1,
       "title": "",
       "content": "根据选择的游戏-玩法-等级-服务，俱乐部，读取【俱乐部-服务配置】该游戏下的人数配置\n\n如果人数未配置，则不展示该栏，默认为1人\n\n如果人数已配置，则读取配置中的 名称，人数，排序，默认选中项",
       "category": "interaction",
@@ -363,22 +350,9 @@
       "route": "page=checkout&tool=quick-match"
     },
     {
-      "id": "anno-1793844453370-interaction",
-      "pagePath": "/game-companion-quick-match",
-      "number": 3,
-      "title": "",
-      "content": "根据所选的游戏-玩法-等级-服务，读取对应的单位。",
-      "category": "interaction",
-      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.match-panel-host:nth-of-type(3) > section.match-panel > div.match-panel__form > label.match-field:nth-of-type(4) > span.match-quantity-control:nth-of-type(2) > span",
-      "position": "top-left",
-      "createdAt": 1793844453370,
-      "overlayId": "quick-match",
-      "route": "page=checkout&tool=quick-match"
-    },
-    {
       "id": "anno-1793844591483-interaction",
       "pagePath": "/game-companion-quick-match",
-      "number": 4,
+      "number": 2,
       "title": "",
       "content": "根据选择的游戏-玩法-等级-服务，俱乐部，读取【俱乐部-服务配置】中男陪和女陪的价格\n\n如果选择的是不限，价格为【低价】-【高价】\n如果选择的是男或者女，价格为对应的【价格】",
       "category": "interaction",
@@ -391,7 +365,7 @@
     {
       "id": "anno-1793844629548-interaction",
       "pagePath": "/game-companion-quick-match",
-      "number": 5,
+      "number": 3,
       "title": "",
       "content": "状态=未匹配，点击缩放则关闭匹配面板。\n\n状态=匹配中，点击缩放则隐藏匹配面板，切换为小浮层面板（支持交互）\n\n状态=选人中，点击缩放则隐藏匹配面板，切换为小浮层面板（支持交互）",
       "category": "interaction",
@@ -404,7 +378,7 @@
     {
       "id": "anno-1793844721858-interaction",
       "pagePath": "/game-companion-quick-match",
-      "number": 6,
+      "number": 4,
       "title": "",
       "content": "客户端仅提供容器\n\n内容（TAB和富文本），使用webview加载【俱乐部配置-客户端配置-下单须知】中页面生成的H5页面。",
       "category": "interaction",
@@ -417,7 +391,7 @@
     {
       "id": "anno-1793844804781-interaction",
       "pagePath": "/game-companion-quick-match",
-      "number": 7,
+      "number": 5,
       "title": "",
       "content": "用户已加价，会记录并展示已加价金额。\n继续加价，会继续更新已加价金额。（支持交互体验）\n\n已加价金额= 每次加价金额的总和",
       "category": "interaction",
