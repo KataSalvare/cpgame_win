@@ -11,6 +11,7 @@ export interface WoodpeckerTicket {
   reason?: string
   description: string
   attachments: string[]
+  attachmentImages?: string[]
   anonymous: boolean
   response?: string
 }

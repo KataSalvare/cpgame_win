@@ -367,10 +367,12 @@
 .companion-life-photos { flex: 0 0 auto; overflow: hidden; padding: 10px; }
 .companion-life-photos__stage { position: relative; display: grid; height: 300px; min-height: 0; place-items: center; overflow: hidden; border-radius: 6px; background: var(--prototype-canvas, #f3f4f6); outline-offset: 2px; }
 .companion-life-photos__stage img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
-.companion-life-photos__stage button { position: absolute; top: 50%; display: grid; width: 32px; height: 32px; place-items: center; transform: translateY(-50%); border: 1px solid var(--client-border); border-radius: 50%; background: var(--client-surface); color: var(--client-text); cursor: pointer; }
-.companion-life-photos__stage button:first-of-type { left: 10px; }
-.companion-life-photos__stage button:last-of-type { right: 10px; }
+.companion-life-photos__stage .companion-life-photos__previous, .companion-life-photos__stage .companion-life-photos__next { position: absolute; top: 50%; display: grid; width: 32px; height: 32px; place-items: center; transform: translateY(-50%); border: 1px solid var(--client-border); border-radius: 50%; background: var(--client-surface); color: var(--client-text); cursor: pointer; }
+.companion-life-photos__stage .companion-life-photos__previous { left: 10px; }
+.companion-life-photos__stage .companion-life-photos__next { right: 10px; }
 .companion-life-photos__stage button:disabled { opacity: .45; cursor: default; }
+.companion-life-photos__image-button { display: grid; width: 100%; height: 100%; place-items: center; border: 0; padding: 0; background: transparent; cursor: zoom-in; }
+.companion-life-photos__image-button img { max-width: 100%; max-height: 100%; }
 .companion-profile-card > .client-avatar { width: 64px; height: 64px; }
 .companion-profile-card__body { min-width: 0; }
 .companion-profile-card__club { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
@@ -2177,7 +2179,9 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .woodpecker-ticket__fields dt { color: var(--client-muted); }
 .woodpecker-ticket__fields dd { min-width: 0; margin: 0; color: var(--client-text); }
 .woodpecker-ticket__attachments { display: flex; gap: 8px; }
-.woodpecker-ticket__attachments > span { display: grid; width: 96px; height: 72px; place-items: center; border: 1px solid var(--client-border); border-radius: 6px; background: #f9fafb; color: var(--client-muted); font-size: 11px; }
+.woodpecker-ticket__attachments > button { display: grid; width: 96px; min-height: 92px; grid-template-rows: 64px auto; gap: 4px; overflow: hidden; border: 1px solid var(--client-border); border-radius: 6px; padding: 4px; background: #f9fafb; color: var(--client-muted); font: inherit; font-size: 10px; cursor: zoom-in; }
+.woodpecker-ticket__attachments img { display: block; width: 100%; height: 64px; object-fit: cover; }
+.woodpecker-ticket__attachments span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .woodpecker-response { display: grid; gap: 8px; border: 1px solid var(--client-border); border-radius: 8px; background: #f9fafb; padding: 14px 16px; }
 .woodpecker-response h3 { margin: 0; font-size: 14px; font-weight: 600; }
 .woodpecker-response p { margin: 0; line-height: 1.6; }
@@ -2216,8 +2220,27 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .woodpecker-attachments { display: grid; gap: 8px; }
 .woodpecker-attachments__list { display: flex; flex-wrap: wrap; gap: 10px; }
 .woodpecker-attachments__add { display: grid; width: 112px; height: 104px; align-content: center; justify-items: center; gap: 8px; border: 1px solid var(--client-border); border-radius: 8px; background: #f9fafb; color: var(--client-muted); font: inherit; cursor: pointer; }
-.woodpecker-attachment { display: inline-flex; max-width: 260px; min-height: 36px; align-items: center; gap: 6px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 8px; font-size: 12px; }
+.woodpecker-attachment { display: inline-flex; max-width: 260px; min-height: 44px; align-items: center; gap: 6px; border: 1px solid var(--client-border); border-radius: 6px; padding: 3px 8px 3px 3px; font-size: 12px; }
+.woodpecker-attachment__preview { display: block; width: 38px; height: 38px; overflow: hidden; border: 0; border-radius: 4px; padding: 0; background: #f3f4f6; cursor: zoom-in; }
+.woodpecker-attachment__preview img { width: 100%; height: 100%; object-fit: cover; }
 .woodpecker-attachment button { display: grid; width: 22px; height: 22px; place-items: center; border: 0; background: transparent; color: var(--client-muted); cursor: pointer; }
+.woodpecker-attachment .woodpecker-attachment__preview { flex: 0 0 auto; }
+
+.image-lightbox-host { display: contents; }
+.image-lightbox { position: fixed; inset: 15% auto auto 15%; z-index: 100; display: grid; width: 70%; height: 70%; place-items: center; border-radius: 8px; background: rgb(17 19 22 / 68%); }
+.image-lightbox__content { box-sizing: border-box; display: grid; width: 100%; height: 100%; min-height: 0; grid-template-rows: minmax(0, 1fr) auto; align-content: center; gap: 12px; padding: 60px 24px 18px; }
+.image-lightbox__stage { display: grid; min-height: 0; place-items: center; overflow: hidden; border-radius: 6px; background: rgb(255 255 255 / 8%); }
+.image-lightbox__stage img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+.image-lightbox__thumbnails { display: flex; min-height: 58px; justify-content: center; gap: 8px; overflow-x: auto; padding: 2px 0; }
+.image-lightbox__thumbnails button { display: grid; width: 56px; height: 48px; flex: 0 0 auto; place-items: center; overflow: hidden; border: 1px solid rgb(255 255 255 / 48%); border-radius: 5px; padding: 2px; background: rgb(255 255 255 / 14%); cursor: pointer; }
+.image-lightbox__thumbnails button.is-selected { border: 2px solid #fff; padding: 1px; }
+.image-lightbox__thumbnails button:focus-visible, .image-lightbox__close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.image-lightbox__thumbnails img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.image-lightbox__close { position: absolute; top: 14px; right: 14px; display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid rgb(255 255 255 / 40%); border-radius: 50%; background: rgb(0 0 0 / 24%); color: #fff; cursor: pointer; }
+.review-item__image-button { display: block; width: 96px; height: 64px; overflow: hidden; border: 0; border-radius: 5px; padding: 0; background: transparent; cursor: zoom-in; }
+.review-item__image-button img { width: 100%; height: 100%; object-fit: cover; }
+.personal-life-photo-stage { width: 100%; border: 0; padding: 0; cursor: zoom-in; }
+.personal-life-photo-stage:focus-visible, .review-item__image-button:focus-visible, .woodpecker-ticket__attachments > button:focus-visible, .woodpecker-attachment__preview:focus-visible { outline: 2px solid var(--prototype-text-secondary, #4b5563); outline-offset: 2px; }
 .woodpecker-file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 .woodpecker-anonymous { display: inline-flex; align-items: center; gap: 8px; color: var(--client-text); cursor: pointer; }
 .woodpecker-anonymous input { accent-color: var(--client-primary); }

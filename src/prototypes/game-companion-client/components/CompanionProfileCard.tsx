@@ -7,6 +7,7 @@ import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { CompanionShareDialog } from './CompanionShareDialog'
 import { UserReportDialog } from './UserReportDialog'
+import { ImageLightbox } from './ImageLightbox'
 
 type Props = {
   onShare?: (friendIds: string[]) => void
@@ -117,17 +118,17 @@ export function CompanionProfileCard({ profile, className = '', followed = false
       </div>
       {!immersive && moreMenu}
     </section>
-    {lifePhotos.length > 0 && <div className="client-card companion-life-photos" aria-label={`${profile.name}的生活照`}>
+    {lifePhotos.length > 0 && <ImageLightbox overlayId={`companion-life-photos-${profile.userId}`} images={lifePhotos} label={`${profile.name}的生活照`}>{(openImage) => <div className="client-card companion-life-photos" aria-label={`${profile.name}的生活照`}>
       <div className="companion-life-photos__stage" tabIndex={0} aria-label="生活照轮播，使用左右方向键切换" onKeyDown={(event) => {
         if (lifePhotos.length < 2) return
         if (event.key === 'ArrowLeft') { event.preventDefault(); setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length) }
         if (event.key === 'ArrowRight') { event.preventDefault(); setLifePhotoIndex((index) => (index + 1) % lifePhotos.length) }
       }}>
-        <img src={lifePhotos[visibleLifePhotoIndex]} alt={`${profile.name}的生活照 ${visibleLifePhotoIndex + 1}`} />
-        <button type="button" aria-label="上一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length)}><ChevronLeft size={18} /></button>
-        <button type="button" aria-label="下一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index + 1) % lifePhotos.length)}><ChevronRight size={18} /></button>
+        <button type="button" className="companion-life-photos__image-button" aria-label="查看生活照大图" onClick={() => openImage(visibleLifePhotoIndex)}><img src={lifePhotos[visibleLifePhotoIndex]} alt={`${profile.name}的生活照 ${visibleLifePhotoIndex + 1}`} /></button>
+        <button type="button" className="companion-life-photos__previous" aria-label="上一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length)}><ChevronLeft size={18} /></button>
+        <button type="button" className="companion-life-photos__next" aria-label="下一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index + 1) % lifePhotos.length)}><ChevronRight size={18} /></button>
       </div>
-    </div>}
+    </div>}</ImageLightbox>}
     {feedback && <p className="companion-profile-card__feedback" role="status">{feedback}</p>}
     {removalDialog}
     {blockConfirmationOpen && <DialogPanel overlayId={`companion-block-${profile.userId}`} title="确认拉黑" description={`确定拉黑「${profile.name}」吗？`} onClose={() => setBlockConfirmationOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBlockConfirmationOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBlock}>确认拉黑</button></>}><p className="social-dialog-copy">确认后，该陪玩会标记为已拉黑。</p></DialogPanel>}

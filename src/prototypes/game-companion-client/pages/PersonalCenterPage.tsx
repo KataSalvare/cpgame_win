@@ -15,6 +15,7 @@ import { personalGiftInventory, profileFootprints, profileRoomVisits, profileVis
 import { type BlockedProfile } from '../data/personalSettingsMockData'
 import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
 import { navigateToProfileSection, type ProfileSection } from '../profileNavigation'
+import { ImageLightbox } from '../components/ImageLightbox'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 type CenterSection = ProfileSection | 'gifts'
@@ -93,7 +94,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   const birthdayInputRef = useRef<HTMLInputElement>(null)
   const [feedback, setFeedback] = useState('')
   const [joinedClubId, setJoinedClubId] = useState<string | null>(null)
-  const [clubMembershipStatus, setClubMembershipStatus] = useState<'idle' | 'joining' | 'leaving'>('idle')
+  const [clubMembershipStatus, setClubMembershipStatus] = useState<'idle' | 'joining'>('idle')
   const [choosingClub, setChoosingClub] = useState(false)
   const [clubSearch, setClubSearch] = useState('')
   const normalizedClubSearch = clubSearch.trim().toLocaleLowerCase()
@@ -103,6 +104,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
   const [clubApplicationId, setClubApplicationId] = useState<string | null>(null)
   const [clubJoinReason, setClubJoinReason] = useState('')
   const [confirmCancelClubApplication, setConfirmCancelClubApplication] = useState(false)
+  const [confirmLeaveClub, setConfirmLeaveClub] = useState(false)
   const [applicationKind, setApplicationKind] = useState<ApplicationKind | null>(() => initialClubApplicationOpen ? 'club' : null)
   const [applicationName, setApplicationName] = useState('')
   const [applicationGame, setApplicationGame] = useState(games[1]?.id ?? '')
@@ -126,11 +128,6 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
       if (clubMembershipStatus === 'joining') {
         setFeedback('')
         onNotify('加入申请已通过')
-      }
-      if (clubMembershipStatus === 'leaving') {
-        setJoinedClubId(null)
-        setFeedback('')
-        onNotify('已退出俱乐部')
       }
       setClubMembershipStatus('idle')
     }, 3000)
@@ -185,8 +182,6 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
     if (clubMembershipStatus === 'joining') {
       setJoinedClubId(null)
       setFeedback('已取消加入申请')
-    } else if (clubMembershipStatus === 'leaving') {
-      setFeedback('已取消退出申请')
     }
     setClubMembershipStatus('idle')
     setConfirmCancelClubApplication(false)
@@ -202,7 +197,7 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
     <main className="personal-center-content" aria-live="polite">
         {section === 'profile' && <ProfileOverview profile={profile} onSaveProfile={onSaveProfile} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
         {section === 'clubs' && <section className="personal-module">
-          {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status">{clubMembershipStatus === 'idle' && <Check size={12} />}{clubMembershipStatus === 'joining' || clubMembershipStatus === 'leaving' ? '待审核' : '已加入'}</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(1)}</span></div></div><div className="personal-club-card__actions">{clubMembershipStatus === 'idle' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => { setClubMembershipStatus('leaving'); setFeedback('退出申请已提交，待审核') }}>退出俱乐部</button></> : <><button type="button" className="client-button client-button--secondary" disabled>待审核</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(true)}>取消申请</button></>}</div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => { setClubSearch(''); setChoosingClub(true) }} />}
+          {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status">{clubMembershipStatus === 'idle' && <Check size={12} />}{clubMembershipStatus === 'joining' ? '待审核' : '已加入'}</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(1)}</span></div></div><div className="personal-club-card__actions">{clubMembershipStatus === 'idle' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmLeaveClub(true)}>退出俱乐部</button></> : <><button type="button" className="client-button client-button--secondary" disabled>待审核</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(true)}>取消申请</button></>}</div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => { setClubSearch(''); setChoosingClub(true) }} />}
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
         </section>}
         {section === 'onboarding' && (recruitmentOpen ? <CompanionOnboarding balance={diamondBalance} onBack={() => setRecruitmentOpen(false)} onChat={onAssessmentChat} onRecharge={onAssessmentRecharge} onPay={onAssessmentPay} onSubmitted={(submission) => { onSubmitOnboarding(submission); setRecruitmentOpen(false); setFeedback('支付成功，入驻申请已提交') }} /> : <section className="personal-module">
@@ -246,7 +241,8 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
     {clubApplicationId && <DialogPanel overlayId="club-join-application-dialog" title="加入俱乐部申请" description={`申请加入「${clubs.find((club) => club.id === clubApplicationId)?.name ?? ''}」。`} onClose={() => setClubApplicationId(null)} width={560} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setClubApplicationId(null); setChoosingClub(true) }}>返回选择</button><button type="submit" form="club-join-application" className="client-button client-button--primary" disabled={!clubJoinReason.trim()}>提交申请</button></>}>
       <form id="club-join-application" className="personal-club-application" onSubmit={submitClubJoinApplication}><label className="personal-field">加入原因<textarea required maxLength={200} rows={5} value={clubJoinReason} onChange={(event) => setClubJoinReason(event.target.value)} placeholder="介绍一下你想加入俱乐部的原因" /></label><small>{clubJoinReason.length}/200</small></form>
     </DialogPanel>}
-    {confirmCancelClubApplication && <DialogPanel overlayId="cancel-club-application-dialog" title="取消申请" description={clubMembershipStatus === 'joining' ? '确认取消加入申请？取消后将不再显示该俱乐部。' : '确认取消退出申请？取消后将继续保留已加入状态。'} onClose={() => setConfirmCancelClubApplication(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(false)}>返回</button><button type="button" className="client-button client-button--primary" onClick={cancelClubApplication}>确认取消申请</button></>}>确定后会立即更新俱乐部状态。</DialogPanel>}
+    {confirmCancelClubApplication && <DialogPanel overlayId="cancel-club-application-dialog" title="取消申请" description="确认取消加入申请？取消后将不再显示该俱乐部。" onClose={() => setConfirmCancelClubApplication(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(false)}>返回</button><button type="button" className="client-button client-button--primary" onClick={cancelClubApplication}>确认取消申请</button></>}>确定后会立即更新俱乐部状态。</DialogPanel>}
+    {confirmLeaveClub && joinedClub && <DialogPanel overlayId="leave-club-confirmation" title="退出俱乐部" description={`确认退出「${joinedClub.name}」吗？`} onClose={() => setConfirmLeaveClub(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmLeaveClub(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { setJoinedClubId(null); setClubMembershipStatus('idle'); setFeedback(''); setConfirmLeaveClub(false); onNotify('已退出俱乐部') }}>确认退出</button></>}>确认后将立即退出俱乐部。</DialogPanel>}
     {confirmClearVisitRecords && <DialogPanel overlayId="clear-personal-visit-records-dialog" title="清除访问记录" description="确认清除足迹、访客和进房记录中的全部内容吗？清除后无法恢复。" onClose={() => setConfirmClearVisitRecords(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmClearVisitRecords(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { setFootprints([]); setVisitors([]); setRoomVisits([]); setConfirmClearVisitRecords(false); onNotify('访问记录已清除') }}>确认清除</button></>}>三类访问记录将同时清空。</DialogPanel>}
     {editingProfile && <DialogPanel overlayId="edit-player-profile-dialog" title="编辑个人资料" onClose={closeProfileEditor} width={560} footer={<><button type="button" className="client-button client-button--secondary" onClick={closeProfileEditor}>取消</button><button type="submit" form="edit-player-profile" className="client-button client-button--primary" disabled={!profileDraft.nickname.trim()}>保存资料</button></>}>
       <form id="edit-player-profile" className="personal-profile-form" onSubmit={submitProfile}>
@@ -348,7 +344,7 @@ function ProfileOverview({ profile, onSaveProfile, orders, diamondBalance, beanB
   ]
   return <section className="personal-module personal-profile-module">
     <div className="personal-account-overview">
-      <section className="client-card personal-life-photos"><header><h3>生活照</h3><label className="client-button client-button--secondary client-button--small personal-life-photo-upload"><ImagePlus size={14} />上传<input type="file" accept="image/*" multiple aria-label="上传生活照，可多选" onChange={handleLifePhotoUpload} /></label></header>{lifePhotoCount ? <><div className="personal-life-photo-stage"><img src={profile.lifePhotoDataUrls[visibleLifePhotoIndex]} alt={`生活照 ${visibleLifePhotoIndex + 1}`} /></div><div className="personal-life-photo-thumbnails" role="group" aria-label="选择生活照">{profile.lifePhotoDataUrls.map((image, index) => <button type="button" key={`${index}-${image.slice(-24)}`} className={index === visibleLifePhotoIndex ? 'is-selected' : ''} aria-label={`查看生活照 ${index + 1}`} aria-pressed={index === visibleLifePhotoIndex} onClick={() => setLifePhotoIndex(index)}><img src={image} alt="" /></button>)}</div></> : <p>暂无生活照</p>}</section>
+      <section className="client-card personal-life-photos"><header><h3>生活照</h3><label className="client-button client-button--secondary client-button--small personal-life-photo-upload"><ImagePlus size={14} />上传<input type="file" accept="image/*" multiple aria-label="上传生活照，可多选" onChange={handleLifePhotoUpload} /></label></header>{lifePhotoCount ? <ImageLightbox overlayId="personal-life-photos" images={profile.lifePhotoDataUrls} label="生活照">{(openImage) => <><button type="button" className="personal-life-photo-stage" aria-label="查看生活照大图" onClick={() => openImage(visibleLifePhotoIndex)}><img src={profile.lifePhotoDataUrls[visibleLifePhotoIndex]} alt={`生活照 ${visibleLifePhotoIndex + 1}`} /></button><div className="personal-life-photo-thumbnails" role="group" aria-label="选择生活照">{profile.lifePhotoDataUrls.map((image, index) => <button type="button" key={`${index}-${image.slice(-24)}`} className={index === visibleLifePhotoIndex ? 'is-selected' : ''} aria-label={`查看生活照 ${index + 1}`} aria-pressed={index === visibleLifePhotoIndex} onClick={() => { setLifePhotoIndex(index); openImage(index) }}><img src={image} alt="" /></button>)}</div></>}</ImageLightbox> : <p>暂无生活照</p>}</section>
       <div className="personal-summary-stack">
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><h2>钱包</h2></div><button type="button" className="client-text-button" onClick={onOpenWallet}>钱包总览 <ChevronRight size={15} /></button></div><div className="personal-summary-values"><BalanceMini icon={<Coins size={16} />} label="金豆" value={diamondBalance} /><BalanceMini icon={<WalletCards size={16} />} label="糖豆" value={beanBalance} /></div></section>
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><h2>订单</h2></div><button type="button" className="client-text-button" onClick={onOpenOrders}>全部订单 <ChevronRight size={15} /></button></div><div className="personal-order-stats"><button type="button" onClick={onOpenOrders}><span>全部订单</span><strong>{orders.length}</strong></button><button type="button" onClick={onOpenOrders}><span>待处理</span><strong>{pendingOrderCount}</strong></button><button type="button" onClick={onOpenOrders}><span>服务中</span><strong>{activeOrderCount}</strong></button></div></section>

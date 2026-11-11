@@ -3,6 +3,7 @@ import { Star } from 'lucide-react'
 import { clubReviews } from '../data/mockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { ReviewContent } from '../components/ReviewContent'
+import { ImageLightbox } from '../components/ImageLightbox'
 
 type ReviewFilter = 'all' | 'images' | 'latest' | 'good' | 'middle' | 'poor'
 
@@ -47,7 +48,7 @@ export function ClubReviewsPanel() {
       <div className="review-item__body">
         <div className="review-item__heading"><strong>{review.author}</strong><span className="rating-mark"><Star size={13} />{review.rating.toFixed(1)}</span><time className="client-muted" dateTime={review.date}>{review.date}</time></div>
         <ReviewContent content={review.content} />
-        {review.images?.length ? <div className="review-item__images" aria-label="评价图片">{review.images.map((image, index) => <img key={`${review.id}-${image}`} src={image} alt={`${review.author}的评价图片 ${index + 1}`} loading="lazy" />)}</div> : null}
+        {review.images?.length ? <ImageLightbox overlayId={`club-review-${review.id}`} images={review.images} label={`${review.author}的评价图片`}>{(openImage) => <div className="review-item__images" aria-label="评价图片">{review.images?.map((image, index) => <button type="button" className="review-item__image-button" key={`${review.id}-${image}`} aria-label={`查看评价图片 ${index + 1}`} onClick={() => openImage(index)}><img src={image} alt={`${review.author}的评价图片 ${index + 1}`} loading="lazy" /></button>)}</div>}</ImageLightbox> : null}
       </div>
     </article>)}</div> : <div className="client-inline-empty"><p>暂无符合条件的评价</p><button type="button" className="client-button client-button--secondary" onClick={() => setFilter('all')}>查看全部评价</button></div>}
   </section>
