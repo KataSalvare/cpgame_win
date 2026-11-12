@@ -2,12 +2,14 @@ import { useRemovalConfirmation } from './RemovalConfirmation'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Flag, MoreHorizontal, Pencil, Shield, Share2, Star, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
+import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import type { ProfileCardData } from './profileCardData'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { CompanionShareDialog } from './CompanionShareDialog'
 import { UserReportDialog } from './UserReportDialog'
 import { ImageLightbox } from './ImageLightbox'
+import { CopyableProfileId } from './CopyableProfileId'
 
 type Props = {
   onShare?: (friendIds: string[]) => void
@@ -109,7 +111,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
       <AvatarMark initials={profile.initials} size={immersive ? 'xl' : 'lg'} />
       <div className="companion-profile-card__body">
         {!immersive && <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>}
-        <div className="companion-profile-card__facts"><span aria-label={`${profile.gender}，${profile.age}岁`}><span aria-hidden="true">{profile.gender === '男' ? '♂' : profile.gender === '女' ? '♀' : profile.gender}{profile.age}</span></span><span>ID：{profile.userId}</span><span className="rating-mark"><Star size={14} />{profile.rating.toFixed(2)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div>
+        <div className="companion-profile-card__facts"><span aria-label={`${profile.gender}，${profile.age}岁`}><span aria-hidden="true">{profile.gender === '男' ? '♂' : profile.gender === '女' ? '♀' : profile.gender}{profile.age}</span></span><CopyableProfileId value={profile.userId} entityLabel="用户" /><span className="rating-mark"><Star size={14} />{profile.rating.toFixed(2)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div>
         {profile.friendCount !== undefined && profile.followingCount !== undefined && profile.followerCount !== undefined && <div className="companion-profile-card__stats" aria-label="社交数据"><span><strong>{profile.friendCount}</strong>朋友</span><span><strong>{profile.followingCount}</strong>关注</span><span><strong>{profile.followerCount}</strong>粉丝</span></div>}
         {profile.club && <div className="companion-profile-card__club" aria-label={`所属俱乐部：${profile.club.name}`}><AvatarMark initials={profile.club.initials} size="sm" /><span>{profile.club.name}</span></div>}
         <div className="client-tag-row">{profile.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
@@ -131,7 +133,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
     </div>}</ImageLightbox>}
     {feedback && <p className="companion-profile-card__feedback" role="status">{feedback}</p>}
     {removalDialog}
-    {blockConfirmationOpen && <DialogPanel overlayId={`companion-block-${profile.userId}`} title="确认拉黑" description={`确定拉黑「${profile.name}」吗？`} onClose={() => setBlockConfirmationOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setBlockConfirmationOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmBlock}>确认拉黑</button></>}><p className="social-dialog-copy">确认后，该陪玩会标记为已拉黑。</p></DialogPanel>}
+    {blockConfirmationOpen && <ConfirmationDialog overlayId={`companion-block-${profile.userId}`} title="拉黑用户" message={`确定拉黑「${profile.name}」吗？`} confirmLabel="确认拉黑" onCancel={() => setBlockConfirmationOpen(false)} onConfirm={confirmBlock} />}
     {shareOpen && onShare && <CompanionShareDialog profile={profile} onShare={onShare} onClose={() => setShareOpen(false)} />}
     {noteDialogOpen && <DialogPanel overlayId={`companion-note-${profile.userId}`} title="设置备注" onClose={() => setNoteDialogOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setNoteDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { if (onSaveNote) onSaveNote(noteDraft.trim()); else setLocalNote(noteDraft.trim()); setNoteDialogOpen(false) }}>保存备注</button></>}><label className="companion-note-field"><span>备注</span><input autoFocus maxLength={20} value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="输入备注名称" /></label></DialogPanel>}
     {reportDialogOpen && <UserReportDialog overlayId={`companion-report-${profile.userId}`} onClose={() => setReportDialogOpen(false)} onSubmit={() => { setFeedback('举报已提交（仅演示）'); setReportDialogOpen(false) }} />}

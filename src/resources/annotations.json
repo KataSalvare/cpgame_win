@@ -648,6 +648,18 @@
       "position": "top-left",
       "createdAt": 1794368203879,
       "route": "page=workbench&workbenchTab=services"
+    },
+    {
+      "id": "anno-1794488598002-interaction",
+      "pagePath": "/game-companion-room-minimized",
+      "number": 1,
+      "title": "",
+      "content": "房间最小化的情况下，进入其他房间，会触发弹窗提示。\n\n可以点击俱乐部详情-接待大厅进行交互演示。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > aside.windows-client-frame__sidebar > nav.windows-sidebar > div.windows-sidebar__footer:nth-of-type(2) > button.voice-minimized-float",
+      "position": "top-left",
+      "createdAt": 1794488598002,
+      "route": "page=home&tool=voice-room-minimized"
     }
   ],
   "categories": [

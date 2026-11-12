@@ -6,11 +6,12 @@ import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { OrderNumberCopy } from '../components/OrderNumberCopy'
 import { OrderAfterSalesRecords } from '../components/OrderAfterSalesRecords'
 import { PageStatePanel } from '../components/PageStatePanel'
-import { DialogPanel } from '@/components/WindowsClient'
+import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import { WorkbenchOrdersPanel } from '../components/WorkbenchOrdersPanel'
 import { ExamOrderPayButton, ExamSubmissionDialog, ExamSubmissionViewDialog } from '../components/ExamOrderDetailPanel'
 import { mockBeanWithdrawalRecords, type ClientOrder, type OrderStatus, type PendingBeanSettlementEntry, type WalletTransaction } from '../data/accountMockData'
 import type { ExamOrder, ExamOrderStatus, ExamSubmission } from '../data/examOrderMockData'
+import { premiumCards } from '../data/storeMockData'
 import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
 import { clubs, companions, games, type Companion, type Service } from '../data/mockData'
 
@@ -296,7 +297,7 @@ export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单
     </section>
     }
   </div>
-  {examCancelOrder && <DialogPanel overlayId="exam-order-list-cancel-confirm" title="取消考核订单" onClose={() => setExamCancelOrder(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setExamCancelOrder(null)}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { onCancelExamOrder(examCancelOrder.id); setExamCancelOrder(null) }}>确认取消</button></>}><p>确认取消这笔考核订单吗？取消后订单将关闭。</p></DialogPanel>}
+  {examCancelOrder && <ConfirmationDialog overlayId="exam-order-list-cancel-confirm" title="取消考核订单" message="确认取消这笔考核订单吗？取消后订单将关闭。" cancelLabel="返回" confirmLabel="确认取消" onCancel={() => setExamCancelOrder(null)} onConfirm={() => { onCancelExamOrder(examCancelOrder.id); setExamCancelOrder(null) }} />}
   {examSubmissionOrder && <ExamSubmissionDialog order={examSubmissionOrder} onClose={() => setExamSubmissionOrder(null)} onSubmit={submission => { onSubmitExamMaterials(examSubmissionOrder.id, submission); setExamSubmissionOrder(null) }} />}
   {examMaterialsOrder && <ExamSubmissionViewDialog order={examMaterialsOrder} onClose={() => setExamMaterialsOrder(null)} />}
   </>
@@ -476,10 +477,12 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
         {!service.canAcceptOrders ? <div className="checkout-insufficient" role="status"><strong>暂不可接单</strong><button type="button" className="client-button client-button--secondary" onClick={openServicePicker}>选择其他服务</button></div> : <button type="button" className="client-button client-button--primary checkout-pay-button" disabled={!validTip || (selectedPaymentCard !== undefined && selectedPaymentBalance < amount)} onClick={beginPayment}><Coins size={16} />确认支付</button>}
       </aside>
     </div>
-    {checkoutDialog && !(checkoutDialog === 'recharge' && hideRechargePrompt) && <div className="order-action-overlay checkout-confirm-overlay" data-overlay={checkoutDialog === 'notice' ? 'checkout-order-notice' : checkoutDialog === 'payment' ? 'checkout-payment-confirmation' : 'checkout-recharge-confirmation'} role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setCheckoutDialog(null) }}>
-      <section className={`order-action-dialog${checkoutDialog === 'notice' ? ' checkout-order-notice-dialog' : ''}`} role="dialog" aria-modal="true" aria-labelledby="checkout-confirm-title">
-        <header><h2 id="checkout-confirm-title">{checkoutDialog === 'notice' ? '点单须知' : checkoutDialog === 'payment' ? '确认支付' : '金豆余额不足'}</h2><button type="button" className="order-action-dialog__close" aria-label="关闭确认弹窗" onClick={() => setCheckoutDialog(null)}><X size={17} /></button></header>
-        {checkoutDialog === 'notice' ? <div className="checkout-notice">
+    {checkoutDialog === 'recharge' && !hideRechargePrompt && <ConfirmationDialog overlayId="checkout-recharge-confirmation" title="金豆余额不足" message={<>当前金豆余额不足，还差 <strong>{(amount - diamondBalance).toLocaleString()}</strong> 金豆，是否前去购买？</>} cancelLabel="稍后再说" confirmLabel="去购买" onCancel={() => setCheckoutDialog(null)} onConfirm={() => { setCheckoutDialog(null); onOpenWallet() }} />}
+    {checkoutDialog === 'payment' && <ConfirmationDialog overlayId="checkout-payment-confirmation" title="确认支付" message={<>本单将使用<strong>{selectedPaymentCard?.name ?? '金豆钱包'}</strong>支付，支付金额<strong>{amount.toLocaleString()}</strong>金豆</>} cancelLabel="再想想" confirmLabel="确认支付" onCancel={() => setCheckoutDialog(null)} onConfirm={() => { setCompletedOrderId(onComplete(quantity, amount, remark, checkoutCompanions, tipAmount, selectedPaymentCard ? 'premium-card' : 'wallet', selectedPaymentCard?.id)); setCheckoutDialog(null) }} />}
+    {checkoutDialog === 'notice' && <div className="order-action-overlay checkout-confirm-overlay" data-overlay="checkout-order-notice" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setCheckoutDialog(null) }}>
+      <section className="order-action-dialog checkout-order-notice-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-confirm-title">
+        <header><h2 id="checkout-confirm-title">点单须知</h2><button type="button" className="order-action-dialog__close" aria-label="关闭确认弹窗" onClick={() => setCheckoutDialog(null)}><X size={17} /></button></header>
+        <div className="checkout-notice">
           <div className="checkout-notice__tabs" role="tablist" aria-label="点单须知分类">
             <button type="button" role="tab" aria-selected={noticeTab === 'club'} className={noticeTab === 'club' ? 'is-active' : ''} onClick={() => setNoticeTab('club')}>俱乐部介绍</button>
             <button type="button" role="tab" aria-selected={noticeTab === 'service'} className={noticeTab === 'service' ? 'is-active' : ''} onClick={() => setNoticeTab('service')}>服务说明</button>
@@ -489,13 +492,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
             <div className="checkout-notice__placeholder" role="img" aria-label="内容图片占位"><span /><i /><b /></div>
           </div>
           <footer><label className="checkout-notice__skip"><input type="checkbox" checked={skipNoticeForSession} onChange={(event) => setSkipNoticeForSession(event.target.checked)} />不再提醒</label><button type="button" className="client-button client-button--primary" onClick={() => { if (skipNoticeForSession) { sessionStorage.setItem('checkout-order-notice-skipped', 'true'); setNoticeSkipped(true) } setCheckoutDialog('payment') }}>同意并继续</button></footer>
-        </div> : <>
-        {checkoutDialog === 'payment' ? <p>应付金额：<strong>{amount.toLocaleString()} 金豆</strong></p> : <p>当前金豆余额为 {diamondBalance.toLocaleString()} 金豆，本次应付 {amount.toLocaleString()} 金豆，还差 <strong>{(amount - diamondBalance).toLocaleString()} 金豆</strong>。打开购买弹窗补充余额吗？</p>}
-        <footer><button type="button" className="client-button client-button--secondary" onClick={() => setCheckoutDialog(null)}>{checkoutDialog === 'payment' ? '再想想' : '稍后再说'}</button><button type="button" className="client-button client-button--primary" onClick={() => {
-          if (checkoutDialog === 'recharge') { setCheckoutDialog(null); onOpenWallet(); return }
-          setCompletedOrderId(onComplete(quantity, amount, remark, checkoutCompanions, tipAmount, selectedPaymentCard ? 'premium-card' : 'wallet', selectedPaymentCard?.id))
-          setCheckoutDialog(null)
-        }}>{checkoutDialog === 'payment' ? '确认支付' : '去购买'}</button></footer></>}
+        </div>
       </section>
     </div>}
   </div>
@@ -613,7 +610,15 @@ function useOrderDialogFocus(onClose: () => void) {
 function OrderActionDialog({ order, action, clubName, diamondBalance, onClose, onOpenRecharge, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder }: { order: ClientOrder; action: string; clubName: string; diamondBalance: number; onClose: () => void; onOpenRecharge: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean }) {
   if (action === '评价') return <OrderReviewDialog order={order} clubName={clubName} onClose={onClose} />
   if (action === '续单') return <OrderRenewDialog order={order} diamondBalance={diamondBalance} onClose={onClose} onOpenRecharge={onOpenRecharge} onRenewOrder={onRenewOrder} />
+  if (action === '支付') return <OrderPaymentConfirmationDialog order={order} onClose={onClose} onPayPendingOrder={onPayPendingOrder} />
   return <OrderActionConfirmationDialog order={order} action={action} onClose={onClose} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} />
+}
+
+function OrderPaymentConfirmationDialog({ order, onClose, onPayPendingOrder }: { order: ClientOrder; onClose: () => void; onPayPendingOrder: (orderId: string) => boolean }) {
+  const paymentMethod = order.paymentSource === 'premium-card'
+    ? premiumCards.find((card) => card.id === order.premiumCardId)?.name ?? '尊享卡'
+    : '金豆钱包'
+  return <ConfirmationDialog overlayId="order-payment-confirmation" title="支付订单" message={<>本单将使用<strong>{paymentMethod}</strong>支付，支付金额<strong>{order.amount.toLocaleString()}</strong>金豆</>} cancelLabel="返回" confirmLabel="确认支付" onCancel={onClose} onConfirm={() => { if (onPayPendingOrder(order.id)) onClose() }} />
 }
 
 function OrderActionConfirmationDialog({ order, action, onClose, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd }: { order: ClientOrder; action: string; onClose: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void }) {

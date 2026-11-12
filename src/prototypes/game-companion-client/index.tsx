@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, CircleHelp, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Settings, Sparkles, Swords, TreeDeciduous, UserRound, WalletCards } from 'lucide-react'
 import { DialogPanel, NotificationToast, RightDrawer, WindowsClientFrame, WindowsSidebar, WindowsTitleBar } from '@/components/WindowsClient'
+import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 import { registerOverlayReveal } from '@/lib/overlayReveal'
 import { playerProfile, walletEntries, type PlayerProfile } from './data/accountMockData'
@@ -577,7 +578,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         </div>
         <label className="window-close-skip"><input type="checkbox" checked={skipWindowClosePromptToday} onChange={(event) => setSkipWindowClosePromptToday(event.target.checked)} /><span>今日不再提示</span></label>
       </DialogPanel>}
-      {pendingVoiceRoomEntry && <DialogPanel overlayId="voice-room-entry-confirm" title="切换语音房" onClose={() => setPendingVoiceRoomEntry(null)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setPendingVoiceRoomEntry(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmVoiceRoomEntry}>确认</button></>}><p className="social-dialog-copy">你当前正在 <strong>{clubs.find((club) => club.id === social.activeVoiceRoom?.clubId)?.name ?? navigation.club.name}</strong> 的语音房，切换至 <strong>{pendingVoiceRoomEntry.clubName}</strong> 会<strong>离开当前语音房、断开语音连接</strong>，是否确认切换？</p></DialogPanel>}
+      {pendingVoiceRoomEntry && <ConfirmationDialog overlayId="voice-room-entry-confirm" title="切换语音房" message={<>你当前正在 <strong>{clubs.find((club) => club.id === social.activeVoiceRoom?.clubId)?.name ?? navigation.club.name}</strong> 的语音房，切换至 <strong>{pendingVoiceRoomEntry.clubName}</strong> 会<strong>离开当前语音房、断开语音连接</strong>，是否确认切换？</>} confirmLabel="确认" onCancel={() => setPendingVoiceRoomEntry(null)} onConfirm={confirmVoiceRoomEntry} />}
       {giftToast > 0 && <div className="gift-success-toast" role="status">赠送成功！</div>}
       {premiumCardToast && <NotificationToast variant="success" message={premiumCardToast} onDismiss={() => setPremiumCardToast(null)} />}
       {workbench.orderAction && <WorkbenchOrderActionDialog key={`${workbench.orderAction.id}-${workbench.orderAction.action}`} logic={workbench} />}

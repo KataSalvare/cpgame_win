@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { DialogPanel } from '@/components/WindowsClient'
+import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 
 type PendingRemoval = { action: '取消关注' | '取消收藏'; name: string; confirm: () => void; description?: string }
 
 export function useRemovalConfirmation() {
   const [pending, setPending] = useState<PendingRemoval | null>(null)
   const requestRemoval = (action: PendingRemoval['action'], name: string, confirm: () => void, description?: string) => setPending({ action, name, confirm, description })
-  const dialog = pending && <DialogPanel overlayId="social-removal-confirmation" title={pending.action} description={pending.description ?? `确定${pending.action}「${pending.name}」吗？`} onClose={() => setPending(null)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setPending(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { pending.confirm(); setPending(null) }}>确认{pending.action}</button></>} children={null} />
+  const dialog = pending && <ConfirmationDialog overlayId="social-removal-confirmation" title={pending.action} message={pending.description ?? `确认${pending.action}「${pending.name}」吗？`} confirmLabel={`确认${pending.action}`} onCancel={() => setPending(null)} onConfirm={() => { pending.confirm(); setPending(null) }} />
   return { requestRemoval, dialog }
 }

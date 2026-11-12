@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DialogPanel } from '@/components/WindowsClient'
+import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { OrderNumberCopy } from './OrderNumberCopy'
@@ -30,7 +31,7 @@ export function ExamOrderDetailPanel({ order, role, onPay, onCancel, onContact, 
         {role === '考官订单' && order.status === '待考核' && <button type="button" className="client-button client-button--primary" onClick={() => setSubmissionOpen(true)}>提交考核资料</button>}
       </footer>
     </div>
-    {cancelConfirm && <DialogPanel overlayId="exam-order-cancel-confirm" title="取消考核订单" onClose={() => setCancelConfirm(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setCancelConfirm(false)}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { onCancel(); setCancelConfirm(false) }}>确认取消</button></>}><p>确认取消这笔考核订单吗？取消后订单将关闭。</p></DialogPanel>}
+    {cancelConfirm && <ConfirmationDialog overlayId="exam-order-cancel-confirm" title="取消考核订单" message="确认取消这笔考核订单吗？取消后订单将关闭。" cancelLabel="返回" confirmLabel="确认取消" onCancel={() => setCancelConfirm(false)} onConfirm={() => { onCancel(); setCancelConfirm(false) }} />}
     {submissionOpen && <ExamSubmissionDialog order={order} onClose={() => setSubmissionOpen(false)} onSubmit={submission => { onSubmit(submission); setSubmissionOpen(false) }} />}
   </>
 }
@@ -51,7 +52,7 @@ export function ExamOrderPayButton({ onPay }: { onPay: () => void }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   return <>
     <button type="button" className="client-button client-button--primary" onClick={() => setConfirmOpen(true)}>支付</button>
-    {confirmOpen && <DialogPanel overlayId="exam-order-payment-confirm" title="支付" onClose={() => setConfirmOpen(false)} width={380} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmOpen(false)}>返回</button><button type="button" className="client-button client-button--primary" onClick={() => { setConfirmOpen(false); onPay() }}>确认支付</button></>}><p>确认支付500金豆吗？</p></DialogPanel>}
+    {confirmOpen && <ConfirmationDialog overlayId="exam-order-payment-confirm" title="支付订单" message={<>本单将使用<strong>金豆钱包</strong>支付，支付金额<strong>500</strong>金豆</>} cancelLabel="返回" confirmLabel="确认支付" onCancel={() => setConfirmOpen(false)} onConfirm={() => { setConfirmOpen(false); onPay() }} />}
   </>
 }
 

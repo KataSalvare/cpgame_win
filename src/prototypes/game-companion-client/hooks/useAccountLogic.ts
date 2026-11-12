@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { games, companions, servicesByCompanion, type Companion, type Service } from '../data/mockData'
 import {
   initialBeanBalance,
@@ -12,8 +12,19 @@ import {
 } from '../data/accountMockData'
 import { initialCoupons, initialOwnedPremiumCardIds, initialPremiumCardBalances, initialPremiumCardTransactions, premiumCards, type PremiumCardTransaction } from '../data/storeMockData'
 
+const diamondBalanceSessionKey = 'game-companion-client-diamond-balance'
+
+function readDiamondBalance() {
+  try {
+    const storedBalance = Number(window.sessionStorage.getItem(diamondBalanceSessionKey))
+    return Number.isInteger(storedBalance) && storedBalance >= 0 ? storedBalance : initialDiamondBalance
+  } catch {
+    return initialDiamondBalance
+  }
+}
+
 export function useAccountLogic() {
-  const [diamondBalance, setDiamondBalance] = useState(initialDiamondBalance)
+  const [diamondBalance, setDiamondBalance] = useState(readDiamondBalance)
   const [beanBalance, setBeanBalance] = useState(initialBeanBalance)
   const availableBeanBalance = beanBalance - initialPendingBeanSettlementBalance
   const [orders, setOrders] = useState(initialOrders)
@@ -23,6 +34,14 @@ export function useAccountLogic() {
   const [ownedPremiumCardIds, setOwnedPremiumCardIds] = useState(initialOwnedPremiumCardIds)
   const [premiumCardBalances, setPremiumCardBalances] = useState(initialPremiumCardBalances)
   const [premiumCardTransactions, setPremiumCardTransactions] = useState<PremiumCardTransaction[]>(initialPremiumCardTransactions)
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(diamondBalanceSessionKey, String(diamondBalance))
+    } catch {
+      // Keep the in-memory prototype usable when browser storage is unavailable.
+    }
+  }, [diamondBalance])
 
   const findOrderService = useCallback((companionId: string | null, serviceId: string | null): { companion: Companion; service: Service } | null => {
     if (!companionId || !serviceId) return null

@@ -1,0 +1,29 @@
+.windows-dialog-panel.grayscale-confirmation-dialog > .windows-dialog-panel__header {
+  align-items: center;
+  border-bottom: 0;
+  padding: 16px 16px 0;
+}
+
+.windows-dialog-panel.grayscale-confirmation-dialog > .windows-dialog-panel__header h2 {
+  font-size: 14px;
+}
+
+.windows-dialog-panel.grayscale-confirmation-dialog > .windows-dialog-panel__content {
+  padding: 12px 16px 16px;
+}
+
+.windows-dialog-panel.grayscale-confirmation-dialog > .windows-dialog-panel__footer {
+  border-top: 0;
+  padding: 0 16px 16px;
+}
+
+.grayscale-confirmation-dialog__message {
+  margin: 0;
+  color: var(--prototype-text-secondary, #4E5969);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.grayscale-confirmation-dialog__extra {
+  margin-top: 12px;
+}

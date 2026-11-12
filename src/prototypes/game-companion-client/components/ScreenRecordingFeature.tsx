@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Circle, CircleStop, Pause, Play, Video } from 'lucide-react'
-import { DialogPanel, NotificationToast } from '@/components/WindowsClient'
+import { NotificationToast } from '@/components/WindowsClient'
+import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 
 type RecordingState = 'idle' | 'recording' | 'paused'
 
@@ -174,22 +175,20 @@ export function ScreenRecordingFeature({ autoOpen = false, onOpen, onClose }: { 
       {recordingState === 'recording' ? <Circle size={13} fill="currentColor" aria-hidden="true" /> : <Video size={15} aria-hidden="true" />}
     </button>
 
-    {promptOpen && <DialogPanel
+    {promptOpen && <ConfirmationDialog
       overlayId="screen-recording-prompt"
       title="屏幕录制"
-      description="开始后可在悬浮工具条暂停或结束录制。"
-      width={440}
-        onClose={closePrompt}
-      footer={<>
-        <button type="button" className="client-button client-button--secondary" onClick={closePrompt}>取消</button>
-        <button ref={startButtonRef} type="button" className="client-button client-button--primary" onClick={startRecording}>开始录制</button>
-      </>}
+      message="开始后可在悬浮工具条暂停或结束录制。"
+      confirmLabel="开始录制"
+      confirmButtonRef={startButtonRef}
+      onCancel={closePrompt}
+      onConfirm={startRecording}
     >
       <label className="screen-recording-prompt__skip">
         <input type="checkbox" checked={skipPromptChecked} onChange={(event) => updateSkipPrompt(event.target.checked)} />
         <span>本次会话不再提醒</span>
       </label>
-    </DialogPanel>}
+    </ConfirmationDialog>}
 
     {recordingState !== 'idle' && <section
       className="screen-recording-float"
