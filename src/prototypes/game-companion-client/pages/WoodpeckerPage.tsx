@@ -110,7 +110,7 @@ export function WoodpeckerPage({ pageState, onRetry }: Props) {
       </div>
       {visibleTickets.length ? <div className="woodpecker-ticket-list">{visibleTickets.map((ticket) => <TicketCard key={ticket.id} ticket={ticket} />)}</div> : <div className="woodpecker-empty"><TreeDeciduous size={30} /><strong>暂无{activeFilter === '全部工单' ? '' : activeFilter.replace('工单', '')}工单</strong></div>}
     </section> : <section className="woodpecker-panel" role="tabpanel" aria-label="啄木鸟公示">
-      <form className="woodpecker-search" onSubmit={(event) => { event.preventDefault(); setAppliedSearch(search) }}><label htmlFor="woodpecker-search-input">搜索被售后人昵称或 ID</label><input id="woodpecker-search-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索被售后人昵称或 ID" /><button type="submit" className="client-button client-button--secondary">搜索</button></form>
+      <form className="woodpecker-search" onSubmit={(event) => { event.preventDefault(); setAppliedSearch(search) }}><label htmlFor="woodpecker-search-input">搜索被举报人昵称或者ID</label><input id="woodpecker-search-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索被举报人昵称或者ID" /><button type="submit" className="client-button client-button--secondary">搜索</button></form>
       {visiblePublicRecords.length ? <div className="woodpecker-ticket-list woodpecker-ticket-list--public">{visiblePublicRecords.map((record) => <PublicRecordCard key={record.id} record={record} feedback={feedback[record.id] ?? null} onFeedback={(value) => setFeedback((current) => ({ ...current, [record.id]: current[record.id] === value ? null : value }))} />)}</div> : <div className="woodpecker-empty"><TreeDeciduous size={30} /><strong>没有匹配的公示工单</strong></div>}
     </section>}
 
@@ -157,13 +157,12 @@ function PublicRecordCard({ record, feedback, onFeedback }: { record: PublicWood
   return <article className="woodpecker-ticket woodpecker-ticket--public client-card">
     <header className="woodpecker-ticket__header"><div className="woodpecker-submitter"><AvatarMark initials={record.anonymous ? '' : record.reportedUser.slice(0, 1)} size="sm" /><strong>{record.anonymous ? '匿名提交' : '用户提交'}</strong></div><span className="woodpecker-ticket__time"><CalendarDays size={14} />{record.submittedAt} 处理</span></header>
     <dl className="woodpecker-ticket__fields">
-      <div><dt>售后类型</dt><dd>啄木鸟工单</dd></div>
-      <div><dt>被售后人</dt><dd className="woodpecker-user-identity"><AvatarMark initials={record.reportedUser.slice(0, 1)} size="sm" /><span>{record.reportedUser}</span><span className="woodpecker-user-identity__id">{record.reportedUserId}</span></dd></div>
-      {record.reason && <div><dt>售后原因</dt><dd>{record.reason}</dd></div>}
+      <div><dt>类型</dt><dd>啄木鸟工单</dd></div>
+      <div><dt>被举报人</dt><dd className="woodpecker-user-identity"><AvatarMark initials={record.reportedUser.slice(0, 1)} size="sm" /><span>{record.reportedUser}</span><span className="woodpecker-user-identity__id">{record.reportedUserId}</span></dd></div>
+      {record.reason && <div><dt>举报原因</dt><dd>{record.reason}</dd></div>}
       <div><dt>补充说明</dt><dd>{record.description}</dd></div>
     </dl>
     {record.attachments.length > 0 && <ImageLightbox overlayId={`woodpecker-public-${record.id}`} images={record.attachments.map((_, index) => record.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length])} label="工单附件">{(openImage) => <div className="woodpecker-ticket__attachments" aria-label="附件">{record.attachments.map((attachment, index) => <button type="button" key={`${attachment}-${index}`} aria-label={`查看附件 ${attachment}`} onClick={() => openImage(index)}><img src={record.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length]} alt={attachment} /><span>{attachment}</span></button>)}</div>}</ImageLightbox>}
     <section className="woodpecker-response"><h3>官方处理回复</h3><p>{record.response}</p><div className="woodpecker-response__feedback"><button type="button" aria-label="有帮助" aria-pressed={feedback === 'like'} onClick={() => onFeedback('like')}><ThumbsUp size={15} />{record.likes + (feedback === 'like' ? 1 : 0)}</button><button type="button" aria-label="没帮助" aria-pressed={feedback === 'dislike'} onClick={() => onFeedback('dislike')}><ThumbsDown size={15} />{record.dislikes + (feedback === 'dislike' ? 1 : 0)}</button></div></section>
-    {record.comments > 0 && <footer className="woodpecker-ticket__footer"><span>{record.comments} 条评论</span></footer>}
   </article>
 }

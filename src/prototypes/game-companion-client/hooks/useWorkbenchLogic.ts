@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { clubs, companions, games, servicesByCompanion, type Service } from '../data/mockData'
 
 export type WorkOrderAction = '接受' | '拒绝' | '开始服务' | '继续服务' | '完成服务' | '免单' | '同意提前结束' | '拒绝提前结束'
-export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '金豆钱包' | '尊享卡'; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; earlyEndSubmittedQuantity?: number; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; category: '免单' | '提前结束' | '售后'; amount?: number | null }[]; deadline?: number }
+export type WorkOrder = { id: string; player: string; playerId: string; playerInitials: string; playerGender: '女' | '男'; playerAge: number; serviceId: string; clubName: string; status: string; amount: number; tipAmount: number; discountAmount: number; paymentSource: '金豆钱包' | '尊享卡'; remark?: string; createdAt: string; duration: number; durationUnit: '小时' | '局'; unitPrice: number; startedAt?: string; completionRequestedAt?: string; completedQuantity?: number; earlyEndRequested?: boolean; earlyEndSubmittedQuantity?: number; serviceSegmentMinutes?: number[]; waivedQuantity?: number; afterSalesRecords?: { id: string; recordedAt: string; category: '免单' | '提前结束' | '售后'; amount?: number | null }[]; deadline?: number }
 const services = (servicesByCompanion['companion-001'] ?? []).filter((s, i, all) => all.findIndex(other => other.gameId === s.gameId && other.playName === s.playName && other.levelName === s.levelName) === i).flatMap(s => [{ ...s, name: '组队开黑' }, { ...s, id: `${s.id}-coaching`, name: '技巧指导' }])
 const levelKey = (service: { gameId: string; playName: string; levelName: string }) => JSON.stringify([service.gameId, service.playName, service.levelName])
 const initialServiceIds = services.filter(s => s.canAcceptOrders).map(s => s.id)
@@ -58,18 +58,18 @@ export function useWorkbenchLogic(initialSelectedOrderId: string | null = null) 
     return () => window.clearInterval(timer)
   }, [])
   const activeMatch = requests.find(r => r.status === '已加入候选名单') ?? null
-  const respond = (id: string, accept: boolean) => {
+  const respond = (id: string) => {
     const request = requests.find(r => r.id === id)
     if (!request || request.status !== '待响应') return false
-    if (accept && (activeMatch || !enabled.includes(request.serviceId))) {
+    if (activeMatch || !enabled.includes(request.serviceId)) {
       setFeedback(activeMatch ? '请先取消当前匹配，再接受其他匹配' : '请先开启该服务的接单')
       return false
     }
     setRequests(items => {
-      if (accept && items.some(r => r.status === '已加入候选名单')) return items
-      return items.map(r => r.id === id && r.status === '待响应' ? { ...r, status: accept ? '已加入候选名单' : '已拒绝' } : r)
+      if (items.some(r => r.status === '已加入候选名单')) return items
+      return items.map(r => r.id === id && r.status === '待响应' ? { ...r, status: '已加入候选名单' } : r)
     })
-    setFeedback(accept ? '已加入候选名单，等待玩家选择并下单' : '已拒绝匹配请求')
+    setFeedback('已加入候选名单，等待玩家选择并下单')
     return true
   }
   const cancelMatch = (id: string) => {

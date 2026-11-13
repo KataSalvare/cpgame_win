@@ -184,6 +184,8 @@
 .workbench-matches-table .order-item__service strong { font-size:14px; font-weight:400; white-space:normal; overflow-wrap:anywhere; }
 .workbench-matches-table .order-item__price strong { font-size:14px; }
 .workbench-matches-table .order-item__price small { font-size:12px; }
+.workbench-matches-table .workbench-match-price { grid-template-columns:minmax(0,1fr) minmax(38px,.55fr) minmax(64px,.85fr); align-items:center; gap:6px; }
+.workbench-matches-table .workbench-match-price > strong,.workbench-matches-table .workbench-match-price > small { white-space:nowrap; }
 .workbench-matches-table .order-item__status { font-size:12px; }
 
 .workbench-order-action-overlay { position:absolute; inset:0; z-index:80; display:grid; place-items:center; padding:24px; background:rgba(31,41,55,.28); }

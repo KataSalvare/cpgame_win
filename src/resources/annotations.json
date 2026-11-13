@@ -660,6 +660,30 @@
       "position": "top-left",
       "createdAt": 1794488598002,
       "route": "page=home&tool=voice-room-minimized"
+    },
+    {
+      "id": "anno-1794538188607-interaction",
+      "pagePath": "/game-companion-club-support",
+      "number": 1,
+      "title": "",
+      "content": "点击后，关闭弹窗并跳转至消息，定位到该用户的会话",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > section.club-support-chat > header.chat-panel__header.is-draggable > div.chat-panel__window-actions:nth-of-type(2) > button.windows-icon-button:nth-of-type(1)",
+      "position": "top-left",
+      "createdAt": 1794538188607,
+      "route": "page=club-detail&club=club-001&support=club"
+    },
+    {
+      "id": "anno-1794538221180-interaction",
+      "pagePath": "/game-companion-club-support",
+      "number": 2,
+      "title": "",
+      "content": "会话弹窗下，不可点击查看用户详情。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > section.club-support-chat > header.chat-panel__header.is-draggable > div.chat-panel__identity:nth-of-type(1)",
+      "position": "top-left",
+      "createdAt": 1794538221180,
+      "route": "page=club-detail&club=club-001&support=club"
     }
   ],
   "categories": [

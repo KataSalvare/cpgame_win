@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, LayoutDashboard, ClipboardList, SlidersHorizontal, WalletCards, Zap, Swords } from 'lucide-react'
+import { X, LayoutDashboard, ClipboardList, SlidersHorizontal, WalletCards, Zap, Swords, ArrowLeftRight, ArrowUpFromLine } from 'lucide-react'
 import type { WorkbenchLogic, WorkOrder } from '../hooks/useWorkbenchLogic'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
@@ -13,7 +13,6 @@ import type { WalletTransaction } from '../data/accountMockData'
 import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 
 type Props = { logic: WorkbenchLogic; pageState: 'normal' | 'loading' | 'empty' | 'error'; onRetry: () => void; balance: number; availableBeanBalance: number; pendingBeanSettlementBalance: number; entries: readonly WalletTransaction[]; onWithdraw: (amount: number) => boolean; onOpenExchange: () => void; onContactMatch: (request: WorkbenchLogic['requests'][number]) => void; initialTab?: '总览' | '匹配请求' | '订单' | '服务管理' | '糖豆钱包'; initialApplicationOpen?: boolean; onTabChange?: (tab: '总览' | '匹配请求' | '订单' | '服务管理' | '糖豆钱包') => void; onApplicationClose?: () => void }
-const openReceivingOrderRoute = (orderId: string) => { window.location.hash = `page=orders&detail=receiving&order=${encodeURIComponent(orderId)}` }
 export function WorkbenchPage({ logic: w, pageState, onRetry, balance, availableBeanBalance, pendingBeanSettlementBalance, entries, onWithdraw, onOpenExchange, onContactMatch, initialTab = '总览', initialApplicationOpen = false, onTabChange, onApplicationClose }: Props) {
   const [tab, setTab] = useState(initialTab)
   const [matchFilter, setMatchFilter] = useState('全部')
@@ -21,7 +20,7 @@ export function WorkbenchPage({ logic: w, pageState, onRetry, balance, available
   const [orderSearch, setOrderSearch] = useState('')
   const [withdraw, setWithdraw] = useState(false)
   const [confirm, setConfirm] = useState<{ id: string; status: string } | null>(null)
-  const setSelected = (order: WorkOrder | null) => { w.setSelectedOrderId(order?.id ?? null); if (order) openReceivingOrderRoute(order.id) }
+  const setSelected = (order: WorkOrder | null) => { w.setSelectedOrderId(order?.id ?? null) }
   useEffect(() => {
     const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setConfirm(null); setWithdraw(false) } }
     window.addEventListener('keydown', close)
@@ -51,13 +50,13 @@ export function WorkbenchPage({ logic: w, pageState, onRetry, balance, available
         <div className="workbench-request__user"><AvatarMark initials={r.playerInitials} size="sm" /><div className="workbench-request__user-copy"><strong><UserNameWithLevel name={r.player} identityId={r.player} /></strong><small>{r.id}</small></div></div>
         <strong className="workbench-request__service">{w.serviceLabel(r.serviceId)}</strong>
         <div className="workbench-request__price"><strong>{(r.matchPrice * r.quantity).toLocaleString()} 金豆</strong><small>{r.quantity} {r.quantityUnit}</small><small aria-label={`加价 ${r.tipAmount} 金豆`}>+{r.tipAmount} 金豆</small></div>
-        <span className="workbench-request__status">{r.status}</span>{r.status === '待响应' ? <div className="workbench-actions"><button className="client-button client-button--secondary" onClick={() => w.respond(r.id, false)}>拒绝</button><button className="client-button client-button--primary" disabled={Boolean(w.activeMatch) || !w.enabled.includes(r.serviceId)} title={w.activeMatch ? '请先取消当前匹配' : undefined} onClick={() => w.respond(r.id, true)}>抢单</button></div> : r.status === '已加入候选名单' ? <div className="workbench-actions"><button type="button" className="client-button client-button--secondary" onClick={() => onContactMatch(r)}>联系老板</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirm({ id: r.id, status: '取消匹配' })}>取消抢单</button></div> : <span aria-hidden="true">—</span>}
+        <span className="workbench-request__status">{r.status}</span>{r.status === '待响应' ? <div className="workbench-actions"><button className="client-button client-button--primary" disabled={Boolean(w.activeMatch) || !w.enabled.includes(r.serviceId)} title={w.activeMatch ? '请先取消当前匹配' : undefined} onClick={() => w.respond(r.id)}>抢单</button></div> : r.status === '已加入候选名单' ? <div className="workbench-actions"><button type="button" className="client-button client-button--secondary" onClick={() => onContactMatch(r)}>联系老板</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirm({ id: r.id, status: '取消匹配' })}>取消抢单</button></div> : <span aria-hidden="true">—</span>}
         <div className="workbench-request__note"><strong>备注</strong><span>{r.note || '无'}</span></div>
       </div>)}</section><section className="client-card workbench-section"><h2>待处理订单</h2>{w.orders.filter(o => ['待接单', '待服务', '服务中', '暂停中'].includes(o.status)).map(renderOrder)}</section></>}
       {tab === '匹配请求' && <WorkbenchMatchesPanel logic={w} filter={matchFilter} onFilterChange={setMatchFilter} onCancel={id => setConfirm({ id, status: '取消匹配' })} onContactMatch={onContactMatch} />}
-      {tab === '订单' && <WorkbenchOrdersPanel logic={w} filter={filter} onFilterChange={value => { setFilter(value); setSelected(null) }} query={orderSearch} onQueryChange={setOrderSearch} />}
+      {tab === '订单' && <WorkbenchOrdersPanel logic={w} onSelectOrder={w.setSelectedOrderId} filter={filter} onFilterChange={value => { setFilter(value); setSelected(null) }} query={orderSearch} onQueryChange={setOrderSearch} />}
       {tab === '服务管理' && <WorkbenchServicesPanel logic={w} initialApplicationOpen={initialApplicationOpen} onApplicationClose={onApplicationClose} />}
-      {tab === '糖豆钱包' && <><section className="client-card workbench-wallet"><div><h2>糖豆钱包</h2><strong>{balance.toLocaleString()} <small>糖豆</small></strong><div className="workbench-wallet__breakdown"><span>可提现 <strong>{availableBeanBalance.toLocaleString()}</strong></span><span>待结算 <strong>{pendingBeanSettlementBalance.toLocaleString()}</strong></span></div></div><div className="workbench-wallet__actions"><button type="button" className="client-button client-button--secondary" onClick={onOpenExchange}>兑换金豆</button><button type="button" className="client-button client-button--primary" onClick={() => setWithdraw(true)}>提现</button></div></section><section className="client-card workbench-section"><h2>收支明细</h2><WalletLedgerPanel entries={entries} /></section></>}
+      {tab === '糖豆钱包' && <><section className="client-card workbench-wallet"><div><h2>糖豆钱包</h2><strong>{balance.toLocaleString()} <small>糖豆</small></strong><div className="workbench-wallet__breakdown"><span>可提现 <strong>{availableBeanBalance.toLocaleString()}</strong></span><span>待结算 <strong>{pendingBeanSettlementBalance.toLocaleString()}</strong></span></div></div><div className="workbench-wallet__actions"><button type="button" className="client-button client-button--primary" onClick={() => setWithdraw(true)}><ArrowUpFromLine size={15} />提现</button><button type="button" className="client-button client-button--secondary" onClick={onOpenExchange}><ArrowLeftRight size={15} />兑换</button></div></section><section className="client-card workbench-section"><h2>收支明细</h2><WalletLedgerPanel entries={entries} /></section></>}
     </>}
     {withdraw && <BeanWithdrawPanel balance={availableBeanBalance} onWithdraw={onWithdraw} onClose={() => setWithdraw(false)} />}
     {confirm?.status === '取消匹配' && <ConfirmationDialog overlayId="companion-workbench-cancel-match-confirm" title="取消抢单" message="需要和老板确认后再取消，否则老板可能会投诉你哦~" confirmLabel="确认取消抢单" onCancel={() => setConfirm(null)} onConfirm={() => { w.cancelMatch(confirm.id); setConfirm(null) }} />}

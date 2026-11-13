@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 
-export function CopyableProfileId({ value, entityLabel }: { value: string; entityLabel: string }) {
+export function CopyableProfileId({ value, entityLabel, showLabel = true }: { value: string; entityLabel: string; showLabel?: boolean }) {
   const [feedback, setFeedback] = useState('')
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function CopyableProfileId({ value, entityLabel }: { value: string; entit
 
   return <span className="personal-user-id">
     <button type="button" className="client-profile-popover__user-id" onClick={() => void copyId()} aria-label={`复制${entityLabel} ID ${value}`} title="点击复制 ID">
-      ID：{value}<Copy size={12} aria-hidden="true" />
+      {showLabel ? `ID：${value}` : value}<Copy size={12} aria-hidden="true" />
     </button>
     {feedback && <span className="client-profile-popover__copy-feedback" role="status">{feedback === '复制成功' && <Check size={12} aria-hidden="true" />}{feedback}</span>}
   </span>

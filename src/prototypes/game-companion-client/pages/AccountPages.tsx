@@ -5,6 +5,7 @@ import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { OrderNumberCopy } from '../components/OrderNumberCopy'
 import { OrderAfterSalesRecords } from '../components/OrderAfterSalesRecords'
+import { CopyableProfileId } from '../components/CopyableProfileId'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import { WorkbenchOrdersPanel } from '../components/WorkbenchOrdersPanel'
@@ -98,6 +99,7 @@ const initialPayoutAccounts: PayoutAccount[] = [
 
 export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: number; onWithdraw: (amount: number) => boolean; onClose: () => void }) {
   const [accounts, setAccounts] = useState(initialPayoutAccounts)
+  const [accountToDelete, setAccountToDelete] = useState<PayoutAccount | null>(null)
   const [selectedId, setSelectedId] = useState(initialPayoutAccounts[0].id)
   const [amount, setAmount] = useState('')
   const [amountMode, setAmountMode] = useState<'beans' | 'rmb'>('beans')
@@ -156,8 +158,8 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   return <div className="store-overlay bean-withdraw-overlay" data-overlay="bean-withdraw-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-withdraw-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-withdraw-title">
     <header><div><h2 id="bean-withdraw-title">{activeView === 'withdraw' ? '提现糖豆' : activeView === 'accounts' ? '提现账户管理' : activeView === 'account-form' ? (editingAccount ? '换绑提现账户' : '绑定提现账户') : '提现结果'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭提现弹窗" onClick={onClose}><X size={17} /></button></header>
     {activeView === 'accounts' ? <>
-      <div className="client-section-heading bean-withdraw-panel__subheading"><div><span className="client-eyebrow">收款方式</span><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" disabled={accounts.length >= 5} title={accounts.length >= 5 ? '最多只能绑定 5 个账户' : undefined} onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
-      <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><button type="button" className="bean-payout-card__select" aria-label={`选择${account.type} ${maskedAccount(account)}`} onClick={() => { setSelectedId(account.id); setManageAccounts(false); setView('withdraw'); setFeedback('') }}><span className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{maskedAccount(account)}</span></span>{selectedId === account.id && <span className="bean-payout-card__selected">已选</span>}</button><button type="button" className="client-button client-button--secondary" onClick={() => deleteAccount(account)}><Trash2 size={14} />删除</button></article>)}</div>
+      <div className="client-section-heading bean-withdraw-panel__subheading"><div><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" disabled={accounts.length >= 5} title={accounts.length >= 5 ? '最多只能绑定 5 个账户' : undefined} onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
+      <div className="bean-payout-list">{accounts.map((account) => <article className="client-card bean-payout-card" key={account.id}><span className="bean-payout-card__icon">{account.type === '银行卡' ? <Landmark size={18} /> : <BadgeCheck size={18} />}</span><button type="button" className="bean-payout-card__select" aria-label={`选择${account.type} ${maskedAccount(account)}`} onClick={() => { setSelectedId(account.id); setManageAccounts(false); setView('withdraw'); setFeedback('') }}><span className="bean-payout-card__details"><strong>{account.type}{account.bankName ? ` · ${account.bankName}` : ''}</strong><span>{maskedAccount(account)}</span></span>{selectedId === account.id && <span className="bean-payout-card__selected">已选</span>}</button><button type="button" className="client-button client-button--secondary" onClick={() => setAccountToDelete(account)}><Trash2 size={14} />删除</button></article>)}</div>
       <footer><button type="button" className="client-button client-button--secondary" onClick={() => { setManageAccounts(false); setView('withdraw') }}>返回提现</button></footer>
     </> : activeView === 'account-form' ? <>
       <div className="bean-account-type" role="group" aria-label="提现账户类型">{(['支付宝', '银行卡'] as const).map((type) => <button type="button" className={`orders-filter-chip${formType === type ? ' is-active' : ''}`} aria-pressed={formType === type} key={type} onClick={() => setFormType(type)}>{type}</button>)}</div><div className="bean-account-name-row"><label className="bean-account-field"><span>账户姓名</span><input value={holder} disabled aria-label={`账户姓名，实名：${mockVerifiedName}`} /></label><span className="bean-realname-status"><BadgeCheck size={14} />已实名</span></div>{formType === '银行卡' && <label className="bean-account-field"><span>开户银行</span><input value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="请输入银行名称" /></label>}<label className="bean-account-field"><span>{formType === '支付宝' ? '支付宝账号' : '银行卡号'}</span><input value={accountValue} onChange={(event) => setAccountValue(event.target.value)} placeholder={formType === '支付宝' ? `请输入${editingAccount ? '新的' : ''}手机号或支付宝账号` : `请输入${editingAccount ? '新的' : ''}银行卡号`} /></label><footer><button type="button" className="client-button client-button--secondary" onClick={closeForm}>取消</button><button type="button" className="client-button client-button--primary" disabled={!accountValue.trim() || (formType === '银行卡' && !bankName.trim())} onClick={saveAccount}>保存账户</button></footer>
@@ -175,7 +177,7 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
       </section>
     </>}
     {feedback && <p className="account-inline-feedback" role="status">{feedback}</p>}
-  </section></div>
+  </section>{accountToDelete && <ConfirmationDialog overlayId="bean-withdraw-delete-account" title="删除账户" message="确认删除该账户吗？" confirmLabel="确认删除" onCancel={() => setAccountToDelete(null)} onConfirm={() => { deleteAccount(accountToDelete); setAccountToDelete(null) }} />}</div>
 }
 
 export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBalance: number; onExchange: (amount: number) => boolean; onClose: () => void }) {
@@ -281,7 +283,7 @@ export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单
     <nav className="personal-center-tabs orders-role-tabs" role="tablist" aria-label="订单类型">
       {(['我的下单', '我的接单', '考生订单', '考官订单'] as const).map(item => <button type="button" role="tab" key={item} className={`personal-center-tab${tab === item ? ' is-active' : ''}`} aria-selected={tab === item} onClick={() => { onTabChange(item); onSelectOrder(null); workbench.setSelectedOrderId(null); onSelectExamOrder(null, null) }}>{item}</button>)}
     </nav>
-    {tab === '我的接单' ? <WorkbenchOrdersPanel logic={workbench} filter={workbenchFilter} onFilterChange={value => { setWorkbenchFilter(value); workbench.setSelectedOrderId(null) }} query={workbenchSearch} onQueryChange={setWorkbenchSearch} label="接单" /> : tab === '考生订单' || tab === '考官订单' ? <section className="client-card orders-list-card exam-orders-card">
+    {tab === '我的接单' ? <WorkbenchOrdersPanel logic={workbench} onSelectOrder={orderId => { workbench.setSelectedOrderId(orderId); window.location.hash = `page=orders&detail=receiving&order=${encodeURIComponent(orderId)}` }} filter={workbenchFilter} onFilterChange={value => { setWorkbenchFilter(value); workbench.setSelectedOrderId(null) }} query={workbenchSearch} onQueryChange={setWorkbenchSearch} label="接单" /> : tab === '考生订单' || tab === '考官订单' ? <section className="client-card orders-list-card exam-orders-card">
       {renderOrderSearch(tab)}
       <div className="orders-filter-bar" role="group" aria-label={`按${tab}状态筛选`}>{(['全部', ...examStatuses] as Array<'全部' | ExamOrderStatus>).map(status => <button type="button" key={status} className={`orders-filter-chip${currentExamFilter === status ? ' is-active' : ''}`} aria-pressed={currentExamFilter === status} onClick={() => setExamFilters(current => ({ ...current, [tab]: status }))}>{status}</button>)}</div>
       {renderExamOrders(filteredExamOrders)}
@@ -675,9 +677,8 @@ function OrderRenewDialog({ order, diamondBalance, onClose, onOpenRecharge, onRe
   return <div className="order-action-overlay" data-overlay="order-renew" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
     <section ref={dialogRef} className="order-action-dialog order-renew-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-renew-title">
       <header><h2 id="order-renew-title">续单</h2><button type="button" className="order-action-dialog__close" aria-label="关闭续单" onClick={onClose}><X size={17} /></button></header>
-      <p className="order-renew-order-id">订单 {order.id}</p>
       <label className="order-renew-quantity"><span>续单数量</span><div className="order-renew-quantity__control"><button type="button" className="client-button client-button--secondary" aria-label="减少续单数量" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button><input type="number" min="1" step="1" value={quantity} aria-label={`续单数量，单位${order.durationUnit}`} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} /><span>{order.durationUnit}</span><button type="button" className="client-button client-button--secondary" aria-label="增加续单数量" onClick={() => setQuantity((value) => value + 1)}>＋</button></div></label>
-      <div className="order-renew-summary"><div><span>服务单价</span><strong>{order.unitPrice.toLocaleString()} 金豆 / {order.durationUnit}</strong></div><div><span>续单金额</span><strong>{amount.toLocaleString()} 金豆</strong></div><div><span>当前余额</span><strong>{diamondBalance.toLocaleString()} 金豆</strong></div></div>
+      <div className="order-renew-summary"><div><span>服务单价</span><strong>{order.unitPrice.toLocaleString()} 金豆 / {order.durationUnit}</strong></div><div><span>续单金额</span><strong>{amount.toLocaleString()} 金豆</strong></div><div><span>金豆钱包余额</span><strong>{diamondBalance.toLocaleString()} 金豆</strong></div></div>
       <footer><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => {
         if (onRenewOrder(order.id, quantity)) {
           setSuccessSummary({ duration: updatedDuration, amount: updatedAmount })
@@ -783,7 +784,7 @@ export function OrderDetailPanel({ order, companion, diamondBalance, onContact, 
 
       <section className="order-detail-section">
         <div className="order-detail-section__heading"><span className="client-eyebrow">陪玩信息</span>{!order.earlyEndPending && <button type="button" className="client-button client-button--secondary" onClick={onContact}><MessageCircle size={15} />聊一聊</button>}</div>
-        <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong>{companion ? <span className="order-detail-companion__demographics" aria-label={`性别${companion.gender}，${companion.age}岁`}>{companion.gender === '女' ? <Venus size={13} aria-hidden="true" /> : <Mars size={13} aria-hidden="true" />}{companion.age}</span> : <span>陪玩资料</span>}<span>ID · {companion?.id ?? order.companionId}</span><span>所属俱乐部 · {getOrderClubName(order)}</span></div></div>
+        <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong><div className="order-detail-companion__identity"><CopyableProfileId value={companion?.id ?? order.companionId} entityLabel="用户" showLabel={false} />{companion && <span className="order-detail-companion__demographics" aria-label={`性别${companion.gender}，${companion.age}岁`}>{companion.gender === '女' ? <Venus size={13} aria-hidden="true" /> : <Mars size={13} aria-hidden="true" />}{companion.age}</span>}</div>{!companion && <span>陪玩资料</span>}<span>{getOrderClubName(order)}</span></div></div>
       </section>
 
       <section className="order-detail-section">

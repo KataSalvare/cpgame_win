@@ -4,7 +4,7 @@ import { groupMembersMockData } from '../data/groupMembersMockData'
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText,
-  Gift, ImagePlus, LockKeyhole, MessageCircle, Mic, MicOff, MoreHorizontal, Pencil,
+  Gift, ImagePlus, LockKeyhole, Maximize2, MessageCircle, Mic, MicOff, MoreHorizontal, Pencil,
   PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, Undo2, UserPlus, Users, PanelRightClose, PanelRightOpen,
   Volume2, VolumeX, Copy, X,
 } from 'lucide-react'
@@ -1445,11 +1445,15 @@ export function ClubSupportSelectionDialog({ onClose, onConsult }: { onClose: ()
   </DialogPanel>
 }
 
-export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, onSendOrder, onReview }: { conversation?: NonNullable<SocialLogic['selectedConversation']>; orders: ClientOrder[]; onClose: () => void; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => void; onSendOrder: (order?: ClientOrder) => void; onReview: (messageId: string, rating: number, submitted: boolean) => void }) {
+export function ClubSupportChatPanel({ conversation, orders, onClose, onExpand, onSend, onSendOrder, onReview, onRecall }: { conversation?: NonNullable<SocialLogic['selectedConversation']>; orders: ClientOrder[]; onClose: () => void; onExpand: () => void; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => void; onSendOrder: (order?: ClientOrder) => void; onReview: (messageId: string, rating: number, submitted: boolean) => void; onRecall: (messageId: string) => boolean }) {
   const [draft, setDraft] = useState('')
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [quickRepliesOpen, setQuickRepliesOpen] = useState(false)
   const [replyTarget, setReplyTarget] = useState<SocialMessage | null>(null)
+  const [contextMessage, setContextMessage] = useState<SocialMessage | null>(null)
+  const [contextPoint, setContextPoint] = useState({ x: 0, y: 0 })
+  const [reportTarget, setReportTarget] = useState<SocialMessage | null>(null)
+  const [feedback, setFeedback] = useState('')
   const [playingMessage, setPlayingMessage] = useState<string | null>(null)
   const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false)
   const [orderDialogOpen, setOrderDialogOpen] = useState(false)
@@ -1460,6 +1464,9 @@ export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, on
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   useEffect(() => { if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight }, [conversation?.messages.length])
   if (!conversation) return null
+  const memberId = conversation.members[0]
+  const friend = socialFriends.find((item) => item.id === memberId)
+  const companion = companions.find((item) => item.id === (friend?.companionId ?? memberId))
   const submit = () => {
     if (!draft.trim()) return
     onSend('text', draft.trim(), undefined, replyTarget ? replySnapshot(replyTarget) : undefined)
@@ -1494,8 +1501,11 @@ export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, on
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
   }
   return <section ref={draggablePanelRef} className="club-support-chat" style={{ transform: `translate3d(${dragPosition.x}px, ${dragPosition.y}px, 0)` }} aria-label={`${conversation.title}聊天窗口`} role="region">
-    <header className="chat-panel__header is-draggable" onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}><div className="chat-panel__identity"><AvatarMark initials={conversation.initials} size="md" /><div><h2>{conversation.title}</h2></div></div><button type="button" className="windows-icon-button" onClick={onClose} aria-label={`关闭与${conversation.title}的聊天`}><X size={17} /></button></header>
-    <div className="chat-message-list" ref={messagesRef} aria-live="polite">{conversation.messages.map((message) => <ChatMessage key={message.id} message={message} selfId={conversation.self?.id} onReviewChange={(rating, submitted) => onReview(message.id, rating, submitted)} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} />)}</div>
+    <header className="chat-panel__header is-draggable" onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}><div className="chat-panel__identity"><AvatarMark initials={conversation.initials} imageUrl={conversation.avatarDataUrl} size="md" /><div><div className="chat-panel__titleline"><h2><UserNameWithLevel name={conversation.title} identityId={friend?.profileId ?? companion?.id ?? memberId ?? conversation.id} /></h2><span className="chat-companion-status" aria-label="状态">{conversation.status ?? companion?.status ?? friend?.status ?? '在线'}</span>{conversation.label === '客服' && <span className="conversation-group-tag">客服</span>}</div></div></div><div className="chat-panel__window-actions"><button type="button" className="windows-icon-button" onClick={onExpand} aria-label="在消息中打开聊天" title="在消息中打开"><Maximize2 size={16} /></button><button type="button" className="windows-icon-button" onClick={onClose} aria-label={`关闭与${conversation.title}的聊天`}><X size={17} /></button></div></header>
+    <div className="chat-message-list" ref={messagesRef} aria-live="polite">{conversation.messages.map((message, index) => <div className="chat-message-group" key={message.id}>
+      {shouldShowChatTimestamp(message, conversation.messages[index - 1]) && <time className="social-message__time social-message__time--grouped">{formatChatMessageTime(message.time)}</time>}
+      <ChatMessage message={message} selfId={conversation.self?.id} identityMode="direct" showInlineTime={false} onReviewChange={(rating, submitted) => onReview(message.id, rating, submitted)} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />
+    </div>)}</div>
     <div className="chat-composer">
       {conversation.supportAction && <div className="chat-support-actions"><button type="button" className="client-button client-button--secondary client-button--small" onClick={() => { if (conversation.supportAction === 'order') { setSelectedOrderId(''); setOrderDialogOpen(true) } else onSendOrder() }}>{conversation.supportAction === 'order' ? <ReceiptText size={15} /> : <Star size={15} />}{conversation.supportAction === 'order' ? '发送订单' : '评价'}</button></div>}
       {replyTarget && <ReplyPreview message={replyTarget} onCancel={() => setReplyTarget(null)} />}
@@ -1504,7 +1514,10 @@ export function ClubSupportChatPanel({ conversation, orders, onClose, onSend, on
       {emojiOpen && <div className="emoji-picker" role="group" aria-label="选择表情">{['😀', '😊', '😂', '👍', '🎮', '🎉', '❤️', '🙌'].map((emoji) => <button type="button" key={emoji} onClick={() => { onSend('emoji', emoji); setEmojiOpen(false) }} aria-label={`发送${emoji}`}>{emoji}</button>)}</div>}
       <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleEnter} placeholder={`发送消息给 ${conversation.title}…`} aria-label={`发送给${conversation.title}的消息内容`} />
       <div className="chat-composer__toolbar"><div className="chat-composer__tools"><button type="button" className="windows-icon-button" aria-label="表情" aria-expanded={emojiOpen} onClick={() => { setQuickRepliesOpen(false); setEmojiOpen((value) => !value) }}><Smile size={18} /></button><button type="button" className="windows-icon-button" aria-label="发送示例图片" title="发送示例图片" onClick={() => onSend('image', '战绩截图 · 示例图片')}><ImagePlus size={18} /></button><button type="button" className="windows-icon-button" aria-label="录制语音" title="录制语音" aria-expanded={voiceRecordingOpen} onClick={() => { setEmojiOpen(false); setQuickRepliesOpen(false); setVoiceRecordingOpen(true) }}><Mic size={18} /></button><button type="button" className="windows-icon-button" aria-label="快捷回复" title="快捷回复" aria-expanded={quickRepliesOpen} onClick={() => { setEmojiOpen(false); setQuickRepliesOpen((open) => !open) }}><MessageSquareText size={17} /></button></div><button type="button" className="client-button client-button--primary chat-send-button" onClick={submit} disabled={!draft.trim()}><Send size={15} />发送</button></div>
+      {feedback && <div className="social-inline-feedback" role="status">{feedback}<button type="button" onClick={() => setFeedback('')} aria-label="关闭提示"><X size={14} /></button></div>}
     </div>
+    {contextMessage && <MessageContextMenu point={contextPoint} canRecall={contextMessage.senderId === (conversation.self?.id ?? currentSocialUser.id)} canReport={contextMessage.senderId !== (conversation.self?.id ?? currentSocialUser.id)} onClose={() => setContextMessage(null)} onReply={() => { setReplyTarget(contextMessage); setContextMessage(null) }} onCopy={() => copyMessage(contextMessage, setFeedback, () => setContextMessage(null))} onRecall={() => { if (onRecall(contextMessage.id)) setFeedback('消息已撤回'); setContextMessage(null) }} onReport={() => { setReportTarget(contextMessage); setContextMessage(null) }} />}
+    {reportTarget && <UserReportDialog overlayId="report-floating-chat-message" onClose={() => setReportTarget(null)} onSubmit={() => { setFeedback('举报已提交（仅演示）'); setReportTarget(null) }} />}
     {orderDialogOpen && <DialogPanel overlayId="send-club-support-order" title="选择订单" width={460} className="chat-order-dialog" onClose={() => setOrderDialogOpen(false)} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setOrderDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" disabled={!orders.some((order) => order.id === selectedOrderId)} onClick={() => { const order = orders.find((item) => item.id === selectedOrderId); if (order) { onSendOrder(order); setOrderDialogOpen(false) } }}>发送订单</button></>}><ChatOrderPicker orders={orders} selectedOrderId={selectedOrderId} onSelect={setSelectedOrderId} radioName="club-support-order" /></DialogPanel>}
   </section>
 }

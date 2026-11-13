@@ -1144,6 +1144,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .order-detail-companion > div { display: grid; gap: 4px; }
 .order-detail-companion strong { color: var(--client-text); font-size: 13px; font-weight: 600; }
 .order-detail-companion span { color: var(--client-muted); font-size: 10px; }
+.order-detail-companion__identity { display: flex; align-items: center; gap: 10px; }
 .order-detail-companion__demographics { display: inline-flex; align-items: center; gap: 3px; }
 .order-detail-companion__demographics svg { width: 13px; height: 13px; }
 .order-detail-facts { display: grid; grid-template-columns: minmax(74px, auto) 1fr; gap: 9px 12px; font-size: 11px; }
@@ -1198,7 +1199,6 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .order-action-dialog--early-end > footer { justify-content: stretch; }
 .order-action-dialog--early-end > footer .client-button { flex: 1; min-height: 38px; }
 .order-renew-dialog { max-width: 440px; }
-.order-renew-order-id { margin: 7px 0 14px !important; color: var(--client-muted) !important; font-size: 10px !important; }
 .order-renew-quantity { display: grid; gap: 9px; margin-bottom: 14px; font-size: 12px; font-weight: 600; }
 .order-renew-quantity > div { display: flex; flex-wrap: wrap; gap: 7px; }
 .order-renew-quantity__control { align-items: center; }

@@ -650,6 +650,7 @@
 
 .club-support-chat{position:absolute;z-index:30;right:24px;bottom:24px;display:flex;width:620px;height:760px;max-width:calc(100% - 32px);max-height:calc(100% - 32px);flex-direction:column;overflow:hidden;border:1px solid var(--client-border);border-radius:8px;background:var(--prototype-surface,#fff);box-shadow:0 12px 36px rgb(17 24 39 / 18%)}
 .club-support-chat .chat-panel__header{flex:0 0 auto}
+.club-support-chat .chat-panel__window-actions{display:flex;flex:0 0 auto;align-items:center;gap:4px}
 .club-support-chat .chat-panel__header.is-draggable{cursor:move;touch-action:none;user-select:none}
 .club-support-chat .chat-panel__header.is-draggable:active{cursor:grabbing}
 .club-support-chat .chat-message-list{min-height:0;flex:1 1 auto}

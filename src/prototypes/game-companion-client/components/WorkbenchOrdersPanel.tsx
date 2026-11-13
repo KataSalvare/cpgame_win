@@ -7,12 +7,13 @@ import { WorkbenchOrderActions } from './WorkbenchOrderDetailPanel'
 
 const filters = ['全部', '待接单', '待服务', '服务中', '暂停中', '已完成', '已取消', '退款']
 
-export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, query, onQueryChange, label = '工作台订单' }: {
+export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, query, onQueryChange, onSelectOrder, label = '工作台订单' }: {
   logic: WorkbenchLogic
   filter: string
   onFilterChange: (filter: string) => void
   query: string
   onQueryChange: (query: string) => void
+  onSelectOrder: (orderId: string) => void
   label?: string
 }) {
   const normalizedQuery = query.trim().toLocaleLowerCase()
@@ -31,7 +32,7 @@ export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, query, 
         const game = games.find(g => g.id === service?.gameId)
         const displayedStatus = o.earlyEndRequested ? '待陪玩确认' : o.status
         return <article className={`order-item workbench-order-table-row${w.selectedOrder?.id === o.id ? ' is-selected' : ''}`} key={o.id}>
-          <button type="button" className="order-item__main" aria-label={`查看订单 ${o.id}，${o.player}，${displayedStatus}`} onClick={() => { w.setSelectedOrderId(o.id); window.location.hash = `page=orders&detail=receiving&order=${encodeURIComponent(o.id)}` }}>
+          <button type="button" className="order-item__main" aria-label={`查看订单 ${o.id}，${o.player}，${displayedStatus}`} onClick={() => onSelectOrder(o.id)}>
             <span className="order-item__info"><strong>{o.id}</strong><small>{o.createdAt}</small></span>
             <span className="order-item__companion"><AvatarMark initials={o.playerInitials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={o.player} identityId={o.player} /></strong></span></span>
             <span className="order-item__service"><strong>{game?.name} · {service?.playName}</strong><small>{service?.levelName} · {service?.name}</small></span>

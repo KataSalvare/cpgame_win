@@ -30,10 +30,10 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
     ...matchTypes.map(type => matches.find(message => message.audition === type && !handled.includes(`match-${message.id}`))).filter((message): message is typeof matches[number] => Boolean(message)),
     ...orders.slice(0, 1).filter(() => !handled.includes('order')),
   ]
-  const respond = (message: WorkbenchMessage, accept: boolean) => {
-    if (message.kind === 'match' && !w.respond(message.id, accept)) return
-    if (message.kind === 'order' && accept) { w.setOrderAction({ id: message.id, action: '接受' }); return }
-    const key = message.kind === 'match' ? `match-${message.id}` : 'order'
+  const respond = (message: WorkbenchMessage) => {
+    if (message.kind === 'match' && !w.respond(message.id)) return
+    if (message.kind === 'order') { w.setOrderAction({ id: message.id, action: '接受' }); return }
+    const key = `match-${message.id}`
     setHandled(keys => keys.includes(key) ? keys : [...keys, key])
   }
 
@@ -56,7 +56,7 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
       <p className="workbench-notice-service">{w.serviceLabel(message.serviceId)}{message.kind === 'order' && ` · ${service?.name ?? '组队开黑'}`}</p>
       <footer className={`workbench-notice-footer${compact ? ' workbench-notice-footer--compact' : ''}`}>
         <dl className={`workbench-notice-prices${compact ? ' workbench-notice-prices--compact' : ''}`}>{message.kind === 'match' ? <><div><dt className="sr-only">总金额</dt><dd>{(message.matchPrice * message.quantity + message.tipAmount).toLocaleString()} 金豆（含加价 {message.tipAmount.toLocaleString()} 金豆）</dd></div><div className="workbench-notice-calculation"><dt className="sr-only">计算方式</dt><dd>{message.matchPrice.toLocaleString()} 金豆 × {message.quantity} {message.quantityUnit}</dd></div></> : <div><dt className="sr-only">金额</dt><dd>{message.amount} 金豆</dd></div>}</dl>
-        <div className="workbench-notice-actions">{!compact && message.kind === 'match' && <button type="button" className="client-button client-button--secondary" onClick={() => respond(message, false)}>拒绝</button>}{message.kind === 'order' && <button type="button" className="client-button client-button--secondary" onClick={() => w.setOrderAction({ id: message.id, action: '拒绝' })}>拒绝</button>}<button type="button" className="client-button client-button--primary" title={message.kind === 'match' && w.activeMatch ? '请先取消当前匹配' : undefined} disabled={message.kind === 'match' && (Boolean(w.activeMatch) || !w.enabled.includes(message.serviceId))} onClick={() => respond(message, true)}>{message.kind === 'match' ? '抢单' : '接受'}</button></div>
+        <div className="workbench-notice-actions">{message.kind === 'order' && <button type="button" className="client-button client-button--secondary" onClick={() => w.setOrderAction({ id: message.id, action: '拒绝' })}>拒绝</button>}<button type="button" className="client-button client-button--primary" title={message.kind === 'match' && w.activeMatch ? '请先取消当前匹配' : undefined} disabled={message.kind === 'match' && (Boolean(w.activeMatch) || !w.enabled.includes(message.serviceId))} onClick={() => respond(message)}>{message.kind === 'match' ? '抢单' : '接受'}</button></div>
       </footer>
     </NotificationCard>
   }

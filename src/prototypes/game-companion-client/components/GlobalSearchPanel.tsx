@@ -34,8 +34,8 @@ const HISTORY_KEY = 'game-companion-global-search-history'
 const clubPublicId = (id: string) => id.replace(/^club-(\d+)$/i, 'C-$1')
 const tabItems: { id: ResultTab; label: string }[] = [
   { id: 'rooms', label: '语音房' },
-  { id: 'clubs', label: '俱乐部' },
   { id: 'users', label: '用户' },
+  { id: 'clubs', label: '俱乐部' },
 ]
 
 function readHistory(): string[] {
@@ -83,8 +83,8 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
     const term = value.trim().toLocaleLowerCase()
     if (!term) { setActiveTab('rooms'); return }
     if (term === '11' || rooms.some((room) => room.name.toLocaleLowerCase().includes(term))) setActiveTab('rooms')
-    else if (clubs.some((club) => club.name.toLocaleLowerCase().includes(term) || club.id.toLocaleLowerCase().includes(term) || clubPublicId(club.id).toLocaleLowerCase().includes(term))) setActiveTab('clubs')
-    else setActiveTab('users')
+    else if (users.some((user) => user.name.toLocaleLowerCase().includes(term) || user.profileId.toLocaleLowerCase().includes(term) || user.id.toLocaleLowerCase().includes(term))) setActiveTab('users')
+    else setActiveTab('clubs')
   }
 
   useEffect(() => {
