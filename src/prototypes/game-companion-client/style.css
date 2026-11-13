@@ -2274,3 +2274,16 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .gift-shortage footer { display: flex; justify-content: flex-end; gap: 8px; }
 
 .gift-success-toast { position: absolute; z-index: 120; top: 60px; left: 50%; transform: translateX(-50%); border: 1px solid var(--client-border); border-radius: 6px; padding: 10px 18px; background: var(--client-surface); color: var(--client-text); box-shadow: 0 4px 16px rgb(17 24 39 / 12%); font-size: 14px; }
+
+.gift-stage-recipients { display:flex; align-items:center; gap:12px; padding:10px 12px 2px; font-size:13px; font-weight:600; }
+.gift-stage-recipients > div { display:flex; align-items:center; gap:5px; overflow-x:auto; }
+.gift-stage-recipient { display:flex; flex:none; padding:2px; border:2px solid transparent; border-radius:50%; background:transparent; cursor:pointer; }
+.gift-stage-recipient.is-selected { border-color:var(--prototype-text-secondary, #4b5563); }
+.gift-stage-recipient:focus-visible { outline:2px solid var(--client-text); outline-offset:2px; }
+
+.gift-panel--voice:not(.gift-panel--confirming) .gift-stage-recipients { padding-right:52px; min-height:48px; }
+.gift-panel--voice:not(.gift-panel--confirming) .gift-panel__header > .client-icon-button { position:absolute; top:8px; right:12px; }
+.gift-panel__toast { position:absolute; z-index:2; top:50%; left:50%; transform:translate(-50%, -50%); margin:0; padding:9px 14px; border-radius:6px; background:#374151; color:#fff; font-size:13px; white-space:nowrap; pointer-events:none; }
+.gift-stage-recipients > .is-shaking { animation:gift-recipient-shake .4s ease-in-out; }
+@keyframes gift-recipient-shake { 0%, 100% { transform:translateX(0); } 25% { transform:translateX(-4px); } 75% { transform:translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { .gift-stage-recipients > .is-shaking { animation:none; } }

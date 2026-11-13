@@ -564,6 +564,18 @@
       "route": "page=voice-room"
     },
     {
+      "id": "anno-1794562765269-interaction",
+      "pagePath": "/game-companion-voice-room",
+      "number": 11,
+      "title": "",
+      "content": "房间配置了发言频控时，如果发言太快，会有提示。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.voice-page > div.voice-workspace > section.room-chat-panel:nth-of-type(2) > div.room-chat-composer:nth-of-type(3) > textarea",
+      "position": "top-left",
+      "createdAt": 1794562765269,
+      "route": "page=voice-room&club=club-001&voiceFrom=personal"
+    },
+    {
       "id": "anno-1794361699214-interaction",
       "pagePath": "/game-companion-profile",
       "number": 1,
