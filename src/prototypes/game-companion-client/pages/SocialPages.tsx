@@ -3,7 +3,7 @@ import type { ClientOrder } from '../data/accountMockData'
 import { groupMembersMockData } from '../data/groupMembersMockData'
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import {
-  Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText,
+  BatteryCharging, HandHeart, Orbit, Sparkles, UsersRound, Bell, Star, ReceiptText, Check, CheckCheck, ChevronDown, ChevronRight, Circle, Clipboard, Eraser, Flag, Flame, Globe2, Headphones, MessageSquareText,
   Gift, ImagePlus, LockKeyhole, Maximize2, MessageCircle, Mic, MicOff, MoreHorizontal, Pencil,
   PhoneOff, Pin, Play, Plus, Reply, Search, Send, SlidersHorizontal, Smile, Trash2, Undo2, UserPlus, Users, PanelRightClose, PanelRightOpen,
   Volume2, VolumeX, Copy, X,
@@ -11,7 +11,7 @@ import {
 import { DialogPanel } from '@/components/WindowsClient'
 import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import { currentSocialUser, initialSupportQueue, DEFAULT_VOICE_GROUP_CAPACITY, MAX_VOICE_CHANNEL_MEMBERS, MAX_VOICE_GROUP_MEMBERS, UNASSIGNED_VOICE_ROOM_ID, socialFriends, voiceSubchannelIsFull, voiceSubchannelOpenSeats, type ChatMessageKind, type SocialFriend, type SocialMessage, type VoiceMember, type VoiceRole, type VoiceSubchannel } from '../data/socialMockData'
-import { clubs, companions } from '../data/mockData'
+import { clubs, companions, gifts } from '../data/mockData'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { useSocialLogic } from '../hooks/useSocialLogic'
 import { FixedMessageFeedPanel } from '../components/FixedMessageFeedPanel'
@@ -1544,7 +1544,11 @@ function RoomChatPanel({ messages, onSend, onRecallMessage, hidden = false, coll
     <header><div><h2><MessageCircle size={16} />房间聊天</h2></div><button type="button" className="windows-icon-button" onClick={onToggleCollapsed} aria-label={collapsed ? "展开聊天面板" : "折叠聊天面板"} title={collapsed ? "展开聊天面板" : "折叠聊天面板"}>{collapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}</button></header>
     <div className="room-chat-panel__announcement" role="note">官方倡导绿色互动，请勿发布违法、低俗、暴力、广告等内容，禁止违规交易，违规者将被封禁帐号。</div>
     <div className="room-chat-panel__messages">{messages.map((message) => {
-      if (message.systemNotice) return <div className="room-chat-system-notice" role="status" key={message.id}>{message.content}</div>
+      if (message.systemNotice) {
+        const selfPosition = message.content.startsWith('你 给 ') ? 0 : message.content.indexOf(' 给 你 赠送了 ') + 3
+        const highlightSelf = selfPosition > 2 || message.content.startsWith('你 给 ')
+        return <div className="room-chat-system-notice" role="status" key={message.id}>{highlightSelf ? <>{message.content.slice(0, selfPosition)}<strong>你</strong>{message.content.slice(selfPosition + 1)}</> : message.content}</div>
+      }
       const member = members.find((item) => item.id === message.senderId) ?? (message.senderId === currentSocialUser.id ? { ...currentSocialUser, role: 'member' as const, micOn: false, muted: false } : socialFriends.find((friend) => friend.id === message.senderId) ? { ...socialFriends.find((friend) => friend.id === message.senderId)!, role: 'member' as const, micOn: false, muted: false } : undefined)
       return <ChatMessage key={message.id} message={message} selfId={currentSocialUser.id} playing={playingMessage === message.id} onTogglePlay={() => setPlayingMessage(playingMessage === message.id ? null : message.id)} onAvatarClick={() => onOpenProfile?.(message.senderId)} onAvatarContextMenu={member && member.id !== currentSocialUser.id ? (event) => onAvatarContextMenu?.(event, member) : undefined} onContextMenu={(event) => openMessageMenu(event, message, setContextMessage, setContextPoint)} />
     })}</div>
@@ -1556,6 +1560,9 @@ function RoomChatPanel({ messages, onSend, onRecallMessage, hidden = false, coll
 
 function ChatMessage({ message, selfId = currentSocialUser.id, identityMode = 'all', showInlineTime = true, onReviewChange, playing, onTogglePlay, onAvatarClick, onAvatarContextMenu, onOpenVoiceRoom, onContextMenu }: { message: SocialMessage; selfId?: string; identityMode?: 'all' | 'direct' | 'group'; showInlineTime?: boolean; onReviewChange?: (rating: number, submitted: boolean) => void; playing: boolean; onTogglePlay: () => void; onAvatarClick?: () => void; onAvatarContextMenu?: (event: ReactMouseEvent<HTMLButtonElement>) => void; onOpenVoiceRoom?: (roomId: string, channelId: string) => void; onContextMenu?: (event: ReactMouseEvent<HTMLElement>) => void }) {
   const isSelf = message.senderId === selfId
+  const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
+  const giftIndex = gifts.findIndex((gift) => gift.id === message.gift?.id)
+  const GiftIcon = giftIcons[giftIndex] ?? Gift
   const showIdentity = identityMode === 'all' || (identityMode === 'group' && !isSelf)
   return <article className={`social-message${isSelf ? ' is-self' : ''}${message.recalled ? ' is-recalled' : ''}`} onContextMenu={message.recalled ? undefined : onContextMenu}>
     <button type="button" className="social-message__avatar" onClick={onAvatarClick} onContextMenu={(event) => { if (onAvatarContextMenu) { event.preventDefault(); event.stopPropagation(); onAvatarContextMenu(event) } }} disabled={!onAvatarClick} aria-label={`查看${message.senderName}资料`}><AvatarMark initials={message.initials} size="sm" /></button>
@@ -1566,6 +1573,7 @@ function ChatMessage({ message, selfId = currentSocialUser.id, identityMode = 'a
       {message.kind === 'order' && message.order && <div className="social-message-card" aria-label="订单消息"><header><ReceiptText size={17} /><strong>订单信息</strong><span>{message.order.status}</span></header><div className="social-message-card__content"><strong>{message.order.service}</strong><p>{message.order.companion} · {message.order.duration}</p><b>{message.order.amount} 金豆</b></div><footer>订单号 {message.order.id}</footer></div>}
       {message.kind === 'support-review' && message.review && <div className="social-message-card" aria-label="客服评价消息"><header><Star size={17} /><strong>客服评价</strong>{message.review.submitted && <span>已评价</span>}</header><div className="social-message-card__content"><strong>{message.review.support}</strong><div className="social-message-card__stars" role="group" aria-label="客服评分">{Array.from({ length: 5 }, (_, index) => <button type="button" key={index} disabled={message.review!.submitted || !onReviewChange} aria-label={`${index + 1} 星`} aria-pressed={index < message.review!.rating} onClick={() => onReviewChange?.(index + 1, false)}><Star size={22} fill={index < message.review!.rating ? 'currentColor' : 'none'} /></button>)}{message.review.rating > 0 && <span>{message.review.rating} 分</span>}</div>{message.review.submitted ? <p role="status">评价完成，感谢您的反馈</p> : message.review.rating > 0 && <button type="button" className="client-button client-button--primary" onClick={() => onReviewChange?.(message.review!.rating, true)}>确认评价</button>}</div></div>}
       {message.recalled ? <p className="social-message__text social-message__text--recalled" role="status">消息已撤回</p> : message.kind === 'text'  && <p className="social-message__text">{message.content}</p>}
+      {!message.recalled && message.kind === 'gift' && message.gift && <div className="social-message__gift" aria-label={`${message.gift.name}，${message.gift.quantity} 个`}><GiftIcon size={38} strokeWidth={1.5} aria-hidden="true" /><span>×{message.gift.quantity}</span></div>}
       {message.kind === 'emoji' && <p className="social-message__emoji" aria-label="表情消息">{message.content}</p>}
       {message.kind === 'image' && <div className="social-message__image"><ImagePlus size={20} /><span>{message.content}</span></div>}
       {message.kind === 'voice' && <button type="button" className="social-message__voice" onClick={onTogglePlay} aria-label={`${playing ? '暂停' : '播放'}语音消息`}><span>{playing ? <VolumeX size={16} /> : <Play size={15} />}</span><i className={playing ? 'is-playing' : ''} /><b>{message.duration ?? 5}″</b><small>{playing ? '播放中' : '语音消息'}</small></button>}

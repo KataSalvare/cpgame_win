@@ -658,9 +658,9 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         setGiftToast((value) => value + 1)
         setGiftAnimation((value) => value + 1)
         if (giftAnchor?.closest('.chat-composer') && social.selectedConversation?.kind === 'direct') {
-          social.sendChatMessage('text', `你向 ${recipient.name} 赠送了 ${gift.name} ×${quantity}`)
+          social.sendChatGiftMessage({ id: gift.id, name: gift.name, quantity })
         } else if (giftAnchor?.closest('.room-chat-composer')) {
-          social.sendRoomGiftMessage(`你向 ${recipient.name} 赠送了 ${gift.name} ×${quantity}`)
+          social.sendRoomGiftMessage(`你 给 ${recipient.name} 赠送了 ${gift.name} ×${quantity}`)
         }
       }} key={giftPanelKey} open={giftPanelOpen} recipients={giftRecipients} fixedRecipient={fixedGiftRecipient} anchor={giftAnchor} balance={account.diamondBalance} onClose={() => setGiftPanelOpen(false)} onPay={(gift, quantity, recipient, amount) => account.payGift(`${gift.name} × ${quantity}`, recipient.name, amount)} onRecharge={() => { setGiftPanelOpen(false); setRechargeReturnLabel('返回送礼'); setCheckoutRechargeOpen(true) }} />
       <WorkbenchNotifications logic={workbench} mode={noticeMode} voiceCallNotifications={voiceCallNotifications} voiceInvitations={social.voiceInvitations} onMarkAllRead={() => setNotificationsRead(true)} onClose={closeClientNotifications} onOpenVoiceCall={openVoiceCallNotification} onIgnoreVoiceCall={() => setVoiceCallNotifications([])} onIgnoreVoiceInvitation={social.ignoreVoiceInvitation} onAcceptVoiceInvitation={acceptRoomInvitation} />

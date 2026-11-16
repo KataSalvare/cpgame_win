@@ -17,7 +17,7 @@ export function WorkbenchMatchesPanel({ logic: w, filter, onFilterChange, onCanc
       {['全部', '待响应', '已加入候选名单', '已取消匹配'].map(status => <button type="button" key={status} className={`orders-filter-chip${filter === status ? ' is-active' : ''}`} aria-pressed={filter === status} onClick={() => onFilterChange(status)}>{status}</button>)}
     </div>
     {requests.length ? <div className="orders-list" role="group" aria-label="全部匹配请求列表">
-      <div className="order-list-header workbench-match-grid"><span>用户 / 单号</span><span>游戏 · 玩法 · 等级 · 服务</span><span>总价 / 数量 / 加价</span><span>状态</span><span>操作</span></div>
+      <div className="order-list-header workbench-match-grid"><span>用户</span><span>游戏服务</span><span>总价 / 数量 / 加价</span><span>状态</span><span>操作</span></div>
       {requests.map(request => {
         const unavailable = !w.enabled.includes(request.serviceId)
         return <article className="order-item workbench-match-grid" key={request.id} aria-label={`匹配请求 ${request.id} ${request.player}`}>

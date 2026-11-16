@@ -347,6 +347,12 @@ export function useSocialLogic(initialConversationId?: string) {
     updateMessages(selectedConversation.id, (id, time) => ({ id, senderId: self.id, senderName: self.name, initials: self.initials, time, kind, content, duration, replyTo }))
   }
 
+  const sendChatGiftMessage = (gift: NonNullable<SocialMessage['gift']>) => {
+    if (!selectedConversation) return
+    const self = selectedConversation.self ?? currentSocialUser
+    updateMessages(selectedConversation.id, (id, time) => ({ id, senderId: self.id, senderName: self.name, initials: self.initials, time, kind: 'gift', content: `${gift.name} ×${gift.quantity}`, gift }))
+  }
+
   const sendChatMessageToConversation = (conversationId: string, kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => {
     const target = conversations.find((item) => item.id === conversationId)
     if (!target || !content.trim()) return
@@ -410,7 +416,7 @@ export function useSocialLogic(initialConversationId?: string) {
   }
 
   const sendRoomGiftMessage = (content: string) => {
-    setRoomMessagesByRoom((items) => ({ ...items, [activeVoiceRoomId]: [...(items[activeVoiceRoomId] ?? []), { id: createId('room-message'), senderId: currentSocialUser.id, senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '现在', kind: 'text', content }] }))
+    setRoomMessagesByRoom((items) => ({ ...items, [activeVoiceRoomId]: [...(items[activeVoiceRoomId] ?? []), { id: createId('room-message'), senderId: 'system', senderName: '系统', initials: '', time: '现在', kind: 'text', content, systemNotice: true }] }))
   }
 
   const recallRoomMessage = (messageId: string) => {
@@ -786,7 +792,7 @@ export function useSocialLogic(initialConversationId?: string) {
     followedProfileIds, blockedProfileIds, toggleProfileFollow, blockProfile, unblockProfile, profileNotes, setProfileNote,
     activeMessagesTab, setActiveMessagesTab, chatSearch, setChatSearch, selectedFriendId, setSelectedFriendId,
     activeFixedFeed, setActiveFixedFeed, groupJoinRequests, resolveGroupJoinRequest,
-    selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageToUser, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, updateGroupAvatar, setGroupAdmin, removeGroupMember, setGroupJoinApproval, setGroupMuted, leaveGroup, dissolveGroup, sendChatMessage, sendChatMessageToConversation, recallChatMessage, sendSupportCard, sendSupportCardToConversation, updateSupportReview, updateSupportReviewInConversation, applyToClubGroup, openClubGroupChat,
+    selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageToUser, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, updateGroupAvatar, setGroupAdmin, removeGroupMember, setGroupJoinApproval, setGroupMuted, leaveGroup, dissolveGroup, sendChatMessage, sendChatGiftMessage, sendChatMessageToConversation, recallChatMessage, sendSupportCard, sendSupportCardToConversation, updateSupportReview, updateSupportReviewInConversation, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms, nextVoiceChannelName: getNextVoiceChannelName(voiceRooms),
     roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
     setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, sendRoomGiftMessage, recallRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,

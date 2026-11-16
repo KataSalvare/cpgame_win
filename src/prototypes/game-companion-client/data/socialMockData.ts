@@ -1,7 +1,7 @@
 import { initialOrders, type ClientOrder } from './accountMockData'
 import { groupMemberExtraIds } from './groupMembersMockData'
 
-export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review' | 'companion-share' | 'room-share'
+export type ChatMessageKind = 'text' | 'emoji' | 'image' | 'voice' | 'order' | 'support-review' | 'companion-share' | 'room-share' | 'gift'
 
 export interface SocialFriend {
   id: string
@@ -27,6 +27,7 @@ export interface SocialMessage {
   time: string
   kind: ChatMessageKind
   content: string
+  gift?: { id: string; name: string; quantity: number }
   companionShare?: { id: string; clubId: string; name: string; initials: string; gender: '女' | '男'; age: number; intro: string }
   roomShare?: { roomId: string; channelId: string; avatarInitials: string; avatarDataUrl?: string; name: string; onlineCount: number }
   recalled?: boolean
@@ -133,8 +134,8 @@ const seedMessages: SocialMessage[] = [
   { id: 'msg-3', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '11月10日 11:50', kind: 'image', content: '图片示例' },
   { id: 'msg-4', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '11月10日 11:50', kind: 'voice', content: '语音消息', duration: 8 },
   { id: 'msg-5-shared-friend', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '昨天 19:25', kind: 'companion-share', content: '[陪玩名片] 北纬三十度', companionShare: { id: 'companion-002', clubId: 'club-001', name: '北纬三十度', initials: '北纬', gender: '男', age: 27, intro: '熟悉多种地图点位，重视沟通和复盘。' } },
-  { id: 'msg-gift-received', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '昨天 19:25', kind: 'text', content: '晚风 给你赠送了 星光徽章 ×1' },
-  { id: 'msg-gift-sent', senderId: 'player', senderName: '林小满', initials: '满', time: '昨天 19:25', kind: 'text', content: '你向 晚风 赠送了 热烈掌声 ×2' },
+  { id: 'msg-gift-received', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '昨天 19:25', kind: 'gift', content: '星光徽章 ×1', gift: { id: 'gift-01', name: '星光徽章', quantity: 1 } },
+  { id: 'msg-gift-sent', senderId: 'player', senderName: '林小满', initials: '满', time: '昨天 19:25', kind: 'gift', content: '热烈掌声 ×2', gift: { id: 'gift-02', name: '热烈掌声', quantity: 2 } },
   { id: 'msg-6-shared-room', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '16:08', kind: 'room-share', content: '[房间分享] 房间A', roomShare: { roomId: 'room-ranked', channelId: 'channel-main', avatarInitials: '房', name: '房间A', onlineCount: 4 } },
 ]
 
@@ -237,8 +238,9 @@ export const initialRoomMessages: SocialMessage[] = [
   { id: 'room-msg-1', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '20:06', kind: 'text', content: '我先去房间B调一下灵敏度。' },
   { id: 'room-msg-2', senderId: 'player', senderName: '林小满', initials: '满', time: '20:07', kind: 'text', content: '好，等大家齐了就开。' },
   { id: 'room-msg-3', senderId: 'friend-3', senderName: '北岸', initials: '北', time: '20:08', kind: 'text', content: '收到，等我整理一下装备。' },
-  { id: 'room-msg-gift-received', senderId: 'friend-1', senderName: '晚风', initials: '风', time: '20:09', kind: 'text', content: '晚风 给你赠送了 星光徽章 ×1' },
-  { id: 'room-msg-gift-sent', senderId: 'player', senderName: '林小满', initials: '满', time: '20:10', kind: 'text', content: '你向 晚风 赠送了 热烈掌声 ×2' },
+  { id: 'room-msg-gift-others', senderId: 'system', senderName: '系统', initials: '', time: '20:09', kind: 'text', content: '北岸 给 晚风 赠送了 能量补给 ×3', systemNotice: true },
+  { id: 'room-msg-gift-received', senderId: 'system', senderName: '系统', initials: '', time: '20:09', kind: 'text', content: '晚风 给 你 赠送了 星光徽章 ×1', systemNotice: true },
+  { id: 'room-msg-gift-sent', senderId: 'system', senderName: '系统', initials: '', time: '20:10', kind: 'text', content: '你 给 晚风 赠送了 热烈掌声 ×2', systemNotice: true },
 ]
 
 export const initialRoomMessagesByRoom: Record<string, SocialMessage[]> = {
