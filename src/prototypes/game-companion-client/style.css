@@ -2287,3 +2287,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .gift-stage-recipients > .is-shaking { animation:gift-recipient-shake .4s ease-in-out; }
 @keyframes gift-recipient-shake { 0%, 100% { transform:translateX(0); } 25% { transform:translateX(-4px); } 75% { transform:translateX(4px); } }
 @media (prefers-reduced-motion: reduce) { .gift-stage-recipients > .is-shaking { animation:none; } }
+
+.gift-animation { position: absolute; z-index: 200; inset: 40px 0 0 240px; pointer-events: none; }
+.gift-animation__player { position: absolute; top: 50%; left: 50%; height: 100%; max-width: 100%; aspect-ratio: 680 / 1209; transform: translate(-50%, -50%); }
+.gift-animation__player canvas { width: 100%; height: 100%; }

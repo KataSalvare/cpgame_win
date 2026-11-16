@@ -21,6 +21,7 @@ import { HomePage } from './pages/HomePage'
 import { AvatarMark } from './components/AvatarMark'
 import { ProfileQuickPanel } from './components/ProfileQuickPanel'
 import { GiftPanel, type GiftRecipient } from './components/GiftPanel'
+import { GiftAnimation } from './components/GiftAnimation'
 import { ClubSupportChatPanel, ClubSupportSelectionDialog, MessagesPage, VoiceRoomsPage } from './pages/SocialPages'
 import { useSocialLogic } from './hooks/useSocialLogic'
 import { useClientNavigation, type ClientPage } from './useClientNavigation'
@@ -140,6 +141,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(() => props.entryView === 'order-detail' ? new URLSearchParams(window.location.hash.slice(1)).get('order') ?? 'GC-20261029-0001' : null)
   const [selectedPremiumCardId, setSelectedPremiumCardId] = useState<string | null>(null)
   const [premiumCardToast, setPremiumCardToast] = useState<string | null>(null)
+  const [giftAnimation, setGiftAnimation] = useState(0)
   const [giftToast, setGiftToast] = useState(0)
   useEffect(() => { if (!giftToast) return; const timer = window.setTimeout(() => setGiftToast(0), 3000); return () => window.clearTimeout(timer) }, [giftToast])
   const [matchPanelOpen, setMatchPanelOpen] = useState(() => props.entryView === 'quick-match' || props.entryView === 'quick-match-in-progress')
@@ -592,6 +594,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         <label className="window-close-skip"><input type="checkbox" checked={skipWindowClosePromptToday} onChange={(event) => setSkipWindowClosePromptToday(event.target.checked)} /><span>今日不再提示</span></label>
       </DialogPanel>}
       {pendingVoiceRoomEntry && <ConfirmationDialog overlayId="voice-room-entry-confirm" title="切换语音房" message={<>你当前正在 <strong>{clubs.find((club) => club.id === social.activeVoiceRoom?.clubId)?.name ?? navigation.club.name}</strong> 的语音房，切换至 <strong>{pendingVoiceRoomEntry.clubName}</strong> 会<strong>离开当前语音房、断开语音连接</strong>，是否确认切换？</>} confirmLabel="确认" onCancel={() => setPendingVoiceRoomEntry(null)} onConfirm={confirmVoiceRoomEntry} />}
+      {giftAnimation > 0 && <GiftAnimation key={`gift-animation-${giftAnimation}`} onFinished={() => setGiftAnimation(0)} />}
       {giftToast > 0 && <div className="gift-success-toast" role="status">赠送成功！</div>}
       {premiumCardToast && <NotificationToast variant="success" message={premiumCardToast} onDismiss={() => setPremiumCardToast(null)} />}
       {workbench.orderAction && <WorkbenchOrderActionDialog key={`${workbench.orderAction.id}-${workbench.orderAction.action}`} logic={workbench} />}
@@ -651,7 +654,15 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       {navigation.page === 'wallet' && navigation.panel === 'bean-withdraw' && <BeanWithdrawPanel balance={account.availableBeanBalance} onWithdraw={account.withdrawBeans} onClose={navigation.closePanel} />}
       {beanExchangeOpen && <BeanExchangePanel beanBalance={account.availableBeanBalance} onExchange={account.exchangeBeans} onClose={() => { setBeanExchangeOpen(false); if (navigation.page === 'wallet' && navigation.panel === 'bean-exchange') window.location.hash = 'page=wallet' }} />}
       {isRechargeModalOpen && <RechargePage presentation="modal" pageState={pageState} onRetry={() => setPageState('normal')} diamondBalance={account.diamondBalance} coupons={account.coupons} onBack={closeRechargeModal} backLabel={rechargeReturnLabel} onComplete={account.completeRecharge} />}
-      <GiftPanel onSuccess={() => setGiftToast((value) => value + 1)} key={giftPanelKey} open={giftPanelOpen} recipients={giftRecipients} fixedRecipient={fixedGiftRecipient} anchor={giftAnchor} balance={account.diamondBalance} onClose={() => setGiftPanelOpen(false)} onPay={(gift, quantity, recipient, amount) => account.payGift(`${gift.name} × ${quantity}`, recipient.name, amount)} onRecharge={() => { setGiftPanelOpen(false); setRechargeReturnLabel('返回送礼'); setCheckoutRechargeOpen(true) }} />
+      <GiftPanel onSuccess={(gift, quantity, recipient) => {
+        setGiftToast((value) => value + 1)
+        setGiftAnimation((value) => value + 1)
+        if (giftAnchor?.closest('.chat-composer') && social.selectedConversation?.kind === 'direct') {
+          social.sendChatMessage('text', `你向 ${recipient.name} 赠送了 ${gift.name} ×${quantity}`)
+        } else if (giftAnchor?.closest('.room-chat-composer')) {
+          social.sendRoomGiftMessage(`你向 ${recipient.name} 赠送了 ${gift.name} ×${quantity}`)
+        }
+      }} key={giftPanelKey} open={giftPanelOpen} recipients={giftRecipients} fixedRecipient={fixedGiftRecipient} anchor={giftAnchor} balance={account.diamondBalance} onClose={() => setGiftPanelOpen(false)} onPay={(gift, quantity, recipient, amount) => account.payGift(`${gift.name} × ${quantity}`, recipient.name, amount)} onRecharge={() => { setGiftPanelOpen(false); setRechargeReturnLabel('返回送礼'); setCheckoutRechargeOpen(true) }} />
       <WorkbenchNotifications logic={workbench} mode={noticeMode} voiceCallNotifications={voiceCallNotifications} voiceInvitations={social.voiceInvitations} onMarkAllRead={() => setNotificationsRead(true)} onClose={closeClientNotifications} onOpenVoiceCall={openVoiceCallNotification} onIgnoreVoiceCall={() => setVoiceCallNotifications([])} onIgnoreVoiceInvitation={social.ignoreVoiceInvitation} onAcceptVoiceInvitation={acceptRoomInvitation} />
       {voiceCallDialogOpen && voiceCallNotifications.length > 0 && <DialogPanel overlayId="voice-call-notification" title="呼叫通知" onClose={() => setVoiceCallDialogOpen(false)} width={500} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setVoiceCallDialogOpen(false)}>稍后</button><button type="button" className="client-button client-button--primary" onClick={() => enterVoiceCallRoom(selectedVoiceCallId)}>加入房间</button></>}>
         <div className="support-queue-summary"><Headphones size={18} /><strong>{voiceCallNotifications.length} 位好友邀请你加入语音房</strong></div>

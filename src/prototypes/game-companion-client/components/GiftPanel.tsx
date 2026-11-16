@@ -18,7 +18,7 @@ type Props = {
   onClose: () => void
   onPay: (gift: Gift, quantity: number, recipient: GiftRecipient, amount: number) => boolean
   onRecharge: () => void
-  onSuccess: () => void
+  onSuccess: (gift: Gift, quantity: number, recipient: GiftRecipient) => void
 }
 
 export function GiftPanel({ open, recipients, fixedRecipient, anchor, balance, onClose, onPay, onRecharge, onSuccess }: Props) {
@@ -66,7 +66,7 @@ export function GiftPanel({ open, recipients, fixedRecipient, anchor, balance, o
   const closeConfirmation = () => { setConfirming(false); setFeedback('') }
   const pay = () => {
     if (!recipient || !enoughBalance) return
-    if (onPay(gift, quantity, recipient, amount)) { onClose(); onSuccess() }
+    if (onPay(gift, quantity, recipient, amount)) { onClose(); onSuccess(gift, quantity, recipient) }
     else setFeedback('金豆余额已变化，请重新确认。')
   }
 

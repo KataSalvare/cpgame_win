@@ -409,6 +409,10 @@ export function useSocialLogic(initialConversationId?: string) {
     return true
   }
 
+  const sendRoomGiftMessage = (content: string) => {
+    setRoomMessagesByRoom((items) => ({ ...items, [activeVoiceRoomId]: [...(items[activeVoiceRoomId] ?? []), { id: createId('room-message'), senderId: currentSocialUser.id, senderName: currentSocialUser.name, initials: currentSocialUser.initials, time: '现在', kind: 'text', content }] }))
+  }
+
   const recallRoomMessage = (messageId: string) => {
     const messages = roomMessagesByRoom[activeVoiceRoomId] ?? []
     if (!messages.some((message) => message.id === messageId && message.senderId === currentSocialUser.id && !message.recalled)) return false
@@ -785,7 +789,7 @@ export function useSocialLogic(initialConversationId?: string) {
     selectedProfileId, setSelectedProfileId, openConversation, setConversationPinned, markConversationRead, clearConversationMessages, deleteConversation, startDirectMessage, startDirectMessageToUser, startDirectMessageWithCompanion, createGroup, inviteFriendsToGroup, renameGroup, updateGroupAvatar, setGroupAdmin, removeGroupMember, setGroupJoinApproval, setGroupMuted, leaveGroup, dissolveGroup, sendChatMessage, sendChatMessageToConversation, recallChatMessage, sendSupportCard, sendSupportCardToConversation, updateSupportReview, updateSupportReviewInConversation, applyToClubGroup, openClubGroupChat,
     voiceRooms, activeVoiceRoom, activeSubchannel, activeVoiceRoomId, activeSubchannelId, visibleVoiceRooms, nextVoiceChannelName: getNextVoiceChannelName(voiceRooms),
     roomMessages, voiceInvitations, totalUnread, isMicOn, isSelfMuted, isInVoice,
-    setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, recallRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,
+    setActiveSubchannelId: switchSubchannel, selectVoiceRoom, selectVoiceSubchannel, sendRoomMessage, sendRoomGiftMessage, recallRoomMessage, moveMember, moveVoiceMember, moveMembers, setDraggedMemberId, draggedMemberId,
     joinVoice, leaveVoice, disconnectVoiceAndSelectSubchannel, toggleMic, setVoiceMemberMic, toggleSelfMute, createVoiceRoom, renameVoiceRoom, updateVoiceRoom, moveVoiceRoom, setDefaultVoiceSubchannel, moveVoiceSubchannel, deleteVoiceRoom, createSubchannel,
     deleteSubchannel, removeVoiceMember, setVoiceMemberMuted, blockVoiceMember, setVoiceMemberRole, inviteFriendsToRoom,
     updateSubchannel,
