@@ -577,7 +577,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
         onClose={() => { setSelectedOrderId(null); window.location.hash = 'page=orders' }}
         className="game-order-drawer game-order-drawer--client"
         width="100%"
-      ><OrderDetailPanel key={selectedOrder.id} order={selectedOrder} companion={companions.find((item) => item.id === selectedOrder.companionId)} diamondBalance={account.diamondBalance} onContact={() => { setChatCompanionId(selectedOrder.companionId); setChatConversationOverride(null); social.startDirectMessageWithCompanion(selectedOrder.companionId); setCompanionChatOpen(true) }} onOpenRecharge={() => { setRechargeReturnLabel('返回订单'); setCheckoutRechargeOpen(true) }} onRequestEarlyEnd={account.requestEarlyEnd} onRenewOrder={account.renewOrder} onReorder={() => {
+      ><OrderDetailPanel onOpenSupport={() => setClubSupportSelectionOpen(true)} onSaveReview={account.saveOrderReview} key={selectedOrder.id} order={selectedOrder} companion={companions.find((item) => item.id === selectedOrder.companionId)} diamondBalance={account.diamondBalance} onContact={() => { setChatCompanionId(selectedOrder.companionId); setChatConversationOverride(null); social.startDirectMessageWithCompanion(selectedOrder.companionId); setCompanionChatOpen(true) }} onOpenRecharge={() => { setRechargeReturnLabel('返回订单'); setCheckoutRechargeOpen(true) }} onRequestEarlyEnd={account.requestEarlyEnd} onRenewOrder={account.renewOrder} onReorder={() => {
         const services = servicesByCompanion[selectedOrder.companionId] ?? []
         const matchingService = services.find((service) => service.playName === selectedOrder.serviceName && account.getGameName(service.gameId) === selectedOrder.gameName)
           ?? services.find((service) => service.playName === selectedOrder.serviceName)
@@ -743,7 +743,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onTopUp={account.rechargePremiumCard}
       onOpenDetails={setSelectedPremiumCardId}
       onNotify={setPremiumCardToast}
-    /> : rechargeBackdropPage === 'orders' ? <OrdersPage
+    /> : rechargeBackdropPage === 'orders' ? <OrdersPage onOpenSupport={() => setClubSupportSelectionOpen(true)} onSaveReview={account.saveOrderReview}
       pageState={pageState}
       initialTab={props.entryView === 'orders-receiving' || props.entryView === 'receiving-order-detail' ? '我的接单' : props.entryView === 'orders-exam-candidate' ? '考生订单' : props.entryView === 'orders-exam-proctor' ? '考官订单' : '我的下单'}
       onTabChange={(tab) => { const value = tab === '我的接单' ? 'receiving' : tab === '考生订单' ? 'exam-candidate' : tab === '考官订单' ? 'exam-proctor' : ''; window.location.hash = value ? `page=orders&orderTab=${value}` : 'page=orders' }}

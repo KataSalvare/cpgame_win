@@ -46,6 +46,8 @@ export type OrderTimeSegment = {
   amount?: number | null
 }
 
+export type OrderReview = Record<'companion' | 'club', { rating: number; content: string; images: { id: string; url: string }[]; submitted: boolean }>
+
 export type ClientOrder = {
   id: string
   companionId: string
@@ -64,6 +66,7 @@ export type ClientOrder = {
   premiumCardId?: string
   remark: string
   status: OrderStatus
+  review?: OrderReview
   earlyEndPending?: boolean
   earlyEndCompletedQuantity?: number
   earlyEndRefundAmount?: number

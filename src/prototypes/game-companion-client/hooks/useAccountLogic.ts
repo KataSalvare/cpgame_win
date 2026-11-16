@@ -12,6 +12,8 @@ import {
 } from '../data/accountMockData'
 import { initialCoupons, initialOwnedPremiumCardIds, initialPremiumCardBalances, initialPremiumCardTransactions, premiumCards, type PremiumCardTransaction } from '../data/storeMockData'
 
+const orderReviewsSessionKey = 'game-companion-client-order-reviews'
+
 const diamondBalanceSessionKey = 'game-companion-client-diamond-balance'
 
 function readDiamondBalance() {
@@ -27,7 +29,12 @@ export function useAccountLogic() {
   const [diamondBalance, setDiamondBalance] = useState(readDiamondBalance)
   const [beanBalance, setBeanBalance] = useState(initialBeanBalance)
   const availableBeanBalance = beanBalance - initialPendingBeanSettlementBalance
-  const [orders, setOrders] = useState(initialOrders)
+  const [orders, setOrders] = useState(() => {
+    try {
+      const reviews = JSON.parse(window.sessionStorage.getItem(orderReviewsSessionKey) ?? '{}') as Record<string, ClientOrder['review']>
+      return initialOrders.map(order => reviews[order.id] ? { ...order, review: reviews[order.id] } : order)
+    } catch { return initialOrders }
+  })
   const [diamondTransactions, setDiamondTransactions] = useState<WalletTransaction[]>(walletEntries.diamonds)
   const [beanTransactions, setBeanTransactions] = useState<WalletTransaction[]>(walletEntries.beans)
   const [coupons, setCoupons] = useState(initialCoupons)
@@ -190,6 +197,13 @@ export function useAccountLogic() {
     renewOrder,
     purchasePremiumCard,
     rechargePremiumCard,
+    saveOrderReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => {
+      setOrders(current => current.map(order => order.id === orderId ? { ...order, review } : order))
+      try {
+        const reviews = JSON.parse(window.sessionStorage.getItem(orderReviewsSessionKey) ?? '{}') as Record<string, ClientOrder['review']>
+        window.sessionStorage.setItem(orderReviewsSessionKey, JSON.stringify({ ...reviews, [orderId]: review }))
+      } catch { /* 当前页面内仍可查看评价 */ }
+    },
     updateOrderStatus,
     payPendingOrder,
   }

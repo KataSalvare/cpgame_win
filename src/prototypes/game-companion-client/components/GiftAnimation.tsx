@@ -28,5 +28,16 @@ export function GiftAnimation({ onFinished }: { onFinished: () => void }) {
     return () => { active = false; player.stopAnimation() }
   }, [])
 
-  return <div className="gift-animation" aria-hidden="true"><div ref={containerRef} className="gift-animation__player" /></div>
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); finish() }
+    }
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [])
+
+  return <div className="gift-animation" onClick={onFinished} role="presentation">
+    <div ref={containerRef} className="gift-animation__player" aria-hidden="true" />
+    <button type="button" className="gift-animation__skip" onClick={(event) => { event.stopPropagation(); onFinished() }}>跳过</button>
+  </div>
 }

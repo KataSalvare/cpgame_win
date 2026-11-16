@@ -277,6 +277,18 @@
       "route": ""
     },
     {
+      "id": "anno-1794800104536-interaction",
+      "pagePath": "/game-companion-messages",
+      "number": 9,
+      "title": "",
+      "content": "礼物播放，支持点”跳过“，点击任意位置，键盘ESC跳过",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.messages-page > div.messages-layout > section.chat-panel > div.chat-composer:nth-of-type(2) > div.chat-composer__toolbar > div.chat-composer__tools > button.windows-icon-button:nth-of-type(4)",
+      "position": "top-left",
+      "createdAt": 1794800104536,
+      "route": "page=messages&club=club-001"
+    },
+    {
       "id": "anno-1793844430486-interaction",
       "pagePath": "/game-companion-quick-match",
       "number": 1,

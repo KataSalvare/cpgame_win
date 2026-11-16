@@ -243,6 +243,8 @@ type OrdersPageProps = StateProps & {
   onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void
   onRenewOrder: (orderId: string, quantity: number) => boolean
   onOpenRecharge: () => void
+  onOpenSupport: () => void
+  onSaveReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => void
   workbench: WorkbenchLogic
   examCandidateOrders: ExamOrder[]
   examProctorOrders: ExamOrder[]
@@ -254,7 +256,7 @@ type OrdersPageProps = StateProps & {
 }
 const orderStatuses: OrderStatus[] = ['待接单', '待服务', '服务中', '暂停中', '待用户确认', '已完成', '已取消']
 
-export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单', onTabChange, orders, selectedOrderId, diamondBalance, onSelectOrder, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onOpenRecharge, workbench, examCandidateOrders, examProctorOrders, selectedExamOrderId, onSelectExamOrder, onCancelExamOrder, onSubmitExamMaterials, onPayExamOrder }: OrdersPageProps) {
+export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单', onTabChange, orders, selectedOrderId, diamondBalance, onSelectOrder, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onOpenRecharge, onOpenSupport, onSaveReview, workbench, examCandidateOrders, examProctorOrders, selectedExamOrderId, onSelectExamOrder, onCancelExamOrder, onSubmitExamMaterials, onPayExamOrder }: OrdersPageProps) {
   const [filter, setFilter] = useState<'全部' | OrderStatus>('全部')
   const [searchByTab, setSearchByTab] = useState<Record<'我的下单' | '考生订单' | '考官订单', string>>({ 我的下单: '', 考生订单: '', 考官订单: '' })
   const [workbenchFilter, setWorkbenchFilter] = useState('全部')
@@ -294,7 +296,7 @@ export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单
       </div>
       {filteredOrders.length === 0 ? <div className="account-empty-inline"><History size={22} /><strong>没有符合条件的订单</strong><button type="button" className="client-button client-button--secondary" onClick={() => { setFilter('全部'); onSelectOrder(null) }}>查看全部订单</button></div> : <div className="orders-list" role="group" aria-label="订单列表">
         <div className="order-list-header"><span>订单号</span><span>陪玩信息</span><span>服务信息</span><span>时长</span><span className="order-price-columns"><span>成单价</span><span>实付</span></span><span>状态 / 快捷操作</span></div>
-        {filteredOrders.map((order) => <OrderCard order={order} key={order.id} selected={selectedOrderId === order.id} diamondBalance={diamondBalance} onSelect={() => onSelectOrder(order.id)} onReorder={() => onReorder(order)} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} onOpenRecharge={onOpenRecharge} />)}
+        {filteredOrders.map((order) => <OrderCard order={order} key={order.id} selected={selectedOrderId === order.id} diamondBalance={diamondBalance} onSelect={() => onSelectOrder(order.id)} onReorder={() => onReorder(order)} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} onOpenRecharge={onOpenRecharge} onOpenSupport={onOpenSupport} onSaveReview={onSaveReview} />)}
       </div>}
     </section>
     }
@@ -511,15 +513,16 @@ function TransactionList({ entries }: { entries: readonly WalletTransaction[] })
   </article>)}</div>
 }
 
-function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onOpenRecharge }: { order: ClientOrder; selected: boolean; diamondBalance: number; onSelect: () => void; onReorder: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean; onOpenRecharge: () => void }) {
+function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onOpenRecharge, onOpenSupport, onSaveReview }: { order: ClientOrder; selected: boolean; diamondBalance: number; onSelect: () => void; onReorder: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean; onOpenRecharge: () => void; onOpenSupport: () => void; onSaveReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => void }) {
   const [activeAction, setActiveAction] = useState<string | null>(null)
   const displayedStatus = order.earlyEndPending ? '待陪玩确认' : order.status === '待用户确认' ? '待确认' : order.status
   const quickActions = order.earlyEndPending ? []
     : order.status === '待支付' ? ['支付', '取消订单']
-    : order.status === '待用户确认' ? ['完成订单']
-    : order.status === '待接单' || order.status === '待服务' || order.status === '暂停中' ? ['提前结束']
+    : order.status === '待用户确认' ? ['联系客服', '完成订单']
+    : order.status === '待接单' || order.status === '待服务' ? ['取消订单']
+    : order.status === '暂停中' ? ['提前结束']
     : order.status === '服务中' && !order.earlyEndPending ? ['确认完成', '续单', '提前结束']
-    : order.status === '已完成' ? ['再次下单', '评价']
+    : order.status === '已完成' ? ['联系客服', '再次下单', order.review ? '查看评价' : '评价']
     : []
   return <article className={`order-item${selected ? ' is-selected' : ''}`}>
     <button type="button" className="order-item__main" aria-pressed={selected} aria-label={`查看订单 ${order.id}，${order.companionName}，所属俱乐部 ${getOrderClubName(order)}，${order.gameName} ${order.serviceName}，${order.duration} ${order.durationUnit}，${order.amount.toLocaleString()} 金豆，${displayedStatus}`} onClick={onSelect}>
@@ -530,18 +533,18 @@ function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpd
       <span className="order-item__price order-price-columns"><strong>{order.unitPrice.toLocaleString()} 金豆 / {order.durationUnit}</strong><strong>{order.amount.toLocaleString()} 金豆</strong></span>
       <span className={`order-item__status order-item__status--${order.status === '已取消' ? 'cancelled' : order.status === '已完成' ? 'completed' : 'active'}`}>{displayedStatus}</span>
     </button>
-    <div className={`order-item__actions${order.status === '服务中' ? ' order-item__actions--service' : ''}`} role="group" aria-label={`订单 ${order.id} 快捷操作`}>{quickActions.map((action) => <button type="button" key={action} className={`client-button ${action === '确认完成' || action === '支付' ? 'client-button--primary' : 'client-button--secondary'}`} onClick={() => action === '再次下单' ? onReorder() : setActiveAction(action)}>{action}</button>)}</div>
-    {activeAction && <OrderActionDialog order={order} action={activeAction} clubName={getOrderClubName(order)} diamondBalance={diamondBalance} onClose={() => setActiveAction(null)} onOpenRecharge={() => { setActiveAction(null); onOpenRecharge() }} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} />}
+    <div className={`order-item__actions${order.status === '服务中' ? ' order-item__actions--service' : ''}`} role="group" aria-label={`订单 ${order.id} 快捷操作`}>{quickActions.map((action) => <button type="button" key={action} className={`client-button ${action === '确认完成' || action === '支付' ? 'client-button--primary' : 'client-button--secondary'}`} onClick={() => action === '再次下单' ? onReorder() : action === '联系客服' ? onOpenSupport() : setActiveAction(action)}>{action}</button>)}</div>
+    {activeAction && <OrderActionDialog order={order} action={activeAction} clubName={getOrderClubName(order)} diamondBalance={diamondBalance} onClose={() => setActiveAction(null)} onOpenRecharge={() => { setActiveAction(null); onOpenRecharge() }} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} onSaveReview={onSaveReview} />}
   </article>
 }
 
 const orderActions: Record<OrderStatus, string[]> = {
   '待支付': ['支付', '取消订单'],
-  '待接单': ['提前结束'],
-  '待服务': ['提前结束'],
+  '待接单': ['取消订单'],
+  '待服务': ['取消订单'],
   '服务中': ['确认完成', '提前结束', '续单'],
   '暂停中': ['提前结束'],
-  '待用户确认': ['完成订单'],
+  '待用户确认': ['联系客服', '完成订单'],
   '已完成': ['联系客服', '再次下单', '评价'],
   '已取消': [],
 }
@@ -551,7 +554,9 @@ function getOrderClubName(order: ClientOrder) {
   return clubs.find((club) => club.id === companion?.clubId)?.name ?? '所属俱乐部'
 }
 
-function orderActionMessage(action: string) {
+function orderActionMessage(action: string, status: OrderStatus) {
+  if (action === '取消订单' && status === '待接单') return '等待陪玩接单中，确认要取消这笔订单吗？'
+  if (action === '取消订单' && status === '待服务') return '建议您先和陪玩沟通取消原因，取消后平台将自动为您全额退款。'
   if (action === '取消订单') return '确认取消这笔订单吗？未开始服务的订单将为您全额退款。'
   if (action === '确认完成' || action === '完成订单') return '请确认陪玩服务是否完成？'
   if (action === '暂停') return '确认暂停本次服务吗？确认后会记录本次服务的时长。暂停后您可以联系陪玩继续开启服务。'
@@ -609,8 +614,8 @@ function useOrderDialogFocus(onClose: () => void) {
   return dialogRef
 }
 
-function OrderActionDialog({ order, action, clubName, diamondBalance, onClose, onOpenRecharge, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder }: { order: ClientOrder; action: string; clubName: string; diamondBalance: number; onClose: () => void; onOpenRecharge: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean }) {
-  if (action === '评价') return <OrderReviewDialog order={order} clubName={clubName} onClose={onClose} />
+function OrderActionDialog({ order, action, clubName, diamondBalance, onClose, onOpenRecharge, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onSaveReview }: { order: ClientOrder; action: string; clubName: string; diamondBalance: number; onClose: () => void; onOpenRecharge: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean; onSaveReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => void }) {
+  if (action === '评价' || action === '查看评价') return <OrderReviewDialog order={order} clubName={clubName} onClose={onClose} onSaveReview={onSaveReview} />
   if (action === '续单') return <OrderRenewDialog order={order} diamondBalance={diamondBalance} onClose={onClose} onOpenRecharge={onOpenRecharge} onRenewOrder={onRenewOrder} />
   if (action === '支付') return <OrderPaymentConfirmationDialog order={order} onClose={onClose} onPayPendingOrder={onPayPendingOrder} />
   return <OrderActionConfirmationDialog order={order} action={action} onClose={onClose} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} />
@@ -637,7 +642,7 @@ function OrderActionConfirmationDialog({ order, action, onClose, onUpdateStatus,
   return <div className="order-action-overlay" data-overlay="order-action-confirmation" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
     <section ref={dialogRef} className={`order-action-dialog${action === '提前结束' ? ' order-action-dialog--early-end' : ''}`} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-action-title">
       <header><h2 id="order-action-title">{action}</h2><button type="button" className="order-action-dialog__close" aria-label="关闭提示" onClick={onClose}><X size={17} /></button></header>
-      <p>{action === '支付' ? `确认支付${order.amount.toLocaleString()}金豆嘛？` : action === '提前结束' ? order.durationUnit === '局' ? '确认提前结束吗？陪玩同意后，系统将按实际完成局数自动结算。' : '确认提前结束吗？陪玩同意后，系统将按实际服务时长自动结算。' : orderActionMessage(action)}</p>
+      <p>{action === '支付' ? `确认支付${order.amount.toLocaleString()}金豆嘛？` : action === '提前结束' ? order.durationUnit === '局' ? '确认提前结束吗？陪玩同意后，系统将按实际完成局数自动结算。' : '确认提前结束吗？陪玩同意后，系统将按实际服务时长自动结算。' : orderActionMessage(action, order.status)}</p>
       {action === '提前结束' && order.durationUnit === '局' && <div className="workbench-waiver-field order-early-end-quantity"><span>已完成局数</span><div className="checkout-duration__controls order-early-end-quantity__controls"><button type="button" className="checkout-duration__stepper" aria-label="减少 0.5 局" disabled={completedQuantity === '' || !Number.isFinite(completedQuantityValue) || completedQuantityValue <= 0.5} onClick={() => adjustCompletedQuantity(-0.5)}><span aria-hidden="true">−</span></button><label><input className="order-early-end-quantity__input" type="number" min="0.5" max={order.duration} step="0.5" value={completedQuantity} onChange={event => setCompletedQuantity(event.target.value)} aria-label="已完成局数" aria-invalid={completedQuantity !== '' && !validCompletedQuantity} /><span>局</span></label><button type="button" className="checkout-duration__stepper" aria-label="增加 0.5 局" disabled={Number.isFinite(completedQuantityValue) && completedQuantityValue >= order.duration} onClick={() => adjustCompletedQuantity(0.5)}><span aria-hidden="true">+</span></button></div><small>请输入 0.5 局的倍数，最多 {order.duration} 局</small></div>}
       {action === '提前结束' && order.durationUnit === '小时' && <div className="order-early-end-summary"><span>已服务时长</span><strong>{formatServedClock(order.servedDurationMinutes)}</strong><p>当前订单已服务时长，将退还 <b>{order.earlyEndRefundAmount ?? 50}</b> 金豆</p></div>}
       <footer>{needsConfirmation ? <><button type="button" className="client-button client-button--secondary" onClick={onClose}>{action === '提前结束' ? '取消' : '返回'}</button><button type="button" className="client-button client-button--primary" disabled={action === '提前结束' && !validCompletedQuantity} onClick={() => { if (action === '支付') { if (!onPayPendingOrder(order.id)) return } else if (action === '提前结束') onRequestEarlyEnd(order.id, order.durationUnit === '局' ? completedQuantityValue : undefined); else onUpdateStatus(order.id, action === '取消订单' ? '已取消' : '已完成'); onClose() }}>{action === '支付' ? '确认支付' : action === '取消订单' ? '确认取消' : action === '提前结束' ? '确认' : '确认完成'}</button></> : <button type="button" className="client-button client-button--primary" onClick={onClose}>知道了</button>}</footer>
@@ -702,14 +707,12 @@ function formatServedClock(minutes = 0) {
   return [hours, remainingMinutes, 0].map((value) => String(value).padStart(2, '0')).join(':')
 }
 
-function OrderReviewDialog({ order, clubName, onClose }: { order: ClientOrder; clubName: string; onClose: () => void }) {
+function OrderReviewDialog({ order, clubName, onClose, onSaveReview }: { order: ClientOrder; clubName: string; onClose: () => void; onSaveReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => void }) {
   const dialogRef = useOrderDialogFocus(onClose)
-  const [drafts, setDrafts] = useState<Record<ReviewTarget, ReviewDraft>>({ companion: emptyReviewDraft(), club: emptyReviewDraft() })
-  const previewUrls = useRef<string[]>([])
+  const [drafts, setDrafts] = useState<Record<ReviewTarget, ReviewDraft>>(order.review ?? { companion: emptyReviewDraft(), club: emptyReviewDraft() })
   const companion = companions.find((item) => item.id === order.companionId)
   const club = clubs.find((item) => item.id === companion?.clubId)
 
-  useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), [])
   useEffect(() => {
     if (drafts.companion.submitted && drafts.club.submitted) dialogRef.current?.querySelector<HTMLElement>('footer button:not(:disabled)')?.focus()
   }, [dialogRef, drafts.companion.submitted, drafts.club.submitted])
@@ -718,22 +721,19 @@ function OrderReviewDialog({ order, clubName, onClose }: { order: ClientOrder; c
     ...current,
     [target]: { ...current[target], ...update },
   }))
-  const addImages = (target: ReviewTarget, event: React.ChangeEvent<HTMLInputElement>) => {
+  const addImages = async (target: ReviewTarget, event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.currentTarget
-    const selectedFiles = Array.from(input.files ?? []).filter((file) => file.type.startsWith('image/'))
+    const files = Array.from(input.files ?? []).filter(file => file.type.startsWith('image/'))
     input.value = ''
-    const addedImages = selectedFiles.map((file, index) => {
-      const url = URL.createObjectURL(file)
-      previewUrls.current.push(url)
-      return { id: `${Date.now()}-${index}-${file.name}`, url }
-    })
-    if (addedImages.length) updateDraft(target, { images: [...drafts[target].images, ...addedImages] })
+    const images = await Promise.all(files.map((file, index) => new Promise<ReviewImage>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve({ id: `${Date.now()}-${index}-${file.name}`, url: String(reader.result) })
+      reader.onerror = () => reject(reader.error)
+      reader.readAsDataURL(file)
+    })))
+    setDrafts(current => ({ ...current, [target]: { ...current[target], images: [...current[target].images, ...images] } }))
   }
-  const removeImage = (target: ReviewTarget, image: ReviewImage) => {
-    URL.revokeObjectURL(image.url)
-    previewUrls.current = previewUrls.current.filter((url) => url !== image.url)
-    updateDraft(target, { images: drafts[target].images.filter((item) => item.id !== image.id) })
-  }
+  const removeImage = (target: ReviewTarget, image: ReviewImage) => updateDraft(target, { images: drafts[target].images.filter(item => item.id !== image.id) })
   const submitted = drafts.companion.submitted && drafts.club.submitted
   const canSubmit = (['companion', 'club'] as const).every((target) => drafts[target].rating > 0 && drafts[target].content.trim().length > 0)
   const reviewTargets: { id: ReviewTarget; label: string; name: string; initials: string; identityId: string }[] = [
@@ -741,28 +741,28 @@ function OrderReviewDialog({ order, clubName, onClose }: { order: ClientOrder; c
     { id: 'club', label: '俱乐部', name: club?.name ?? clubName, initials: club?.initials ?? clubName.slice(0, 2), identityId: '' },
   ]
 
-  const renderReviewImages = (target: ReviewTarget) => <div className="order-review-images"><span>评价图片</span><div className="order-review-image-list">{drafts[target].images.map((image, index) => <div className="order-review-image" key={image.id}><img src={image.url} alt={`待提交图片 ${index + 1}`} /><button type="button" aria-label={`移除图片 ${index + 1}`} onClick={() => removeImage(target, image)}><X size={14} /></button></div>)}<label className="order-review-upload"><input type="file" accept="image/*" multiple aria-label={`选择${reviewTargets.find((item) => item.id === target)?.label}评价图片`} onChange={(event) => addImages(target, event)} /><ImagePlus size={20} /><span>添加图片</span></label></div></div>
+  const renderReviewImages = (target: ReviewTarget) => <div className="order-review-images"><span>评价图片</span><div className="order-review-image-list">{drafts[target].images.map((image, index) => <div className="order-review-image" key={image.id}><img src={image.url} alt={`待提交图片 ${index + 1}`} /><button type="button" aria-label={`移除图片 ${index + 1}`} onClick={() => removeImage(target, image)} hidden={submitted}><X size={14} /></button></div>)}{!submitted && <label className="order-review-upload"><input type="file" accept="image/*" multiple aria-label={`选择${reviewTargets.find((item) => item.id === target)?.label}评价图片`} onChange={(event) => addImages(target, event)} /><ImagePlus size={20} /><span>添加图片</span></label>}</div></div>
 
   return <div className="order-action-overlay" data-overlay="order-review" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
     <section ref={dialogRef} className="order-action-dialog order-review-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-review-title">
       <header><h2 id="order-review-title">服务评价</h2><button type="button" className="order-action-dialog__close" aria-label="关闭服务评价" onClick={onClose}><X size={17} /></button></header>
-      {submitted ? <div className="order-review-submitted" role="status"><CheckCircle2 size={22} /><strong>服务评价已提交</strong><span>本次仅作原型演示，评价内容和图片未保存。</span></div> : <div className="order-review-form">
+      <div className="order-review-form">
         {reviewTargets.map(({ id, label, name, initials, identityId }) => {
           const draft = drafts[id]
           return <section className="order-review-section" key={id} aria-label={`${label}评价`}>
             <div className="order-review-subject">{id === 'companion' ? <AvatarMark initials={initials} size="md" /> : <AvatarMark initials={initials} size="md" />}<div><strong>{id === 'companion' ? <UserNameWithLevel name={name} identityId={identityId} /> : name}</strong>{id === 'companion' && companion && <span className="order-review-demographic" aria-label={`性别${companion.gender}，${companion.age}岁`}>{companion.gender === '女' ? <Venus size={13} aria-hidden="true" /> : <Mars size={13} aria-hidden="true" />}{companion.age}</span>}</div></div>
-            <fieldset className="order-review-rating" aria-required="true"><legend>{label}评分</legend><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`${label}${score}分`} aria-pressed={draft.rating === score} className={draft.rating >= score ? 'is-selected' : ''} onClick={() => updateDraft(id, { rating: score })}><Star size={22} fill={draft.rating >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{draft.rating ? `${draft.rating} 分` : '请选择分数'}</span></fieldset>
-            <label className="order-review-content"><span>{label}评价内容</span><span className="order-review-textarea-wrap"><textarea maxLength={100} value={draft.content} onChange={(event) => updateDraft(id, { content: event.target.value })} placeholder={`分享你对${label}服务的感受`} rows={3} /><small aria-live="polite">{Array.from(draft.content).length}/100</small></span></label>
+            <fieldset className="order-review-rating" aria-required="true"><legend>{label}评分</legend><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`${label}${score}分`} aria-pressed={draft.rating === score} className={draft.rating >= score ? 'is-selected' : ''} disabled={submitted} onClick={() => updateDraft(id, { rating: score })}><Star size={22} fill={draft.rating >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{draft.rating ? `${draft.rating} 分` : '请选择分数'}</span></fieldset>
+            <label className="order-review-content"><span>{label}评价内容</span><span className="order-review-textarea-wrap"><textarea readOnly={submitted} maxLength={100} value={draft.content} onChange={(event) => updateDraft(id, { content: event.target.value })} placeholder={`分享你对${label}服务的感受`} rows={3} /><small aria-live="polite">{Array.from(draft.content).length}/100</small></span></label>
             {renderReviewImages(id)}
           </section>
         })}
-      </div>}
-      <footer>{submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!canSubmit} onClick={() => setDrafts((current) => ({ companion: { ...current.companion, submitted: true }, club: { ...current.club, submitted: true } }))}>提交</button></>}</footer>
+      </div>
+      <footer>{submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!canSubmit} onClick={() => { const review = { companion: { ...drafts.companion, submitted: true }, club: { ...drafts.club, submitted: true } }; onSaveReview(order.id, review); setDrafts(review) }}>提交</button></>}</footer>
     </section>
   </div>
 }
 
-export function OrderDetailPanel({ order, companion, diamondBalance, onContact, onReorder, onOpenRecharge, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder }: { order: ClientOrder; companion: Companion | undefined; diamondBalance: number; onContact: () => void; onReorder: () => void; onOpenRecharge: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean }) {
+export function OrderDetailPanel({ order, companion, diamondBalance, onContact, onReorder, onOpenRecharge, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onOpenSupport, onSaveReview }: { order: ClientOrder; companion: Companion | undefined; diamondBalance: number; onContact: () => void; onReorder: () => void; onOpenRecharge: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean; onOpenSupport: () => void; onSaveReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => void }) {
   const [activeAction, setActiveAction] = useState<string | null>(null)
   const countdownDuration = order.status === '待支付' ? 5 * 60 : order.status === '待用户确认' ? 24 * 60 * 60 : null
   const [remainingSeconds, setRemainingSeconds] = useState(countdownDuration ?? 0)
@@ -800,10 +800,10 @@ export function OrderDetailPanel({ order, companion, diamondBalance, onContact, 
     </div>
 
     <div className="order-detail-actions" aria-label="订单操作">
-      {!order.earlyEndPending && orderActions[order.status].map((action) => <button type="button" key={action} className={`client-button ${action === '再次下单' || action === '取消订单' || action === '提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => action === '再次下单' ? onReorder() : setActiveAction(action)}>{action}</button>)}
+      {!order.earlyEndPending && orderActions[order.status].map((item) => { const action = item === '评价' && order.review ? '查看评价' : item; return <button type="button" key={action} className={`client-button ${action === '再次下单' || action === '取消订单' || action === '提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => action === '再次下单' ? onReorder() : action === '联系客服' ? onOpenSupport() : setActiveAction(action)}>{action}</button> })}
     </div>
 
-    {activeAction && <OrderActionDialog order={order} action={activeAction} clubName={getOrderClubName(order)} diamondBalance={diamondBalance} onClose={() => setActiveAction(null)} onOpenRecharge={() => { setActiveAction(null); onOpenRecharge() }} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} />}
+    {activeAction && <OrderActionDialog order={order} action={activeAction} clubName={getOrderClubName(order)} diamondBalance={diamondBalance} onClose={() => setActiveAction(null)} onOpenRecharge={() => { setActiveAction(null); onOpenRecharge() }} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} onSaveReview={onSaveReview} />}
   </div>
 }
 
