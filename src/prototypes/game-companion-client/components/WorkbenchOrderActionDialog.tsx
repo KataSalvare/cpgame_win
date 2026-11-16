@@ -74,7 +74,7 @@ export function WorkbenchOrderActionDialog({ logic: w }: { logic: WorkbenchLogic
           return
         }
         if (action.action === '继续服务') {
-          if (order.status === '暂停中') w.resumeOrder(order.id)
+          if (order.status === '已暂停') w.resumeOrder(order.id)
           w.setOrderAction(null)
           return
         }

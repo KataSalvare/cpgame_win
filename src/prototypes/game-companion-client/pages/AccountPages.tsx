@@ -254,7 +254,7 @@ type OrdersPageProps = StateProps & {
   onSubmitExamMaterials: (orderId: string, submission: ExamSubmission) => void
   onPayExamOrder: (order: ExamOrder) => void
 }
-const orderStatuses: OrderStatus[] = ['待接单', '待服务', '服务中', '暂停中', '待用户确认', '已完成', '已取消']
+const orderStatuses: OrderStatus[] = ['待接单', '待服务', '服务中', '已暂停', '待用户确认', '已完成', '已取消']
 
 export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单', onTabChange, orders, selectedOrderId, diamondBalance, onSelectOrder, onReorder, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onOpenRecharge, onOpenSupport, onSaveReview, workbench, examCandidateOrders, examProctorOrders, selectedExamOrderId, onSelectExamOrder, onCancelExamOrder, onSubmitExamMaterials, onPayExamOrder }: OrdersPageProps) {
   const [filter, setFilter] = useState<'全部' | OrderStatus>('全部')
@@ -520,7 +520,7 @@ function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpd
     : order.status === '待支付' ? ['支付', '取消订单']
     : order.status === '待用户确认' ? ['联系客服', '完成订单']
     : order.status === '待接单' || order.status === '待服务' ? ['取消订单']
-    : order.status === '暂停中' ? ['提前结束']
+    : order.status === '已暂停' ? ['提前结束']
     : order.status === '服务中' && !order.earlyEndPending ? ['确认完成', '续单', '提前结束']
     : order.status === '已完成' ? ['联系客服', '再次下单', order.review ? '查看评价' : '评价']
     : []
@@ -543,7 +543,7 @@ const orderActions: Record<OrderStatus, string[]> = {
   '待接单': ['取消订单'],
   '待服务': ['取消订单'],
   '服务中': ['确认完成', '提前结束', '续单'],
-  '暂停中': ['提前结束'],
+  '已暂停': ['提前结束'],
   '待用户确认': ['联系客服', '完成订单'],
   '已完成': ['联系客服', '再次下单', '评价'],
   '已取消': [],

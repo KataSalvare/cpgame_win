@@ -1430,10 +1430,10 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .wallet-coupon--inactive { background: var(--prototype-surface-muted, #f9fafb); color: var(--prototype-text-muted, #6b7280); }
 .wallet-coupon--inactive .wallet-coupon__value { color: var(--prototype-text-muted, #6b7280); }
 .premium-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.premium-card { overflow: hidden; }
-.premium-card__cover { display: block; width: 100%; height: 142px; object-fit: cover; border-bottom: 1px solid var(--client-border); }
-.premium-card__body { display: grid; gap: 12px; padding: 17px; }
+.premium-card { overflow: hidden; background: #f1f2f4 url("./assets/premium-card-cover.svg") center / cover no-repeat; }
+.premium-card__body { display: grid; gap: 12px; min-height: 190px; padding: 25px 17px 17px; }
 .premium-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.premium-card__heading .client-status { background: #f1f2f4; color: #4b5563; }
 .premium-card__heading h2 { margin: 4px 0 0; font-size: 16px; font-weight: 600; }
 .premium-card__discount { width: fit-content; margin: -4px 0 0; border: 1px solid var(--client-border); border-radius: 4px; padding: 4px 8px; color: var(--prototype-text-secondary, #4b5563); font-size: 11px; }
 .premium-card__price, .premium-card__balance { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; }
@@ -1442,7 +1442,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .premium-card__price small { color: var(--client-muted); font-size: 11px; font-weight: 400; }
 .premium-card__balance strong { font-size: 11px; font-weight: 600; }
 .premium-card__shortage { margin: -4px 0 0; color: var(--prototype-text-secondary, #4b5563); font-size: 11px; }
-.premium-card__actions { display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--prototype-canvas, #f3f4f6); padding-top: 12px; }
+.premium-card__actions { display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid rgba(107, 114, 128, .2); padding-top: 12px; }
 .premium-card__actions .client-button:disabled { color: var(--prototype-text-muted, #6b7280); cursor: not-allowed; }
 .premium-empty { min-height: 220px; }
 .store-overlay { position: absolute; z-index: 50; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17, 24, 39, .42); }
@@ -1522,8 +1522,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .game-companion-drawer .store-page:not(.premium-card-detail-page) > .client-back-link { display: none; }
 .game-companion-drawer .store-page > .client-page-heading { align-items: flex-start; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 .game-companion-drawer .premium-card-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-.game-companion-drawer .premium-card__cover { height: 112px; }
-.game-companion-drawer .premium-card__body { padding: 13px; }
+.game-companion-drawer .premium-card__body { padding: 25px 13px 13px; }
 .game-companion-drawer .premium-card__heading { gap: 8px; }
 .game-companion-drawer .premium-card__actions .client-button { min-height: 34px; padding-inline: 10px; font-size: 11px; }
 .game-companion-drawer .coupon-page-card { padding: 16px 12px; }
@@ -1903,7 +1902,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .identity-flow__success h3 { margin: 4px 0 0; color: var(--client-text); font-size: 18px; }
 
 .announcement-page { gap: 16px; }
-.announcement-page--panel { gap: 0; }
+.announcement-page--panel { gap: 12px; }
 .announcement-page--panel .announcement-card { width: 100%; }
 .announcement-page--panel .announcement-tabs-row { display: block; }
 .announcement-page--panel .announcement-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; overflow: hidden; }

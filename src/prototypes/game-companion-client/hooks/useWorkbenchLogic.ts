@@ -46,7 +46,7 @@ export function useWorkbenchLogic(initialSelectedOrderId: string | null = null) 
       durationUnit: roundService?.unit ?? '局', unitPrice: 80, startedAt: '2026-10-28 08:25', earlyEndRequested: true, earlyEndSubmittedQuantity: 2, serviceSegmentMinutes: [18, 22, 15],
     }, {
       id: 'CW-1028-107', player: '晚风玩家', playerId: 'P-102860', playerInitials: '晚风', playerGender: '女', playerAge: 26, serviceId: hourlyService?.id ?? services[0]?.id ?? '', clubName: workbenchClubName,
-      status: '暂停中', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '金豆钱包', createdAt: '2026-10-28 07:20', duration: 3,
+      status: '已暂停', amount: 240, tipAmount: 0, discountAmount: 0, paymentSource: '金豆钱包', createdAt: '2026-10-28 07:20', duration: 3,
       durationUnit: hourlyService?.unit ?? '小时', unitPrice: 80, startedAt: '2026-10-28 07:35', serviceSegmentMinutes: [45],
     }]
   })
@@ -105,8 +105,8 @@ export function useWorkbenchLogic(initialSelectedOrderId: string | null = null) 
   }
   const resumeOrder = (id: string) => {
     const order = orders.find(item => item.id === id)
-    if (!order || order.status !== '暂停中') return false
-    setOrders(items => items.map(item => item.id === id && item.status === '暂停中' ? { ...item, status: '服务中', startedAt: new Date().toLocaleString('zh-CN', { hour12: false }) } : item))
+    if (!order || order.status !== '已暂停') return false
+    setOrders(items => items.map(item => item.id === id && item.status === '已暂停' ? { ...item, status: '服务中', startedAt: new Date().toLocaleString('zh-CN', { hour12: false }) } : item))
     setFeedback('已继续服务')
     return true
   }

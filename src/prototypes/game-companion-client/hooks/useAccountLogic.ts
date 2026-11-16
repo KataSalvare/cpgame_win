@@ -83,7 +83,7 @@ export function useAccountLogic() {
   }, [diamondBalance, orders, premiumCardBalances])
 
   const requestEarlyEnd = useCallback((orderId: string, completedQuantity?: number) => {
-    setOrders((current) => current.map((order) => order.id === orderId && ['待接单', '待服务', '服务中', '暂停中'].includes(order.status) && !order.earlyEndPending ? { ...order, earlyEndPending: true, ...(order.durationUnit === '局' ? { earlyEndCompletedQuantity: completedQuantity } : {}) } : order))
+    setOrders((current) => current.map((order) => order.id === orderId && ['待接单', '待服务', '服务中', '已暂停'].includes(order.status) && !order.earlyEndPending ? { ...order, earlyEndPending: true, ...(order.durationUnit === '局' ? { earlyEndCompletedQuantity: completedQuantity } : {}) } : order))
   }, [])
 
   const renewOrder = useCallback((orderId: string, quantity: number) => {
