@@ -55,7 +55,6 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
         <div className="club-profile-card__body">
           <div className="club-card__name-row"><h1>{club.name}</h1>{club.selfOperated && <span className="client-badge"><ShieldCheck size={13} /> 自营</span>}</div>
           <div className="club-profile-card__subline"><CopyableProfileId value={club.id.replace('club-', 'C-')} entityLabel="俱乐部" /><button type="button" className="rating-mark club-profile-rating-button" onClick={onOpenClubReviews} aria-label={`查看俱乐部评价，评分 ${club.rating.toFixed(1)}`}><Star size={14} />{club.rating.toFixed(1)}</button></div>
-          <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
           <p>{club.intro}</p>
         </div>
         <div className="club-profile-card__tools"><FollowIconButton followed={social.followedClubIds.includes(club.id)} name={club.name} onToggle={toggleFollow} /><ClubMoreActions club={club} followed={social.followedClubIds.includes(club.id)} onToggleFollow={toggleFollow} onOpenInfo={setClubInfoTab} /></div>

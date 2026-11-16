@@ -430,8 +430,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
   </div>
 
   return <div className="client-content account-page">
-    <button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={15} />返回陪玩详情</button>
-    <PageHeading title="确认订单" />
+    <div className="club-detail-page__heading"><button type="button" className="client-back-link" onClick={onBack} aria-label="返回陪玩详情"><ArrowLeft size={16} /></button><h1>确认订单</h1></div>
     <div className="checkout-grid">
       <section className="client-card checkout-service-card">
         <div className="client-section-heading"><div><h2>服务信息</h2></div><span className="client-badge">{checkoutCompanions.length === 1 ? '单陪服务' : `${checkoutCompanions.length} 人服务`}</span></div>
@@ -500,10 +499,6 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
       </section>
     </div>}
   </div>
-}
-
-function PageHeading({ eyebrow, title, description }: { eyebrow?: string; title: string; description?: string }) {
-  return <header className="client-page-heading account-page-heading"><div>{eyebrow && <span className="client-eyebrow">{eyebrow}</span>}<h1>{title}</h1>{description && <p>{description}</p>}</div></header>
 }
 
 function TransactionList({ entries }: { entries: readonly WalletTransaction[] }) {

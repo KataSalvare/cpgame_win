@@ -209,7 +209,6 @@
 .club-card--gallery .club-card__details-line { justify-content: space-between; gap: 4px; margin-top: 3px; }
 .club-card--gallery .club-card__details-line .client-muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .club-card--gallery .club-card__count { gap: 3px; font-size: 10px; }
-.club-card--gallery .client-tag-row { gap: 4px; margin: 8px 10px 0; }
 .club-card--gallery .client-tag { padding: 2px 5px; font-size: 9px; }
 .club-card--gallery .club-card__intro { margin: 7px 0 9px; font-size: 11px; line-height: 1.45; }
 .club-card--gallery:hover .club-card__intro, .club-card--gallery:focus-visible .club-card__intro { display: block; overflow: visible; -webkit-line-clamp: unset; }

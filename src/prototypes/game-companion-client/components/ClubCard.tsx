@@ -33,7 +33,6 @@ export function ClubCard({ club, onOpen, onBrowse, onSelfOrder, showActions = tr
         </div>
         {!isGallery && <span className="rating-mark"><Star size={14} />{club.rating.toFixed(1)}</span>}
       </div>
-      <div className="client-tag-row">{club.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
       <p className="club-card__intro">{club.intro}</p>
       {showActions && <div className="club-card__actions">
         <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onBrowse() }}><Compass size={15} />逛一逛</button>
