@@ -87,6 +87,7 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
     { path: '/game-companion-help-center', label: '帮助中心', entryView: 'help-center', defaultHash: '#page=home&tool=help-center', states: demoPageStates },
     { path: '/game-companion-screen-recording', label: '屏幕录制', entryView: 'screen-recording', defaultHash: '#page=home&tool=screen-recording', states: demoPageStates },
     { path: '/game-companion-client-notifications', label: '客户端通知', entryView: 'client-notifications', defaultHash: '#page=home&tool=client-notifications', states: demoPageStates },
+    { path: '/game-companion-update', label: '更新提醒', entryView: 'update-reminder', defaultHash: '#page=home&tool=update-reminder', states: identityVerificationPageStates },
     { path: '/game-companion-close-app', label: '关闭应用', entryView: 'close-app', defaultHash: '#page=home&tool=close-app', states: demoPageStates },
     { path: '/game-companion-quick-panel', label: '我的快捷面板', entryView: 'quick-panel', defaultHash: '#page=home&tool=quick-panel', states: demoPageStates },
     { path: '/game-companion-wallet', label: '我的钱包', entryView: 'wallet', states: demoPageStates },

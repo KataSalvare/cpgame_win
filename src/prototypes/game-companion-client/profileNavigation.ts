@@ -14,7 +14,7 @@ export function navigateToProfileSection(section: ProfileSection, onboardingEntr
   if (window.location.hash.slice(1) !== nextHash) window.location.hash = nextHash
 }
 
-export type ClientOverlay = 'help-center' | 'screen-recording' | 'client-notifications' | 'close-app' | 'platform-support' | 'club-support' | 'global-search'
+export type ClientOverlay = 'help-center' | 'screen-recording' | 'client-notifications' | 'update-reminder' | 'close-app' | 'platform-support' | 'club-support' | 'global-search'
 
 export function navigateToClientOverlay(overlay: ClientOverlay) {
   const params = new URLSearchParams(window.location.hash.slice(1))

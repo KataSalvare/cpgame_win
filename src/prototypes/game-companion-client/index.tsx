@@ -118,6 +118,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
   const [pageState, setPageState] = usePrototypeState<ClientPageState>('normal', props)
   const closePromptSkippedToday = window.localStorage.getItem(closePromptDateKey) === getLocalDateKey()
   const [windowSessionState, setWindowSessionState] = useState<'open' | 'minimized' | 'exited'>(() => props.entryView === 'close-app' && closePromptSkippedToday ? 'minimized' : 'open')
+  const [updateReminderClosed, setUpdateReminderClosed] = useState(false)
   const [windowCloseDialogOpen, setWindowCloseDialogOpen] = useState(() => props.entryView === 'close-app' && !closePromptSkippedToday)
   const [pendingVoiceRoomEntry, setPendingVoiceRoomEntry] = useState<{ source: 'personal' | 'club'; roomId: string; channelId: string; clubName: string } | null>(null)
   const [windowCloseChoice, setWindowCloseChoice] = useState<WindowCloseChoice>('minimize')
@@ -586,6 +587,9 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       }} onUpdateStatus={account.updateOrderStatus} onPayPendingOrder={account.payPendingOrder} /></RightDrawer> : undefined}
     rightPanelWidth="var(--client-profile-drawer-width)"
     overlayLayer={<>
+      {props.entryView === 'update-reminder' && !updateReminderClosed && <DialogPanel overlayId="client-update-reminder" title="更新提醒" onClose={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>稍后提醒</button><button type="button" className="client-button client-button--primary" onClick={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>立即更新</button></>}>
+        <p>发现新版本 v1.1.0</p><p>更新后可体验最新功能与优化。</p>
+      </DialogPanel>}
       {windowCloseDialogOpen && <DialogPanel overlayId="client-window-close" title="关闭超速电竞" onClose={cancelWindowClose} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={cancelWindowClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmWindowClose}>确定</button></>}>
         <div className="window-close-options" role="radiogroup" aria-label="关闭方式">
           <label className={`window-close-option${windowCloseChoice === 'minimize' ? ' is-selected' : ''}`}><input type="radio" name="window-close-choice" value="minimize" checked={windowCloseChoice === 'minimize'} onChange={() => setWindowCloseChoice('minimize')} /><span>最小化到托盘</span></label>
