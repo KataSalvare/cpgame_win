@@ -1771,7 +1771,9 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .match-notice-footer .client-button { min-height: 38px; }
 .match-dialog--companions { width: min(100%, 440px); max-height: min(520px, 100%); grid-template-rows: auto minmax(0, 1fr) auto; }
 .match-candidate-list { display: grid; max-height: 186px; align-content: start; gap: 6px; overflow: auto; overscroll-behavior: contain; }
-.match-candidate { display: flex; min-width: 0; align-items: center; gap: 10px; border: 1px solid var(--client-border); border-radius: 7px; padding: 9px; background: var(--prototype-surface, #fff); text-align: left; cursor: pointer; }
+.match-candidate { display: flex; min-width: 0; align-items: center; gap: 8px; border: 1px solid var(--client-border); border-radius: 7px; padding: 7px; background: var(--prototype-surface, #fff); }
+.match-candidate__select { display: flex; min-width: 0; flex: 1; align-items: center; gap: 8px; border: 0; padding: 0; background: transparent; text-align: left; cursor: pointer; }
+.match-candidate__contact { flex: 0 0 auto; }
 .match-candidate.is-selected { border-color: var(--prototype-text-muted, #6b7280); background: var(--prototype-surface-muted, #f9fafb); }
 .match-candidate__info { display: grid; min-width: 0; flex: 1; gap: 4px; color: var(--client-muted); font-size: 10px; }
 .match-candidate__info strong { display: flex; align-items: center; gap: 7px; color: var(--client-text); font-size: 12px; }
@@ -1783,6 +1785,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .match-candidate__stats svg { width: 12px; height: 12px; }
 .match-candidate__check { display: grid; width: 20px; height: 20px; place-items: center; border: 1px solid var(--prototype-border-strong, #d1d5db); border-radius: 50%; color: white; }
 .match-candidate.is-selected .match-candidate__check { border-color: var(--prototype-primary, #374151); background: var(--prototype-primary, #374151); }
+.match-candidate__select:focus-visible { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; border-radius: 4px; }
 .match-candidate-empty { display: grid; justify-items: center; gap: 8px; padding: 28px; color: var(--client-muted); font-size: 11px; }
 .match-dialog__selection-count { margin-right: auto; color: var(--client-muted); font-size: 10px; }
 

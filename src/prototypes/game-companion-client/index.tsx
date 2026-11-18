@@ -633,6 +633,12 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onStartMatching={() => setIsMatching(true)}
       onGoToVoiceRoom={() => { setIsMatching(true); setMatchPanelOpen(true); navigation.goToPage('voice-room') }}
       onCancel={() => { setIsMatching(false); setMatchPanelOpen(false); navigation.goHome() }}
+      onContactCompanion={(companion) => {
+        setChatCompanionId(null)
+        setChatConversationOverride({ title: companion.name, initials: companion.initials })
+        social.startDirectMessageToUser(companion.id, companion.name, companion.initials, `你好，我想和你聊聊本次匹配的服务。`)
+        setCompanionChatOpen(true)
+      }}
       onChooseCompanions={(companionIds) => {
         const selected = match.selectedService
         const servicesFor = (id: string) => servicesByCompanion[id] ?? []

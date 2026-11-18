@@ -35,7 +35,7 @@ type Props = {
 
 type DetailTab = 'services' | 'reviews' | 'gifts'
 type ReviewFilter = 'all' | 'images' | 'latest' | 'good' | 'middle' | 'poor'
-const tabNames: Record<DetailTab, string> = { services: '服务', reviews: '评价', gifts: '礼物' }
+const tabNames: Record<DetailTab, string> = { services: '陪玩', reviews: '评价', gifts: '礼物' }
 const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 const receivedGiftCount = gifts.reduce((total, gift) => total + gift.count, 0)
 
@@ -77,15 +77,15 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
       </div>
 
       <div className="companion-tab-panel" role="tabpanel">
-        {activeTab === 'services' && <section className="service-section" aria-labelledby="service-title">
-          <div className="client-section-heading service-section__heading"><h2 id="service-title">服务</h2><label className="client-filter-select client-filter-select--inline"><span>游戏</span><select value={logic.gameId} onChange={(event) => logic.selectGame(event.target.value)}>{games.map((game) => <option value={game.id} key={game.id}>{game.name}</option>)}</select></label></div>
+        {activeTab === 'services' && <section className="service-section" aria-label="陪玩">
+          <div className="client-section-heading service-section__heading"><label className="client-filter-select client-filter-select--inline"><span>游戏</span><select value={logic.gameId} onChange={(event) => logic.selectGame(event.target.value)}>{games.map((game) => <option value={game.id} key={game.id}>{game.name}</option>)}</select></label></div>
           {logic.totalServices === 0 ? <div className="client-inline-empty"><p>该游戏暂时没有服务项目</p><button type="button" className="client-button client-button--secondary" onClick={() => logic.selectGame('all')}>查看全部服务</button></div> : <>
             {presentation === 'panel' ? <div className="service-offer-list">{logic.pageServices.map((service) => {
               const game = games.find((item) => item.id === service.gameId)
               return <article className="service-offer" key={service.id}>
               <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small className="service-offer__play-level"><span>{service.playName}</span><span aria-label={`等级：${service.levelName}`}>{service.levelName}</span></small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></div>
               {service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}
-                <div className="service-offer__facts"><span><small>单价</small><strong className="service-offer__price">{service.price} 金豆 / {service.unit}</strong></span><span><small>服务单数</small>{service.orderCount}</span><span><small>评分</small><span className="rating-mark"><Star size={12} />{service.rating.toFixed(2)}</span></span></div>
+                <div className="service-offer__facts"><span><strong className="service-offer__price">{service.price} 金豆</strong></span><span>服务 {service.orderCount} 人</span><span>{Math.round(service.rating * 20)}%好评</span></div>
               </article>
             })}</div> : <div className="service-table-wrap">
               <table className="service-table">

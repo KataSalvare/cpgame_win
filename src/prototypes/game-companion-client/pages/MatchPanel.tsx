@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import { Check, ChevronDown, ChevronRight, ClipboardList, Headphones, Mars, Maximize2, Minimize2, Plus, Search, Star, Swords, UserRound, UsersRound, Venus, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, ClipboardList, Headphones, Mars, Maximize2, MessageCircle, Minimize2, Plus, Search, Star, Swords, UserRound, UsersRound, Venus, X } from 'lucide-react'
 import type { useMatchLogic } from '../hooks/useMatchLogic'
 import { registerOverlayReveal } from '@/lib/overlayReveal'
-import { companions, games } from '../data/mockData'
+import { companions, games, type Companion } from '../data/mockData'
 import { quickMatchCompanions } from '../data/quickMatchMockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
@@ -31,9 +31,10 @@ type Props = {
   onGoToVoiceRoom: () => void
   onCancel: () => void
   onChooseCompanions: (companionIds: string[]) => void
+  onContactCompanion: (companion: Companion) => void
 }
 
-export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCandidatesAvailable, onStartMatching, onGoToVoiceRoom, onCancel, onChooseCompanions }: Props) {
+export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCandidatesAvailable, onStartMatching, onGoToVoiceRoom, onCancel, onChooseCompanions, onContactCompanion }: Props) {
   const [dialog, setDialog] = useState<'price' | 'cancel' | 'notice' | null>(null)
   const [noticeTab, setNoticeTab] = useState<NoticeTab>('tab1')
   const [dontRemind, setDontRemind] = useState(false)
@@ -276,7 +277,14 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCan
         {candidatesReady && <section className="match-found-list" aria-label="匹配到的陪玩">
           <header><strong><UsersRound size={15} />选择陪玩</strong><span>已选 {selectedIds.length}</span></header>
           <div className="match-candidate-list">
-            {candidates.map((companion) => <button type="button" key={companion.id} className={`match-candidate${selectedIds.includes(companion.id) ? ' is-selected' : ''}`} aria-pressed={selectedIds.includes(companion.id)} onClick={() => toggleCandidate(companion.id)}><AvatarMark initials={companion.initials} size="md" /><span className="match-candidate__info"><strong><UserNameWithLevel name={companion.name} identityId={companion.id} /><small className="match-candidate__demographics" aria-label={`性别${companion.gender}，${companion.age}岁`}>{companion.gender === '女' ? <Venus size={12} aria-hidden="true" /> : <Mars size={12} aria-hidden="true" />}{companion.age}</small></strong><small className="match-candidate__stats"><span aria-label={`评分 ${companion.rating}`}><Star size={12} aria-hidden="true" />{companion.rating.toFixed(2)}</span><span aria-label={`订单数 ${companion.orderCount}`}><ClipboardList size={12} aria-hidden="true" />{companion.orderCount.toLocaleString()}</span></small></span><span className="match-candidate__check">{selectedIds.includes(companion.id) && <Check size={14} />}</span></button>)}
+            {candidates.map((companion) => <article key={companion.id} className={`match-candidate${selectedIds.includes(companion.id) ? ' is-selected' : ''}`}>
+              <button type="button" className="match-candidate__select" role="checkbox" aria-checked={selectedIds.includes(companion.id)} aria-label={`${selectedIds.includes(companion.id) ? '取消选择' : '选择'}${companion.name}`} onClick={() => toggleCandidate(companion.id)}>
+                <span className="match-candidate__check">{selectedIds.includes(companion.id) && <Check size={14} />}</span>
+                <AvatarMark initials={companion.initials} size="md" />
+                <span className="match-candidate__info"><strong><UserNameWithLevel name={companion.name} identityId={companion.id} /><small className="match-candidate__demographics" aria-label={`性别${companion.gender}，${companion.age}岁`}>{companion.gender === '女' ? <Venus size={12} aria-hidden="true" /> : <Mars size={12} aria-hidden="true" />}{companion.age}</small></strong><small className="match-candidate__stats"><span aria-label={`评分 ${companion.rating}`}><Star size={12} aria-hidden="true" />{companion.rating.toFixed(2)}</span><span aria-label={`订单数 ${companion.orderCount}`}><ClipboardList size={12} aria-hidden="true" />{companion.orderCount.toLocaleString()}</span></small></span>
+              </button>
+              <button type="button" className="client-button client-button--secondary client-button--small match-candidate__contact" onClick={() => onContactCompanion(companion)}><MessageCircle size={13} />联系</button>
+            </article>)}
             {candidates.length === 0 && <div className="match-candidate-empty"><UserRound size={20} /><span>当前条件下没有可选陪玩</span></div>}
           </div>
         </section>}
