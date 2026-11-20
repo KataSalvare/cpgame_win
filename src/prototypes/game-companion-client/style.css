@@ -2312,3 +2312,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .client-update-entry__content strong { font-size: 13px; font-weight: 600; }
 .client-update-entry__content small { margin-top: 4px; color: var(--client-muted); font-size: 12px; }
 .client-update-entry__close { display: grid; width: 20px; height: 20px; flex: 0 0 20px; place-items: center; padding: 0; border: 0; background: transparent; color: var(--client-muted); cursor: pointer; }
+
+.client-update-entry__progress { display: flex; width: 158px; height: 28px; align-items: center; gap: 6px; color: var(--client-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.client-update-entry__progress-label { flex: 0 0 auto; white-space: nowrap; }
+.client-update-entry__track { width: 56px; flex: 0 0 56px; height: 5px; overflow: hidden; border-radius: 3px; background: #e5e7eb; }
+.client-update-entry__track span { display: block; height: 100%; border-radius: inherit; background: #4b5563; transition: width 100ms linear; }

@@ -173,7 +173,8 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCan
   const startMatching = () => {
     setCandidatesReady(false)
     setSelectedIds([])
-    onStartMatching()
+    if (logic.tryout) onGoToVoiceRoom()
+    else onStartMatching()
   }
 
   const beginMatching = () => {
@@ -330,7 +331,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCan
         <label className="match-field"><span>数量</span><span className="match-quantity-field"><span className="match-quantity-control"><button type="button" aria-label="减少数量" disabled={logic.quantity <= 1} onClick={() => stepQuantity(-1)}>−</button><input type="number" min="1" step="1" inputMode="numeric" aria-label={`数量，${logic.selectedService?.unit ?? '小时'}`} aria-invalid={!validQuantity} value={quantityInput} onChange={(event) => { const value = event.target.value; setQuantityInput(value); if (/^\d+$/.test(value) && Number(value) >= 1) logic.setQuantity(Number(value)) }} onBlur={() => { if (!validQuantity) setQuantityInput(String(logic.quantity)) }} /><button type="button" aria-label="增加数量" onClick={() => stepQuantity(1)}>+</button></span><span className="match-quantity-unit">{logic.selectedService?.unit ?? '小时'}</span></span>{!validQuantity && <small className="match-quantity-error" role="alert">请输入大于 0 的整数</small>}</label>
         <label className="match-field match-field--remark"><span>备注</span><textarea value={logic.remark} onChange={(event) => logic.setRemark(event.target.value)} rows={2} placeholder="补充你的游戏偏好或需求" /></label>
         <div className="match-panel__price"><span>推荐单价</span><strong>{logic.recommendedUnitPriceLabel} <small>金豆 / {logic.selectedService?.unit ?? '小时'}</small></strong>{logic.peopleCount > 1 && <span className="match-panel__price-hint">{logic.people} ×{logic.peopleCount}</span>}</div>
-        <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.playName || !logic.levelName || !logic.selectedService || !club || !validQuantity} onClick={() => logic.tryout ? onGoToVoiceRoom() : beginMatching()}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
+        <button type="button" className="client-button client-button--primary match-panel__submit" disabled={!logic.playName || !logic.levelName || !logic.selectedService || !club || !validQuantity} onClick={beginMatching}>{logic.tryout ? <><Headphones size={16} />前往语音房试音</> : <><Search size={16} />开始匹配</>}</button>
       </div>}
 
       {dialog === 'notice' && <div className="match-dialog-scrim" data-reveal-overlay="quick-match-notice"><section className="match-dialog match-dialog--notice" role="dialog" aria-modal="true" aria-labelledby="match-notice-title">

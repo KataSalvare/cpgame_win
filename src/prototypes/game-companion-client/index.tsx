@@ -588,7 +588,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       }} onUpdateStatus={account.updateOrderStatus} onPayPendingOrder={account.payPendingOrder} /></RightDrawer> : undefined}
     rightPanelWidth="var(--client-profile-drawer-width)"
     overlayLayer={<>
-      {props.entryView === 'update-reminder' && !updateReminderClosed && <DialogPanel overlayId="client-update-reminder" title="更新提醒" onClose={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>稍后提醒</button><button type="button" className="client-button client-button--primary" onClick={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>立即更新</button></>}>
+      {props.entryView === 'update-reminder' && !updateReminderClosed && <DialogPanel overlayId="client-update-reminder" title="更新提醒" onClose={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>稍后提醒</button><button type="button" className="client-button client-button--primary" onClick={() => { try { sessionStorage.setItem('game-companion-update-download-start', String(Date.now())); sessionStorage.removeItem('game-companion-update-ready-shown') } catch { /* Storage may be unavailable. */ } setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>立即更新</button></>}>
         <p>发现新版本 v1.1.0</p><p>更新后可体验最新功能与优化。</p>
       </DialogPanel>}
       {windowCloseDialogOpen && <DialogPanel overlayId="client-window-close" title="关闭超速电竞" onClose={cancelWindowClose} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={cancelWindowClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmWindowClose}>确定</button></>}>
@@ -636,7 +636,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       onMinimize={() => setMatchPanelOpen(false)}
       onRestore={() => setMatchPanelOpen(true)}
       onStartMatching={() => setIsMatching(true)}
-      onGoToVoiceRoom={() => { setIsMatching(true); setMatchPanelOpen(true); navigation.goToPage('voice-room') }}
+      onGoToVoiceRoom={() => { setIsMatching(true); setMatchPanelOpen(false); navigation.goToPage('voice-room'); const params = new URLSearchParams(window.location.hash.slice(1)); params.set('tool', 'quick-match'); window.location.hash = params.toString() }}
       onCancel={() => { setIsMatching(false); setMatchPanelOpen(false); navigation.goHome() }}
       onContactCompanion={(companion) => {
         setChatCompanionId(null)
