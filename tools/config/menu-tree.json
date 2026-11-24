@@ -254,6 +254,10 @@
           "children": []
         },
         {
+          "id": "/game-companion-update",
+          "children": []
+        },
+        {
           "id": "/game-companion-close-app",
           "children": []
         }

@@ -11,6 +11,16 @@ export type MenuTree = Record<string, MenuNode[]>
 const STORAGE_KEY = 'prototype-sidebar-menu-tree-v3'
 const FILE_API = '/api/menu-tree'
 
+// Keep required entries independent of the editable menu tree persisted by the API.
+const withRequiredDefaults = (tree: MenuTree): MenuTree => {
+  const contains = (nodes: MenuNode[]): boolean => nodes.some(node => node.id === '/game-companion-update' || contains(node.children))
+  if (contains(tree.frontend ?? [])) return tree
+  const insert = (nodes: MenuNode[]): MenuNode[] => nodes.map(node => node.id === '/game-companion-system-settings'
+    ? { ...node, children: [...node.children, { id: '/game-companion-update', children: [] }] }
+    : { ...node, children: insert(node.children) })
+  return { ...tree, frontend: insert(tree.frontend ?? []) }
+}
+
 const makeFlatTree = (ids: string[]): MenuNode[] => ids.map(id => ({ id, children: [] }))
 
 const sanitizeNodes = (value: unknown, allowed: Set<string>): MenuNode[] => {
@@ -58,13 +68,14 @@ const restoreMenuTree = (saved: unknown, idsByCategory: Record<string, string[]>
     const seen = new Set<string>()
     const collect = (nodes: MenuNode[]) => nodes.forEach(node => { seen.add(node.id); collect(node.children) })
     collect(savedNodes)
-    const configured = configuredTree[category] ?? makeFlatTree(ids)
+    const configured = withRequiredDefaults(configuredTree)[category] ?? makeFlatTree(ids)
     const defaultNodes = sanitizeNodes(configured, allowed)
     return [category, mergeMissingDefaults(savedNodes, defaultNodes, seen)]
   }))
 }
 
 export const mergeMenuTreeWithDefaults = (saved: unknown, defaults: MenuTree = defaultMenuTree as MenuTree): MenuTree => {
+  defaults = withRequiredDefaults(defaults)
   const idsByCategory = Object.fromEntries(Object.entries(defaults).map(([category, nodes]) => {
     const ids: string[] = []
     const collect = (items: MenuNode[]) => items.forEach(node => { ids.push(node.id); collect(node.children) })
