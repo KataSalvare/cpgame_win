@@ -26,7 +26,6 @@ export function ClubMoreActions({ club, followed, onToggleFollow, onOpenInfo }: 
       {menuOpen && <div className="companion-profile-card__menu" role="menu" aria-label="俱乐部更多功能">
         <button type="button" role="menuitem" onClick={() => { setDialog('qualification'); setMenuOpen(false) }}><FileCheck2 size={14} />营业资质</button>
         <button type="button" role="menuitem" onClick={() => { onOpenInfo('intro'); setMenuOpen(false) }}><FileText size={14} />简介</button>
-        <button type="button" role="menuitem" onClick={() => { onToggleFollow(); setMenuOpen(false) }}><Star size={14} />{followed ? '取消关注' : '关注'}</button>
       </div>}
     </div>
     {dialog && <DialogPanel overlayId={`club-${dialog}-${club.id}`} title="营业资质" onClose={() => setDialog(null)} width={560}>
