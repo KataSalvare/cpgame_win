@@ -1430,11 +1430,12 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .wallet-coupon__detail span { color: var(--prototype-text-secondary, #4b5563); font-size: 11px; }
 .wallet-coupon--inactive { background: var(--prototype-surface-muted, #f9fafb); color: var(--prototype-text-muted, #6b7280); }
 .wallet-coupon--inactive .wallet-coupon__value { color: var(--prototype-text-muted, #6b7280); }
+.premium-card-groups { display: grid; gap: 24px; }
+.premium-card-group__title { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
 .premium-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .premium-card { overflow: hidden; background: #f1f2f4 url("./assets/premium-card-cover.svg") center / cover no-repeat; }
 .premium-card__body { display: grid; gap: 12px; min-height: 190px; padding: 25px 17px 17px; }
 .premium-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.premium-card__heading .client-status { background: #f1f2f4; color: #4b5563; }
 .premium-card__heading h2 { margin: 4px 0 0; font-size: 16px; font-weight: 600; }
 .premium-card__discount { width: fit-content; margin: -4px 0 0; border: 1px solid var(--client-border); border-radius: 4px; padding: 4px 8px; color: var(--prototype-text-secondary, #4b5563); font-size: 11px; }
 .premium-card__price, .premium-card__balance { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; }
