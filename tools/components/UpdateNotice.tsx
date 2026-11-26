@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 
 const CHECK_INTERVAL_MS = 60_000
@@ -6,6 +6,7 @@ const CHECK_INTERVAL_MS = 60_000
 type BuildInfo = typeof __BUILD_INFO__
 
 export function UpdateNotice({ theme, pageId }: { theme: 'dark' | 'light'; pageId?: string }) {
+  const [dismissedRevision, setDismissedRevision] = useState<string | null>(null)
   const [availableUpdate, setAvailableUpdate] = useState<{ pageId?: string; info: BuildInfo } | null>(null)
   const availableVersion = availableUpdate && availableUpdate.pageId === pageId
     ? availableUpdate.info
@@ -45,6 +46,10 @@ export function UpdateNotice({ theme, pageId }: { theme: 'dark' | 'light'; pageI
   if (!availableVersion) return null
 
   return (
+    <>
+    {dismissedRevision !== availableVersion.revision && (
+      <UpdateDialog theme={theme} version={availableVersion.version} onDismiss={() => setDismissedRevision(availableVersion.revision)} />
+    )}
     <div className={`flex shrink-0 items-center justify-center gap-3 border-b px-4 py-2 text-sm ${
       theme === 'dark'
         ? 'border-red-900 bg-red-800 text-white'
@@ -64,5 +69,37 @@ export function UpdateNotice({ theme, pageId }: { theme: 'dark' | 'light'; pageI
         立即刷新
       </button>
     </div>
+    </>
+  )
+}
+
+function UpdateDialog({ theme, version, onDismiss }: { theme: 'dark' | 'light'; version: string; onDismiss: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    dialog?.showModal()
+    return () => dialog?.close()
+  }, [])
+
+  return (
+    <dialog
+      ref={dialogRef}
+      onCancel={onDismiss}
+      aria-labelledby="update-dialog-title"
+      aria-describedby="update-dialog-description"
+      className={`m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border p-6 shadow-2xl backdrop:bg-black/60 ${
+        theme === 'dark' ? 'border-zinc-700 bg-zinc-900 text-white' : 'border-zinc-200 bg-white text-zinc-900'
+      }`}
+    >
+      <h2 id="update-dialog-title" className="text-lg font-semibold">发现新版本</h2>
+      <p id="update-dialog-description" className={`mt-3 text-sm ${theme === 'dark' ? 'text-zinc-300' : 'text-zinc-600'}`}>
+        当前页面已更新至 {version}，刷新后即可查看最新内容。
+      </p>
+      <div className="mt-6 flex justify-end gap-3">
+        <button type="button" onClick={onDismiss} className={`rounded-md px-4 py-2 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${theme === 'dark' ? 'text-zinc-200 hover:bg-zinc-800' : 'text-zinc-700 hover:bg-zinc-100'}`}>稍后再说</button>
+        <button type="button" autoFocus onClick={() => window.location.reload()} className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">立即刷新</button>
+      </div>
+    </dialog>
   )
 }

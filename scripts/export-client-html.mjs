@@ -23,13 +23,26 @@ const configPath = path.join(tempDir, 'vite.config.mjs')
 fs.writeFileSync(entryPath, `
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import GameCompanionClient from ${JSON.stringify(path.join(root, 'src/prototypes/game-companion-client/index.tsx'))}
 import './entry.css'
 const { entryView, defaultHash } = window.__CLIENT_EXPORT_ROUTE__
 if (defaultHash && !window.location.hash) window.location.hash = defaultHash
 document.documentElement.dataset.prototypePalette = 'grayscale'
-createRoot(document.getElementById('root')).render(React.createElement(MemoryRouter, null, React.createElement(GameCompanionClient, { entryView })))
+function ExportClient() {
+  const location = useLocation()
+  const [activePath, setActivePath] = React.useState(location.pathname)
+  React.useLayoutEffect(() => {
+    if (location.pathname !== activePath) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      setActivePath(location.pathname)
+    }
+  }, [location.pathname, activePath])
+  if (location.pathname !== activePath) return null
+  const view = location.pathname === '/game-companion-login' ? 'login' : location.pathname === '/game-companion-client' ? 'home' : entryView
+  return React.createElement(GameCompanionClient, { key: activePath, entryView: view })
+}
+createRoot(document.getElementById('root')).render(React.createElement(MemoryRouter, null, React.createElement(ExportClient)))
 `)
 fs.writeFileSync(stylePath, `
 @import "tailwindcss";

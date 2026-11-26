@@ -426,7 +426,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     ? <RightDrawer mode="inline" title={showPremiumCardDetail ? '尊享卡明细' : navigation.panel === 'club-cards' ? '尊享卡' : '我的尊享卡'} description={showPremiumCardDetail ? selectedPremiumCard?.name : undefined} onClose={() => { setSelectedPremiumCardId(null); navigation.closePanel() }} className="game-companion-drawer" width="100%">{showPremiumCardDetail && selectedPremiumCard ? <PremiumCardDetailPage transactions={account.premiumCardTransactions.filter((entry) => entry.cardId === selectedPremiumCard.id)} onBack={() => setSelectedPremiumCardId(null)} /> : <PremiumCardsPage pageState={pageState} onRetry={() => setPageState('normal')} clubId={navigation.clubId} ownedOnly={navigation.panel === 'my-cards'} balance={account.diamondBalance} ownedIds={account.ownedPremiumCardIds} cardBalances={account.premiumCardBalances} onBack={navigation.closePanel} onRecharge={() => navigation.goToPage('recharge', navigation.panel === 'my-cards' ? 'my-cards' : 'club-cards')} onPurchase={account.purchasePremiumCard} onTopUp={account.rechargePremiumCard} onOpenDetails={setSelectedPremiumCardId} onNotify={setPremiumCardToast} />}</RightDrawer>
     : null
   const checkoutCompanions = navigation.companionIds.map((id) => companions.find((companion) => companion.id === id)).filter((companion): companion is Companion => Boolean(companion))
-  const rechargeRouteOpen = props.entryView === 'wallet-recharge' && navigation.page === 'recharge'
+  const rechargeRouteOpen = navigation.page === 'recharge'
   const rechargeBackdropPage = rechargeRouteOpen ? navigation.returnTo ?? 'wallet' : navigation.page
   const isWalletPage = rechargeBackdropPage === 'wallet' || (props.entryView === 'wallet-recharge' && !rechargeRouteOpen)
   const isRechargeModalOpen = navigation.panel === 'diamond-recharge' || rechargeMenuOpen || checkoutRechargeOpen || rechargeRouteOpen
@@ -663,7 +663,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       }}
       />
       {navigation.page === 'wallet' && navigation.panel === 'bean-withdraw' && <BeanWithdrawPanel balance={account.availableBeanBalance} onWithdraw={account.withdrawBeans} onClose={navigation.closePanel} />}
-      {beanExchangeOpen && <BeanExchangePanel beanBalance={account.availableBeanBalance} onExchange={account.exchangeBeans} onClose={() => { setBeanExchangeOpen(false); if (navigation.page === 'wallet' && navigation.panel === 'bean-exchange') window.location.hash = 'page=wallet' }} />}
+      {(beanExchangeOpen || navigation.panel === 'bean-exchange') && <BeanExchangePanel beanBalance={account.availableBeanBalance} onExchange={account.exchangeBeans} onClose={() => { setBeanExchangeOpen(false); if (navigation.page === 'wallet' && navigation.panel === 'bean-exchange') window.location.hash = 'page=wallet' }} />}
       {isRechargeModalOpen && <RechargePage presentation="modal" pageState={pageState} onRetry={() => setPageState('normal')} diamondBalance={account.diamondBalance} coupons={account.coupons} onBack={closeRechargeModal} backLabel={rechargeReturnLabel} onComplete={account.completeRecharge} />}
       <GiftPanel onSuccess={(gift, quantity, recipient) => {
         setGiftToast((value) => value + 1)
