@@ -1433,18 +1433,19 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .premium-card-groups { display: grid; gap: 24px; }
 .premium-card-group__title { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
 .premium-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.premium-card { overflow: hidden; background: #f1f2f4 url("./assets/premium-card-cover.svg") center / cover no-repeat; }
-.premium-card__body { display: grid; gap: 12px; min-height: 190px; padding: 25px 17px 17px; }
-.premium-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.premium-card__heading h2 { margin: 4px 0 0; font-size: 16px; font-weight: 600; }
-.premium-card__discount { width: fit-content; margin: -4px 0 0; border: 1px solid var(--client-border); border-radius: 4px; padding: 4px 8px; color: var(--prototype-text-secondary, #4b5563); font-size: 11px; }
-.premium-card__price, .premium-card__balance { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; }
+ .premium-card { overflow: hidden; }
+.premium-card__cover { min-height: 128px; padding: 20px 17px; background: #f1f2f4 url("./assets/premium-card-cover.svg") center / cover no-repeat; }
+.premium-card__heading { display: flex; min-height: 88px; max-width: 65%; flex-direction: column; align-items: flex-start; }
+.premium-card__heading h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.premium-card__discount { margin: 4px 0 0; color: var(--prototype-text-secondary, #4b5563); font-size: 11px; }
+.premium-card__club { margin-top: auto; padding-top: 12px; font-size: 11px; font-weight: 600; }
+.premium-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 13px; }
+.premium-card__price, .premium-card__balance { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; font-size: 11px; }
 .premium-card__price > span, .premium-card__balance > span { color: var(--client-muted); }
-.premium-card__price strong { font-size: 17px; font-weight: 600; }
+.premium-card__price strong, .premium-card__balance strong { font-size: 13px; font-weight: 600; }
 .premium-card__price small { color: var(--client-muted); font-size: 11px; font-weight: 400; }
-.premium-card__balance strong { font-size: 11px; font-weight: 600; }
-.premium-card__shortage { margin: -4px 0 0; color: var(--prototype-text-secondary, #4b5563); font-size: 11px; }
-.premium-card__actions { display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid rgba(107, 114, 128, .2); padding-top: 12px; }
+.premium-card__feedback { margin: 0 13px 12px; }
+.premium-card__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
 .premium-card__actions .client-button:disabled { color: var(--prototype-text-muted, #6b7280); cursor: not-allowed; }
 .premium-empty { min-height: 220px; }
 .store-overlay { position: absolute; z-index: 50; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17, 24, 39, .42); }
@@ -1524,8 +1525,6 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .game-companion-drawer .store-page:not(.premium-card-detail-page) > .client-back-link { display: none; }
 .game-companion-drawer .store-page > .client-page-heading { align-items: flex-start; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 .game-companion-drawer .premium-card-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-.game-companion-drawer .premium-card__body { padding: 25px 13px 13px; }
-.game-companion-drawer .premium-card__heading { gap: 8px; }
 .game-companion-drawer .premium-card__actions .client-button { min-height: 34px; padding-inline: 10px; font-size: 11px; }
 .game-companion-drawer .coupon-page-card { padding: 16px 12px; }
 .game-companion-drawer .store-tabs { gap: 10px; }
@@ -2164,6 +2163,13 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .woodpecker-tabs-row { display: flex; align-items: center; gap: 16px; }
 .woodpecker-tabs { flex: 1; min-width: 0; }
 .woodpecker-submit-button { flex: 0 0 auto; margin-bottom: 8px; }
+.woodpecker-info { position: relative; flex: 0 0 auto; margin-bottom: 8px; }
+.woodpecker-info__button { display: grid; width: 28px; height: 28px; place-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--client-muted); cursor: help; }
+.woodpecker-info__button:hover, .woodpecker-info__button:focus-visible { color: var(--client-text); }
+.woodpecker-info__button:focus-visible { outline: 2px solid var(--client-text-secondary, #4b5563); outline-offset: 2px; }
+.woodpecker-info__tooltip { position: absolute; z-index: 120; top: calc(100% + 8px); right: 0; width: 320px; max-width: 80vw; border: 1px solid var(--client-border); border-radius: 6px; padding: 12px; background: var(--client-surface); color: var(--client-text); font-size: 13px; line-height: 1.6; box-shadow: 0 2px 8px rgba(17, 24, 39, .12); opacity: 0; visibility: hidden; pointer-events: none; }
+.woodpecker-info:hover .woodpecker-info__tooltip, .woodpecker-info:focus-within .woodpecker-info__tooltip { opacity: 1; visibility: visible; }
+
 .woodpecker-panel { display: grid; gap: 16px; }
 .woodpecker-filter-row { display: flex; align-items: center; gap: 8px; }
 .woodpecker-filter { min-height: 32px; border: 1px solid var(--client-border); border-radius: 6px; padding: 0 12px; background: var(--client-surface); color: var(--client-muted); font: inherit; font-size: 13px; cursor: pointer; }

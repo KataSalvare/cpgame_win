@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { CalendarDays, ClipboardList, ImagePlus, Megaphone, Search, ThumbsDown, ThumbsUp, TreeDeciduous, X } from 'lucide-react'
+import { CalendarDays, ClipboardList, ImagePlus, Info, Megaphone, Search, ThumbsDown, ThumbsUp, TreeDeciduous, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { ImageLightbox } from '../components/ImageLightbox'
@@ -12,13 +12,14 @@ import { initialMyWoodpeckerTickets, publicWoodpeckerRecords, woodpeckerMockUser
 type Props = {
   pageState: 'normal' | 'loading' | 'empty' | 'error'
   onRetry: () => void
+  profile: { nickname: string; initials: string; avatarDataUrl?: string }
 }
 
 type Tab = 'mine' | 'public'
 type TicketFilter = '全部工单' | '建议工单' | '啄木鸟工单'
 const woodpeckerSampleImages = [lifePhotoCafe, lifePhotoCity, lifePhotoWindow]
 
-export function WoodpeckerPage({ pageState, onRetry }: Props) {
+export function WoodpeckerPage({ pageState, onRetry, profile }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('mine')
   const [activeFilter, setActiveFilter] = useState<TicketFilter>('全部工单')
   const [tickets, setTickets] = useState(initialMyWoodpeckerTickets)
@@ -102,13 +103,16 @@ export function WoodpeckerPage({ pageState, onRetry }: Props) {
     <div className="woodpecker-tabs-row"><div className="woodpecker-tabs personal-center-tabs" role="tablist" aria-label="啄木鸟分类">
       <button type="button" role="tab" aria-selected={activeTab === 'mine'} className={`personal-center-tab${activeTab === 'mine' ? ' is-active' : ''}`} onClick={() => setActiveTab('mine')}><ClipboardList size={16} /><span>我的啄木鸟</span></button>
       <button type="button" role="tab" aria-selected={activeTab === 'public'} className={`personal-center-tab${activeTab === 'public' ? ' is-active' : ''}`} onClick={() => setActiveTab('public')}><Megaphone size={16} /><span>啄木鸟公示</span></button>
+    </div><div className="woodpecker-info">
+      <button type="button" className="woodpecker-info__button" aria-label="啄木鸟平台说明" aria-describedby="woodpecker-info-tooltip"><Info size={16} aria-hidden="true" /></button>
+      <div id="woodpecker-info-tooltip" className="woodpecker-info__tooltip" role="tooltip">这里是啄木鸟举报平台。像森林医生啄木鸟一样，发现超速电竞的问题，即刻提交，进度随时可查。您的每一次发声都会被认真对待，让我们一起守护超速电竞的清朗环境。</div>
     </div>{activeTab === 'mine' && <button type="button" className="client-button client-button--primary woodpecker-submit-button" onClick={() => setFormOpen(true)}>我要建议/举报</button>}</div>
 
     {activeTab === 'mine' ? <section className="woodpecker-panel" role="tabpanel" aria-label="我的啄木鸟">
       <div className="woodpecker-filter-row" role="group" aria-label="工单类型">
         {(['全部工单', '建议工单', '啄木鸟工单'] as const).map((filter) => <button key={filter} type="button" className={`woodpecker-filter${activeFilter === filter ? ' is-active' : ''}`} aria-pressed={activeFilter === filter} onClick={() => setActiveFilter(filter)}>{filter}</button>)}
       </div>
-      {visibleTickets.length ? <div className="woodpecker-ticket-list">{visibleTickets.map((ticket) => <TicketCard key={ticket.id} ticket={ticket} />)}</div> : <div className="woodpecker-empty"><TreeDeciduous size={30} /><strong>暂无{activeFilter === '全部工单' ? '' : activeFilter.replace('工单', '')}工单</strong></div>}
+      {visibleTickets.length ? <div className="woodpecker-ticket-list">{visibleTickets.map((ticket) => <TicketCard key={ticket.id} ticket={ticket} profile={profile} />)}</div> : <div className="woodpecker-empty"><TreeDeciduous size={30} /><strong>暂无{activeFilter === '全部工单' ? '' : activeFilter.replace('工单', '')}工单</strong></div>}
     </section> : <section className="woodpecker-panel" role="tabpanel" aria-label="啄木鸟公示">
       <form className="woodpecker-search" onSubmit={(event) => { event.preventDefault(); setAppliedSearch(search) }}><label htmlFor="woodpecker-search-input">搜索被举报人昵称或者ID</label><input id="woodpecker-search-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索被举报人昵称或者ID" /><button type="submit" className="client-button client-button--secondary">搜索</button></form>
       {visiblePublicRecords.length ? <div className="woodpecker-ticket-list woodpecker-ticket-list--public">{visiblePublicRecords.map((record) => <PublicRecordCard key={record.id} record={record} feedback={feedback[record.id] ?? null} onFeedback={(value) => setFeedback((current) => ({ ...current, [record.id]: current[record.id] === value ? null : value }))} />)}</div> : <div className="woodpecker-empty"><TreeDeciduous size={30} /><strong>没有匹配的公示工单</strong></div>}
@@ -138,18 +142,17 @@ export function WoodpeckerPage({ pageState, onRetry }: Props) {
   </div>
 }
 
-function TicketCard({ ticket, showResponse = true }: { ticket: WoodpeckerTicket; showResponse?: boolean }) {
+function TicketCard({ ticket, profile, showResponse = true }: { ticket: WoodpeckerTicket; profile: Props['profile']; showResponse?: boolean }) {
   return <article className="woodpecker-ticket client-card">
-    <header className="woodpecker-ticket__header"><strong>{ticket.type === 'suggestion' ? '建议工单' : '啄木鸟工单'}</strong><span className={`woodpecker-status woodpecker-status--${ticket.status === '已处理' ? 'done' : 'pending'}`}>{ticket.status}</span><time><CalendarDays size={14} />{ticket.submittedAt}</time></header>
+    <header className="woodpecker-ticket__header"><div className="woodpecker-submitter"><AvatarMark initials={ticket.anonymous ? '' : profile.initials} imageUrl={ticket.anonymous ? undefined : profile.avatarDataUrl} size="sm" /><strong>{ticket.anonymous ? '匿名提交' : profile.nickname}</strong></div><span className={`woodpecker-status woodpecker-status--${ticket.status === '已处理' ? 'done' : 'pending'}`}>{ticket.status}</span><time><CalendarDays size={14} />{ticket.submittedAt}</time></header>
     <dl className="woodpecker-ticket__fields">
-      <div><dt>售后类型</dt><dd>{ticket.type === 'suggestion' ? '意见建议' : '啄木鸟工单（举报）'}</dd></div>
-      {ticket.reason && <div><dt>售后原因</dt><dd>{ticket.reason}</dd></div>}
-      {ticket.reportedUser && <div><dt>被售后人</dt><dd>{ticket.anonymous ? '匿名提交' : ticket.reportedUserId || ticket.reportedUser}</dd></div>}
+      <div><dt>类型</dt><dd>{ticket.type === 'suggestion' ? '意见建议' : '啄木鸟工单（举报）'}</dd></div>
+      {ticket.reason && <div><dt>举报原因</dt><dd>{ticket.reason}</dd></div>}
+      {ticket.reportedUser && <div><dt>被举报人</dt><dd className="woodpecker-user-identity"><AvatarMark initials={ticket.reportedUser.slice(0, 1)} size="sm" /><span>{ticket.reportedUser}</span></dd></div>}
       <div><dt>补充说明</dt><dd>{ticket.description}</dd></div>
     </dl>
     {ticket.attachments.length > 0 && <ImageLightbox overlayId={`woodpecker-ticket-${ticket.id}`} images={ticket.attachments.map((_, index) => ticket.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length])} label="工单附件">{(openImage) => <div className="woodpecker-ticket__attachments" aria-label="附件">{ticket.attachments.map((attachment, index) => <button type="button" key={`${attachment}-${index}`} aria-label={`查看附件 ${attachment}`} onClick={() => openImage(index)}><img src={ticket.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length]} alt={attachment} /><span>{attachment}</span></button>)}</div>}</ImageLightbox>}
     {showResponse && ticket.response && <section className="woodpecker-response"><h3>官方处理回复</h3><p>{ticket.response}</p></section>}
-    <footer className="woodpecker-ticket__footer"><span>工单号 {ticket.id}</span></footer>
   </article>
 }
 
@@ -158,7 +161,7 @@ function PublicRecordCard({ record, feedback, onFeedback }: { record: PublicWood
     <header className="woodpecker-ticket__header"><div className="woodpecker-submitter"><AvatarMark initials={record.anonymous ? '' : record.reportedUser.slice(0, 1)} size="sm" /><strong>{record.anonymous ? '匿名提交' : '用户提交'}</strong></div><span className="woodpecker-ticket__time"><CalendarDays size={14} />{record.submittedAt} 处理</span></header>
     <dl className="woodpecker-ticket__fields">
       <div><dt>类型</dt><dd>啄木鸟工单</dd></div>
-      <div><dt>被举报人</dt><dd className="woodpecker-user-identity"><AvatarMark initials={record.reportedUser.slice(0, 1)} size="sm" /><span>{record.reportedUser}</span><span className="woodpecker-user-identity__id">{record.reportedUserId}</span></dd></div>
+      <div><dt>被举报人</dt><dd className="woodpecker-user-identity"><AvatarMark initials={record.reportedUser.slice(0, 1)} size="sm" /><span>{record.reportedUser}</span></dd></div>
       {record.reason && <div><dt>举报原因</dt><dd>{record.reason}</dd></div>}
       <div><dt>补充说明</dt><dd>{record.description}</dd></div>
     </dl>
