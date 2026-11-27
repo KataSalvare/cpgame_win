@@ -59,7 +59,7 @@ export function useAnnotationController({
   }
 } {
   const requestAuthorization = useEditAuthorization()
-  const [showAnnotations, setShowAnnotations] = useState(true)
+  const [showAnnotations, setShowAnnotations] = useState(false)
   const [annotationEditMode, setAnnotationEditMode] = useState(false)
   const [annotationSelecting, setAnnotationSelecting] = useState(false)
   const [annotationModalOpen, setAnnotationModalOpen] = useState(false)

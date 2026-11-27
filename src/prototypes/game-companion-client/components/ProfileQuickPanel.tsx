@@ -71,7 +71,7 @@ export function ProfileQuickPanel({ profile, diamondBalance, beanBalance, onNavi
     {open && <section className="client-profile-popover" aria-label="个人资料快捷面板">
       <div className="client-profile-popover__identity">
         <button type="button" className="client-profile-popover__avatar-button" aria-label="进入个人中心" title="进入个人中心" onClick={() => navigate('profile')}>
-          {profile.avatarDataUrl ? <img className="client-profile-popover__avatar" src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" />}
+          {profile.avatarDataUrl ? <img className="client-profile-popover__avatar" src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" isDemoUser />}
         </button>
         <div><strong><UserNameWithLevel name={profile.nickname} identityId={profile.userId} /></strong><span className="client-profile-popover__meta"><button type="button" className="client-profile-popover__user-id" onClick={() => void copyUserId()} aria-label={`复制用户 ID ${profile.userId}`} title="点击复制 ID">{profile.userId}<Copy size={12} /></button>{copyFeedback && <span className="client-profile-popover__copy-feedback" role="status">{copyFeedback === '复制成功' && <Check size={12} />}{copyFeedback}</span>}</span></div>
       </div>

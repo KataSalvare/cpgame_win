@@ -12,6 +12,7 @@ import {
   EyeOff,
   XIcon,
   PanelLeft,
+  Palette,
 } from 'lucide-react'
 import { TooltipButton } from './TooltipButton'
 import { PreviewStateBar } from './PreviewStateBar'
@@ -30,6 +31,8 @@ import { pages } from '../config/pages'
 import type { AnnotationControllerActions, AnnotationControllerState } from '../tools/AnnotationController'
 
 interface TopbarProps {
+  prototypePalette: 'grayscale' | 'high-fidelity'
+  setPrototypePalette: (palette: 'grayscale' | 'high-fidelity') => void
   deviceMode: 'mobile' | 'pc'
   setDeviceMode: (mode: 'mobile' | 'pc') => void
   showToast: (message: string, type?: 'success' | 'error') => void
@@ -67,6 +70,8 @@ const FigmaIcon = ({ className }: { className?: string }) => (
 )
 
 export const Topbar = ({
+  prototypePalette,
+  setPrototypePalette,
   deviceMode,
   setDeviceMode,
   showToast,
@@ -235,6 +240,17 @@ export const Topbar = ({
             <span className="hidden min-[1180px]:inline">PC端</span>
           </TooltipButton>
           </div>
+
+          {currentPage && <TooltipButton
+            tooltip={prototypePalette === 'high-fidelity' ? '切换为灰阶原型' : '切换为高保真原型'}
+            aria-label="高保真原型"
+            aria-pressed={prototypePalette === 'high-fidelity'}
+            onClick={() => setPrototypePalette(prototypePalette === 'high-fidelity' ? 'grayscale' : 'high-fidelity')}
+            className={prototypePalette === 'high-fidelity' ? activeSegmentBtn : inactiveSegmentBtn}
+          >
+            <Palette size={14} />
+            <span>高保真</span>
+          </TooltipButton>}
 
           <PreviewStateBar
             states={previewStates}

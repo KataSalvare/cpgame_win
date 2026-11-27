@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Check, ChevronDown, ChevronRight, Coins, MessageCircle, Search, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { clubs, companions, games, servicesByCompanion } from '../data/mockData'
 import type { OnboardingSubmission } from '../data/onboardingApplicationMockData'
 import { AvatarMark } from './AvatarMark'

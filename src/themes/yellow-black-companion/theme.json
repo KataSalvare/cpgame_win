@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "sourceName": "项目自定义主题",
+    "originalDetailUrl": "",
+    "fallbackRawUrl": "",
+    "mirrorSource": "",
+    "websiteUrl": ""
+  },
+  "identity": {
+    "id": "CUSTOM-YELLOW-BLACK-COMPANION",
+    "slug": "yellow-black-companion",
+    "brand": "黄黑陪玩平台",
+    "titleZh": "黄黑陪玩平台主题",
+    "titleEn": "Yellow Black Companion",
+    "descriptionZh": "面向 Windows 游戏陪玩客户端的黄黑高保真主题。",
+    "descriptionEn": "A yellow and black Windows gaming companion client theme."
+  },
+  "tags": {
+    "sourceTags": [],
+    "generatedTags": [
+      "windows-client",
+      "gaming",
+      "yellow-black"
+    ],
+    "designTags": [
+      "明亮",
+      "游戏陪玩",
+      "桌面客户端"
+    ],
+    "distributionTags": [
+      "Windows 客户端",
+      "游戏陪玩",
+      "高保真原型"
+    ]
+  },
+  "assets": {
+    "designMd": {
+      "path": "DESIGN.md",
+      "method": "project_custom"
+    },
+    "tailwind": {
+      "path": "tw.css",
+      "method": "project_custom"
+    },
+    "tokens": {
+      "path": "assets/tokens.json",
+      "method": "derived_from_design_md"
+    },
+    "cover": {
+      "status": "local_preview",
+      "path": "assets/preview.svg"
+    },
+    "previewHtml": {
+      "type": "local-preview",
+      "path": "assets/preview.svg",
+      "publicPath": "assets/preview.svg",
+      "importPath": "./assets/preview.svg?url"
+    }
+  },
+  "tokens": {
+    "palette": [
+      "#FFD60A",
+      "#1D2129",
+      "#4E5969",
+      "#F6F7FD",
+      "#ECECEC",
+      "#FFFFFF",
+      "#FFF4BD",
+      "#FFEB85",
+      "#E5E6EB",
+      "#86909C",
+      "#C9362B",
+      "#287A4B",
+      "#2F66C5"
+    ],
+    "typography": {
+      "display": "Segoe UI",
+      "body": "Segoe UI",
+      "mono": "ui-monospace",
+      "hints": [
+        "Segoe UI",
+        "Arial",
+        "sans-serif"
+      ]
+    },
+    "radius": {
+      "control": "6px",
+      "card": "8px",
+      "preview": "8px",
+      "pill": "9999px",
+      "source": "DESIGN.md",
+      "button": "9999px"
+    },
+    "spacing": {
+      "xxs": "4px",
+      "xs": "8px",
+      "sm": "12px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "section": "32px",
+      "source": "DESIGN.md"
+    },
+    "semantic": {
+      "brand": "#FFD60A",
+      "brandHover": "#E6B800",
+      "brandActive": "#CCA300",
+      "ink": "#1D2129",
+      "secondary": "#4E5969",
+      "canvas": "#F6F7FD",
+      "navigation": "#ECECEC",
+      "surface": "#FFFFFF",
+      "selection": "#FFF4BD",
+      "special": "#FFEB85",
+      "border": "#E5E6EB",
+      "controlBorder": "#86909C",
+      "danger": "#C9362B",
+      "success": "#287A4B",
+      "link": "#2F66C5"
+    },
+    "sizes": {
+      "buttonHeight": "48px",
+      "inputHeight": "36px",
+      "dialogWidth": "375px"
+    }
+  },
+  "previewImages": [
+    {
+      "type": "local-preview",
+      "path": "assets/preview.svg"
+    }
+  ],
+  "display": {
+    "brand": "黄黑陪玩平台",
+    "brandAlias": "Yellow Black Companion",
+    "description": "明亮的 Windows 游戏陪玩客户端主题。",
+    "descriptionEn": "Yellow accents, dark text and cool surfaces.",
+    "variant": "windows-client-high-fidelity",
+    "distributionTags": [
+      "Windows 客户端",
+      "游戏陪玩",
+      "高保真原型"
+    ],
+    "fontStylesheets": [],
+    "palette": [
+      {
+        "color": "#FFD60A",
+        "labelZh": "品牌黄",
+        "labelEn": "品牌黄",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#1D2129",
+        "labelZh": "主要文字",
+        "labelEn": "主要文字",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#4E5969",
+        "labelZh": "次级文字",
+        "labelEn": "次级文字",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#F6F7FD",
+        "labelZh": "内容背景",
+        "labelEn": "内容背景",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#ECECEC",
+        "labelZh": "导航背景",
+        "labelEn": "导航背景",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#FFFFFF",
+        "labelZh": "白色表面",
+        "labelEn": "白色表面",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#FFF4BD",
+        "labelZh": "选中背景",
+        "labelEn": "选中背景",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#FFEB85",
+        "labelZh": "特殊卡片",
+        "labelEn": "特殊卡片",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#E5E6EB",
+        "labelZh": "装饰分隔",
+        "labelEn": "装饰分隔",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#86909C",
+        "labelZh": "控件边界",
+        "labelEn": "控件边界",
+        "textColor": "#1D2129"
+      },
+      {
+        "color": "#C9362B",
+        "labelZh": "危险",
+        "labelEn": "危险",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#287A4B",
+        "labelZh": "成功",
+        "labelEn": "成功",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "color": "#2F66C5",
+        "labelZh": "链接",
+        "labelEn": "链接",
+        "textColor": "#FFFFFF"
+      }
+    ],
+    "shadows": [
+      {
+        "label": "卡片",
+        "value": "0 1px 3px rgba(17,24,39,.06)",
+        "cssValue": "0 1px 3px rgba(17,24,39,.06)",
+        "description": "轻微层次。"
+      },
+      {
+        "label": "浮层",
+        "value": "0 8px 24px rgba(17,24,39,.15)",
+        "cssValue": "0 8px 24px rgba(17,24,39,.15)",
+        "description": "弹窗与菜单。"
+      }
+    ],
+    "borders": [
+      {
+        "label": "装饰分隔线",
+        "value": "#E5E6EB",
+        "cssValue": "1px solid #E5E6EB",
+        "description": "普通内容分隔。"
+      },
+      {
+        "label": "控件边界",
+        "value": "#86909C",
+        "cssValue": "1px solid #86909C",
+        "description": "输入及必要控件边界。"
+      }
+    ],
+    "typography": [
+      "Segoe UI",
+      "Arial",
+      "sans-serif"
+    ],
+    "previewImages": [
+      {
+        "type": "local-preview",
+        "path": "assets/preview.svg"
+      }
+    ],
+    "panels": [
+      {
+        "eyebrow": "窗口",
+        "title": "桌面客户端",
+        "body": "1920×1080 固定画布，标题栏 40px，导航 240px。"
+      },
+      {
+        "eyebrow": "颜色",
+        "title": "黄与深色",
+        "body": "品牌黄突出主要操作，白色与冷灰承载内容。"
+      }
+    ],
+    "usageGuidance": {
+      "do": [
+        "使用黄色主操作与深色文字。",
+        "使用背景和形状共同区分选中状态。",
+        "检查键盘焦点和文字对比度。"
+      ],
+      "dont": [
+        "不要用黄色细线独自表示焦点。",
+        "不要将普通卡片统一涂黄。",
+        "不要改变原型既有业务规则。"
+      ]
+    },
+    "radius": {
+      "control": "6px",
+      "card": "8px",
+      "preview": "8px",
+      "pill": "9999px",
+      "source": "DESIGN.md",
+      "button": "9999px"
+    },
+    "spacing": {
+      "xxs": "4px",
+      "xs": "8px",
+      "sm": "12px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "section": "32px",
+      "source": "DESIGN.md"
+    }
+  }
+}

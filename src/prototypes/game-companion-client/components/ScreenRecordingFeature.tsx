@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Circle, CircleStop, Pause, Play, Video } from 'lucide-react'
 import { NotificationToast } from '@/components/WindowsClient'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 
 type RecordingState = 'idle' | 'recording' | 'paused'
 

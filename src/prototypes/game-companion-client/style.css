@@ -531,6 +531,7 @@
 .game-companion-client .windows-client-frame__sidebar { position: relative; z-index: 21; overflow: visible; }
 .game-companion-client .windows-sidebar { max-height: 100%; }
 .game-companion-client .windows-sidebar__items { min-height: 0; flex: 1 1 auto; overflow-y: auto; }
+.game-companion-client .windows-sidebar__item:not(.windows-sidebar__item--primary) { min-height: 46px; }
 .client-profile-quick--sidebar { display: block; width: 100%; }
 .client-sidebar-account { display: flex; width: 100%; min-height: 64px; align-items: center; gap: 10px; border: 0; border-radius: 6px; padding: 8px; background: transparent; color: var(--client-text); font: inherit; text-align: left; cursor: pointer; }
 .client-sidebar-account > .client-avatar, .client-sidebar-account > img { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
@@ -1608,6 +1609,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .club-group-application-field textarea:focus-visible { border-color: var(--prototype-text-muted, #6b7280); box-shadow: 0 0 0 3px rgb(107 114 128 / 15%); }
 .club-group-application-count { margin-top: 6px; color: var(--client-muted); font-size: 10px; text-align: right; }
 
+.game-companion-client .windows-sidebar__item--primary .windows-sidebar__icon { width: 48px; flex: 0 0 48px; }
+.client-quick-match-icon { display: block; width: 48px; height: 48px; object-fit: contain; }
 .windows-sidebar__item--primary { min-height: 56px; margin-bottom: 4px; background: var(--prototype-primary, #374151); color: var(--prototype-on-primary, var(--prototype-surface, #fff)); font-weight: 600; }
 .windows-sidebar__item--primary:hover, .windows-sidebar__item--primary.is-active { background: var(--prototype-primary-hover, var(--prototype-text, #1f2937)); color: var(--prototype-on-primary, var(--prototype-surface, #fff)); }
 .windows-sidebar__item--primary.is-active { box-shadow: inset 2px 0 var(--prototype-border-strong, #d1d5db); }
@@ -2324,3 +2327,30 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .client-update-entry__progress-label { flex: 0 0 auto; white-space: nowrap; }
 .client-update-entry__track { width: 56px; flex: 0 0 56px; height: 5px; overflow: hidden; border-radius: 3px; background: #e5e7eb; }
 .client-update-entry__track span { display: block; height: 100%; border-radius: inherit; background: #4b5563; transition: width 100ms linear; }
+
+
+/* 高保真首批：仅为客户端公共框架上色。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__main { background: #f6f7fc; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__titlebar { background: #ffd60a; border-color: #ffd60a; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-titlebar { color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-titlebar-search { background: #ffec8a; border-color: transparent; border-radius: 999px; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-titlebar-support,
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notice-button,
+[data-prototype-palette="high-fidelity"] .game-companion-client .screen-recording-entry { background: #ffec8a; border-color: transparent; border-radius: 50%; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-control-buttons { align-self: center; overflow: hidden; margin-right: 16px; border-radius: 999px; background: #ffec8a; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-control-buttons__button { height: 28px; width: 32px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__sidebar { background: #ececec; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item { color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item:hover,
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item.is-active { background: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item.is-active { box-shadow: inset 3px 0 #ffd60a; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary,
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary.is-active { background: #ffd60a; color: #1d2129; border-radius: 999px; box-shadow: 0 3px 8px rgb(0 0 0 / 12%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover { background: #edc600; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__badge { background: #f44336; color: #fff; }
+
+/* 高保真预览头像；显式提供的头像仍优先。 */
+.client-avatar__preview { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-avatar { background: #e9e5f6; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-avatar:has(.client-avatar__preview) .client-avatar__fallback { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-avatar__preview { display: block; }

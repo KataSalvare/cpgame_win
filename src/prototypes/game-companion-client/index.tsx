@@ -4,9 +4,9 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, CircleHelp, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Settings, Sparkles, Swords, TreeDeciduous, UserRound, WalletCards } from 'lucide-react'
+import { Bell, Building2, CircleHelp, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Settings, Sparkles, TreeDeciduous, UserRound, WalletCards } from 'lucide-react'
 import { DialogPanel, NotificationToast, RightDrawer, WindowsClientFrame, WindowsSidebar, WindowsTitleBar } from '@/components/WindowsClient'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 import { registerOverlayReveal } from '@/lib/overlayReveal'
 import { playerProfile, walletEntries, type PlayerProfile } from './data/accountMockData'
@@ -58,6 +58,7 @@ import { ExamOrderDetailPanel } from './components/ExamOrderDetailPanel'
 import { WorkbenchPage } from './pages/WorkbenchPage'
 import { useWorkbenchLogic } from './hooks/useWorkbenchLogic'
 import clubAdminDashboardReference from './assets/club-admin-dashboard-reference.png'
+import quickMatchGamepad from './assets/quick-match-gamepad.webp'
 
 const clientNoticeCycleStorageKey = 'game-companion-client-notice-cycle'
 
@@ -73,6 +74,7 @@ function readPendingSearchUser(): GlobalSearchUser | null {
 }
 import './workbench.css'
 import './style.css'
+import './high-fidelity.css'
 
 type ClientPageState = 'normal' | 'loading' | 'empty' | 'error'
 type WindowCloseChoice = 'minimize' | 'exit'
@@ -507,7 +509,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
     titleBar={<WindowsTitleBar title="超速电竞" leading={<Gamepad2 size={16} />} onClose={requestWindowClose} actions={<><button type="button" className="client-titlebar-search" onClick={() => { setGlobalSearchOpen(true); navigateToClientOverlay('global-search') }} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><UpdateEntry onOpen={() => { setUpdateReminderClosed(false); navigateToClientOverlay('update-reminder') }} /><ScreenRecordingFeature autoOpen={props.entryView === 'screen-recording'} onOpen={() => navigateToClientOverlay('screen-recording')} onClose={() => closeClientOverlay('screen-recording')} /><button type="button" className="client-titlebar-support" onClick={() => { setHelpCenterOpen(true); navigateToClientOverlay('help-center') }} aria-label="帮助中心" data-tooltip="帮助中心"><CircleHelp size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => { if (navigation.page !== 'system-settings') { setSelectedSearchUser(null); navigateToSystemSettings() } }} aria-label="系统设置" data-tooltip="系统设置"><Settings size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => { setPlatformSupportOpen(true); navigateToClientOverlay('platform-support') }} aria-label="平台客服" data-tooltip="平台客服"><Headphones size={16} /></button><button type="button" className="workbench-notice-button" aria-label="客户端通知" data-tooltip="客户端通知" aria-expanded={noticeMode !== 'closed'} aria-controls="workbench-notifications" onClick={toggleClientNotifications}><Bell size={16} /><span className="workbench-notice-count">{pendingNotificationCount}</span></button></>} />}
     sidebar={<WindowsSidebar
       items={[
-        { id: 'quick-match', label: isMatching ? (matchCandidatesAvailable ? '等待选人' : '匹配中') : '一键匹配', icon: <Swords size={16} />, group: 'quick-match', groupTitle: '', variant: 'primary' },
+        { id: 'quick-match', label: isMatching ? (matchCandidatesAvailable ? '等待选人' : '匹配中') : '一键匹配', icon: <img className="client-quick-match-icon" src={quickMatchGamepad} alt="" />, group: 'quick-match', groupTitle: '', variant: 'primary' },
         { id: 'home', label: '首页', icon: <Building2 size={16} />, group: 'main', groupTitle: '' },
         { id: 'talents', label: '大神', icon: <Sparkles size={16} />, group: 'main' },
         { id: 'announcements', label: '公告', icon: <Bell size={16} />, group: 'main', badge: unreadPlatformAnnouncementCount },
@@ -522,7 +524,7 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       ]}
       activeId={matchPanelOpen || isMatching ? 'quick-match' : activeNavId}
       onSelect={(id) => id === 'club-admin' ? setClubAdminPreviewOpen(true) : id === 'quick-match' ? openMatchPanel() : id === 'home' ? navigation.goHome() : id === 'voice-room' ? requestVoiceRoomEntry('personal') : navigation.goToPage(id as 'workbench' | 'talents' | 'profile' | 'wallet' | 'orders' | 'messages' | 'announcements' | 'woodpecker')}
-      footer={<>{voiceRoomMinimized && <button type="button" className="voice-minimized-float" onClick={() => { setVoiceRoomMinimized(false); window.sessionStorage.removeItem('voice-room-minimized'); navigation.goToPage('voice-room') }}><Headphones size={17} /><span>语音聊天中</span><small>点击返回语音房</small><span className="voice-minimized-float__wave" aria-hidden="true"><i /><i /><i /><i /></span></button>}<ProfileQuickPanel initialOpen={props.entryView === 'quick-panel'} profile={profile} diamondBalance={account.diamondBalance} beanBalance={account.beanBalance} onNavigate={(action) => { if (action === 'friends') { navigation.goToPage('messages'); window.setTimeout(() => { window.location.hash = 'page=messages&tab=friends' }, 100) } else if (action === 'fans' || action === 'following') { setPersonalCenterRequest((current) => ({ ...current, entryView: 'profile-social', section: 'favorites', socialTab: action === 'fans' ? 'fans' : 'users', version: current.version + 1 })); navigateToProfileSection('favorites') } else if (action === 'wealth') { setPersonalCenterRequest((current) => ({ ...current, entryView: 'profile-wealth', section: 'wealth', socialTab: 'clubs', version: current.version + 1 })); navigateToProfileSection('wealth') } else if (action === 'profile') { setPersonalCenterRequest((current) => ({ ...current, entryView: 'profile', section: 'profile', socialTab: 'clubs', version: current.version + 1 })); navigation.goToPage('profile') } else if (action === 'recharge') { setRechargeReturnLabel('返回'); setCheckoutRechargeOpen(true) } else if (action === 'withdraw') navigation.openBeanWithdraw(); else setBeanExchangeOpen(true) }}>{profile.avatarDataUrl ? <img src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" />}</ProfileQuickPanel></>}
+      footer={<>{voiceRoomMinimized && <button type="button" className="voice-minimized-float" onClick={() => { setVoiceRoomMinimized(false); window.sessionStorage.removeItem('voice-room-minimized'); navigation.goToPage('voice-room') }}><Headphones size={17} /><span>语音聊天中</span><small>点击返回语音房</small><span className="voice-minimized-float__wave" aria-hidden="true"><i /><i /><i /><i /></span></button>}<ProfileQuickPanel initialOpen={props.entryView === 'quick-panel'} profile={profile} diamondBalance={account.diamondBalance} beanBalance={account.beanBalance} onNavigate={(action) => { if (action === 'friends') { navigation.goToPage('messages'); window.setTimeout(() => { window.location.hash = 'page=messages&tab=friends' }, 100) } else if (action === 'fans' || action === 'following') { setPersonalCenterRequest((current) => ({ ...current, entryView: 'profile-social', section: 'favorites', socialTab: action === 'fans' ? 'fans' : 'users', version: current.version + 1 })); navigateToProfileSection('favorites') } else if (action === 'wealth') { setPersonalCenterRequest((current) => ({ ...current, entryView: 'profile-wealth', section: 'wealth', socialTab: 'clubs', version: current.version + 1 })); navigateToProfileSection('wealth') } else if (action === 'profile') { setPersonalCenterRequest((current) => ({ ...current, entryView: 'profile', section: 'profile', socialTab: 'clubs', version: current.version + 1 })); navigation.goToPage('profile') } else if (action === 'recharge') { setRechargeReturnLabel('返回'); setCheckoutRechargeOpen(true) } else if (action === 'withdraw') navigation.openBeanWithdraw(); else setBeanExchangeOpen(true) }}>{profile.avatarDataUrl ? <img src={profile.avatarDataUrl} alt="" /> : <AvatarMark initials={profile.initials} size="md" isDemoUser />}</ProfileQuickPanel></>}
     />}
     rightPanel={selectedSearchUser?.companionId ? (() => {
       const companion = companions.find((item) => item.id === selectedSearchUser.companionId)
@@ -586,13 +588,13 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
       {props.entryView === 'update-reminder' && !updateReminderClosed && <DialogPanel overlayId="client-update-reminder" title="更新提醒" onClose={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => { setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>稍后提醒</button><button type="button" className="client-button client-button--primary" onClick={() => { try { sessionStorage.setItem('game-companion-update-download-start', String(Date.now())); sessionStorage.removeItem('game-companion-update-ready-shown') } catch { /* Storage may be unavailable. */ } setUpdateReminderClosed(true); closeClientOverlay('update-reminder') }}>立即更新</button></>}>
         <p>发现新版本 v1.1.0</p><p>更新后可体验最新功能与优化。</p>
       </DialogPanel>}
-      {windowCloseDialogOpen && <DialogPanel overlayId="client-window-close" title="关闭超速电竞" onClose={cancelWindowClose} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={cancelWindowClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={confirmWindowClose}>确定</button></>}>
+      {windowCloseDialogOpen && <ConfirmationDialog overlayId="client-window-close" title="关闭超速电竞" onCancel={cancelWindowClose} onConfirm={confirmWindowClose} confirmLabel="确定">
         <div className="window-close-options" role="radiogroup" aria-label="关闭方式">
           <label className={`window-close-option${windowCloseChoice === 'minimize' ? ' is-selected' : ''}`}><input type="radio" name="window-close-choice" value="minimize" checked={windowCloseChoice === 'minimize'} onChange={() => setWindowCloseChoice('minimize')} /><span>最小化到托盘</span></label>
           <label className={`window-close-option${windowCloseChoice === 'exit' ? ' is-selected' : ''}`}><input type="radio" name="window-close-choice" value="exit" checked={windowCloseChoice === 'exit'} onChange={() => setWindowCloseChoice('exit')} /><span>退出超速电竞</span></label>
         </div>
         <label className="window-close-skip"><input type="checkbox" checked={skipWindowClosePromptToday} onChange={(event) => setSkipWindowClosePromptToday(event.target.checked)} /><span>今日不再提示</span></label>
-      </DialogPanel>}
+      </ConfirmationDialog>}
       {pendingVoiceRoomEntry && <ConfirmationDialog overlayId="voice-room-entry-confirm" title="切换语音房" message={<>你当前正在 <strong>{clubs.find((club) => club.id === social.activeVoiceRoom?.clubId)?.name ?? navigation.club.name}</strong> 的语音房，切换至 <strong>{pendingVoiceRoomEntry.clubName}</strong> 会<strong>离开当前语音房、断开语音连接</strong>，是否确认切换？</>} confirmLabel="确认" onCancel={() => setPendingVoiceRoomEntry(null)} onConfirm={confirmVoiceRoomEntry} />}
       {giftAnimation > 0 && <GiftAnimation key={`gift-animation-${giftAnimation}`} onFinished={() => setGiftAnimation(0)} />}
       {giftToast > 0 && <div className="gift-success-toast" role="status">赠送成功！</div>}

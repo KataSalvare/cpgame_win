@@ -1,0 +1,131 @@
+/* Scoped to the client so the workbench and other prototypes keep their palettes. */
+[data-prototype-palette="high-fidelity"] :is(.game-companion-client, .gc-login-page, .game-client-session-surface) {
+  --prototype-canvas: #f6f7fd;
+  --prototype-surface: #fff;
+  --prototype-surface-muted: #f0f1f5;
+  --prototype-text: #1d2129;
+  --prototype-text-secondary: #4e5969;
+  --prototype-text-muted: #4e5969;
+  --prototype-text-subtle: #4e5969;
+  --prototype-border: #e5e6eb;
+  --prototype-border-strong: #86909c;
+  --prototype-brand: #ffd60a;
+  --prototype-primary: #ffd60a;
+  --prototype-primary-hover: #e6b800;
+  --prototype-on-primary: #1d2129;
+  --prototype-danger: #c9362b;
+  --prototype-success: #287a4b;
+  --prototype-blue: #2f66c5;
+  --client-confirmation-width: 375px;
+  accent-color: var(--prototype-primary);
+}
+
+:where([data-prototype-palette="high-fidelity"] .game-companion-client) :is(.client-card, .windows-right-drawer__panel) {
+  border-color: var(--prototype-border);
+  background: var(--prototype-surface);
+}
+
+[data-prototype-palette="high-fidelity"] :is(.game-companion-client, .gc-login-page)
+  :where(button, a, summary, select, textarea, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--prototype-text);
+  outline-offset: 2px;
+}
+
+[data-prototype-palette="high-fidelity"] :is(.gc-login-page, .game-companion-client :not(.messages-page *))
+  :where(input:not([type="radio"], [type="checkbox"], [type="range"], [type="file"]), select, textarea):focus-visible {
+  outline: 2px solid var(--prototype-text-secondary);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+[data-prototype-palette="high-fidelity"] .game-companion-client
+  .client-button:not(.messages-page *, .client-titlebar *, .client-confirmation *) {
+  min-height: 48px;
+  border-radius: 9999px;
+  padding-inline: 16px;
+}
+
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-button--primary:not(.messages-page *):active:not(:disabled) {
+  background: #cca300;
+  color: var(--prototype-text);
+}
+
+[data-prototype-palette="high-fidelity"] :is(.gc-login-submit, .gc-login-code-button, .gc-login-secondary-button) {
+  min-height: 48px;
+  border-radius: 9999px;
+  padding-inline: 16px;
+}
+
+[data-prototype-palette="high-fidelity"] .gc-login-brand {
+  background: #fff4bd;
+}
+
+[data-prototype-palette="high-fidelity"] .gc-login-form input:not([type="checkbox"]) {
+  height: 36px;
+  border-color: var(--prototype-border-strong);
+}
+
+[data-prototype-palette="high-fidelity"] .client-confirmation__panel {
+  border-radius: 8px;
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
+  box-shadow: 0 8px 24px rgb(17 24 39 / 15%);
+}
+
+[data-prototype-palette="high-fidelity"] .client-confirmation__panel .windows-dialog-panel__header h2 {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+[data-prototype-palette="high-fidelity"] .client-confirmation__panel .grayscale-confirmation-dialog__message {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+[data-prototype-palette="high-fidelity"] .client-confirmation__panel .client-button {
+  min-height: 48px;
+  border-radius: 9999px;
+  padding-inline: 16px;
+}
+
+[data-prototype-palette="high-fidelity"] .client-confirmation__panel .client-button--secondary {
+  background: #f1f2f8;
+  border-color: #f1f2f8;
+}
+
+[data-prototype-palette="high-fidelity"] .client-confirmation__panel .client-button--secondary:hover {
+  background: #e5e6eb;
+}
+
+[data-prototype-palette="high-fidelity"] .client-confirmation__panel .client-button--primary:active:not(:disabled) {
+  background: #cca300;
+}
+
+.game-companion-client .match-panel [data-overlay="quick-match-cancel"] {
+  position: absolute;
+  z-index: 3;
+  padding: 16px;
+}
+
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(
+  .match-game-option.is-selected, .match-club-strip__option.is-selected,
+  .match-club-option.is-selected, .match-service-cascade__option.is-selected,
+  .match-candidate.is-selected, .order-item.is-selected, .window-close-option.is-selected
+) {
+  background: #fff4bd;
+}
+
+[data-prototype-palette="high-fidelity"] .game-companion-client
+  :is(.client-button--primary, .client-confirmation__panel .client-button--primary):disabled {
+  border-color: var(--prototype-border);
+  background: var(--prototype-border);
+  color: var(--prototype-text-secondary);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+[data-prototype-palette="high-fidelity"] .game-companion-client
+  :where(input, select, textarea)[aria-invalid="true"]:focus-visible {
+  border-color: var(--prototype-danger);
+  outline-color: var(--prototype-danger);
+}

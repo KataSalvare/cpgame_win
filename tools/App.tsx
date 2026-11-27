@@ -217,7 +217,7 @@ function AppContent() {
     setPreviewContainer(node)
   }, [])
 
-  const prototypePalette: 'grayscale' | 'color' = 'grayscale'
+  const [prototypePalette, setPrototypePalette] = useState<'grayscale' | 'high-fidelity'>('grayscale')
   const [deviceMode, setDeviceMode] = useState<'mobile' | 'pc'>('pc')
   const { stageRef, scale: previewScale } = usePreviewScale()
   const fixedDesktopPreview = deviceMode === 'pc' && currentPage != null
@@ -326,6 +326,8 @@ function AppContent() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar
+          prototypePalette={prototypePalette}
+          setPrototypePalette={setPrototypePalette}
           deviceMode={deviceMode}
           setDeviceMode={setDeviceMode}
           showToast={showToast}

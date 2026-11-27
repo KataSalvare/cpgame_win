@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { DialogPanel } from '@/components/WindowsClient'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { OrderNumberCopy } from './OrderNumberCopy'

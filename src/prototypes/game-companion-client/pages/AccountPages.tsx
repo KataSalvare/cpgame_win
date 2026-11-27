@@ -7,7 +7,7 @@ import { OrderNumberCopy } from '../components/OrderNumberCopy'
 import { OrderAfterSalesRecords } from '../components/OrderAfterSalesRecords'
 import { CopyableProfileId } from '../components/CopyableProfileId'
 import { PageStatePanel } from '../components/PageStatePanel'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { WorkbenchOrdersPanel } from '../components/WorkbenchOrdersPanel'
 import { ExamOrderPayButton, ExamSubmissionDialog, ExamSubmissionViewDialog } from '../components/ExamOrderDetailPanel'
 import { mockBeanWithdrawalRecords, type ClientOrder, type OrderStatus, type PendingBeanSettlementEntry, type WalletTransaction } from '../data/accountMockData'
@@ -624,7 +624,6 @@ function OrderPaymentConfirmationDialog({ order, onClose, onPayPendingOrder }: {
 }
 
 function OrderActionConfirmationDialog({ order, action, onClose, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd }: { order: ClientOrder; action: string; onClose: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void }) {
-  const dialogRef = useOrderDialogFocus(onClose)
   const [completedQuantity, setCompletedQuantity] = useState('')
   const completedQuantityValue = Number(completedQuantity)
   const validCompletedQuantity = order.durationUnit !== '局' || (completedQuantity !== '' && Number.isFinite(completedQuantityValue) && completedQuantityValue > 0 && completedQuantityValue <= order.duration && Number.isInteger(completedQuantityValue * 2))
@@ -634,15 +633,15 @@ function OrderActionConfirmationDialog({ order, action, onClose, onUpdateStatus,
     return String(nextValue)
   })
   const needsConfirmation = action === '支付' || action === '取消订单' || action === '确认完成' || action === '完成订单' || action === '提前结束'
-  return <div className="order-action-overlay" data-overlay="order-action-confirmation" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
-    <section ref={dialogRef} className={`order-action-dialog${action === '提前结束' ? ' order-action-dialog--early-end' : ''}`} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-action-title">
-      <header><h2 id="order-action-title">{action}</h2><button type="button" className="order-action-dialog__close" aria-label="关闭提示" onClick={onClose}><X size={17} /></button></header>
-      <p>{action === '支付' ? `确认支付${order.amount.toLocaleString()}金豆嘛？` : action === '提前结束' ? order.durationUnit === '局' ? '确认提前结束吗？陪玩同意后，系统将按实际完成局数自动结算。' : '确认提前结束吗？陪玩同意后，系统将按实际服务时长自动结算。' : orderActionMessage(action, order.status)}</p>
+  return <ConfirmationDialog overlayId="order-action-confirmation" title={action} message={action === '支付' ? `确认支付${order.amount.toLocaleString()}金豆嘛？` : action === '提前结束' ? order.durationUnit === '局' ? '确认提前结束吗？陪玩同意后，系统将按实际完成局数自动结算。' : '确认提前结束吗？陪玩同意后，系统将按实际服务时长自动结算。' : orderActionMessage(action, order.status)}
+    onCancel={needsConfirmation ? onClose : undefined} onDismiss={onClose}
+    cancelLabel={action === '提前结束' ? '取消' : '返回'}
+    confirmLabel={!needsConfirmation ? '知道了' : action === '支付' ? '确认支付' : action === '取消订单' ? '确认取消' : action === '提前结束' ? '确认' : '确认完成'}
+    confirmDisabled={action === '提前结束' && !validCompletedQuantity}
+    onConfirm={() => { if (action === '支付') { if (!onPayPendingOrder(order.id)) return } else if (action === '提前结束') onRequestEarlyEnd(order.id, order.durationUnit === '局' ? completedQuantityValue : undefined); else if (needsConfirmation) onUpdateStatus(order.id, action === '取消订单' ? '已取消' : '已完成'); onClose() }}>
       {action === '提前结束' && order.durationUnit === '局' && <div className="workbench-waiver-field order-early-end-quantity"><span>已完成局数</span><div className="checkout-duration__controls order-early-end-quantity__controls"><button type="button" className="checkout-duration__stepper" aria-label="减少 0.5 局" disabled={completedQuantity === '' || !Number.isFinite(completedQuantityValue) || completedQuantityValue <= 0.5} onClick={() => adjustCompletedQuantity(-0.5)}><span aria-hidden="true">−</span></button><label><input className="order-early-end-quantity__input" type="number" min="0.5" max={order.duration} step="0.5" value={completedQuantity} onChange={event => setCompletedQuantity(event.target.value)} aria-label="已完成局数" aria-invalid={completedQuantity !== '' && !validCompletedQuantity} /><span>局</span></label><button type="button" className="checkout-duration__stepper" aria-label="增加 0.5 局" disabled={Number.isFinite(completedQuantityValue) && completedQuantityValue >= order.duration} onClick={() => adjustCompletedQuantity(0.5)}><span aria-hidden="true">+</span></button></div><small>请输入 0.5 局的倍数，最多 {order.duration} 局</small></div>}
       {action === '提前结束' && order.durationUnit === '小时' && <div className="order-early-end-summary"><span>已服务时长</span><strong>{formatServedClock(order.servedDurationMinutes)}</strong><p>当前订单已服务时长，将退还 <b>{order.earlyEndRefundAmount ?? 50}</b> 金豆</p></div>}
-      <footer>{needsConfirmation ? <><button type="button" className="client-button client-button--secondary" onClick={onClose}>{action === '提前结束' ? '取消' : '返回'}</button><button type="button" className="client-button client-button--primary" disabled={action === '提前结束' && !validCompletedQuantity} onClick={() => { if (action === '支付') { if (!onPayPendingOrder(order.id)) return } else if (action === '提前结束') onRequestEarlyEnd(order.id, order.durationUnit === '局' ? completedQuantityValue : undefined); else onUpdateStatus(order.id, action === '取消订单' ? '已取消' : '已完成'); onClose() }}>{action === '支付' ? '确认支付' : action === '取消订单' ? '确认取消' : action === '提前结束' ? '确认' : '确认完成'}</button></> : <button type="button" className="client-button client-button--primary" onClick={onClose}>知道了</button>}</footer>
-    </section>
-  </div>
+  </ConfirmationDialog>
 }
 
 function OrderRenewDialog({ order, diamondBalance, onClose, onOpenRecharge, onRenewOrder }: { order: ClientOrder; diamondBalance: number; onClose: () => void; onOpenRecharge: () => void; onRenewOrder: (orderId: string, quantity: number) => boolean }) {
@@ -658,13 +657,9 @@ function OrderRenewDialog({ order, diamondBalance, onClose, onOpenRecharge, onRe
     dialogRef.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus()
   }, [dialogRef, result])
 
-  if (result === 'insufficient') return <div className="order-action-overlay" data-overlay="order-renew-recharge-confirmation" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setResult('form') }}>
-    <section ref={dialogRef} className="order-action-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-renew-recharge-title">
-      <header><h2 id="order-renew-recharge-title">金豆余额不足</h2><button type="button" className="order-action-dialog__close" aria-label="关闭购买提示" onClick={() => setResult('form')}><X size={17} /></button></header>
-      <p>当前金豆余额 {diamondBalance.toLocaleString()}，续单需要 {amount.toLocaleString()}，还差 <strong>{Math.max(0, amount - diamondBalance).toLocaleString()} 金豆</strong>。打开购买弹窗补充余额吗？</p>
-      <footer><button type="button" className="client-button client-button--secondary" onClick={() => setResult('form')}>稍后再说</button><button type="button" className="client-button client-button--primary" onClick={onOpenRecharge}>去购买</button></footer>
-    </section>
-  </div>
+  if (result === 'insufficient') return <ConfirmationDialog overlayId="order-renew-recharge-confirmation"
+    title="金豆余额不足" message={<>当前金豆余额 {diamondBalance.toLocaleString()}，续单需要 {amount.toLocaleString()}，还差 <strong>{Math.max(0, amount - diamondBalance).toLocaleString()} 金豆</strong>。打开购买弹窗补充余额吗？</>} cancelLabel="稍后再说" confirmLabel="去购买"
+    onCancel={() => setResult('form')} onConfirm={onOpenRecharge} />
 
   if (result === 'success') return <div className="order-action-overlay" data-overlay="order-renew-success" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
     <section ref={dialogRef} className="order-action-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-renew-success-title">

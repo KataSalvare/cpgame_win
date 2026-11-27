@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 
 type PendingRemoval = { action: '取消关注' | '取消收藏'; name: string; confirm: () => void; description?: string }
 

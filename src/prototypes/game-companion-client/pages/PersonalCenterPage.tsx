@@ -2,7 +2,7 @@ import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { BadgeCheck, BatteryCharging, Bookmark, Building2, CalendarDays, Check, ChevronRight, Coins, Copy, FileBadge2, Footprints, Gem, Gift, HandHeart, Headphones, History, ImagePlus, LockKeyhole, LogOut, Monitor, Orbit, Pencil, Search, Shield, ShieldCheck, Sparkles, Star, Trash2, UserRound, UsersRound, WalletCards, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { CompanionOnboarding } from '../components/CompanionOnboarding'
 import { OnboardingApplicationRecords } from '../components/OnboardingApplicationRecords'
 import type { OnboardingApplication, OnboardingSubmission } from '../data/onboardingApplicationMockData'
@@ -447,9 +447,12 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
   const pendingDevice = mockDevices.find((device) => device.id === pendingDeviceId)
   const activeTitle = view === 'overview' ? '账号安全' : view === 'real-name' ? '实名认证信息' : view === 'phone' ? '修改手机号' : view === 'devices' ? '登录设备' : view.startsWith('closure') ? '注销账号' : '结束登录'
   const activeDescription = view === 'overview' ? '管理账号信息和登录设备。' : view === 'real-name' ? '当前账号已完成实名认证。' : view === 'phone' ? '验证新手机号后更新绑定信息。' : view === 'devices' ? '查看并管理登录中的设备。' : view === 'closure-terms' ? '请阅读注销账号协议。' : view === 'closure-warning' ? '请确认注销后果及账户余额。' : view === 'closure-phone' ? '验证绑定手机号后完成注销。' : view === 'closure-complete' ? '账号注销申请流程已完成。' : '确认结束该设备登录。'
-  const footer = pendingDevice
-    ? <><button type="button" className="client-button client-button--secondary" onClick={() => setPendingDeviceId(null)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { onEndDevice(pendingDevice.id); setPendingDeviceId(null); setFeedback('已结束该设备的登录') }}>确认结束登录</button></>
-    : view === 'overview' || view === 'devices' || view === 'closure-complete' || view === 'real-name'
+  if (pendingDevice) return <ConfirmationDialog overlayId="account-security-dialog" title="结束登录"
+    message={activeDescription} confirmLabel="确认结束登录" onCancel={() => setPendingDeviceId(null)} onDismiss={onClose}
+    onConfirm={() => { onEndDevice(pendingDevice.id); setPendingDeviceId(null); setFeedback('已结束该设备的登录') }}>
+    <div className="personal-setting-confirm"><Monitor size={22} /><div><strong>结束「{pendingDevice.name}」的登录？</strong><p>该设备将退出当前账号。此操作仅更新本次原型中的设备状态。</p></div></div>
+  </ConfirmationDialog>
+  const footer = view === 'overview' || view === 'devices' || view === 'closure-complete' || view === 'real-name'
       ? <button type="button" className="client-button client-button--secondary" onClick={view === 'overview' || view === 'closure-complete' ? onClose : () => { backToOverview(); if (view === 'real-name') onBackFromRealName() }}>{view === 'devices' || view === 'real-name' ? '返回' : '完成'}</button>
       : view === 'phone'
         ? <><button type="button" className="client-button client-button--secondary" onClick={backToOverview}>返回</button><button type="submit" form="personal-phone-form" className="client-button client-button--primary">确认更换</button></>
@@ -459,8 +462,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
             ? <><button type="button" className="client-button client-button--secondary" onClick={() => setView('closure-terms')}>返回</button><button type="button" className="client-button client-button--primary" disabled={!warningAccepted} onClick={() => { setView('closure-phone'); setError('') }}>下一步</button></>
             : <><button type="button" className="client-button client-button--secondary" onClick={() => setView('closure-warning')}>返回</button><button type="submit" form="account-closure-phone-form" className="client-button client-button--primary">确认注销</button></>
   return <DialogPanel overlayId="account-security-dialog" title={activeTitle} description={activeDescription} onClose={onClose} width={600} footer={footer}>
-    {pendingDevice ? <div className="personal-setting-confirm"><Monitor size={22} /><div><strong>结束「{pendingDevice.name}」的登录？</strong><p>该设备将退出当前账号。此操作仅更新本次原型中的设备状态。</p></div></div>
-      : view === 'overview' ? <div className="personal-security-menu">
+    {view === 'overview' ? <div className="personal-security-menu">
         <button type="button" className="personal-security-menu__row" onClick={() => { if (onRealNameEntryClick()) setView('real-name') }}><span><strong>实名认证</strong><small>{realNameEntryClicks === 0 ? '已实名' : '未实名'}</small></span><ChevronRight size={17} /></button>
         <button type="button" className="personal-security-menu__row" onClick={() => { setView('phone'); setError(''); setFeedback(''); setCodeSent(false); setNewPhone(''); setCode('') }}><span><strong>手机号</strong><small>{maskPhone(phone)}</small></span><ChevronRight size={17} /></button>
         <button type="button" className="personal-security-menu__row" onClick={() => { setView('devices'); setError('') }}><span><strong>登录设备</strong><small>{mockDevices.filter((device) => !endedDeviceIds.includes(device.id)).length} 台设备</small></span><ChevronRight size={17} /></button>
@@ -489,7 +491,7 @@ function BlacklistDialog({ profiles, onRemove, onClose }: { profiles: BlockedPro
 
 function ProfileAvatar({ profile, size }: { profile: PlayerProfile; size: 'sm' | 'md' | 'lg' }) {
   if (profile.avatarDataUrl) return <span className={`client-avatar client-avatar--${size} personal-avatar-image`}><img src={profile.avatarDataUrl} alt="" /></span>
-  return <AvatarMark initials={profile.initials} size={size} />
+  return <AvatarMark initials={profile.initials} size={size} isDemoUser />
 }
 
 function readImageFile(file: File) {

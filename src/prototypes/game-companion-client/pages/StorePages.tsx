@@ -4,7 +4,7 @@ import type { Club } from '../data/mockData'
 import { clubs as allClubs } from '../data/mockData'
 import { premiumCards, rechargePackages, type PremiumCard, type PremiumCardTransaction, type RechargeCoupon } from '../data/storeMockData'
 import { PageStatePanel } from '../components/PageStatePanel'
-import { ConfirmationDialog } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
+import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { BalanceRefreshButton } from '../components/BalanceRefreshButton'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
