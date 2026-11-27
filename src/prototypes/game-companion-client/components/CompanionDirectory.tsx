@@ -1,10 +1,11 @@
+import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { companions, regions, type Companion } from '../data/mockData'
 import { useCompanionDirectoryLogic } from '../hooks/useClubDetailLogic'
 import { CompanionCard } from './CompanionCard'
 import { PageStatePanel } from './PageStatePanel'
 import { GameFilter } from './GameFilter'
-import { Flame, LayoutGrid, RotateCcw, Search, Star, X } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, RotateCcw, Search, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 
@@ -31,9 +32,9 @@ const sortLabels: Record<string, string> = {
 }
 
 const talentCategories = [
-  { id: 'all', label: '全部', icon: LayoutGrid },
-  { id: 'popular', label: '人气陪玩', icon: Flame },
-  { id: 'star', label: '明星大神', icon: Star },
+  { id: 'all', label: '全部' },
+  { id: 'popular', label: '人气陪玩' },
+  { id: 'star', label: '明星大神' },
 ] as const
 
 export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion, searchable = false, showTalentCategoryFilter = false, companionSource = companions }: Props) {
@@ -55,7 +56,8 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
   }
 
   return <section className="club-members-section" aria-label="陪玩列表">
-    {showTalentCategoryFilter && <div className="talent-category-filter" role="group" aria-label="陪玩分类筛选">{talentCategories.map(({ id, label, icon: Icon }) => <button type="button" key={id} className={`talent-category-filter__option${talentCategory === id ? ' is-active' : ''}`} aria-pressed={talentCategory === id} onClick={() => setTalentCategory(id)}><Icon size={17} aria-hidden="true" /><span>{label}</span></button>)}</div>}
+    <div className={`companion-directory-filters${showTalentCategoryFilter ? ' companion-directory-filters--talents' : ''}`}>
+    {showTalentCategoryFilter && <CategoryTabs label="陪玩分类筛选" items={talentCategories} value={talentCategory} onChange={setTalentCategory} className="talent-category-filter" />}
     <div className="club-game-filter"><GameFilter gameId={logic.gameId} onSelect={logic.setGameId} /></div>
     <div className={`club-filter-panel${searchable ? ' club-filter-panel--with-search' : ''}`}>
       {searchable && <label className="companion-directory-search"><Search size={15} aria-hidden="true" /><input type="search" value={logic.searchQuery} onChange={(event) => logic.setSearchQuery(event.target.value)} placeholder="搜索陪玩名称或 ID" aria-label="搜索陪玩名称或 ID" />{logic.searchQuery && <button type="button" className="windows-icon-button" aria-label="清空陪玩搜索" onClick={() => logic.setSearchQuery('')}><X size={14} /></button>}</label>}
@@ -66,6 +68,7 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
       <FilterSelect label="年龄" value={logic.age} onChange={logic.setAge} options={ages.map((value) => ({ value, label: value }))} />
       <FilterSelect label="地区" value={logic.region} onChange={logic.setRegion} options={['全部地区', ...regions].map((value) => ({ value, label: value }))} />
       <button type="button" className="client-button client-button--secondary companion-directory-reset" onClick={resetFilters} aria-label="重置陪玩搜索和筛选"><RotateCcw size={14} />重置</button>
+    </div>
     </div>
 
     {visibleCompanions.length > 0 ? <div className="client-card-grid client-card-grid--companions">
@@ -80,5 +83,27 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
 }
 
 function FilterSelect({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (value: string) => void }) {
-  return <label className="client-filter-select"><select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const closeOutside = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', closeOutside)
+    return () => document.removeEventListener('pointerdown', closeOutside)
+  }, [open])
+
+  return <div className="directory-select" ref={rootRef} onKeyDown={(event) => {
+    if (event.key === 'Escape' && open) { setOpen(false); buttonRef.current?.focus() }
+  }}>
+    <button ref={buttonRef} type="button" className="directory-select__trigger" aria-label={`${label}：${options.find(option => option.value === value)?.label ?? value}`} aria-expanded={open} aria-haspopup="listbox" onClick={() => setOpen(!open)}>
+      <span>{options.find(option => option.value === value)?.label ?? value}</span><ChevronDown size={16} aria-hidden="true" />
+    </button>
+    {open && <div className="directory-select__menu" role="listbox" aria-label={label}>
+      {options.map(option => <button type="button" role="option" aria-selected={option.value === value} className={`directory-select__option${option.value === value ? ' is-selected' : ''}`} key={option.value} onClick={() => { onChange(option.value); setOpen(false); buttonRef.current?.focus() }}>{option.label}</button>)}
+    </div>}
+  </div>
 }

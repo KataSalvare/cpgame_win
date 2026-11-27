@@ -1,5 +1,6 @@
+import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useRef, useState } from 'react'
-import { CalendarDays, ClipboardList, ImagePlus, Info, Megaphone, Search, ThumbsDown, ThumbsUp, TreeDeciduous, X } from 'lucide-react'
+import { CalendarDays, ImagePlus, Info, Search, ThumbsDown, ThumbsUp, TreeDeciduous, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { ImageLightbox } from '../components/ImageLightbox'
@@ -100,10 +101,7 @@ export function WoodpeckerPage({ pageState, onRetry, profile }: Props) {
   if (pageState !== 'normal') return <div className="client-content woodpecker-state"><PageStatePanel state={pageState} title={pageState === 'empty' ? '暂无工单' : '啄木鸟暂不可用'} description={pageState === 'loading' ? '正在加载工单…' : pageState === 'error' ? '暂时无法加载，请重试。' : '当前没有可显示的工单。'} actionLabel={pageState === 'error' ? '重新加载' : '查看全部'} onAction={onRetry} /></div>
 
   return <div className="client-content woodpecker-page">
-    <div className="woodpecker-tabs-row"><div className="woodpecker-tabs personal-center-tabs" role="tablist" aria-label="啄木鸟分类">
-      <button type="button" role="tab" aria-selected={activeTab === 'mine'} className={`personal-center-tab${activeTab === 'mine' ? ' is-active' : ''}`} onClick={() => setActiveTab('mine')}><ClipboardList size={16} /><span>我的啄木鸟</span></button>
-      <button type="button" role="tab" aria-selected={activeTab === 'public'} className={`personal-center-tab${activeTab === 'public' ? ' is-active' : ''}`} onClick={() => setActiveTab('public')}><Megaphone size={16} /><span>啄木鸟公示</span></button>
-    </div><div className="woodpecker-info">
+    <div className="woodpecker-tabs-row"><CategoryTabs className="woodpecker-tabs" label="啄木鸟分类" items={[{ id: 'mine', label: '我的啄木鸟' }, { id: 'public', label: '啄木鸟公示' }]} value={activeTab} onChange={setActiveTab} /><div className="woodpecker-info">
       <button type="button" className="woodpecker-info__button" aria-label="啄木鸟平台说明" aria-describedby="woodpecker-info-tooltip"><Info size={16} aria-hidden="true" /></button>
       <div id="woodpecker-info-tooltip" className="woodpecker-info__tooltip" role="tooltip">这里是啄木鸟举报平台。像森林医生啄木鸟一样，发现超速电竞的问题，即刻提交，进度随时可查。您的每一次发声都会被认真对待，让我们一起守护超速电竞的清朗环境。</div>
     </div>{activeTab === 'mine' && <button type="button" className="client-button client-button--primary woodpecker-submit-button" onClick={() => setFormOpen(true)}>我要建议/举报</button>}</div>

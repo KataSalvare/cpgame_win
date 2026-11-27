@@ -1,5 +1,5 @@
 import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
-import { X, Minus, Square } from 'lucide-react'
+import { X, Minus, Square, ArrowLeft } from 'lucide-react'
 import './style.css'
 
 export interface WindowsClientFrameProps {
@@ -189,6 +189,7 @@ export function DialogPanel({ overlayId, children, title, description, footer, o
 
 type RightDrawerCommonProps = {
   children: ReactNode
+  onBack?: () => void
   title?: string
   description?: string
   onClose?: () => void
@@ -201,10 +202,10 @@ export type RightDrawerProps = RightDrawerCommonProps & (
 )
 
 export function RightDrawer(props: RightDrawerProps) {
-  const { children, title, description, onClose, className = '', width = 360 } = props
+  const { children, title, description, onClose, onBack, className = '', width = 360 } = props
   const panel = <section className={`windows-right-drawer__panel${props.mode === 'inline' ? ' is-inline' : ''} ${className}`.trim()} style={{ width }}>
     {(title || onClose) && <header className="windows-right-drawer__header">
-      <div>{title && <h2>{title}</h2>}{description && <p>{description}</p>}</div>
+      <div className="windows-right-drawer__heading">{onBack && <button type="button" className="windows-icon-button" aria-label="返回列表" onClick={onBack}><ArrowLeft size={18} /></button>}<div>{title && <h2>{title}</h2>}{description && <p>{description}</p>}</div></div>
       {onClose && <button type="button" className="windows-icon-button" aria-label="关闭侧栏" onClick={onClose}><X size={16} /></button>}
     </header>}
     <div className="windows-right-drawer__content">{children}</div>

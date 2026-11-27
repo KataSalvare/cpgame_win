@@ -1,8 +1,9 @@
 import type { Companion, VoiceMessage } from '../data/mockData'
 import { clubs } from '../data/mockData'
-import cafeLifePhoto from '../assets/profile-life-photo-cafe.svg'
-import windowLifePhoto from '../assets/profile-life-photo-window.svg'
-import cityLifePhoto from '../assets/profile-life-photo-city.svg'
+import cafeLifePhoto from '../assets/generated/user-life.webp'
+import windowLifePhoto from '../assets/generated/personal-life.webp'
+import cityLifePhoto from '../assets/generated/companion-portrait-03.webp'
+import portraitLifePhoto from '../assets/generated/user-avatar.webp'
 
 export type ProfileCardData = {
   name: string
@@ -53,6 +54,6 @@ export function companionToProfileCard(companion: Companion): ProfileCardData {
     tags: companion.tags,
     intro: companion.intro,
     voiceMessage: companion.voiceMessage,
-    lifePhotos: [cafeLifePhoto, windowLifePhoto, cityLifePhoto].slice(0, 9),
+    lifePhotos: [cafeLifePhoto, windowLifePhoto, cityLifePhoto, portraitLifePhoto],
   }
 }

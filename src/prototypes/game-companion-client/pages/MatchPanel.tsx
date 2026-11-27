@@ -1,6 +1,7 @@
+import { GenderAgeBadge } from '../components/GenderAgeBadge'
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import { Check, ChevronDown, ChevronRight, ClipboardList, Headphones, Mars, Maximize2, MessageCircle, Minimize2, Plus, Search, Star, Swords, UserRound, UsersRound, Venus, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, ClipboardList, Headphones, Maximize2, MessageCircle, Minimize2, Plus, Search, Star, Swords, UserRound, UsersRound, X } from 'lucide-react'
 import type { useMatchLogic } from '../hooks/useMatchLogic'
 import { registerOverlayReveal } from '@/lib/overlayReveal'
 import { companions, games, type Companion } from '../data/mockData'
@@ -283,7 +284,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCan
               <button type="button" className="match-candidate__select" role="checkbox" aria-checked={selectedIds.includes(companion.id)} aria-label={`${selectedIds.includes(companion.id) ? '取消选择' : '选择'}${companion.name}`} onClick={() => toggleCandidate(companion.id)}>
                 <span className="match-candidate__check">{selectedIds.includes(companion.id) && <Check size={14} />}</span>
                 <AvatarMark initials={companion.initials} size="md" />
-                <span className="match-candidate__info"><strong><UserNameWithLevel name={companion.name} identityId={companion.id} /><small className="match-candidate__demographics" aria-label={`性别${companion.gender}，${companion.age}岁`}>{companion.gender === '女' ? <Venus size={12} aria-hidden="true" /> : <Mars size={12} aria-hidden="true" />}{companion.age}</small></strong><small className="match-candidate__stats"><span aria-label={`评分 ${companion.rating}`}><Star size={12} aria-hidden="true" />{companion.rating.toFixed(2)}</span><span aria-label={`订单数 ${companion.orderCount}`}><ClipboardList size={12} aria-hidden="true" />{companion.orderCount.toLocaleString()}</span></small></span>
+                <span className="match-candidate__info"><strong><UserNameWithLevel name={companion.name} identityId={companion.id} /><GenderAgeBadge gender={companion.gender} age={companion.age} /></strong><small className="match-candidate__stats"><span aria-label={`评分 ${companion.rating}`}><Star size={12} aria-hidden="true" />{companion.rating.toFixed(2)}</span><span aria-label={`订单数 ${companion.orderCount}`}><ClipboardList size={12} aria-hidden="true" />{companion.orderCount.toLocaleString()}</span></small></span>
               </button>
               <button type="button" className="client-button client-button--secondary client-button--small match-candidate__contact" onClick={() => onContactCompanion(companion)}><MessageCircle size={13} />联系</button>
             </article>)}

@@ -1,4 +1,5 @@
-import { Mars, MessageCircle, Star, Venus } from 'lucide-react'
+import { GenderAgeBadge } from './GenderAgeBadge'
+import { Star } from 'lucide-react'
 import type { Companion } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
 import { UserNameWithLevel } from './UserNameWithLevel'
@@ -25,7 +26,7 @@ export function CompanionCard({ companion, onOpen, onChat }: CompanionCardProps)
   >
     <div className="companion-card__visual">
       <AvatarMark initials={companion.initials} size="lg" />
-      <span className={`client-status companion-card__visual-status ${companion.status === '接单中' ? 'is-available' : ''}`}>{companion.status}</span>
+      <span className="client-status companion-card__visual-status" data-person-status={companion.status}>{companion.status}</span>
       {companion.voiceMessage && <VoiceMessageButton message={companion.voiceMessage} label="语音介绍" compact />}
     </div>
     <div className="companion-card__body">
@@ -33,10 +34,7 @@ export function CompanionCard({ companion, onOpen, onChat }: CompanionCardProps)
         <div className="companion-card__identity">
           <div className="companion-card__name-row">
             <h3><UserNameWithLevel name={companion.name} identityId={companion.id} /></h3>
-            <span className="companion-card__gender-age" aria-label={`${companion.gender}，${companion.age} 岁`}>
-              {companion.gender === '男' ? <Mars size={13} aria-hidden="true" /> : <Venus size={13} aria-hidden="true" />}
-              <span>{companion.age}</span>
-            </span>
+            <GenderAgeBadge gender={companion.gender} age={companion.age} />
           </div>
         </div>
       </div>
@@ -48,7 +46,7 @@ export function CompanionCard({ companion, onOpen, onChat }: CompanionCardProps)
           <span>{companion.orderCount.toLocaleString()} 单</span>
         </div>
         <button type="button" className="companion-card__chat" onClick={(event) => { event.stopPropagation(); onChat() }}>
-          <MessageCircle size={14} />聊一聊
+          聊一聊
         </button>
       </div>
     </div>

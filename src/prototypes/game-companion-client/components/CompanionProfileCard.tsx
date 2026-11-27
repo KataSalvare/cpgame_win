@@ -1,3 +1,4 @@
+import { GenderAgeBadge } from './GenderAgeBadge'
 import { demoImageKind } from './demoImage'
 import { useRemovalConfirmation } from './RemovalConfirmation'
 import { useEffect, useRef, useState } from 'react'
@@ -41,6 +42,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
   const [localBlocked, setLocalBlocked] = useState(false)
   const [localNote, setLocalNote] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
+  const photoStripRef = useRef<HTMLDivElement>(null)
   const isFollowed = onToggleFollow ? followed : localFollowed
   const isBlocked = onBlock ? blocked : localBlocked
   const visibleNote = onSaveNote ? note : localNote
@@ -48,10 +50,10 @@ export function CompanionProfileCard({ profile, className = '', followed = false
   const visibleLifePhotoIndex = lifePhotos.length ? lifePhotoIndex % lifePhotos.length : 0
 
   useEffect(() => {
-    if (lifePhotos.length < 2) return
+    if (immersive || lifePhotos.length < 2) return
     const timer = window.setInterval(() => setLifePhotoIndex((index) => (index + 1) % lifePhotos.length), 5000)
     return () => window.clearInterval(timer)
-  }, [lifePhotos.length, profile.userId])
+  }, [immersive, lifePhotos.length, profile.userId])
 
   const openReportDialog = () => {
     setReportDialogOpen(true)
@@ -105,18 +107,18 @@ export function CompanionProfileCard({ profile, className = '', followed = false
 
   return <>
     {immersive && <header className="companion-profile-toolbar">
-      <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>
+      <h2 className="companion-profile-toolbar__title">个人主页</h2>
       <div className="companion-profile-card__toolbar-actions">{moreMenu}{onClose && <button type="button" className="windows-icon-button" aria-label="关闭用户详情" onClick={onClose}><X size={17} /></button>}</div>
     </header>}
     <section className={`client-card companion-profile-card${immersive ? ' companion-profile-card--immersive' : ''}${className ? ` ${className}` : ''}`} data-profile-id={profile.userId}>
       <AvatarMark initials={profile.initials} size={immersive ? 'xl' : 'lg'} />
       <div className="companion-profile-card__body">
-        {!immersive && <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>}
-        <div className="companion-profile-card__facts"><span aria-label={`${profile.gender}，${profile.age}岁`}><span aria-hidden="true">{profile.gender === '男' ? '♂' : profile.gender === '女' ? '♀' : profile.gender}{profile.age}</span></span><CopyableProfileId value={profile.userId} entityLabel="用户" /><span className="rating-mark"><Star size={14} />{profile.rating.toFixed(2)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div>
+        <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className="client-status" data-person-status={profile.status}>{profile.status}</span></div>
+        <div className="companion-profile-card__facts"><GenderAgeBadge gender={profile.gender} age={profile.age} /><CopyableProfileId value={profile.userId} entityLabel="用户" /><span className="rating-mark"><Star size={14} />{profile.rating.toFixed(2)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div>
         {profile.friendCount !== undefined && profile.followingCount !== undefined && profile.followerCount !== undefined && <div className="companion-profile-card__stats" aria-label="社交数据"><span><strong>{profile.friendCount}</strong>朋友</span><span><strong>{profile.followingCount}</strong>关注</span><span><strong>{profile.followerCount}</strong>粉丝</span></div>}
-        {profile.club && <div className="companion-profile-card__club" aria-label={`所属俱乐部：${profile.club.name}`}><AvatarMark initials={profile.club.initials} size="sm" /><span>{profile.club.name}</span></div>}
-        <div className="client-tag-row">{profile.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
         <p>{profile.intro}</p>
+        <div className="client-tag-row">{profile.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
+        {profile.club && <div className="companion-profile-card__club" data-club-id={profile.club.id} aria-label={`所属俱乐部：${profile.club.name}`}><AvatarMark initials={profile.club.initials} size="sm" /><span>{profile.club.name}</span></div>}
         {visibleNote && <div className="companion-profile-card__note"><Pencil size={12} /><span>{visibleNote}</span></div>}
       </div>
       {!immersive && moreMenu}
@@ -131,6 +133,9 @@ export function CompanionProfileCard({ profile, className = '', followed = false
         <button type="button" className="companion-life-photos__previous" aria-label="上一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length)}><ChevronLeft size={18} /></button>
         <button type="button" className="companion-life-photos__next" aria-label="下一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index + 1) % lifePhotos.length)}><ChevronRight size={18} /></button>
       </div>
+      <div className="companion-life-photos__gallery"><button type="button" className="companion-life-photos__gallery-arrow is-previous" aria-label="上一张生活照" onClick={() => { const next = (visibleLifePhotoIndex - 1 + lifePhotos.length) % lifePhotos.length; setLifePhotoIndex(next); photoStripRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' }) }}><ChevronLeft size={18} /></button><div ref={photoStripRef} className="companion-life-photos__strip" role="group" aria-label="生活照">
+        {lifePhotos.map((photo, index) => <button type="button" key={`${index}-${photo.slice(-24)}`} className={index === visibleLifePhotoIndex ? 'is-selected' : ''} aria-label={`查看生活照 ${index + 1}`} onClick={() => { setLifePhotoIndex(index); openImage(index) }}><img data-demo-image={demoImageKind(photo)} src={photo} alt="" /></button>)}
+      </div><button type="button" className="companion-life-photos__gallery-arrow is-next" aria-label="下一张生活照" onClick={() => { const next = (visibleLifePhotoIndex + 1) % lifePhotos.length; setLifePhotoIndex(next); photoStripRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' }) }}><ChevronRight size={18} /></button></div>
     </div>}</ImageLightbox>}
     {feedback && <p className="companion-profile-card__feedback" role="status">{feedback}</p>}
     {removalDialog}

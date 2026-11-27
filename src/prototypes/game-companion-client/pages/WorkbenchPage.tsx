@@ -1,5 +1,6 @@
+import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useEffect, useState } from 'react'
-import { X, LayoutDashboard, ClipboardList, SlidersHorizontal, WalletCards, Zap, Swords, ArrowLeftRight, ArrowUpFromLine } from 'lucide-react'
+import { X, Zap, ArrowLeftRight, ArrowUpFromLine } from 'lucide-react'
 import type { WorkbenchLogic, WorkOrder } from '../hooks/useWorkbenchLogic'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
@@ -41,7 +42,7 @@ export function WorkbenchPage({ logic: w, pageState, onRetry, balance, available
   </div>
   return <div className="client-content account-page personal-center-page workbench-page">
     <div className="workbench-tab-row">
-      <nav className="personal-center-tabs" role="tablist" aria-label="工作台模块">{[{ label: '总览', icon: LayoutDashboard }, { label: '匹配请求', icon: Swords }, { label: '订单', icon: ClipboardList }, { label: '服务管理', icon: SlidersHorizontal }, { label: '糖豆钱包', icon: WalletCards }].map(({ label, icon: Icon }) => <button type="button" role="tab" key={label} className={`personal-center-tab${tab === label ? ' is-active' : ''}`} aria-selected={tab === label} onClick={() => { setTab(label as typeof tab); setSelected(null); onTabChange?.(label as typeof tab) }}><Icon size={16} /><span>{label}</span></button>)}</nav>
+      <CategoryTabs label="工作台模块" items={(['总览', '匹配请求', '订单', '服务管理', '糖豆钱包'] as const).map(label => ({ id: label, label }))} value={tab} onChange={(label) => { setTab(label); setSelected(null); onTabChange?.(label) }} />
       <button type="button" className={`client-button workbench-auto-grab ${w.automatic ? 'client-button--primary' : 'client-button--secondary'}`} aria-pressed={w.automatic} onClick={() => setConfirm({ id: 'auto-grab', status: w.automatic ? '关闭自动抢单' : '开启自动抢单' })}><Zap size={18} />{w.automatic ? '关闭自动抢单' : '开启自动抢单'}</button>
     </div>
     {w.feedback && <div className="workbench-feedback" role="status">{w.feedback}<button aria-label="关闭反馈" onClick={() => w.setFeedback('')}><X size={16} /></button></div>}

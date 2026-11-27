@@ -1,0 +1,28 @@
+/* High-fidelity panels float over the workspace; grayscale keeps its inline layout. */
+[data-prototype-palette="high-fidelity"] .windows-client-frame__workspace:has(> .windows-client-frame__right-panel .theme-side-drawer) { position: relative; }
+[data-prototype-palette="high-fidelity"] .windows-client-frame__right-panel:has(.theme-side-drawer) {
+  position: absolute;
+  z-index: 10;
+  inset: 16px 16px 16px auto;
+  max-width: calc(100% - 32px);
+  overflow: visible;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  box-shadow: -12px 12px 36px rgb(44 48 67 / 16%), 0 4px 12px rgb(44 48 67 / 8%);
+}
+[data-prototype-palette="high-fidelity"] .windows-client-frame__right-panel:has(.theme-side-drawer) > .windows-right-drawer--inline { overflow: hidden; border-radius: 20px; background: #f0f1f7; }
+[data-prototype-palette="high-fidelity"] .theme-side-drawer.is-inline { border: 0; background: #f0f1f7; }
+[data-prototype-palette="high-fidelity"] .theme-side-drawer :is(.windows-right-drawer__header, .windows-right-drawer__content) { border: 0; background: transparent; }
+[data-prototype-palette="high-fidelity"] .theme-side-drawer .windows-right-drawer__header { padding: 22px 24px 12px; }
+[data-prototype-palette="high-fidelity"] .theme-side-drawer .windows-right-drawer__header h2 { font-size: 18px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .theme-side-drawer:not(.game-companion-drawer--immersive) .windows-right-drawer__content { padding: 12px 20px 24px; }
+
+/* Embedded side panels use the same surface; position is owned by their layout. */
+[data-prototype-palette="high-fidelity"] .theme-side-surface {
+  border: 0;
+  border-radius: 20px;
+  background: #f0f1f7;
+  box-shadow: -12px 12px 36px rgb(44 48 67 / 16%), 0 4px 12px rgb(44 48 67 / 8%);
+}
+[data-prototype-palette="high-fidelity"] .theme-side-surface > header { border: 0; }

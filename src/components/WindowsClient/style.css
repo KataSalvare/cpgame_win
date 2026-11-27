@@ -85,3 +85,5 @@
 .windows-icon-button:hover { background: var(--prototype-canvas, #f3f4f6); color: var(--wc-text); }
 .windows-client-frame button:focus-visible { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) { .windows-client-frame button { transition: background-color 140ms ease, color 140ms ease; } }
+
+.windows-right-drawer__heading { display: flex; min-width: 0; align-items: center; gap: 8px; }

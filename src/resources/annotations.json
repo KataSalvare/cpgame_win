@@ -588,6 +588,18 @@
       "route": "page=voice-room&club=club-001&voiceFrom=personal"
     },
     {
+      "id": "anno-1795794159360-interaction",
+      "pagePath": "/game-companion-voice-room",
+      "number": 12,
+      "title": "",
+      "content": "改成红底白字。",
+      "category": "interaction",
+      "selector": "div.prototype-content-scroll.w-full.h-full.overflow-auto > div.windows-client-frame.game-companion-client > div.windows-client-frame__body:nth-of-type(2) > div.windows-client-frame__workspace > main.windows-client-frame__main > div.social-page.voice-page > div.voice-workspace > section.room-chat-panel:nth-of-type(2) > div.room-chat-panel__announcement:nth-of-type(1)",
+      "position": "top-left",
+      "createdAt": 1795794159360,
+      "route": "page=voice-room"
+    },
+    {
       "id": "anno-1794361699214-interaction",
       "pagePath": "/game-companion-profile",
       "number": 1,

@@ -1,6 +1,7 @@
+import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, BellRing, CalendarDays, CheckCheck, ClipboardList, LayoutDashboard, Megaphone, ShieldAlert, Siren, type LucideIcon } from 'lucide-react'
+import { Bell, CalendarDays, CheckCheck } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { Announcement, AnnouncementCategory } from '../data/announcementMockData'
@@ -19,15 +20,6 @@ type Props = {
   onBack?: () => void
 }
 
-const categoryIcons: Record<string, LucideIcon> = {
-  全部: LayoutDashboard,
-  平台活动: Megaphone,
-  规则更新: ClipboardList,
-  紧急通知: Siren,
-  处罚通知: ShieldAlert,
-  俱乐部活动: BellRing,
-}
-
 export function AnnouncementsPage({ kind, clubName, announcements, categories, pageState, readIds, onRead, onReadAll, onRetry, onBack, presentation = 'page' }: Props) {
   const [activeCategory, setActiveCategory] = useState<AnnouncementCategory | '全部'>('全部')
   const [selected, setSelected] = useState<Announcement | null>(null)
@@ -43,9 +35,7 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
   return <div className={`client-content announcement-page${presentation === 'panel' ? ' announcement-page--panel' : ''}`}>
     {presentation === 'page' && onBack && <button type="button" className="client-back-link" onClick={onBack}>返回俱乐部</button>}
     {presentation === 'page' && kind === 'club' && <header className="client-page-heading"><div><span className="client-eyebrow">{clubName}</span><h1>{title}</h1></div></header>}
-    <div className="announcement-tabs-row workbench-tab-row"><div className="announcement-filters personal-center-tabs" role="tablist" aria-label="公告分类">
-        {(['全部', ...categories] as const).map((category) => { const Icon = categoryIcons[category] ?? Bell; return <button key={category} type="button" role="tab" aria-selected={activeCategory === category} className={`personal-center-tab${activeCategory === category ? ' is-active' : ''}`} onClick={() => setActiveCategory(category)}><Icon size={16} /><span>{category}</span></button> })}
-      </div>{presentation === 'page' && kind === 'platform' && <button type="button" className="client-button client-button--secondary announcement-read-all" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button>}</div>
+    <div className="announcement-tabs-row workbench-tab-row"><CategoryTabs className="announcement-filters" label="公告分类" items={(['全部', ...categories] as const).map((category) => ({ id: category, label: category }))} value={activeCategory} onChange={setActiveCategory} />{presentation === 'page' && kind === 'platform' && <button type="button" className="client-button client-button--secondary announcement-read-all" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button>}</div>
     <section className="announcement-card client-card" aria-label={`${title}列表`}>
       {visibleAnnouncements.length ? <ul className="announcement-list">
         {visibleAnnouncements.map((announcement) => {

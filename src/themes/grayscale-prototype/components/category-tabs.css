@@ -1,0 +1,5 @@
+.theme-category-tabs { display: flex; min-width: 0; align-items: center; gap: 4px; overflow-x: auto; border-radius: 12px; padding: 8px; background: #e9ebef; }
+.theme-category-tabs__tab { display: inline-flex; min-height: 44px; flex: 0 0 auto; align-items: center; justify-content: center; border: 0; border-radius: 8px; padding: 0 18px; background: transparent; color: #68707d; font: inherit; font-size: 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.theme-category-tabs__tab:hover { background: rgb(255 255 255 / 50%); color: #1d2129; }
+.theme-category-tabs__tab.is-active { background: #fff; color: #1d2129; }
+.theme-category-tabs__tab:focus-visible { outline: 2px solid #6b7280; outline-offset: -3px; }

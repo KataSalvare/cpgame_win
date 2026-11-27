@@ -1,7 +1,7 @@
 import { demoImageKind } from '../components/demoImage'
 import { useRemovalConfirmation } from '../components/RemovalConfirmation'
-import { useState } from 'react'
-import { ArrowLeft, BatteryCharging, ChevronLeft, ChevronRight, Gift, HandHeart, MessageCircle, Orbit, Sparkles, Star, UsersRound } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, BatteryCharging, ChevronDown, ChevronLeft, ChevronRight, Gift, HandHeart, MessageCircle, Orbit, Sparkles, Star, UsersRound } from 'lucide-react'
 import type { Companion } from '../data/mockData'
 import { games, gifts, reviews, servicesByCompanion } from '../data/mockData'
 import { useCompanionDetailLogic } from '../hooks/useCompanionDetailLogic'
@@ -39,6 +39,21 @@ type ReviewFilter = 'all' | 'images' | 'latest' | 'good' | 'middle' | 'poor'
 const tabNames: Record<DetailTab, string> = { services: '陪玩', reviews: '评价', gifts: '礼物' }
 const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
 const receivedGiftCount = gifts.reduce((total, gift) => total + gift.count, 0)
+
+function ServiceGameFilter({ gameId, onSelect }: { gameId: string; onSelect: (gameId: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const filterRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const closeOutside = (event: PointerEvent) => { if (!filterRef.current?.contains(event.target as Node)) setOpen(false) }
+    document.addEventListener('pointerdown', closeOutside)
+    return () => document.removeEventListener('pointerdown', closeOutside)
+  }, [open])
+  return <div className="service-game-filter" ref={filterRef} onKeyDown={(event) => { if (event.key === 'Escape') setOpen(false) }}>
+    <span>游戏</span><button type="button" className="service-game-filter__trigger" aria-expanded={open} aria-haspopup="true" onClick={() => setOpen((value) => !value)}>{games.find((game) => game.id === gameId)?.name ?? '全部游戏'}<ChevronDown size={16} /></button>
+    {open && <div className="home-game-popover service-game-filter__popover" role="group" aria-label="游戏筛选">{games.map((game) => <button key={game.id} type="button" className={`home-game-popover__option${gameId === game.id ? ' is-active' : ''}`} aria-pressed={gameId === game.id} onClick={() => { onSelect(game.id); setOpen(false) }}><span className="game-choice__mark home-game-choice__mark">{game.icon && <img className="game-icon" src={game.icon} alt="" />}</span><span>{game.name}</span></button>)}</div>}
+  </div>
+}
 
 export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onOrder, presentation = 'page', profileOverride, onChat, onGift, followed, blocked, onToggleFollow, onBlock, note, onSaveNote, onShare, onClose }: Props) {
   const { requestRemoval, dialog: removalDialog } = useRemovalConfirmation()
@@ -79,14 +94,14 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
 
       <div className="companion-tab-panel" role="tabpanel">
         {activeTab === 'services' && <section className="service-section" aria-label="陪玩">
-          <div className="client-section-heading service-section__heading"><label className="client-filter-select client-filter-select--inline"><span>游戏</span><select value={logic.gameId} onChange={(event) => logic.selectGame(event.target.value)}>{games.map((game) => <option value={game.id} key={game.id}>{game.name}</option>)}</select></label></div>
+          <div className="client-section-heading service-section__heading"><ServiceGameFilter gameId={logic.gameId} onSelect={logic.selectGame} /></div>
           {logic.totalServices === 0 ? <div className="client-inline-empty"><p>该游戏暂时没有服务项目</p><button type="button" className="client-button client-button--secondary" onClick={() => logic.selectGame('all')}>查看全部服务</button></div> : <>
             {presentation === 'panel' ? <div className="service-offer-list">{logic.pageServices.map((service) => {
               const game = games.find((item) => item.id === service.gameId)
               return <article className="service-offer" key={service.id}>
-              <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.icon ? <img className="game-icon" src={game.icon} alt="" /> : '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small className="service-offer__play-level"><span>{service.playName}</span><span aria-label={`等级：${service.levelName}`}>{service.levelName}</span></small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></div>
-              {service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}
-                <div className="service-offer__facts"><span><strong className="service-offer__price">{service.price} 金豆</strong></span><span>服务 {service.orderCount} 人</span><span>{Math.round(service.rating * 20)}%好评</span></div>
+                <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.icon ? <img className="game-icon" src={game.icon} alt="" /> : '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small className="service-offer__play-level"><span>{service.playName}</span><span aria-label={`等级：${service.levelName}`}>{service.levelName}</span></small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下一单' : '暂不可接单'}</button></div>
+                {service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}
+                <div className="service-offer__facts"><span><strong className="service-offer__price">{service.price}</strong> 金豆</span><span>服务 {service.orderCount} 人</span><span>{Math.round(service.rating * 20)}%好评</span></div>
               </article>
             })}</div> : <div className="service-table-wrap">
               <table className="service-table">
