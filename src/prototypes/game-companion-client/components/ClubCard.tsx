@@ -1,4 +1,4 @@
-import { Compass, Star, UsersRound } from 'lucide-react'
+import { Star, UsersRound } from 'lucide-react'
 import type { Club } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
 
@@ -8,6 +8,7 @@ export function ClubCard({ club, onOpen, onBrowse, onSelfOrder, showActions = tr
   const isGallery = layout === 'gallery'
   return <article
     className={`client-card club-card${isGallery ? ' club-card--gallery' : ''}`}
+    data-club-id={club.id}
     tabIndex={0}
     aria-label={`查看${club.name}详情`}
     onClick={onOpen}
@@ -35,8 +36,8 @@ export function ClubCard({ club, onOpen, onBrowse, onSelfOrder, showActions = tr
       </div>
       <p className="club-card__intro">{club.intro}</p>
       {showActions && <div className="club-card__actions">
-        <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onBrowse() }}><Compass size={15} />逛一逛</button>
-        <button type="button" className="client-button client-button--secondary" onClick={(event) => { event.stopPropagation(); onSelfOrder() }}>自助下单</button>
+        <button type="button" className="client-button client-button--secondary club-card__browse" onClick={(event) => { event.stopPropagation(); onBrowse() }}>逛一逛</button>
+        <button type="button" className="client-button client-button--secondary club-card__self-order" onClick={(event) => { event.stopPropagation(); onSelfOrder() }}>自助下单</button>
       </div>}
     </div>
   </article>

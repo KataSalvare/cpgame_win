@@ -35,12 +35,11 @@ export function HomePage({ pageState, followedClubIds, onOpenClub, onBrowseClub,
     <PromotionBanner />
 
     <section className="home-games" aria-labelledby="home-games-title">
-      <div className="client-section-heading"><h2 id="home-games-title">游戏</h2></div>
+      <div className="client-section-heading"><h2 id="home-games-title">热门游戏推荐</h2></div>
       <GameFilter gameId={logic.gameId} onSelect={logic.setGameId} />
     </section>
 
-    <section className="home-clubs" aria-labelledby="home-clubs-title">
-      <div className="client-section-heading"><h2 id="home-clubs-title">俱乐部</h2></div>
+    <section className="home-clubs" aria-label="俱乐部">
       <div className="club-scope-row">
         <div className="club-filter-group" role="group" aria-label="俱乐部范围筛选">
           <button type="button" className={`client-filter-pill${logic.scope === 'featured' ? ' is-active' : ''}`} aria-pressed={logic.scope === 'featured'} onClick={() => logic.setScope('featured')}>推荐俱乐部</button>

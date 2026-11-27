@@ -129,3 +129,167 @@
   border-color: var(--prototype-danger);
   outline-color: var(--prototype-danger);
 }
+
+/* 高保真素材仅替换指定演示对象，保留用户上传图片与灰阶内容。 */
+[data-prototype-palette="high-fidelity"] .home-banner {
+  background: #15102c url('./assets/generated/home-banner.png') center / cover no-repeat;
+  color: #fff;
+}
+[data-prototype-palette="high-fidelity"] .club-detail-page .home-banner {
+  background-image: url('./assets/generated/club-banner.png');
+}
+[data-prototype-palette="high-fidelity"] .home-banner :is(.home-banner__eyebrow, p, .home-banner__label) { color: #fff; }
+[data-prototype-palette="high-fidelity"] .home-banner__label { border-color: rgb(255 255 255 / 65%); }
+[data-prototype-palette="high-fidelity"] :is(.club-card, .club-profile-card)[data-club-id="club-001"] :is(.club-card__visual, .club-card__heading, .club-profile-card__main) > .client-avatar {
+  background: #101137 url('./assets/generated/club-avatar.png') center / cover no-repeat;
+}
+[data-prototype-palette="high-fidelity"] :is(.club-card, .club-profile-card)[data-club-id="club-001"] :is(.club-card__visual, .club-card__heading, .club-profile-card__main) > .client-avatar > * { visibility: hidden; }
+[data-prototype-palette="high-fidelity"] .club-profile-card__main > .client-avatar { width: 88px; height: 88px; }
+[data-prototype-palette="high-fidelity"] .companion-profile-card[data-profile-id="P-001"] > .client-avatar {
+  background: #e9e5f6 url('./assets/generated/user-avatar.png') center / cover no-repeat;
+}
+[data-prototype-palette="high-fidelity"] .companion-profile-card[data-profile-id="P-001"] > .client-avatar > * { visibility: hidden; }
+[data-prototype-palette="high-fidelity"] .companion-detail-page:has(.companion-profile-card[data-profile-id="P-001"]) :is(.companion-life-photos, [data-overlay^="companion-life-photos-"]) img[data-demo-image="life"] { content: url('./assets/generated/user-life.png'); }
+[data-prototype-palette="high-fidelity"] :is(.personal-life-photos, .personal-life-photo-editor) img[data-demo-image="life"],
+[data-prototype-palette="high-fidelity"] [data-overlay="personal-life-photos"] img[data-demo-image="life"] { content: url('./assets/generated/personal-life.png'); }
+[data-prototype-palette="high-fidelity"] :is(.review-item__images, [data-overlay^="club-review-"], [data-overlay^="companion-review-"]) img[data-demo-image="review"] { content: url('./assets/generated/review.png'); }
+[data-prototype-palette="high-fidelity"] :is(.companion-life-photos__stage, .personal-life-photo-stage) img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
+[data-prototype-palette="high-fidelity"] .personal-life-photo-stage { height: 310px; }
+
+/* 游戏筛选状态 */
+[data-prototype-palette="high-fidelity"] .home-game-browser :is(.game-choice, .home-game-popover__option) {
+  border-color: transparent;
+  background: #fff;
+  box-shadow: none;
+}
+[data-prototype-palette="high-fidelity"] .home-game-browser :is(.game-choice, .home-game-popover__option).is-active {
+  border-color: #ffd60a;
+  background: #fff9db;
+  box-shadow: none;
+}
+[data-prototype-palette="high-fidelity"] .home-game-browser :is(.game-choice, .home-game-popover__option):focus-visible {
+  outline: 2px solid #a67c00;
+  outline-offset: 2px;
+}
+
+/* 首页俱乐部卡片使用完整方形封面。 */
+[data-prototype-palette="high-fidelity"] .club-card--gallery .club-card__visual { background: #171b35 url('./assets/generated/club-cover-default.png') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .club-card--gallery[data-club-id="club-001"] .club-card__visual { background-image: url('./assets/generated/club-cover-01.png'); }
+[data-prototype-palette="high-fidelity"] .club-card--gallery[data-club-id="club-002"] .club-card__visual { background-image: url('./assets/generated/club-cover-02.png'); }
+[data-prototype-palette="high-fidelity"] .club-card--gallery[data-club-id="club-003"] .club-card__visual { background-image: url('./assets/generated/club-cover-03.png'); }
+[data-prototype-palette="high-fidelity"] .club-card--gallery[data-club-id="club-004"] .club-card__visual { background-image: url('./assets/generated/club-cover-04.png'); }
+[data-prototype-palette="high-fidelity"] .club-card--gallery .club-card__visual::before,
+[data-prototype-palette="high-fidelity"] .club-card--gallery .club-card__visual::after,
+[data-prototype-palette="high-fidelity"] .club-card--gallery .club-card__visual > .client-avatar { display: none; }
+
+/* 首页与俱乐部详情的自营标识和评分。 */
+[data-prototype-palette="high-fidelity"] :is(.club-card, .club-profile-card) .club-card__name-row .client-badge {
+  display: inline-block;
+  width: 40px;
+  height: 26px;
+  box-sizing: border-box;
+  border: 0;
+  padding: 0;
+  background: url('./assets/generated/self-operated-label.webp') center / contain no-repeat;
+  color: transparent;
+  font-size: 0;
+}
+[data-prototype-palette="high-fidelity"] :is(.club-card, .club-profile-card) .club-card__name-row .client-badge svg { display: none; }
+[data-prototype-palette="high-fidelity"] :is(.club-card__visual-rating, .club-card .rating-mark, .club-profile-rating-button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 4px;
+  padding: 3px 5px;
+  background: #ffd62e;
+  color: #ef641e;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+}
+[data-prototype-palette="high-fidelity"] :is(.club-card__visual-rating, .club-card .rating-mark, .club-profile-rating-button) svg { width: 17px; height: 17px; fill: #ff7821; stroke: #ff7821; }
+[data-prototype-palette="high-fidelity"] .club-profile-rating-button:is(:hover, :focus-visible) { color: #bb440b; text-decoration: underline; }
+
+[data-prototype-palette="high-fidelity"] .home-clubs .club-filter-group[aria-label="俱乐部标签筛选"] .client-filter-pill.is-active { border-color: transparent; background: #fff6cc; }
+[data-prototype-palette="high-fidelity"] .home-clubs .club-filter-group[aria-label="俱乐部范围筛选"] .client-filter-pill.is-active { border-color: #ffd60a; background: #fff6cc; }
+
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__self-order {
+  border: 1px solid #e7bc00;
+  background: linear-gradient(160deg, #fff3a5 0%, #ffe04b 42%, #ffd60a 70%, #f3bb00 100%);
+  color: #1d2129;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 -2px 4px rgb(180 127 0 / 15%), 0 3px 7px rgb(141 105 0 / 18%);
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__self-order:hover {
+  border-color: #d9ac00;
+  background: linear-gradient(160deg, #fff8c6 0%, #ffe86e 42%, #ffd60a 70%, #eeb400 100%);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgb(180 127 0 / 16%), 0 5px 10px rgb(141 105 0 / 25%);
+  transform: translateY(-2px);
+}
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__self-order:active { transform: translateY(0); }
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__self-order:focus-visible { outline: 2px solid #997600; outline-offset: 2px; }
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__browse {
+  border: 1px solid #cbd0d9;
+  background: linear-gradient(160deg, #fff 0%, #f5f7fa 52%, #e6eaf0 100%);
+  color: #394150;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 95%), inset 0 -2px 4px rgb(103 117 137 / 8%), 0 2px 5px rgb(51 65 85 / 10%);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__browse:hover {
+  border-color: #aeb8c6;
+  background: linear-gradient(160deg, #fff 0%, #f8fafc 52%, #e9edf3 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 4px 8px rgb(51 65 85 / 16%);
+  transform: translateY(-2px);
+}
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__browse:active { transform: translateY(0); }
+[data-prototype-palette="high-fidelity"] .home-clubs .club-card__browse:focus-visible { outline: 2px solid #66788e; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  [data-prototype-palette="high-fidelity"] .home-clubs :is(.club-card__self-order, .club-card__browse) { transition: none; }
+  [data-prototype-palette="high-fidelity"] .home-clubs :is(.club-card__self-order, .club-card__browse):hover { transform: none; }
+}
+
+/* 侧栏一键匹配使用品牌色玻璃质感。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary,
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary.is-active {
+  border: 1px solid #e7bc00;
+  background: linear-gradient(160deg, #fff3a5 0%, #ffe04b 42%, #ffd60a 70%, #f3bb00 100%);
+  color: #1d2129;
+  font-size: 18px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 -2px 4px rgb(180 127 0 / 15%), 0 3px 7px rgb(141 105 0 / 18%);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover {
+  background: linear-gradient(160deg, #fff8c6 0%, #ffe86e 42%, #ffd60a 70%, #eeb400 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 5px 10px rgb(141 105 0 / 25%);
+  transform: translateY(-2px);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:active { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary { transition: none; }
+  [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover { transform: none; }
+}
+
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item:not(.windows-sidebar__item--primary) { font-size: 18px; font-weight: 400; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item:not(.windows-sidebar__item--primary) .windows-sidebar__icon { width: 22px; flex: 0 0 22px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item:not(.windows-sidebar__item--primary) .windows-sidebar__icon svg { width: 22px; height: 22px; }
+
+/* 陪玩卡片与俱乐部列表保持一致的封面、信息和操作层级。 */
+[data-prototype-palette="high-fidelity"] .companion-card__visual { background: #e9e7e4; }
+[data-prototype-palette="high-fidelity"] .companion-card__visual::before,
+[data-prototype-palette="high-fidelity"] .companion-card__visual::after { display: none; }
+[data-prototype-palette="high-fidelity"] .companion-card__visual > .client-avatar { background: #d8dce3; color: #414955; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .companion-card[data-companion-id="companion-001"] .companion-card__visual { background: #e9e7e4 url('./assets/generated/user-avatar.png') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .companion-card[data-companion-id="talent-page-104"] .companion-card__visual { background: #e9e7e4 url('./assets/generated/companion-portrait-02.png') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .companion-card[data-companion-id="companion-004"] .companion-card__visual { background: #e9e7e4 url('./assets/generated/companion-portrait-03.png') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .companion-card[data-companion-id="talent-page-102"] .companion-card__visual { background: #e9e7e4 url('./assets/generated/companion-portrait-04.png') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .companion-card:is([data-companion-id="companion-001"], [data-companion-id="talent-page-104"], [data-companion-id="companion-004"], [data-companion-id="talent-page-102"]) .companion-card__visual > .client-avatar { display: none; }
+[data-prototype-palette="high-fidelity"] .companion-card--hero .companion-card__body { background: #fff; border-top: 1px solid #edeef1; }
+[data-prototype-palette="high-fidelity"] .companion-card .client-tag { border-color: transparent; background: #f2f4f7; color: #4e5969; }
+[data-prototype-palette="high-fidelity"] .companion-card .companion-card__visual-status { border: 0; background: rgb(255 255 255 / 92%); color: #59616d; }
+[data-prototype-palette="high-fidelity"] .companion-card .companion-card__visual-status.is-available { background: #e8f6ee; color: #237749; }
+[data-prototype-palette="high-fidelity"] .companion-card .rating-mark { color: #d96316; }
+[data-prototype-palette="high-fidelity"] .companion-card .rating-mark svg { fill: #ffb224; stroke: #ffb224; }
+[data-prototype-palette="high-fidelity"] .companion-card__chat { border-color: #e2bd24; border-radius: 999px; background: #fff6cc; color: #564400; }
+[data-prototype-palette="high-fidelity"] .companion-card__chat:hover { border-color: #d6ac00; background: #ffec91; color: #403200; }

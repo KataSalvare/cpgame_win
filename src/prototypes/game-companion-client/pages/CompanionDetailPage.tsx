@@ -1,3 +1,4 @@
+import { demoImageKind } from '../components/demoImage'
 import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useState } from 'react'
 import { ArrowLeft, BatteryCharging, ChevronLeft, ChevronRight, Gift, HandHeart, MessageCircle, Orbit, Sparkles, Star, UsersRound } from 'lucide-react'
@@ -83,7 +84,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
             {presentation === 'panel' ? <div className="service-offer-list">{logic.pageServices.map((service) => {
               const game = games.find((item) => item.id === service.gameId)
               return <article className="service-offer" key={service.id}>
-              <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small className="service-offer__play-level"><span>{service.playName}</span><span aria-label={`等级：${service.levelName}`}>{service.levelName}</span></small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></div>
+              <div className="service-offer__heading"><div className="service-game-cell"><span className="game-choice__mark">{game?.icon ? <img className="game-icon" src={game.icon} alt="" /> : '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small className="service-offer__play-level"><span>{service.playName}</span><span aria-label={`等级：${service.levelName}`}>{service.levelName}</span></small></span></div><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></div>
               {service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}
                 <div className="service-offer__facts"><span><strong className="service-offer__price">{service.price} 金豆</strong></span><span>服务 {service.orderCount} 人</span><span>{Math.round(service.rating * 20)}%好评</span></div>
               </article>
@@ -93,7 +94,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
                 <tbody>{logic.pageServices.map((service) => {
                   const game = games.find((item) => item.id === service.gameId)
                   return <tr key={service.id}>
-                    <td><div className="service-game-cell"><span className="game-choice__mark">{game?.shortName ?? '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small>{service.playName}</small>{service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}</span></div></td>
+                    <td><div className="service-game-cell"><span className="game-choice__mark">{game?.icon ? <img className="game-icon" src={game.icon} alt="" /> : '游戏'}</span><span><strong>{game?.name ?? '游戏'}</strong><small>{service.playName}</small>{service.voiceMessage && <VoiceMessageButton message={service.voiceMessage} label="服务语音" compact />}</span></div></td>
                     <td>{service.levelName}</td><td>{service.orderCount}</td><td><span className="rating-mark"><Star size={14} />{service.rating.toFixed(2)}</span></td><td><strong>{service.price} 金豆 / {service.unit}</strong></td><td><button type="button" className="client-button client-button--primary client-button--small" disabled={!service.canAcceptOrders} onClick={() => onOrder(service.id, companion.id)}>{service.canAcceptOrders ? '下单' : '暂不可接单'}</button></td>
                   </tr>
                 })}</tbody>
@@ -121,7 +122,7 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
             <div className="review-item__body">
               <div className="review-item__heading"><strong>{review.author}</strong><span className="rating-mark"><Star size={13} />{review.rating.toFixed(1)}</span><time className="client-muted" dateTime={review.date}>{review.date}</time></div>
               <ReviewContent content={review.content} />
-              {review.images?.length ? <ImageLightbox overlayId={`companion-review-${review.id}`} images={review.images} label={`${review.author}的评价图片`}>{(openImage) => <div className="review-item__images" aria-label="评价图片">{review.images?.map((image, index) => <button type="button" className="review-item__image-button" key={`${review.id}-${image}`} aria-label={`查看评价图片 ${index + 1}`} onClick={() => openImage(index)}><img src={image} alt={`${review.author}的评价图片 ${index + 1}`} loading="lazy" /></button>)}</div>}</ImageLightbox> : null}
+              {review.images?.length ? <ImageLightbox overlayId={`companion-review-${review.id}`} images={review.images} label={`${review.author}的评价图片`}>{(openImage) => <div className="review-item__images" aria-label="评价图片">{review.images?.map((image, index) => <button type="button" className="review-item__image-button" key={`${review.id}-${image}`} aria-label={`查看评价图片 ${index + 1}`} onClick={() => openImage(index)}><img data-demo-image={demoImageKind(image)} src={image} alt={`${review.author}的评价图片 ${index + 1}`} loading="lazy" /></button>)}</div>}</ImageLightbox> : null}
             </div>
           </article>)}</div> : <div className="client-inline-empty"><p>暂无符合条件的评价</p><button type="button" className="client-button client-button--secondary" onClick={() => setReviewFilter('all')}>查看全部评价</button></div>}
         </section>}

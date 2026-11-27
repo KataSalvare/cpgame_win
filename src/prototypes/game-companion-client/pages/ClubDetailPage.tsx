@@ -49,7 +49,7 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
   return <div className="client-content club-detail-page">
     <div className="club-detail-page__heading"><button type="button" className="client-back-link" onClick={onBack} aria-label="返回首页"><ArrowLeft size={16} /></button><h1>俱乐部</h1></div>
     <PromotionBanner />
-    <section className="client-card club-profile-card">
+    <section className="client-card club-profile-card" data-club-id={club.id}>
       <div className="club-profile-card__main">
         <AvatarMark initials={club.initials} size="lg" />
         <div className="club-profile-card__body">

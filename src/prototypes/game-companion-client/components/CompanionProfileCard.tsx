@@ -1,3 +1,4 @@
+import { demoImageKind } from './demoImage'
 import { useRemovalConfirmation } from './RemovalConfirmation'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Flag, MoreHorizontal, Pencil, Shield, Share2, Star, X } from 'lucide-react'
@@ -107,7 +108,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
       <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>
       <div className="companion-profile-card__toolbar-actions">{moreMenu}{onClose && <button type="button" className="windows-icon-button" aria-label="关闭用户详情" onClick={onClose}><X size={17} /></button>}</div>
     </header>}
-    <section className={`client-card companion-profile-card${immersive ? ' companion-profile-card--immersive' : ''}${className ? ` ${className}` : ''}`}>
+    <section className={`client-card companion-profile-card${immersive ? ' companion-profile-card--immersive' : ''}${className ? ` ${className}` : ''}`} data-profile-id={profile.userId}>
       <AvatarMark initials={profile.initials} size={immersive ? 'xl' : 'lg'} />
       <div className="companion-profile-card__body">
         {!immersive && <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className={`client-status${profile.status === '接单中' ? ' is-available' : ''}`}>{profile.status}</span></div>}
@@ -126,7 +127,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
         if (event.key === 'ArrowLeft') { event.preventDefault(); setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length) }
         if (event.key === 'ArrowRight') { event.preventDefault(); setLifePhotoIndex((index) => (index + 1) % lifePhotos.length) }
       }}>
-        <button type="button" className="companion-life-photos__image-button" aria-label="查看生活照大图" onClick={() => openImage(visibleLifePhotoIndex)}><img src={lifePhotos[visibleLifePhotoIndex]} alt={`${profile.name}的生活照 ${visibleLifePhotoIndex + 1}`} /></button>
+        <button type="button" className="companion-life-photos__image-button" aria-label="查看生活照大图" onClick={() => openImage(visibleLifePhotoIndex)}><img data-demo-image={demoImageKind(lifePhotos[visibleLifePhotoIndex])} src={lifePhotos[visibleLifePhotoIndex]} alt={`${profile.name}的生活照 ${visibleLifePhotoIndex + 1}`} /></button>
         <button type="button" className="companion-life-photos__previous" aria-label="上一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index - 1 + lifePhotos.length) % lifePhotos.length)}><ChevronLeft size={18} /></button>
         <button type="button" className="companion-life-photos__next" aria-label="下一张生活照" disabled={lifePhotos.length < 2} onClick={() => setLifePhotoIndex((index) => (index + 1) % lifePhotos.length)}><ChevronRight size={18} /></button>
       </div>

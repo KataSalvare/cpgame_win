@@ -1,3 +1,4 @@
+import { demoImageKind } from './demoImage'
 import { useEffect, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 
@@ -28,9 +29,9 @@ export function ImageLightbox({ images, label, overlayId = 'image-lightbox', chi
     {activeIndex !== null && images.length > 0 && <div className="image-lightbox" data-overlay={overlayId} onClick={(event) => { if (event.target === event.currentTarget) setActiveIndex(null) }}>
       <button type="button" className="image-lightbox__close" aria-label="关闭大图" onClick={() => setActiveIndex(null)}><X size={20} /></button>
       <div className="image-lightbox__content" role="dialog" aria-modal="true" aria-label={label}>
-        <div className="image-lightbox__stage"><img src={images[activeIndex]} alt={`${label} ${activeIndex + 1}`} /></div>
+        <div className="image-lightbox__stage"><img data-demo-image={demoImageKind(images[activeIndex])} src={images[activeIndex]} alt={`${label} ${activeIndex + 1}`} /></div>
         <div className="image-lightbox__thumbnails" role="group" aria-label={`${label}缩略图`}>
-          {images.map((image, index) => <button type="button" key={`${index}-${image.slice(-32)}`} aria-label={`查看第 ${index + 1} 张图片`} aria-pressed={index === activeIndex} className={index === activeIndex ? 'is-selected' : ''} onClick={() => setActiveIndex(index)}><img src={image} alt="" /></button>)}
+          {images.map((image, index) => <button type="button" key={`${index}-${image.slice(-32)}`} aria-label={`查看第 ${index + 1} 张图片`} aria-pressed={index === activeIndex} className={index === activeIndex ? 'is-selected' : ''} onClick={() => setActiveIndex(index)}><img data-demo-image={demoImageKind(image)} src={image} alt="" /></button>)}
         </div>
       </div>
     </div>}

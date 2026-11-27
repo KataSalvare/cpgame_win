@@ -13,6 +13,7 @@ type CompanionCardProps = {
 export function CompanionCard({ companion, onOpen, onChat }: CompanionCardProps) {
   return <article
     className="client-card companion-card companion-card--hero"
+    data-companion-id={companion.id}
     tabIndex={0}
     aria-label={`查看${companion.name}详情`}
     onClick={onOpen}

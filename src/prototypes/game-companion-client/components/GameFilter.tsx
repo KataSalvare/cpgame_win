@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Gamepad2, LayoutGrid } from 'lucide-react'
+import { ChevronDown, LayoutGrid } from 'lucide-react'
 import { games } from '../data/mockData'
 
 type Props = {
@@ -39,13 +39,13 @@ export function GameFilter({ gameId, onSelect, label = '游戏筛选', includeAl
   return <div ref={browserRef} className="home-game-browser" onKeyDown={(event) => { if (event.key === 'Escape') setAllGamesOpen(false) }}>
     <div ref={listRef} className="home-game-list" role="group" aria-label={label} tabIndex={0}>
       {choices.map((game) => <button key={game.id} data-game-id={game.id} type="button" className={`game-choice${gameId === game.id ? ' is-active' : ''}`} aria-pressed={gameId === game.id} onClick={() => selectGame(game.id)}>
-        <span className="game-choice__mark home-game-choice__mark">{game.id === 'all' ? <LayoutGrid size={17} aria-hidden="true" /> : <Gamepad2 size={17} aria-hidden="true" />}<small>{game.shortName}</small></span><span>{game.name}</span>
+        <span className="game-choice__mark home-game-choice__mark">{game.icon ? <img className={`game-icon${game.id === 'all' ? ' game-icon--all' : ''}`} src={game.icon} alt="" /> : <><LayoutGrid size={17} aria-hidden="true" /><small>{game.shortName}</small></>}</span><span>{game.name}</span>
       </button>)}
     </div>
     <button type="button" className={`home-game-expand${allGamesOpen ? ' is-open' : ''}`} aria-label={allGamesOpen ? '收起全部游戏' : '展开全部游戏'} aria-expanded={allGamesOpen} aria-controls="all-games-popover" onClick={() => setAllGamesOpen((open) => !open)}><ChevronDown size={18} aria-hidden="true" /></button>
     {allGamesOpen && <div id="all-games-popover" className="home-game-popover" role="group" aria-label="全部游戏">
       {choices.map((game) => <button key={game.id} type="button" className={`home-game-popover__option${gameId === game.id ? ' is-active' : ''}`} aria-pressed={gameId === game.id} onClick={() => selectGame(game.id)}>
-        <span className="game-choice__mark home-game-choice__mark">{game.id === 'all' ? <LayoutGrid size={17} aria-hidden="true" /> : <Gamepad2 size={17} aria-hidden="true" />}<small>{game.shortName}</small></span><span>{game.name}</span>
+        <span className="game-choice__mark home-game-choice__mark">{game.icon ? <img className={`game-icon${game.id === 'all' ? ' game-icon--all' : ''}`} src={game.icon} alt="" /> : <><LayoutGrid size={17} aria-hidden="true" /><small>{game.shortName}</small></>}</span><span>{game.name}</span>
       </button>)}
     </div>}
   </div>
