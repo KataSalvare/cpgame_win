@@ -1,0 +1,79 @@
+/* 订单及工作台表格：表头、行和行内操作共用同一视觉层级。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list { overflow: hidden; border: 1px solid var(--prototype-border, #e5e7eb); border-radius: 8px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-list-header { min-height: 44px; padding: 0 16px; background: #f7f8fa; color: #6b7280; font-size: 12px; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list-card .orders-list .order-item { margin-top: 0; border-radius: 0; min-height: 80px; padding: 12px 16px; border-top: 1px solid var(--prototype-border, #e5e7eb); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item:hover { background: #f9fafb; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item.is-selected { background: #f3f4f6; box-shadow: inset 3px 0 #4b5563; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__info > strong, .order-item__companion-copy strong, .order-item__service strong, .order-item__duration, .order-item__price strong) { font-size: 13px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__info, .order-item__service, .order-item__companion-copy) { gap: 5px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__price { font-variant-numeric: tabular-nums; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status { border: 0; border-radius: 4px; padding: 4px 8px; background: #f1f2f4; color: #4b5563; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) { display: flex; width: auto; flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button.client-button { flex: 0 0 88px; width: 88px; min-width: 88px; height: 30px; min-height: 30px; padding: 0 10px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #4b5563; font-size: 13px; font-weight: 500; box-shadow: none; backdrop-filter: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button--primary.client-button--primary:not(:disabled) { background: #374151; color: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button:not(:disabled):hover { background: #e9ebef; color: #111827; transform: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button--primary:not(:disabled):hover { background: #1f2937; color: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button:focus-visible { outline: 2px solid #6b7280; outline-offset: 2px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button:disabled { color: #9ca3af; opacity: .65; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-after-sales-table { overflow: hidden; border: 1px solid var(--prototype-border, #e5e7eb); border-radius: 6px; font-variant-numeric: tabular-nums; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-after-sales-table__row { min-height: 38px; padding: 0 10px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-after-sales-table__row--head { min-height: 34px; background: #f7f8fa; font-weight: 600; }
+
+/* 灰阶模式保留原表头，高保真模式拆分状态和操作列。 */
+.game-companion-client .order-header-high-fidelity { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-header-grayscale { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-header-high-fidelity { display: block; }
+
+/* 状态颜色只用于高保真表格，文字和圆点共同表达状态。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status { gap: 6px; background: transparent; padding: 4px 0; color: #667085; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="待支付"], [data-status="待接单"], [data-status="待服务"], [data-status="待响应"], [data-status="待考核"], [data-status="待确认"], [data-status="待玩家确认"], [data-status="待陪玩确认"], [data-status="审核中"]) { color: #ad650c; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="服务中"], [data-status="已加入候选名单"]) { color: #2f66c5; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="已完成"], [data-status="已通过"]) { color: #287a4b; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="退款"], [data-status="未通过"]) { color: #c9362b; }
+
+/* 高保真状态标签：语义色文字、圆点、浅底与细边框。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status { padding: 3px 7px; border: 1px solid #d9dfe7; border-radius: 4px; background: #f4f5f7; line-height: 1.4; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="待支付"], [data-status="待接单"], [data-status="待服务"], [data-status="待响应"], [data-status="待考核"], [data-status="待确认"], [data-status="待玩家确认"], [data-status="待陪玩确认"], [data-status="审核中"]) { background: #fff8ed; border-color: #f1d8b4; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="服务中"], [data-status="已加入候选名单"]) { background: #eff6ff; border-color: #c8ddf6; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="已完成"], [data-status="已通过"]) { background: #eff9f2; border-color: #c8e7d1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list .order-item__status:is([data-status="退款"], [data-status="未通过"]) { background: #fff2f1; border-color: #f2cfca; }
+
+/* 高保真表格为三个行内操作预留固定宽度，其余字段按内容分配。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list:not(.exam-orders-list) :is(.order-list-header:not(.workbench-match-grid), .order-item:not(.workbench-match-grid)) { grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(155px, 1.3fr) minmax(55px, .45fr) minmax(150px, 1.1fr) minmax(100px, .8fr) 276px; gap: 10px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list:not(.exam-orders-list) .order-item__main { grid-template-columns: subgrid; gap: 10px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .exam-orders-list :is(.order-list-header, .exam-order-row) { grid-template-columns: minmax(130px, 1fr) minmax(150px, 1.1fr) minmax(190px, 1.5fr) minmax(90px, .7fr) minmax(100px, .8fr) 276px; gap: 10px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .exam-orders-list .exam-order-row__main { grid-template-columns: subgrid; gap: 10px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-matches-table .workbench-match-grid { grid-template-columns: minmax(150px, 1.1fr) minmax(240px, 2fr) minmax(180px, 1.3fr) minmax(120px, .8fr) 276px; gap: 10px; }
+
+.table-action-label--high-fidelity { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .table-action-label--grayscale { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .table-action-label--high-fidelity { display: inline; }
+
+/* 表格操作采用轻量玻璃表面，黄色只突出主要操作。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button.client-button:not(:disabled) { border: 1px solid #e4e4e7; border-radius: 8px; background: linear-gradient(180deg, #fff 0%, #f4f4f5 100%); color: #41434a; box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), 0 1px 2px rgb(31 41 55 / 6%); backdrop-filter: none; transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button.client-button--primary:not(:disabled) { border-color: #edc83b; background: linear-gradient(180deg, #ffe982 0%, #ffd60a 100%); color: #332800; box-shadow: inset 0 1px 0 rgb(255 255 255 / 65%), 0 1px 2px rgb(144 106 0 / 12%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button.client-button:not(:disabled):hover { border-color: #c7c9ce; background: linear-gradient(180deg, #fff 0%, #ebedf0 100%); color: #20242b; filter: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button.client-button--primary:not(:disabled):hover { border-color: #d4ae1a; background: linear-gradient(180deg, #ffe36a 0%, #f3c900 100%); color: #332800; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button:focus-visible { outline: 2px solid #a77d00; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { [data-prototype-palette="high-fidelity"] .game-companion-client .orders-list :is(.order-item__actions, .exam-order-row__actions, .workbench-match-actions) .client-button { transition: none; } }
+
+/* 入驻申请记录沿用高保真数据表格规范。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table table { min-width: 900px; table-layout: fixed; border-collapse: collapse; font-size: 13px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table th { height: 44px; padding: 0 16px; border: 0; background: #f7f8fa; color: #6b7280; font-size: 12px; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table td { height: 80px; padding: 12px 16px; border-top: 1px solid #e5e7eb; border-bottom: 0; background: #fff; vertical-align: middle; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table tr:hover td { background: #f9fafb; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table :is(th, td):nth-child(1) { width: 14%; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table :is(th, td):nth-child(2) { width: auto; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table :is(th, td):nth-child(3) { width: 180px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table :is(th, td):nth-child(4) { width: 120px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table :is(th, td):nth-child(5) { width: 308px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table td small { font-size: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__status { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 3px 7px; border: 1px solid #f1d8b4; border-radius: 4px; background: #fff8ed; color: #ad650c; font-size: 12px; line-height: 1.4; white-space: nowrap; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__status::before { content: ""; width: 6px; height: 6px; flex: none; border-radius: 50%; background: currentColor; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__status[data-status="已通过"] { background: #eff9f2; border-color: #c8e7d1; color: #287a4b; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__status[data-status="未通过"] { background: #fff2f1; border-color: #f2cfca; color: #c9362b; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table .client-button.client-button:not(:disabled) { width: 88px; min-width: 88px; height: 30px; min-height: 30px; padding: 0 10px; border: 1px solid #e4e4e7; border-radius: 8px; background: linear-gradient(180deg, #fff 0%, #f4f4f5 100%); color: #41434a; font-size: 13px; font-weight: 500; box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), 0 1px 2px rgb(31 41 55 / 6%); backdrop-filter: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table .client-button.client-button:not(:disabled):hover { border-color: #c7c9ce; background: linear-gradient(180deg, #fff 0%, #ebedf0 100%); color: #20242b; filter: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-records__table .client-button:focus-visible { outline: 2px solid #a77d00; outline-offset: 2px; }

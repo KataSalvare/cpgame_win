@@ -17,6 +17,7 @@ export interface PageItem {
   defaultHash?: string
   component: React.ComponentType<PrototypePreviewProps>
   category: PageCategory
+  previewLayout?: 'fluid'
   dirName: string
   states: readonly PageStateOption[]
 }
@@ -58,7 +59,7 @@ const identityVerificationPageStates: readonly PageStateOption[] = [
   { id: 'normal', label: '正常' },
 ]
 
-type PageConfig = { path: string; label: string; states: readonly PageStateOption[]; entryView?: string; defaultHash?: string }
+type PageConfig = { path: string; label: string; states: readonly PageStateOption[]; entryView?: string; defaultHash?: string; previewLayout?: 'fluid' }
 
 const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
   'game-companion-client': [
@@ -129,12 +130,13 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
 
 const adminPageConfig: Record<string, PageConfig | PageConfig[]> = {
   'admin-companion-ui-guide': [
-    { path: '/admin/companion-ui-foundations', label: 'UI说明 · 色彩与按钮', entryView: 'foundations', states: identityVerificationPageStates },
-    { path: '/admin/companion-ui-forms', label: 'UI说明 · 输入与选择', entryView: 'forms', states: identityVerificationPageStates },
-    { path: '/admin/companion-ui-framework', label: 'UI说明 · 核心框架', entryView: 'framework', states: identityVerificationPageStates },
-    { path: '/admin/companion-ui-panels', label: 'UI说明 · 浮层面板', entryView: 'panels', states: identityVerificationPageStates },
-    { path: '/admin/companion-ui-messages', label: 'UI说明 · 消息样式', entryView: 'messages', states: identityVerificationPageStates },
-    { path: '/admin/companion-ui-overlays', label: 'UI说明 · 弹窗与标签', entryView: 'overlays', states: identityVerificationPageStates },
+    { path: '/admin/companion-ui-foundations', label: 'UI说明 · 色彩与按钮', entryView: 'foundations', states: identityVerificationPageStates, previewLayout: 'fluid' },
+    { path: '/admin/companion-ui-forms', label: 'UI说明 · 输入与选择', entryView: 'forms', states: identityVerificationPageStates, previewLayout: 'fluid' },
+    { path: '/admin/companion-ui-framework', label: 'UI说明 · 核心框架', entryView: 'framework', states: identityVerificationPageStates, previewLayout: 'fluid' },
+    { path: '/admin/companion-ui-panels', label: 'UI说明 · 浮层面板', entryView: 'panels', states: identityVerificationPageStates, previewLayout: 'fluid' },
+    { path: '/admin/companion-ui-messages', label: 'UI说明 · 消息样式', entryView: 'messages', states: identityVerificationPageStates, previewLayout: 'fluid' },
+    { path: '/admin/companion-ui-tables', label: 'UI说明 · 表格', entryView: 'tables', states: identityVerificationPageStates, previewLayout: 'fluid' },
+    { path: '/admin/companion-ui-overlays', label: 'UI说明 · 弹窗与标签', entryView: 'overlays', states: identityVerificationPageStates, previewLayout: 'fluid' },
   ],
   'DEMO-admin-windows-client-components': { path: '/demo/admin/windows-client-components', label: 'DEMO Windows 客户端组件', states: demoPageStates },
 }
@@ -182,7 +184,7 @@ export const generatePages = (): PageItem[] => {
         path: item.path, label: item.label,
         prdPath: `../../src/docs/page-prds/${item.path.replace(/^\//, '').replace(/\//g, '-')}.md`,
         entryView: item.entryView, component: getLazyComponent(loader),
-        category: 'admin', dirName, states: item.states,
+        category: 'admin', dirName, states: item.states, previewLayout: item.previewLayout,
       }))
     }
   })

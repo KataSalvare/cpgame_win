@@ -1,3 +1,4 @@
+import { TableActionLabel } from '../components/TableActionLabel'
 import alipayIcon from '../assets/payment/alipay.svg'
 import { DialogIllustration } from '../components/DialogIllustration'
 import { GlassButton } from '@/themes/yellow-black-companion/components'
@@ -303,7 +304,7 @@ export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单
       {renderOrderSearch('我的下单')}
       </div>
       {filteredOrders.length === 0 ? <div className="account-empty-inline"><History size={22} /><strong>没有符合条件的订单</strong><button type="button" className="client-button client-button--secondary" onClick={() => { setFilter('全部'); onSelectOrder(null) }}>查看全部订单</button></div> : <div className="orders-list" role="group" aria-label="订单列表">
-        <div className="order-list-header"><span>订单号</span><span>陪玩信息</span><span>服务信息</span><span>时长</span><span className="order-price-columns"><span>成单价</span><span>实付</span></span><span>状态 / 快捷操作</span></div>
+        <div className="order-list-header"><span>订单号</span><span>陪玩信息</span><span>服务信息</span><span>时长</span><span className="order-price-columns"><span>单价</span><span>实付</span></span><span className="order-header-grayscale">状态 / 快捷操作</span><span className="order-header-high-fidelity">状态</span><span className="order-header-high-fidelity">操作</span></div>
         {filteredOrders.map((order) => <OrderCard order={order} key={order.id} selected={selectedOrderId === order.id} diamondBalance={diamondBalance} onSelect={() => onSelectOrder(order.id)} onReorder={() => onReorder(order)} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} onOpenRecharge={onOpenRecharge} onOpenSupport={onOpenSupport} onSaveReview={onSaveReview} />)}
       </div>}
     </section>
@@ -323,7 +324,7 @@ function ExamOrderRow({ order, role, selected, onSelect, onPay, onCancel, onSubm
       <span className="order-item__companion"><AvatarMark initials={order.initials} size="sm" /><span className="order-item__companion-copy"><strong><UserNameWithLevel name={order.person} identityId={order.personId} /></strong>{role === '考生订单' && <small>{order.clubName}</small>}</span></span>
       <span className="order-item__service"><strong>{order.game} · {order.play}</strong><small>{order.level} · {order.service}</small></span>
       <span className="order-item__price"><strong>500 金豆</strong></span>
-      <span className="workbench-order-table-row__status"><span className={`order-item__status order-item__status--${statusClass}`}>{order.status}</span></span>
+      <span className="workbench-order-table-row__status"><span data-status={order.status} className={`order-item__status order-item__status--${statusClass}`}>{order.status}</span></span>
     </button>
     <div className="exam-order-row__actions" aria-label={`订单 ${order.id} 操作`}>
       {role === '考生订单' && order.status === '待支付' && <><ExamOrderPayButton onPay={onPay} /><button type="button" className="client-button client-button--secondary" onClick={onCancel}>取消订单</button></>}
@@ -528,9 +529,9 @@ function OrderCard({ order, selected, diamondBalance, onSelect, onReorder, onUpd
       <span className="order-item__service"><strong>{order.gameName} · {order.serviceName}</strong><small>{order.levelName} · {order.durationUnit}服务</small></span>
       <span className="order-item__duration">{order.duration} {order.durationUnit}</span>
       <span className="order-item__price order-price-columns"><strong>{order.unitPrice.toLocaleString()} 金豆 / {order.durationUnit}</strong><strong>{order.amount.toLocaleString()} 金豆</strong></span>
-      <span className={`order-item__status order-item__status--${order.status === '已取消' ? 'cancelled' : order.status === '已完成' ? 'completed' : 'active'}`}>{displayedStatus}</span>
+      <span data-status={displayedStatus} className={`order-item__status order-item__status--${order.status === '已取消' ? 'cancelled' : order.status === '已完成' ? 'completed' : 'active'}`}>{displayedStatus}</span>
     </button>
-    <div className={`order-item__actions${order.status === '服务中' ? ' order-item__actions--service' : ''}`} role="group" aria-label={`订单 ${order.id} 快捷操作`}>{quickActions.map((action) => <button type="button" key={action} className={`client-button ${action === '确认完成' || action === '支付' ? 'client-button--primary' : 'client-button--secondary'}`} onClick={() => action === '再次下单' ? onReorder() : action === '联系客服' ? onOpenSupport() : setActiveAction(action)}>{action}</button>)}</div>
+    <div className={`order-item__actions${order.status === '服务中' ? ' order-item__actions--service' : ''}`} role="group" aria-label={`订单 ${order.id} 快捷操作`}>{quickActions.map((action) => <button type="button" key={action} className={`client-button ${action === '确认完成' || action === '支付' ? 'client-button--primary' : 'client-button--secondary'}`} onClick={() => action === '再次下单' ? onReorder() : action === '联系客服' ? onOpenSupport() : setActiveAction(action)}><TableActionLabel action={action} /></button>)}</div>
     {activeAction && <OrderActionDialog order={order} action={activeAction} clubName={getOrderClubName(order)} diamondBalance={diamondBalance} onClose={() => setActiveAction(null)} onOpenRecharge={() => { setActiveAction(null); onOpenRecharge() }} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} onSaveReview={onSaveReview} />}
   </article>
 }
@@ -539,7 +540,7 @@ const orderActions: Record<OrderStatus, string[]> = {
   '待支付': ['支付', '取消订单'],
   '待接单': ['取消订单'],
   '待服务': ['取消订单'],
-  '服务中': ['确认完成', '提前结束', '续单'],
+  '服务中': ['确认完成', '续单', '提前结束'],
   '已暂停': ['提前结束'],
   '待用户确认': ['联系客服', '完成订单'],
   '已完成': ['联系客服', '再次下单', '评价'],
@@ -744,6 +745,7 @@ function OrderReviewDialog({ order, clubName, onClose, onSaveReview }: { order: 
 
 export function OrderDetailPanel({ order, companion, diamondBalance, onContact, onReorder, onOpenRecharge, onUpdateStatus, onPayPendingOrder, onRequestEarlyEnd, onRenewOrder, onOpenSupport, onSaveReview }: { order: ClientOrder; companion: Companion | undefined; diamondBalance: number; onContact: () => void; onReorder: () => void; onOpenRecharge: () => void; onUpdateStatus: (orderId: string, status: OrderStatus) => void; onPayPendingOrder: (orderId: string) => boolean; onRequestEarlyEnd: (orderId: string, completedQuantity?: number) => void; onRenewOrder: (orderId: string, quantity: number) => boolean; onOpenSupport: () => void; onSaveReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => void }) {
   const [activeAction, setActiveAction] = useState<string | null>(null)
+  const game = games.find((item) => item.name === order.gameName)
   const countdownDuration = order.status === '待支付' ? 5 * 60 : order.status === '待用户确认' ? 24 * 60 * 60 : null
   const [remainingSeconds, setRemainingSeconds] = useState(countdownDuration ?? 0)
 
@@ -762,15 +764,17 @@ export function OrderDetailPanel({ order, companion, diamondBalance, onContact, 
         {countdownDuration !== null && <span className="order-detail-countdown" role="timer" aria-label={`${order.status === '待支付' ? '支付' : '确认'}倒计时 ${formatOrderCountdown(remainingSeconds, order.status === '待用户确认')}`}><Clock3 size={13} />{order.status === '待支付' ? '支付倒计时' : '确认倒计时'}<strong>{formatOrderCountdown(remainingSeconds, order.status === '待用户确认')}</strong></span>}
       </section>
 
-      <section className="order-detail-section">
-        <div className="order-detail-section__heading"><span className="client-eyebrow">陪玩信息</span>{!order.earlyEndPending && <button type="button" className="client-button client-button--secondary" onClick={onContact}><MessageCircle size={15} />聊一聊</button>}</div>
-        <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong><div className="order-detail-companion__identity"><CopyableProfileId value={companion?.id ?? order.companionId} entityLabel="用户" showLabel={false} />{companion && <GenderAgeBadge gender={companion.gender} age={companion.age} />}</div>{!companion && <span>陪玩资料</span>}<span>{getOrderClubName(order)}</span></div></div>
+      <section className="order-detail-section order-detail-person">
+        <div className="order-detail-companion"><AvatarMark initials={order.companionInitials} size="md" /><div><div className="order-detail-companion__name"><strong><UserNameWithLevel name={order.companionName} identityId={order.companionId} /></strong>{companion && <GenderAgeBadge gender={companion.gender} age={companion.age} />}</div><div className="order-detail-companion__identity"><CopyableProfileId value={companion?.id ?? order.companionId} entityLabel="用户" showLabel={false} /></div>{!companion && <span>陪玩资料</span>}<span>{getOrderClubName(order)}</span></div></div>
+        {!order.earlyEndPending && <button type="button" className="client-button client-button--secondary" onClick={onContact}><MessageCircle size={15} />聊一聊</button>}
       </section>
 
       <section className="order-detail-section">
-        <div className="order-detail-section__heading"><span className="client-eyebrow">订单信息</span><History size={15} aria-hidden="true" /></div>
-        <div className="order-detail-facts"><span>服务信息</span><strong>{order.gameName} · {order.serviceName} · {order.levelName} · {order.durationUnit}服务</strong><span>服务时长</span><strong>{order.duration} {order.durationUnit}</strong><span>服务单价</span><strong>{order.unitPrice.toLocaleString()} 金豆 / {order.durationUnit}</strong><span>加价</span><strong>{(order.tipAmount ?? 0).toLocaleString()} 金豆</strong><span>优惠金额</span><strong>{(order.discountAmount ?? 0).toLocaleString()} 金豆</strong><span>订单金额</span><strong>{order.amount.toLocaleString()} 金豆</strong><span>支付方式</span><strong>{order.paymentSource === 'premium-card' ? '尊享卡' : '金豆钱包'}</strong><span>订单备注</span><strong>{order.remark || '无'}</strong></div>
+        <div className="order-detail-section__heading"><span className="client-eyebrow">订单信息</span></div>
+        <div className="order-detail-game">{game?.icon ? <img src={game.icon} alt="" /> : <span className="order-detail-game__fallback" aria-hidden="true">{order.gameName.slice(0, 1)}</span>}<div><strong>{order.gameName} · {order.serviceName} · {order.levelName} · {order.durationUnit}服务</strong><span>按{order.durationUnit}</span></div></div>
+        <div className="order-detail-facts order-detail-facts--aligned"><span>服务单价</span><strong>{order.unitPrice.toLocaleString()} 金豆 / {order.durationUnit}</strong><span>服务时长</span><strong>{order.duration} {order.durationUnit}</strong><span>加价</span><strong>{(order.tipAmount ?? 0).toLocaleString()} 金豆</strong><span>优惠金额</span><strong>{(order.discountAmount ?? 0).toLocaleString()} 金豆</strong><span>支付方式</span><strong>{order.paymentSource === 'premium-card' ? '尊享卡' : '金豆钱包'}</strong><span>订单金额</span><strong>{order.amount.toLocaleString()} 金豆</strong></div>
       </section>
+      <section className="order-detail-section order-detail-remark"><div className="order-detail-section__heading"><span className="client-eyebrow">订单备注</span></div><p>{order.remark || '无'}</p></section>
 
       <OrderTimeSection title="服务记录" icon={<Clock3 size={15} />} emptyLabel="暂无服务记录" segments={order.serviceSegments} />
       <OrderAfterSalesRecords records={order.afterSalesSegments.flatMap(segment => {
@@ -780,7 +784,7 @@ export function OrderDetailPanel({ order, companion, diamondBalance, onContact, 
     </div>
 
     <div className="order-detail-actions" aria-label="订单操作">
-      {!order.earlyEndPending && orderActions[order.status].map((item) => { const action = item === '评价' && order.review ? '查看评价' : item; return <button type="button" key={action} className={`client-button ${action === '再次下单' || action === '取消订单' || action === '提前结束' ? 'client-button--secondary' : 'client-button--primary'}`} onClick={() => action === '再次下单' ? onReorder() : action === '联系客服' ? onOpenSupport() : setActiveAction(action)}>{action}</button> })}
+      {!order.earlyEndPending && orderActions[order.status].map((item) => { const action = item === '评价' && order.review ? '查看评价' : item; return <button type="button" key={action} className={`client-button ${action === '确认完成' || action === '支付' ? 'client-button--primary' : 'client-button--secondary'}`} onClick={() => action === '再次下单' ? onReorder() : action === '联系客服' ? onOpenSupport() : setActiveAction(action)}><TableActionLabel action={action} /></button> })}
     </div>
 
     {activeAction && <OrderActionDialog order={order} action={activeAction} clubName={getOrderClubName(order)} diamondBalance={diamondBalance} onClose={() => setActiveAction(null)} onOpenRecharge={() => { setActiveAction(null); onOpenRecharge() }} onUpdateStatus={onUpdateStatus} onPayPendingOrder={onPayPendingOrder} onRequestEarlyEnd={onRequestEarlyEnd} onRenewOrder={onRenewOrder} onSaveReview={onSaveReview} />}

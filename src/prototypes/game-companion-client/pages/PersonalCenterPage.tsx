@@ -1,3 +1,5 @@
+import wealthBenefitsEmpty from '../assets/wealth-benefits-empty.webp'
+import wealthLevelEmblem from '../assets/wealth-level-emblem.webp'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { GenderAgeBadge } from '../components/GenderAgeBadge'
 import { demoImageKind } from '../components/demoImage'
@@ -198,10 +200,10 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
 
   return <div className="client-content account-page personal-center-page">
     <ProfileIdentityCard profile={profile} onEdit={() => { setProfileDraft(profile); setEditingProfile(true) }} onOpenFriends={onOpenFriends} onOpenFollowing={() => { selectSection('favorites'); setFavoriteTab('users') }} onOpenFans={() => { selectSection('favorites'); setFavoriteTab('fans') }} />
-    <CategoryTabs label="个人中心模块" items={sectionItems} value={section} onChange={selectSection} />
+    <CategoryTabs className="personal-center-tabs" label="个人中心模块" items={sectionItems.map(item => ({ ...item, tabIcon: <item.icon className="personal-center-tabs__icon" size={16} aria-hidden="true" /> }))} value={section} onChange={selectSection} />
     <main className="personal-center-content" aria-live="polite">
         {section === 'profile' && <ProfileOverview profile={profile} onSaveProfile={onSaveProfile} orders={orders} diamondBalance={diamondBalance} beanBalance={beanBalance} onOpenWallet={onOpenWallet} onOpenOrders={onOpenOrders} feedback={feedback} onFeedback={setFeedback} onOpenSetting={setActiveSetting} />}
-        {section === 'clubs' && <section className="personal-module">
+        {section === 'clubs' && <section className="personal-module personal-club-module">
           {joinedClub ? <article className="client-card personal-club-card"><AvatarMark initials={joinedClub.initials} size="md" /><div className="personal-club-card__body"><div className="personal-card-title"><h3>{joinedClub.name}</h3><span className="personal-status">{clubMembershipStatus === 'idle' && <Check size={12} />}{clubMembershipStatus === 'joining' ? '待审核' : '已加入'}</span></div><p>{joinedClub.intro}</p><div className="personal-card-meta"><span><Star size={13} />{joinedClub.rating.toFixed(1)}</span></div></div><div className="personal-club-card__actions">{clubMembershipStatus === 'idle' ? <><button type="button" className="client-button client-button--secondary" onClick={() => onOpenClub(joinedClub.id)}>查看详情</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmLeaveClub(true)}>退出俱乐部</button></> : <><button type="button" className="client-button client-button--secondary" disabled>待审核</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirmCancelClubApplication(true)}>取消申请</button></>}</div></article> : <EmptyPanel icon={<Building2 size={22} />} title="还没有加入俱乐部" action="加入俱乐部" actionClassName="client-button--primary" onAction={() => { setClubSearch(''); setChoosingClub(true) }} />}
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
         </section>}
@@ -353,9 +355,9 @@ function ProfileOverview({ profile, onSaveProfile, orders, diamondBalance, beanB
       <div className="personal-summary-stack">
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><h2>钱包</h2></div><button type="button" className="client-text-button" onClick={onOpenWallet}>钱包总览 <ChevronRight size={15} /></button></div><div className="personal-summary-values"><BalanceMini icon={<Coins size={16} />} label="金豆" value={diamondBalance} /><BalanceMini icon={<WalletCards size={16} />} label="糖豆" value={beanBalance} /></div></section>
         <section className="client-card personal-summary-card"><div className="client-section-heading"><div><h2>订单</h2></div><button type="button" className="client-text-button" onClick={onOpenOrders}>全部订单 <ChevronRight size={15} /></button></div><div className="personal-order-stats"><button type="button" onClick={onOpenOrders}><span>全部订单</span><strong>{orders.length}</strong></button><button type="button" onClick={onOpenOrders}><span>待处理</span><strong>{pendingOrderCount}</strong></button><button type="button" onClick={onOpenOrders}><span>服务中</span><strong>{activeOrderCount}</strong></button></div></section>
+        <section className="client-card account-settings-card"><div className="client-section-heading"><div><h2>常用设置</h2></div><UserRound size={18} className="client-muted" /></div><div className="account-settings-list">{settings.map((item) => <button type="button" key={item.id} onClick={() => onOpenSetting(item.id as 'security' | 'blacklist' | 'logout')}><item.icon size={17} /><span>{item.label}</span><ChevronRight size={16} /></button>)}</div>{feedback && <FeedbackMessage>{feedback}<button type="button" onClick={() => onFeedback('')} aria-label="关闭提示"><X size={14} /></button></FeedbackMessage>}</section>
       </div>
     </div>
-    <section className="client-card account-settings-card"><div className="client-section-heading"><div><h2>常用设置</h2></div><UserRound size={18} className="client-muted" /></div><div className="account-settings-list">{settings.map((item) => <button type="button" key={item.id} onClick={() => onOpenSetting(item.id as 'security' | 'blacklist' | 'logout')}><item.icon size={17} /><span>{item.label}</span><ChevronRight size={16} /></button>)}</div>{feedback && <FeedbackMessage>{feedback}<button type="button" onClick={() => onFeedback('')} aria-label="关闭提示"><X size={14} /></button></FeedbackMessage>}</section>
   </section>
 }
 
@@ -371,10 +373,10 @@ function WealthLevelSection() {
   ] as const
   return <section className="personal-module personal-wealth-module">
     <section className="client-card personal-wealth-current">
-      <div className="personal-wealth-current__level"><span className="personal-wealth-badge personal-wealth-badge--large"><Gem size={19} />V{currentWealthLevel}</span><div><span className="client-eyebrow">当前财富等级</span><h3>V{currentWealthLevel} · {current.profileStyle}</h3></div></div>
+      <div className="personal-wealth-current__level"><img className="personal-wealth-current__emblem" src={wealthLevelEmblem} alt="" /><span className="personal-wealth-badge personal-wealth-badge--large"><Gem size={19} />V{currentWealthLevel}</span><div><span className="client-eyebrow">当前财富等级</span><h3>V{currentWealthLevel} · {current.profileStyle}</h3></div></div>
       <div className="personal-wealth-current__progress"><div><span>财富值</span><strong>{currentWealthValue.toLocaleString()}</strong></div><div className="personal-wealth-progress" role="progressbar" aria-label="升级进度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}><span style={{ width: `${progress}%` }} /></div><small>{next ? `再获得 ${(next.requiredWealth - currentWealthValue).toLocaleString()} 财富值升至 V${next.level}` : '已达到最高等级'}</small></div>
     </section>
-    <section className="client-card personal-wealth-benefits"><div className="client-section-heading"><div><span className="client-eyebrow">等级对比</span><h2>等级权益</h2></div></div><div className="personal-wealth-table-wrap"><table className="personal-wealth-table"><thead><tr><th scope="col">等级</th><th scope="col">所需财富值</th>{benefits.map((benefit) => <th scope="col" key={benefit.key}>{benefit.label}</th>)}</tr></thead><tbody>{wealthLevels.map((level) => <tr key={level.level} className={level.level === currentWealthLevel ? 'is-current' : undefined}><th scope="row"><span className="personal-wealth-badge"><Gem size={12} />V{level.level}</span>{level.level === currentWealthLevel && <small>当前</small>}</th><td>{level.requiredWealth.toLocaleString()}</td>{benefits.map((benefit) => <td key={benefit.key}>{level[benefit.key]}</td>)}</tr>)}</tbody></table></div><p className="personal-demo-note">财富等级与权益为本地 mock 展示。</p></section>
+    <section className="client-card personal-wealth-benefits"><div className="client-section-heading"><div><span className="client-eyebrow">等级对比</span><h2>等级权益</h2></div></div><div className="personal-wealth-table-wrap"><table className="personal-wealth-table"><thead><tr><th scope="col">等级</th><th scope="col">所需财富值</th>{benefits.map((benefit) => <th scope="col" key={benefit.key}>{benefit.label}</th>)}</tr></thead><tbody>{wealthLevels.map((level) => <tr key={level.level} className={level.level === currentWealthLevel ? 'is-current' : undefined}><th scope="row"><span className="personal-wealth-badge"><Gem size={12} />V{level.level}</span>{level.level === currentWealthLevel && <small>当前</small>}</th><td>{level.requiredWealth.toLocaleString()}</td>{benefits.map((benefit) => <td key={benefit.key}>{level[benefit.key]}</td>)}</tr>)}</tbody></table></div><p className="personal-demo-note">财富等级与权益为本地 mock 展示。</p><div className="personal-wealth-benefits__empty"><img src={wealthBenefitsEmpty} alt="" /><span>敬请期待～</span></div></section>
   </section>
 }
 
@@ -528,7 +530,7 @@ function BalanceMini({ icon, label, value }: { icon: ReactNode; label: string; v
 }
 
 function OnboardingCard({ art, icon, title, description, submitted, onApply }: { art: string; icon: ReactNode; title: string; description: string; submitted: boolean; onApply: () => void }) {
-  return <article className="client-card onboarding-card"><img className="onboarding-card__art" src={art} alt="" /><span className="onboarding-card__icon">{icon}</span><div><div className="personal-card-title"><h3>{title}</h3>{submitted && <span className="personal-status"><BadgeCheck size={13} />已提交</span>}</div><p>{description}</p></div><button type="button" className="client-button client-button--primary" onClick={onApply}>{submitted ? '再次申请' : '开始申请'}<ChevronRight size={15} /></button></article>
+  return <article className="client-card onboarding-card"><img className="onboarding-card__art" src={art} alt="" /><span className="onboarding-card__icon">{icon}</span><div><div className="personal-card-title"><h3>{title}</h3>{submitted && <span className="personal-status"><BadgeCheck size={13} />已提交</span>}</div><p>{description}</p></div><button type="button" className="client-button client-button--secondary" onClick={onApply}>{submitted ? '再次申请' : '开始申请'}<ChevronRight size={15} /></button></article>
 }
 
 function ApplicationSection({ title, children }: { title: string; children: ReactNode }) {

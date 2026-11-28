@@ -220,7 +220,7 @@ function AppContent() {
   const [prototypePalette, setPrototypePalette] = useState<'grayscale' | 'high-fidelity'>('grayscale')
   const [deviceMode, setDeviceMode] = useState<'mobile' | 'pc'>('pc')
   const { stageRef, scale: previewScale } = usePreviewScale()
-  const fixedDesktopPreview = deviceMode === 'pc' && currentPage != null
+  const fixedDesktopPreview = deviceMode === 'pc' && currentPage != null && currentPage.previewLayout !== 'fluid'
   const [previewStateByPath, setPreviewStateByPath] = useState<Record<string, string>>({})
 
   const previewState = currentPage ? previewStateByPath[currentPage.path] : undefined

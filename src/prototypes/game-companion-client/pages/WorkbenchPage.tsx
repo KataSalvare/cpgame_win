@@ -1,6 +1,6 @@
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useEffect, useState } from 'react'
-import { X, Zap, ArrowLeftRight, ArrowUpFromLine } from 'lucide-react'
+import { X, ArrowLeftRight, ArrowUpFromLine } from 'lucide-react'
 import type { WorkbenchLogic, WorkOrder } from '../hooks/useWorkbenchLogic'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
@@ -43,7 +43,7 @@ export function WorkbenchPage({ logic: w, pageState, onRetry, balance, available
   return <div className="client-content account-page personal-center-page workbench-page">
     <div className="workbench-tab-row">
       <CategoryTabs label="工作台模块" items={(['总览', '匹配请求', '订单', '服务管理', '糖豆钱包'] as const).map(label => ({ id: label, label }))} value={tab} onChange={(label) => { setTab(label); setSelected(null); onTabChange?.(label) }} />
-      <button type="button" className={`client-button workbench-auto-grab ${w.automatic ? 'client-button--primary' : 'client-button--secondary'}`} aria-pressed={w.automatic} onClick={() => setConfirm({ id: 'auto-grab', status: w.automatic ? '关闭自动抢单' : '开启自动抢单' })}><Zap size={18} />{w.automatic ? '关闭自动抢单' : '开启自动抢单'}</button>
+      <button type="button" className="workbench-auto-grab" role="switch" aria-checked={w.automatic} onClick={() => setConfirm({ id: 'auto-grab', status: w.automatic ? '关闭自动抢单' : '开启自动抢单' })}><span>{w.automatic ? '已开启自动抢单' : '未开启自动抢单'}</span><span className="workbench-auto-grab__track" aria-hidden="true"><span /></span></button>
     </div>
     {w.feedback && <div className="workbench-feedback" role="status">{w.feedback}<button aria-label="关闭反馈" onClick={() => w.setFeedback('')}><X size={16} /></button></div>}
     {pageState !== 'normal' ? <PageStatePanel state={pageState} title={pageState === 'empty' ? '暂无工作台数据' : '工作台暂不可用'} description={pageState === 'empty' ? '收到匹配请求或订单后会在这里展示。' : '请稍后重试。'} actionLabel="重新加载" onAction={onRetry} /> : <>
@@ -51,7 +51,7 @@ export function WorkbenchPage({ logic: w, pageState, onRetry, balance, available
         <div className="workbench-request__user"><AvatarMark initials={r.playerInitials} size="sm" /><div className="workbench-request__user-copy"><strong><UserNameWithLevel name={r.player} identityId={r.player} /></strong><small>{r.id}</small></div></div>
         <strong className="workbench-request__service">{w.serviceLabel(r.serviceId)}</strong>
         <div className="workbench-request__price"><strong>{(r.matchPrice * r.quantity).toLocaleString()} 金豆</strong><small>{r.quantity} {r.quantityUnit}</small><small aria-label={`加价 ${r.tipAmount} 金豆`}>+{r.tipAmount} 金豆</small></div>
-        <span className="workbench-request__status">{r.status}</span>{r.status === '待响应' ? <div className="workbench-actions"><button className="client-button client-button--primary" disabled={Boolean(w.activeMatch) || !w.enabled.includes(r.serviceId)} title={w.activeMatch ? '请先取消当前匹配' : undefined} onClick={() => w.respond(r.id)}>抢单</button></div> : r.status === '已加入候选名单' ? <div className="workbench-actions"><button type="button" className="client-button client-button--secondary" onClick={() => onContactMatch(r)}>联系老板</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirm({ id: r.id, status: '取消匹配' })}>取消抢单</button></div> : <span aria-hidden="true">—</span>}
+        <span className="workbench-request__status">{r.status}</span>{r.status === '待响应' ? <div className="workbench-actions"><button className="client-button client-button--primary" disabled={Boolean(w.activeMatch) || !w.enabled.includes(r.serviceId)} title={w.activeMatch ? '请先取消当前匹配' : undefined} onClick={() => w.respond(r.id)}>立即抢单</button></div> : r.status === '已加入候选名单' ? <div className="workbench-actions"><button type="button" className="client-button client-button--secondary" onClick={() => onContactMatch(r)}>联系老板</button><button type="button" className="client-button client-button--secondary" onClick={() => setConfirm({ id: r.id, status: '取消匹配' })}>取消抢单</button></div> : <span aria-hidden="true">—</span>}
         <div className="workbench-request__note"><strong>备注</strong><span>{r.note || '无'}</span></div>
       </div>)}</section><section className="client-card workbench-section"><h2>待处理订单</h2>{w.orders.filter(o => ['待接单', '待服务', '服务中', '已暂停'].includes(o.status)).map(renderOrder)}</section></>}
       {tab === '匹配请求' && <WorkbenchMatchesPanel logic={w} filter={matchFilter} onFilterChange={setMatchFilter} onCancel={id => setConfirm({ id, status: '取消匹配' })} onContactMatch={onContactMatch} />}

@@ -2,11 +2,6 @@
 .yb-kit *, .yb-kit *::before, .yb-kit *::after { box-sizing:border-box; }
 .yb-kit button { cursor:pointer;font:inherit; }
 .yb-kit button:focus-visible,.yb-kit input:focus-visible { outline:2px solid #1d2129;outline-offset:2px; }
-.yb-button { min-height:48px;border:1px solid #86909c;border-radius:9999px;padding:0 16px;background:#fff;color:#1d2129;font-weight:600!important;white-space:nowrap; }
-.yb-button:hover { background:#f1f2f4; }.yb-button:active { background:#e5e6eb; }
-.yb-button.primary { background:#ffd60a;border-color:#ffd60a; }.yb-button.primary:hover { background:#e6b800;border-color:#e6b800; }.yb-button.primary:active { background:#cca300;border-color:#cca300; }
-.yb-button.danger { color:#c9362b;border-color:#c9362b; }.yb-button:disabled { cursor:not-allowed;background:#e5e6eb;color:#4e5969;border-color:#e5e6eb; }
-.yb-button.primary:disabled { background:#ffd60a;border-color:#ffd60a;color:#69717e; }
 .yb-label { display:block;font-size:12px;font-weight:600;margin:12px 0 6px; }.yb-input { display:flex;align-items:center;gap:8px;height:36px;border:1px solid #86909c;border-radius:6px;padding:0 10px;color:#4e5969; }.yb-input:focus-within { outline:2px solid #1d2129;outline-offset:2px; }.yb-input input { min-width:0;width:100%;border:0;outline:0!important;background:transparent; }.yb-field { width:100%;height:36px;border:1px solid #86909c;border-radius:6px;padding:0 10px; }.yb-field.error { border-color:#c9362b; }.yb-error { display:block;margin-top:4px;color:#c9362b;font-size:12px; }
 .yb-segment { display:flex;background:#ececec;padding:4px;border-radius:9999px;margin-bottom:16px; }.yb-segment button { flex:1;height:32px;border:0;border-radius:9999px;background:transparent; }.yb-segment button.selected { background:#ffd60a;font-weight:600;box-shadow:inset 0 -2px #1d2129; }
 .yb-tag { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid #86909c;border-radius:99px;font-size:12px; }.yb-tag.online { color:#287a4b;border-color:#287a4b; }.yb-badge { display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:#c9362b;color:#fff;font-size:12px;font-weight:600; }
@@ -20,8 +15,6 @@
 .yb-dialog { width:375px;max-width:100%;padding:16px;border:1px solid #e5e6eb;border-radius:8px;box-shadow:0 8px 24px rgba(17,24,39,.15); }.yb-dialog-title,.yb-dialog-actions { display:flex;align-items:center;justify-content:space-between; }.yb-dialog p { margin:16px 0;color:#4e5969; }.yb-dialog-actions { justify-content:stretch;gap:11px; }.yb-dialog-actions > :is(.yb-button, .client-button) { flex:1;min-width:0; }
 @media (prefers-reduced-motion:no-preference) { .yb-kit button { transition:background-color 140ms,border-color 140ms; } }
 .yb-button.pill { border-radius:9999px; }
-.yb-button.soft { border-color:#f1f2f8;background:#f1f2f8; }
-.yb-button.soft:hover { background:#e5e6eb; }
 .yb-field.soft { background:#f6f7fd; }
 .yb-conversation { width:100%;border:0;background:transparent;text-align:left;color:inherit;cursor:pointer; }
 .yb-conversation:not(.selected):hover { background:#f6f7fd; }
@@ -35,8 +28,6 @@
 .yb-dialog-close { border:0;background:transparent;font-size:20px;line-height:1;cursor:pointer; }
 .yb-kit button:disabled { cursor:not-allowed; }
 
-.yb-button.primary.yb-state-hover { background:#e6b800;border-color:#e6b800; }
-.yb-button.primary.yb-state-active { background:#cca300;border-color:#cca300; }
 .yb-button.yb-state-focus { outline:2px solid #1d2129;outline-offset:2px; }
 
 :is(.yb-kit .yb-windows-dialog, [data-prototype-palette="high-fidelity"] .client-confirmation__panel) .windows-dialog-panel__header { position:relative;display:flex;justify-content:center;align-items:center;padding:16px 44px 0;border:0;text-align:center; }
@@ -66,20 +57,31 @@
 }
 :is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button--primary {
   color: #332800;
-  background: var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78) 52%, rgb(243 190 0 / 72)));
+  background: var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78%) 52%, rgb(243 190 0 / 72%)));
   box-shadow: var(--yb-glass-primary-shadow, inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%));
 }
 :is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:hover:not(:disabled) { filter: brightness(1.05); }
 :is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:active:not(:disabled) { transform: translateY(1px); }
 :is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:focus-visible { outline: 2px solid #5b4a00; outline-offset: 2px; }
 :is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:disabled { background: #e5e6eb; box-shadow: none; color: #69717e; cursor: not-allowed; }
-:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button--primary:disabled { background: var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78) 52%, rgb(243 190 0 / 72))); box-shadow: var(--yb-glass-primary-shadow, inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%)); }
+:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button--primary:disabled { background: var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78%) 52%, rgb(243 190 0 / 72%))); box-shadow: var(--yb-glass-primary-shadow, inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%)); }
 @media (prefers-reduced-motion: reduce) { :is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button { transition: none; } }
 
 /* Shared glass surface tokens for existing compact action controls. */
 [data-prototype-palette="high-fidelity"] .game-companion-client {
   --yb-glass-secondary: linear-gradient(155deg, rgb(255 255 255 / 85%), rgb(255 255 255 / 38%) 48%, rgb(220 216 205 / 32%));
-  --yb-glass-primary: linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78) 52%, rgb(243 190 0 / 72));
+  --yb-glass-primary: linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78%) 52%, rgb(243 190 0 / 72%));
   --yb-glass-secondary-shadow: inset 0 1px 2px rgb(255 255 255 / 95%), inset 0 -2px 5px rgb(112 105 86 / 10%), 0 3px 9px rgb(62 55 38 / 11%);
   --yb-glass-primary-shadow: inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%);
 }
+
+/* 主题常规按钮统一为液态玻璃；表格行内按钮使用独立规范。 */
+.yb-kit .yb-button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:48px; padding:0 16px; border:0; border-radius:9999px; color:#35322a; font-weight:600!important; white-space:nowrap; background:var(--yb-glass-secondary, linear-gradient(155deg, rgb(255 255 255 / 85%), rgb(255 255 255 / 38%) 48%, rgb(220 216 205 / 32%))); box-shadow:var(--yb-glass-secondary-shadow, inset 0 1px 2px rgb(255 255 255 / 95%), inset 0 -2px 5px rgb(112 105 86 / 10%), 0 3px 9px rgb(62 55 38 / 11%)); backdrop-filter:blur(12px); transition:filter 160ms ease, transform 160ms ease; }
+.yb-kit .yb-button.primary { color:#332800; background:var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78%) 52%, rgb(243 190 0 / 72%))); box-shadow:var(--yb-glass-primary-shadow, inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%)); }
+.yb-kit .yb-button.danger { color:#c9362b; }
+.yb-kit .yb-button:not(:disabled):hover, .yb-kit .yb-button.yb-state-hover:not(:disabled) { filter:brightness(1.05); }
+.yb-kit .yb-button:not(:disabled):active, .yb-kit .yb-button.yb-state-active:not(:disabled) { transform:translateY(1px); }
+.yb-kit .yb-button:focus-visible, .yb-kit .yb-button.yb-state-focus { outline:2px solid #5b4a00; outline-offset:2px; }
+.yb-kit .yb-button:disabled { background:#e5e6eb; box-shadow:none; color:#69717e; cursor:not-allowed; }
+.yb-kit .yb-button.primary:disabled { background:var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78%) 52%, rgb(243 190 0 / 72%))); box-shadow:var(--yb-glass-primary-shadow, inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%)); }
+@media (prefers-reduced-motion:reduce) { .yb-kit .yb-button { transition:none; } }

@@ -28,7 +28,7 @@ export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, query, 
     <label className="orders-search"><Search size={16} aria-hidden="true" /><span className="sr-only">搜索订单号、用户名称或 ID</span><input type="search" value={query} onChange={event => onQueryChange(event.target.value)} placeholder="搜索订单号、用户名称或 ID" /></label>
     </div>
     {filteredOrders.length ? <div className="orders-list" role="group" aria-label={`${label}列表`}>
-      <div className="order-list-header"><span>订单号</span><span>玩家信息</span><span>服务信息</span><span>时长</span><span className="order-price-columns"><span>成单价</span><span>实付</span></span><span>状态</span><span>操作</span></div>
+      <div className="order-list-header"><span>订单号</span><span>玩家信息</span><span>服务信息</span><span>时长</span><span className="order-price-columns"><span>单价</span><span>实付</span></span><span>状态</span><span>操作</span></div>
       {filteredOrders.map(o => {
         const service = w.services.find(s => s.id === o.serviceId)
         const game = games.find(g => g.id === service?.gameId)
@@ -40,7 +40,7 @@ export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, query, 
             <span className="order-item__service"><strong>{game?.name} · {service?.playName}</strong><small>{service?.levelName} · {service?.name}</small></span>
             <span className="order-item__duration">{o.duration} {o.durationUnit}</span>
             <span className="order-item__price order-price-columns"><strong>{o.unitPrice} 金豆 / {o.durationUnit}</strong><strong>{o.amount} 金豆</strong></span>
-            <span className="workbench-order-table-row__status"><span className={`order-item__status order-item__status--${o.status === '已取消' ? 'cancelled' : o.status === '退款' ? 'refund' : o.status === '已完成' ? 'completed' : 'active'}`}>{displayedStatus}</span></span>
+            <span className="workbench-order-table-row__status"><span data-status={displayedStatus} className={`order-item__status order-item__status--${o.status === '已取消' ? 'cancelled' : o.status === '退款' ? 'refund' : o.status === '已完成' ? 'completed' : 'active'}`}>{displayedStatus}</span></span>
           </button><WorkbenchOrderActions logic={w} orderId={o.id} />
         </article>
       })}

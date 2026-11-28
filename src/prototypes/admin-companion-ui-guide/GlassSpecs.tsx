@@ -28,6 +28,12 @@ const primaryCss = `.glass-button--primary {
 .glass-button:active:not(:disabled) { transform: translateY(1px); }
 .glass-button:focus-visible { outline: 2px solid #5b4a00; outline-offset: 2px; }
 .glass-button:disabled { background: #e5e6eb; color: #69717e; box-shadow: none; }
+.glass-button--primary:disabled {
+  background: linear-gradient(155deg, rgb(255 239 139 / 94%),
+    rgb(255 214 10 / 78%) 52%, rgb(243 190 0 / 72%));
+  box-shadow: inset 0 1px 2px rgb(255 255 255 / 85%),
+    inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%);
+}
 @media (prefers-reduced-motion: reduce) {
   .glass-button { transition: none; }
 }`

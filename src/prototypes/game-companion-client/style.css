@@ -550,8 +550,9 @@
 .client-sidebar-account { display: flex; width: 100%; min-height: 64px; align-items: center; gap: 10px; border: 0; border-radius: 6px; padding: 8px; background: transparent; color: var(--client-text); font: inherit; text-align: left; cursor: pointer; }
 .client-sidebar-account > .client-avatar, .client-sidebar-account > img { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
 .client-sidebar-account__details { display: grid; min-width: 0; flex: 1; gap: 3px; }
-.client-sidebar-account__details strong { overflow: hidden; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.client-sidebar-account__details span, .client-sidebar-account__details small { color: var(--client-muted); font-size: 12px; line-height: 1.3; }
+.client-sidebar-account__details strong { overflow: hidden; font-size: 16px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.client-sidebar-account__details .client-user-name__text { color: var(--client-text); font-size: 16px; }
+.client-sidebar-account__details > span { color: var(--client-muted); font-size: 14px; line-height: 1.3; }
 .client-profile-quick--sidebar .client-profile-popover { top: auto; right: auto; bottom: 0; left: calc(100% + 8px); }
 .game-companion-client .windows-client-frame__titlebar { position: relative; z-index: 20; }
 .client-profile-quick { position: relative; display: flex; align-items: center; }
@@ -1154,9 +1155,9 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .order-item__actions--service { display: grid; width: 100%; grid-template-columns: repeat(2, 92px); justify-content: end; gap: 6px; }
 .order-item__actions--service .client-button { width: 92px; min-width: 92px; }
 .order-detail-panel { position: relative; display: grid; min-height: 100%; align-content: start; gap: 14px; }
-.game-order-drawer--client .windows-right-drawer__content { display: flex; min-height: 0; overflow: hidden; }
-.game-order-drawer--client .order-detail-panel { display: flex; width: 100%; height: 100%; min-height: 0; flex-direction: column; gap: 0; overflow: hidden; }
-.order-detail-scroll { display: grid; min-height: 0; flex: 1 1 auto; align-content: start; gap: 14px; overflow-y: auto; padding-bottom: 14px; }
+.game-order-drawer .windows-right-drawer__content { display: flex; min-height: 0; overflow: hidden; padding: 0; }
+.game-order-drawer .order-detail-panel { display: flex; width: 100%; min-width: 0; height: 100%; min-height: 0; flex-direction: column; gap: 0; overflow: hidden; }
+.order-detail-scroll { display: grid; min-height: 0; flex: 1 1 auto; align-content: start; gap: 14px; overflow-y: auto; padding: 16px 20px; }
 .order-detail-status-card, .order-detail-section { border: 1px solid var(--client-border); border-radius: 6px; background: var(--prototype-surface, #fff); }
 .order-detail-status-card { display: grid; gap: 7px; padding: 14px; background: var(--prototype-surface-muted, #f9fafb); }
 .order-detail-status-card__status { font-size: 17px; font-weight: 600; }
@@ -1194,7 +1195,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .order-time-item > div { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
 .order-time-item > div span { color: var(--client-muted); }
 .order-time-item time { color: var(--client-text); text-align: right; }
-.order-detail-actions { z-index: 2; display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 7px; border-top: 1px solid var(--client-border); margin: 0 -20px -16px; padding: 12px 20px 16px; background: rgba(255, 255, 255, .98); }
+.order-detail-actions { z-index: 2; display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 7px; border-top: 1px solid var(--client-border); margin: 0; padding: 12px 20px 16px; background: rgba(255, 255, 255, .98); }
 .order-detail-actions .client-button { min-height: 32px; padding: 0 10px; font-size: 14px; }
 .order-action-overlay { position: absolute; z-index: 5; inset: 0; display: grid; align-items: start; justify-items: center; padding: 72px 6px 20px; background: rgba(31, 41, 55, .28); }
 .order-action-dialog { width: 100%; max-width: 360px; border: 1px solid var(--client-border); border-radius: 8px; padding: 16px; background: var(--prototype-surface, #fff); box-shadow: 0 12px 30px rgba(17, 24, 39, .16); }
@@ -2638,3 +2639,35 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .bean-payout-card__icon img { width: 22px; height: 22px; }
 .bean-withdraw-amount__conversion { flex: 1; min-width: 0; color: var(--client-muted); font-size: 12px; line-height: 1.4; }
 [data-prototype-palette="high-fidelity"] .bean-payout-card__icon img { filter: invert(42%) sepia(98%) saturate(2777%) hue-rotate(184deg) brightness(99%); }
+
+.order-detail-actions:empty { display: none; }
+
+.order-detail-person { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.order-detail-person .order-detail-companion { min-width: 0; }
+.order-detail-person > .client-button { flex: 0 0 auto; }
+.order-detail-game { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.order-detail-game img, .order-detail-game__fallback { width: 56px; height: 56px; flex: 0 0 56px; border-radius: 10px; object-fit: cover; }
+.order-detail-game__fallback { display: grid; place-items: center; background: var(--prototype-canvas, #f3f4f6); font-weight: 600; }
+.order-detail-game > div { display: grid; min-width: 0; gap: 5px; }
+.order-detail-game strong { font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+.order-detail-game > div > span { color: var(--client-muted); font-size: 12px; }
+.order-detail-facts--aligned { grid-template-columns: minmax(74px, auto) minmax(0, 1fr); }
+.order-detail-facts--aligned > strong { text-align: right; }
+.order-detail-remark p { margin: 0; color: var(--client-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+
+.order-detail-companion__name { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
+
+/* 个人总览按照片比例和内容高度组织。 */
+.personal-account-overview > .personal-life-photos { min-height: 0; }
+.personal-life-photo-stage { aspect-ratio: 1 / 1; min-height: 0; height: auto; }
+.personal-life-photo-stage img { max-height: 100%; }
+.personal-summary-stack { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
+.personal-summary-stack .account-settings-card { display: flex; min-height: 0; flex-direction: column; }
+.personal-summary-stack .account-settings-list { flex: 1; grid-template-columns: 1fr; grid-template-rows: repeat(3, minmax(48px, 1fr)); margin-top: 12px; }
+
+.personal-center-tabs__icon, .personal-wealth-current__emblem { display: none; }
+
+.personal-wealth-benefits__empty { display: none; }
+
+/* 入驻卡片与记录只使用模块的 16px 间距。 */
+.onboarding-card-grid + .onboarding-records { margin-top: 0; }
