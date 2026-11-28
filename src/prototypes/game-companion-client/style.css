@@ -688,9 +688,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-device-list article strong small { border: 1px solid var(--client-border); border-radius: 4px; padding: 2px 5px; }
 .personal-device-current { color: var(--client-muted); font-size: 12px; }
 .personal-setting-empty { margin: 0; padding: 16px 0; color: var(--client-muted); font-size: 12px; text-align: center; }
-.personal-setting-confirm { display: flex; align-items: flex-start; gap: 14px; padding: 12px 4px; color: var(--prototype-text-secondary, #374151); }
+.personal-setting-confirm { padding: 12px 4px; color: var(--prototype-text-secondary, #374151); }
 .personal-setting-confirm strong { font-size: 14px; }
-.personal-setting-confirm p { margin: 8px 0 0; color: var(--client-muted); font-size: 12px; line-height: 1.6; }
 .personal-security-menu { display: grid; }
 .personal-security-menu__row { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 16px; border: 0; border-bottom: 1px solid var(--client-border); padding: 10px 4px; background: transparent; color: var(--client-text); text-align: left; cursor: pointer; }
 .personal-security-menu__row > span { display: grid; gap: 5px; }
@@ -1931,7 +1930,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .identity-flow__code > button { flex: 0 0 auto; min-width: 112px; }
 .identity-flow__code > button:disabled { color: var(--prototype-text-subtle, #9ca3af); cursor: not-allowed; opacity: .55; }
 .identity-flow__error { margin: -8px 0 0; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
-.identity-flow-dialog > .windows-dialog-panel__footer > .client-button { min-height: 36px; padding-inline: 16px; font-size: 14px; }
+.identity-flow-dialog > .windows-dialog-panel__footer > .client-button { height: 48px; min-height: 48px; padding-inline: 16px; font-size: 14px; }
 .identity-flow__qr-panel { display: grid; justify-items: center; gap: 12px; padding: 0 0 8px; }
 .identity-flow__qr { width: 216px; height: 216px; border: 1px solid var(--client-border); border-radius: 6px; background: var(--prototype-surface, #fff); padding: 10px; image-rendering: pixelated; }
 .identity-flow__qr-panel > strong { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; }

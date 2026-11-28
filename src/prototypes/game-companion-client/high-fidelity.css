@@ -229,22 +229,28 @@
 [data-prototype-palette="high-fidelity"] .home-clubs .club-filter-group[aria-label="俱乐部标签筛选"] .client-filter-pill.is-active { border-color: transparent; background: #fff6cc; }
 [data-prototype-palette="high-fidelity"] .home-clubs .club-filter-group[aria-label="俱乐部范围筛选"] .client-filter-pill.is-active { border-color: #ffd60a; background: #fff6cc; }
 
-/* 侧栏一键匹配使用品牌色玻璃质感。 */
+/* 侧栏一键匹配：橙黄胶囊与柔和高光。 */
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary,
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary.is-active {
-  border: 1px solid #e7bc00;
-  background: linear-gradient(160deg, #fff3a5 0%, #ffe04b 42%, #ffd60a 70%, #f3bb00 100%);
-  color: #1d2129;
+  border: 2px solid #ffd24b;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse at 18% 0%, rgb(255 255 255 / 85%), transparent 30%),
+    radial-gradient(ellipse at 78% 110%, #fff97b 0%, transparent 42%),
+    linear-gradient(105deg, #ff5414 5%, #ff7c08 42%, #ffbe08 78%, #ffa600 100%);
+  color: #fff;
   font-size: 18px;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 -2px 4px rgb(180 127 0 / 15%), 0 3px 7px rgb(141 105 0 / 18%);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  text-shadow: 0 1px 3px rgb(145 61 0 / 45%);
+  box-shadow: inset 0 2px 3px rgb(255 255 255 / 75%), inset 0 -3px 4px rgb(255 226 63 / 70%), 0 3px 9px rgb(255 167 0 / 35%);
+  transition: filter 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover {
-  background: linear-gradient(160deg, #fff8c6 0%, #ffe86e 42%, #ffd60a 70%, #eeb400 100%);
-  box-shadow: inset 0 1px 0 #fff, 0 5px 10px rgb(141 105 0 / 25%);
+  filter: brightness(1.06);
+  box-shadow: inset 0 2px 3px rgb(255 255 255 / 80%), inset 0 -3px 4px rgb(255 226 63 / 70%), 0 5px 12px rgb(255 167 0 / 45%);
   transform: translateY(-2px);
 }
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:active { transform: translateY(0); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:focus-visible { outline: 2px solid #9a4700; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary { transition: none; }
   [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover { transform: none; }
@@ -657,11 +663,15 @@
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog :is(.identity-flow__field > input, .identity-flow__code > input) { min-height: 48px; border: 0; border-radius: 12px; padding: 0 14px; background: #f2f3f9; color: #1d2129; }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog :is(.identity-flow__field > input, .identity-flow__code > input):focus-visible { outline: 2px solid #b99200; outline-offset: 2px; }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__error { color: #c9362b; }
-[data-prototype-palette="high-fidelity"] .identity-flow-dialog .client-button { min-height: 42px; border: 0; border-radius: 999px; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .client-button { height: 48px; min-height: 48px; border: 0; border-radius: 999px; font-weight: 600; }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog .client-button--primary { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; box-shadow: inset 0 1px 1px rgb(255 255 255 / 75%), 0 3px 8px rgb(180 131 0 / 16%); }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog .client-button--secondary { background: #f1f2f7; color: #434c59; }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__primary { width: 100%; }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__footer .client-button--primary { flex: 1; }
+[data-prototype-palette="high-fidelity"] .personal-closure-dialog .windows-dialog-panel__footer .client-button { height: 48px; min-height: 48px; }
+[data-prototype-palette="high-fidelity"] .personal-closure-balance > div span::before { width: 20px; height: 20px; flex: 0 0 20px; background: center / contain no-repeat url('./assets/wallet-gold-bean.webp'); content: ''; }
+[data-prototype-palette="high-fidelity"] .personal-closure-balance > div:nth-of-type(2) span::before { background-image: url('./assets/wallet-candy-bean.webp'); }
+[data-prototype-palette="high-fidelity"] .personal-closure-balance > div span svg { display: none; }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__qr { border: 0; border-radius: 14px; background: #f2f3f9; padding: 12px; }
 [data-prototype-palette="high-fidelity"] .identity-flow-dialog .personal-real-name-details { border: 0; border-radius: 14px; background: #f2f3f9; }
 

@@ -452,7 +452,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
   if (pendingDevice) return <ConfirmationDialog overlayId="account-security-dialog" title="结束登录"
     message={activeDescription} confirmLabel="确认结束登录" onCancel={() => setPendingDeviceId(null)} onDismiss={onClose}
     onConfirm={() => { onEndDevice(pendingDevice.id); setPendingDeviceId(null); setFeedback('已结束该设备的登录') }}>
-    <div className="personal-setting-confirm"><Monitor size={22} /><div><strong>结束「{pendingDevice.name}」的登录？</strong><p>该设备将退出当前账号。此操作仅更新本次原型中的设备状态。</p></div></div>
+    <div className="personal-setting-confirm"><strong>结束「{pendingDevice.name}」的登录？</strong></div>
   </ConfirmationDialog>
   const footer = view === 'overview' ? null : view === 'closure-complete'
       ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button>
@@ -487,7 +487,7 @@ function BlacklistDialog({ profiles, onRemove, onClose }: { profiles: BlockedPro
   const [removedId, setRemovedId] = useState<string | null>(null)
   const [profileToRemove, setProfileToRemove] = useState<BlockedProfile | null>(null)
   const visibleProfiles = profiles.filter((profile) => profile.id !== removedId)
-  return <DialogPanel overlayId="profile-blacklist-dialog" title="黑名单" description="移除后可重新查看资料并发起私聊，历史消息会保留。" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
+  return <DialogPanel overlayId="profile-blacklist-dialog" title="黑名单" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
     {visibleProfiles.length ? <div className="personal-blacklist-list">{visibleProfiles.map((profile) => <article key={profile.id}><AvatarMark initials={profile.initials} size="sm" /><div><strong><UserNameWithLevel name={profile.name} identityId={profile.profileId} /></strong><small>{profile.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => setProfileToRemove(profile)}>移除</button></article>)}</div> : <div className="personal-blacklist-empty"><Shield size={24} /><strong>黑名单为空</strong><span>被拉黑的玩家和陪玩会显示在这里</span></div>}
     {profileToRemove && <ConfirmationDialog overlayId="profile-blacklist-remove-confirm" title="移除黑名单" message={`确定将「${profileToRemove.name}」移出黑名单吗？`} confirmLabel="确认移除" onCancel={() => setProfileToRemove(null)} onConfirm={() => { onRemove(profileToRemove.id); setRemovedId(profileToRemove.id); setProfileToRemove(null) }} />}
   </DialogPanel>
