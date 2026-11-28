@@ -1,6 +1,6 @@
 import { NoticeDialog } from '@/themes/grayscale-prototype/components/NoticeDialog'
 import { useState } from 'react'
-import { Check, ChevronDown, ChevronRight, Coins, MessageCircle, Search, X } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, ChevronRight, Coins, MessageCircle, Search, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { clubs, companions, games, servicesByCompanion } from '../data/mockData'
@@ -47,8 +47,8 @@ export function CompanionOnboarding({ balance, onBack, onChat, onRecharge, onPay
   const reset = () => { sessionStorage.removeItem(draftKey); setStage('list'); setDraft(null); setDialog(null); setPicker(false); setError('') }
   const back = () => { reset(); onBack() }
   return <section className="personal-module companion-onboarding">
-    <header className="client-section-heading"><h2>{stage === 'list' ? '俱乐部招聘' : '选择考核内容'}</h2><button type="button" className="client-button client-button--secondary" onClick={stage === 'list' ? back : reset}>返回</button></header>
-    {stage === 'list' ? <><label className="personal-club-search recruitment-search"><Search size={16} /><input type="search" aria-label="搜索招聘俱乐部名称" placeholder="搜索俱乐部名称" value={clubSearch} onChange={event => setClubSearch(event.target.value)} />{clubSearch && <button type="button" aria-label="清空招聘俱乐部搜索" onClick={() => setClubSearch('')}><X size={15} /></button>}</label><div className="recruitment-list" aria-live="polite">{recruitingClubs.map(({ item, index }) => <article className="client-card recruitment-card" key={item.id}>
+    <header className="client-section-heading companion-onboarding__heading"><button type="button" className="onboarding-back" onClick={stage === 'list' ? back : reset}><span><ArrowLeft size={16} /></span>返回</button>{stage === 'list' ? <label className="personal-club-search recruitment-search"><Search size={16} /><input type="search" aria-label="搜索招聘俱乐部名称" placeholder="搜索俱乐部名称" value={clubSearch} onChange={event => setClubSearch(event.target.value)} />{clubSearch && <button type="button" aria-label="清空招聘俱乐部搜索" onClick={() => setClubSearch('')}><X size={15} /></button>}</label> : <h2>选择考核内容</h2>}</header>
+    {stage === 'list' ? <><div className="recruitment-list" aria-live="polite">{recruitingClubs.map(({ item, index }) => <article className="client-card recruitment-card" key={item.id}>
       <header><AvatarMark initials={item.initials} size="md" /><div><h3>{item.name}</h3><span>招聘 {item.gameIds.reduce((total, _, i) => total + 20 + index * 8 + i * 12, 0)} 人</span></div><button type="button" className="client-button client-button--secondary" onClick={() => { setRulesClubId(item.id); setDialog('rules') }}>查看店规<ChevronRight size={14} /></button></header>
       <div className="recruitment-games">{item.gameIds.map((id, i) => { const g = games.find(g => g.id === id)!; return <button type="button" key={id} onClick={() => { setDraft({ clubId: item.id, gameId: id, serviceId: '', examinerId: '' }); setAgreed(false); setDialog('notice') }}>
         <span className="recruitment-game-icon" role="img" aria-label={`${g.name}游戏图`}>{g.icon ? <img className="game-icon" src={g.icon} alt="" /> : g.shortName}</span>

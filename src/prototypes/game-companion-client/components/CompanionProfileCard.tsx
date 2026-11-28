@@ -2,7 +2,7 @@ import { GenderAgeBadge } from './GenderAgeBadge'
 import { demoImageKind } from './demoImage'
 import { useRemovalConfirmation } from './RemovalConfirmation'
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Flag, MoreHorizontal, Pencil, Shield, Share2, Star, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flag, Heart, MoreHorizontal, Pencil, Shield, Share2, Star, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import type { ProfileCardData } from './profileCardData'
@@ -99,7 +99,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
     {menuOpen && <div className="companion-profile-card__menu" role="menu" aria-label={`${profile.name}更多功能`}>
       {onShare && <button type="button" role="menuitem" onClick={() => { setShareOpen(true); setMenuOpen(false) }}><Share2 size={14} />分享</button>}
       <button type="button" role="menuitem" onClick={openNote}><Pencil size={14} />备注</button>
-      <button type="button" role="menuitem" aria-pressed={isFollowed} onClick={toggleFollow}><Star size={14} />{isFollowed ? '已关注' : '关注'}</button>
+      <button type="button" role="menuitem" aria-pressed={isFollowed} onClick={toggleFollow}><Heart className="follow-heart" size={14} fill={isFollowed ? "currentColor" : "none"} />{isFollowed ? '已关注' : '关注'}</button>
       <button type="button" role="menuitem" className="is-danger" disabled={isBlocked} onClick={() => { setBlockConfirmationOpen(true); setMenuOpen(false) }}><Shield size={14} />{isBlocked ? '已拉黑' : '拉黑'}</button>
       <button type="button" role="menuitem" onClick={openReportDialog}><Flag size={14} />举报</button>
     </div>}
@@ -114,7 +114,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
       <AvatarMark initials={profile.initials} size={immersive ? 'xl' : 'lg'} />
       <div className="companion-profile-card__body">
         <div className="companion-profile-card__name"><h1><UserNameWithLevel name={profile.name} identityId={profile.userId} /></h1><span className="client-status" data-person-status={profile.status}>{profile.status}</span></div>
-        <div className="companion-profile-card__facts"><GenderAgeBadge gender={profile.gender} age={profile.age} /><CopyableProfileId value={profile.userId} entityLabel="用户" /><span className="rating-mark"><Star size={14} />{profile.rating.toFixed(2)}</span>{profile.realNameVerified && <span className="client-badge">已实名</span>}</div>
+        <div className="companion-profile-card__facts"><GenderAgeBadge gender={profile.gender} age={profile.age} /><CopyableProfileId value={profile.userId} entityLabel="用户" /><span className="rating-mark"><Star size={14} />{profile.rating.toFixed(2)}</span>{profile.realNameVerified && <span className="client-badge verified-identity-badge" aria-label="已实名">已实名</span>}</div>
         {profile.friendCount !== undefined && profile.followingCount !== undefined && profile.followerCount !== undefined && <div className="companion-profile-card__stats" aria-label="社交数据"><span><strong>{profile.friendCount}</strong>朋友</span><span><strong>{profile.followingCount}</strong>关注</span><span><strong>{profile.followerCount}</strong>粉丝</span></div>}
         <p>{profile.intro}</p>
         <div className="client-tag-row">{profile.tags.map((tag) => <span className="client-tag" key={tag}>{tag}</span>)}</div>
@@ -141,7 +141,7 @@ export function CompanionProfileCard({ profile, className = '', followed = false
     {removalDialog}
     {blockConfirmationOpen && <ConfirmationDialog overlayId={`companion-block-${profile.userId}`} title="拉黑用户" message={`确定拉黑「${profile.name}」吗？`} confirmLabel="确认拉黑" onCancel={() => setBlockConfirmationOpen(false)} onConfirm={confirmBlock} />}
     {shareOpen && onShare && <CompanionShareDialog profile={profile} onShare={onShare} onClose={() => setShareOpen(false)} />}
-    {noteDialogOpen && <DialogPanel overlayId={`companion-note-${profile.userId}`} title="设置备注" onClose={() => setNoteDialogOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setNoteDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { if (onSaveNote) onSaveNote(noteDraft.trim()); else setLocalNote(noteDraft.trim()); setNoteDialogOpen(false) }}>保存备注</button></>}><label className="companion-note-field"><span>备注</span><input autoFocus maxLength={20} value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="输入备注名称" /></label></DialogPanel>}
+    {noteDialogOpen && <DialogPanel className="companion-note-dialog" overlayId={`companion-note-${profile.userId}`} title="设置备注" onClose={() => setNoteDialogOpen(false)} width={440} footer={<><button type="button" className="client-button client-button--secondary" onClick={() => setNoteDialogOpen(false)}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => { if (onSaveNote) onSaveNote(noteDraft.trim()); else setLocalNote(noteDraft.trim()); setNoteDialogOpen(false) }}>保存备注</button></>}><label className="companion-note-field"><span>备注</span><input autoFocus maxLength={20} value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="输入备注名称" /></label></DialogPanel>}
     {reportDialogOpen && <UserReportDialog overlayId={`companion-report-${profile.userId}`} onClose={() => setReportDialogOpen(false)} onSubmit={() => { setFeedback('举报已提交（仅演示）'); setReportDialogOpen(false) }} />}
   </>
 }

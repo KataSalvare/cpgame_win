@@ -36,7 +36,7 @@ export function UserReportDialog({ overlayId, onClose, onSubmit }: { overlayId: 
     setReportImages((current) => [...current, ...nextImages])
   }
 
-  return <DialogPanel overlayId={overlayId} title="举报用户" onClose={onClose} width={640} className="companion-report-dialog" footer={<><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!reportType || !reportReason.trim()} onClick={onSubmit}>提交举报</button></>}>
+  return <DialogPanel overlayId={overlayId} title="举报用户" onClose={onClose} width={640} className="companion-report-dialog" footer={<button type="button" className="client-button client-button--primary" disabled={!reportType || !reportReason.trim()} onClick={onSubmit}>提交举报</button>}>
     <fieldset className="companion-report-types">
       <legend>选择举报类型</legend>
       <div className="companion-report-types__options" role="radiogroup" aria-label="选择举报类型">{REPORT_TYPES.map((type) => {

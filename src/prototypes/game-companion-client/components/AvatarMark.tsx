@@ -5,7 +5,7 @@ import avatar3 from '../assets/avatar-preview-3.webp'
 import avatar4 from '../assets/avatar-preview-4.webp'
 import demoAvatar from '../assets/demo-avatar.webp'
 
-const previewAvatars: Record<string, string> = { 风: avatar1, 满: avatar2, 北: avatar3, 柠: avatar4 }
+const previewAvatars: Record<string, string> = { 风: avatar1, 晚风: avatar1, 满: avatar2, 北: avatar3, 柠: avatar4 }
 
 export function AvatarMark({ initials, size = 'md', imageUrl, isDemoUser = false }: { initials: string; size?: 'sm' | 'md' | 'lg' | 'xl'; imageUrl?: string; isDemoUser?: boolean }) {
   const previewAvatar = !imageUrl ? (isDemoUser ? demoAvatar : previewAvatars[initials]) : undefined

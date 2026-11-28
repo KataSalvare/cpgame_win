@@ -298,7 +298,7 @@
 .client-back-link { display: inline-flex; width: fit-content; align-items: center; gap: 8px; border: 0; padding: 0; background: transparent; color: var(--prototype-text-secondary, #4b5563); font: inherit; font-size: 12px; cursor: pointer; }
 .client-back-link:hover { color: #111827; }
 .system-settings-page__heading, .club-detail-page__heading { display: flex; align-items: center; gap: 10px; }
-.system-settings-page__heading { margin: 0 0 24px; }
+.system-settings-page__heading { margin: 0; }
 .system-settings-page__heading h1, .club-detail-page__heading h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
 .system-settings-page__heading > .client-button { margin-left: auto; }
 .system-settings-page__heading .client-back-link, .club-detail-page__heading .client-back-link { justify-content: center; width: 32px; height: 32px; border: 1px solid var(--prototype-border, #e5e7eb); border-radius: 6px; background: var(--prototype-surface, #fff); }
@@ -710,7 +710,9 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-security-form .personal-setting-field input { box-sizing: border-box; }
 .personal-form-note { color: var(--client-muted); font-size: 12px; }
 .personal-closure-content { display: grid; gap: 18px; }
-.personal-closure-terms { max-height: 330px; overflow: auto; border: 1px solid var(--client-border); border-radius: 6px; padding: 16px 18px; color: var(--client-text); line-height: 1.65; }
+.personal-closure-terms { max-height: 330px; overflow: auto; color: var(--client-text); line-height: 1.65; }
+.personal-closure-dialog > .windows-dialog-panel__footer > .client-button { height: 48px; min-height: 48px; }
+.personal-closure-dialog > .windows-dialog-panel__footer > .client-button--primary { flex: 1; }
 .personal-closure-terms h3 { margin: 0 0 10px; font-size: 16px; }
 .personal-closure-terms h4 { margin: 16px 0 5px; font-size: 14px; }
 .personal-closure-terms p { margin: 6px 0; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; }
@@ -1583,7 +1585,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .companion-profile-card--immersive .client-tag-row { justify-content: center; }
 .companion-profile-card--immersive .companion-profile-card__body > p { max-width: 100%; }
 .companion-profile-card--immersive + .companion-life-photos { margin-top: 0; }
-.companion-detail-page__actions { position: sticky; z-index: 12; bottom: -16px; display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 8px; flex: 0 0 auto; margin: auto -20px -16px; border-top: 1px solid var(--client-border); padding: 10px 16px; background: var(--client-surface); }
+.companion-detail-page__actions { position: sticky; z-index: 12; bottom: -16px; display: grid; grid-template-columns: 1fr 2fr 80px; gap: 8px; flex: 0 0 auto; margin: auto -20px -16px; border-top: 1px solid var(--client-border); padding: 10px 16px; background: var(--client-surface); }
 .companion-detail-page--panel .companion-detail-page__actions { bottom: 8px; margin-bottom: 0; }
 .companion-detail-page__actions .client-button { min-height: 38px; }
 .companion-detail-page__actions .is-followed { background: var(--prototype-canvas, #f3f4f6); }
@@ -1902,6 +1904,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .global-search-result__demographic.is-male { color: #65778a; }
 .global-search-result__count { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; color: var(--client-muted); font-size: 12px; }
 .global-search-result__kind { flex: 0 0 auto; color: var(--client-muted); font-size: 12px; }
+.global-search-result__owned, .global-search-result__rating, .global-search-result__intro { display: none; }
 .global-search-empty { display: grid; justify-items: center; gap: 8px; padding: 32px 16px 24px; color: var(--client-muted); text-align: center; }
 .global-search-empty strong { color: var(--client-text); font-size: 14px; }
 .global-search-empty span { font-size: 12px; }
@@ -2064,11 +2067,10 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-notification-table :disabled { opacity: .45; cursor: not-allowed; }
 .personal-notification-table :focus-visible { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; }
 
-.companion-share-preview { display: flex; align-items: center; gap: 12px; border: 1px solid var(--client-border); border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 14px; }
-.companion-share-friends { display: grid; max-height: 300px; overflow: auto; margin-top: 8px; }
-.companion-share-friends label { display: flex; align-items: center; gap: 12px; min-height: 50px; padding: 8px; border-radius: 6px; font-size: 14px; cursor: pointer; }
-.companion-share-friends label:hover { background: var(--prototype-canvas, #f3f4f6); }
-.companion-share-friends input { accent-color: var(--client-primary); }
+.companion-share-dialog .social-search { width: 100%; min-height: 44px; box-sizing: border-box; margin: 0; border-radius: 10px; padding: 0 14px; }
+.companion-share-friends { max-height: 300px; margin-top: 12px; }
+.companion-share-friends label { min-height: 56px; font-size: 14px; cursor: pointer; }
+.companion-share-friends input { width: 20px; height: 20px; flex: 0 0 20px; margin: 0; accent-color: var(--client-primary); }
 .companion-share-success { padding: 20px 0; font-size: 14px; }
 
 .screen-recording-entry:disabled { color: var(--client-text); cursor: default; }
@@ -2140,7 +2142,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 
 .recruitment-search { width: 360px; max-width: 100%; }
 
-.system-settings-page { max-width: 1040px; width: 100%; }
+.system-settings-page { max-width: 1040px; width: 100%; gap: 16px; }
 .system-settings-page h1 { font-size: 20px; font-weight: 600; }
 .system-settings-card { padding: 24px; margin-bottom: 16px; }
 .system-settings-card h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 24px; font-size: 15px; font-weight: 600; }
@@ -2442,3 +2444,55 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 [data-prototype-palette="high-fidelity"] .gift-panel__footer .client-button--primary:hover { background: #e6b800; }
 [data-prototype-palette="high-fidelity"] .gift-tabs button { position: relative; }
 [data-prototype-palette="high-fidelity"] .gift-tabs button.is-active::after { position: absolute; right: 25%; bottom: 3px; left: 25%; height: 3px; border-radius: 999px; background: #ffd60a; content: ''; }
+.companion-detail-page__actions .companion-detail-page__gift { border: 0; background: transparent; box-shadow: none; }
+.companion-detail-page__gift img { display: block; width: 40px; height: 40px; object-fit: contain; }
+.gift-wall__color-art { display: none; }
+:is(button[aria-pressed="true"] .follow-heart, .follow-heart.is-selected) { color: #e5484d; }
+
+/* 平台和俱乐部公告共用独立卡片布局。 */
+.announcement-page .announcement-card { overflow: visible; border: 0; padding: 0; background: transparent; box-shadow: none; }
+.announcement-page .announcement-list { display: grid; gap: 12px; }
+.announcement-page .announcement-list li + li { border: 0; }
+.announcement-page .announcement-row.has-cover { min-height: 144px; grid-template-columns: 176px minmax(0, 1fr) auto; gap: 18px; border: 0; border-radius: 12px; padding: 16px 20px; background: #fff; }
+.announcement-page .announcement-row:hover { background: #f9fafc; }
+.announcement-page .announcement-row__cover { border: 0; border-radius: 8px; }
+.announcement-page .announcement-row__title-line strong { font-size: 17px; font-weight: 600; }
+.announcement-page .announcement-row__summary { display: -webkit-box; overflow: hidden; color: #657184; font-size: 14px; line-height: 1.5; white-space: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.announcement-page .announcement-row__time { font-size: 13px; }
+.announcement-page--panel .announcement-row.has-cover { min-height: 128px; grid-template-columns: minmax(0, 1fr) 96px; gap: 8px 12px; padding: 14px; }
+.announcement-page--panel .announcement-row__cover { width: 96px; height: 72px; grid-column: 2; grid-row: 1 / 3; }
+.announcement-page--panel .announcement-row.has-cover .announcement-row__main { grid-column: 1; grid-row: 1; }
+.announcement-page--panel .announcement-row.has-cover .announcement-row__time { grid-column: 1; grid-row: 2; }
+.announcement-page--panel .announcement-row__title-line strong { font-size: 15px; }
+.announcement-page--panel .announcement-row__summary { font-size: 13px; }
+
+/* Wallet and update dialog actions retain the standard 48px target. */
+.game-companion-client .client-update-reminder-dialog > .windows-dialog-panel__footer .client-button,
+.game-companion-client .bean-exchange-dialog > footer .client-button,
+.game-companion-client .bean-withdraw-dialog .bean-withdraw-submit { height: 48px; min-height: 48px; }
+.game-companion-client .bean-exchange-dialog > footer .client-button { width: 100%; }
+.game-companion-client .bean-withdraw-dialog { height: auto; gap: 12px; }
+
+/* Compact payment and result states without changing the purchase form. */
+.store-benefit-dialog.wallet-recharge-dialog:is(.is-payment, .is-completed) { width: min(480px, calc(100% - 48px)); }
+.wallet-recharge-dialog:is(.is-payment, .is-completed) > .client-content { padding: 16px 24px 20px; }
+.wallet-recharge-dialog.is-payment .wallet-recharge-payment { width: 100%; gap: 10px; padding: 0; }
+.wallet-recharge-dialog.is-payment .wallet-recharge-payment__qr { padding: 4px; }
+.wallet-recharge-dialog.is-completed .checkout-success-card { width: 100%; padding: 8px 0 0; }
+.wallet-recharge-dialog.is-completed .checkout-success-card h1 { margin-top: 12px; }
+.wallet-recharge-dialog.is-completed .checkout-success-card__actions { margin-top: 18px; }
+.announcement-detail-dialog > .windows-dialog-panel__footer > .client-button { height: 48px; min-height: 48px; }
+.woodpecker-ticket__attachments > button { min-height: 0; height: 72px; grid-template-rows: 64px; }
+.woodpecker-filter-row .woodpecker-filter { min-width: 112px; min-height: 42px; padding: 0 18px; font-size: 16px; }
+.personal-gift-list { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: 160px; }
+.personal-gift-tile__art { display: none; }
+.companion-onboarding__heading { justify-content: flex-start; gap: 16px; }
+.companion-onboarding__heading .recruitment-search { margin: 0; }
+.assessment-payment > button { margin-left: auto; }
+.game-companion-client :is([data-overlay="choose-club-dialog"], [data-overlay="club-join-application-dialog"], [data-overlay="companion-assessment-dialog"]) .windows-dialog-panel__footer > .client-button { height: 48px; min-height: 48px; }
+.onboarding-back { display: inline-flex; align-items: center; gap: 8px; border: 0; padding: 0; background: transparent; color: var(--client-text); font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+.onboarding-back > span { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--client-border); border-radius: 6px; background: #fff; color: var(--client-muted); }
+.onboarding-back:hover > span { background: var(--prototype-canvas, #f3f4f6); color: var(--client-text); }
+.onboarding-back:focus-visible { outline: 2px solid var(--client-text); outline-offset: 3px; }
+.personal-onboarding-dialog > .windows-dialog-panel__footer > .client-button { height: 48px; min-height: 48px; }
+.personal-record-tabs button { font-size: 16px; }

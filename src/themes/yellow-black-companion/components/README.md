@@ -26,3 +26,5 @@ function Example() {
 `NoticeDialog` 复用标准弹窗，`children` 接收须知内容，`onConfirm` / `onClose` 由页面处理；可通过 `reminder` 传入 `label`、`checked` 和 `onChange`。组件不自行持久化“不再提醒”。
 
 组件：`NoticeDialog`、`CompanionDialogPanel`、`Button`（primary / secondary / danger / soft，统一胶囊圆角；保留 shape 参数兼容现有调用）、`TextField`（label、error、原生输入属性）、`SegmentedControl`（受控 value/onChange）、`Switch`（受控 checked/onChange）、`Badge`、`Tag`、`Avatar`、`Card`、`Message`、`Navigation`、`Conversation`、`Menu`（受控回调）、`Dialog`（受控 open/onClose）。组合表格可使用主题的 `yb-table` / `yb-table-wrap` 类，特殊分享卡使用 `yb-share`；页面数据与操作由调用方提供。`Menu` 支持触发、选中、点击外部和 Esc 关闭；本版未提供方向键菜单导航。
+
+`GlassButton` 提供 `primary`、`secondary` 两种液态玻璃样式，接受原生 button 属性；高保真原型可直接使用，灰阶模式回退到原有按钮样式。

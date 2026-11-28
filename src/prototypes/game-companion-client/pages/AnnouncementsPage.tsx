@@ -1,3 +1,5 @@
+import platformMockCover from '../assets/generated/home-banner.webp'
+import clubMockCover from '../assets/generated/club-banner.webp'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -41,8 +43,8 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
         {visibleAnnouncements.map((announcement) => {
           const isRead = readIds.includes(announcement.id)
           return <li key={announcement.id}>
-            <button type="button" className={`announcement-row${isRead ? '' : ' is-unread'}${announcement.coverImage ? ' has-cover' : ''}`} onClick={() => { onRead(announcement.id); setSelected(announcement) }}>
-              {announcement.coverImage && <img className="announcement-row__cover" src={announcement.coverImage} alt={announcement.coverAlt ?? ''} />}
+            <button type="button" className={`announcement-row${isRead ? '' : ' is-unread'} has-cover`} onClick={() => { onRead(announcement.id); setSelected(announcement) }}>
+              <img className="announcement-row__cover" src={kind === 'club' ? clubMockCover : platformMockCover} alt="" />
               <span className="announcement-row__main"><span className="announcement-row__copy"><span className="announcement-row__title-line">{!isRead && <span className="announcement-row__status" role="img" aria-label="未读" />}<span className={`announcement-category announcement-category--${announcement.category === '紧急通知' || announcement.category === '处罚通知' ? 'important' : 'default'}`}>{announcement.category}</span><strong>{announcement.title}</strong></span><span className="announcement-row__summary">{announcement.summary}</span></span></span>
               <time className="announcement-row__time" dateTime={announcement.publishedAt.replace(' ', 'T')}><CalendarDays size={14} />{announcement.publishedAt}</time>
             </button>
@@ -50,7 +52,7 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
         })}
       </ul> : <div className="announcement-empty"><Bell size={24} /><strong>暂无{activeCategory}公告</strong><span>选择其他分类查看公告</span></div>}
     </section>
-    {selected && createPortal(<DialogPanel overlayId={`${kind}-announcement-detail`} title={selected.title} description={`${selected.category} · ${selected.publishedAt}`} onClose={() => setSelected(null)} width={620} footer={<button type="button" className="client-button client-button--primary" onClick={() => setSelected(null)}>关闭</button>}>
+    {selected && createPortal(<DialogPanel overlayId={`${kind}-announcement-detail`} title={selected.title} description={`${selected.category} · ${selected.publishedAt}`} onClose={() => setSelected(null)} width={620} className="announcement-detail-dialog" footer={<button type="button" className="client-button client-button--primary" onClick={() => setSelected(null)}>关闭</button>}>
       {selected.coverImage && <img className="announcement-detail__cover" src={selected.coverImage} alt={selected.coverAlt ?? ''} />}
       <article className="announcement-detail">{selected.content.map((paragraph, index) => <p key={`${selected.id}-${index}`}>{paragraph}</p>)}</article>
     </DialogPanel>, dialogHost ?? document.body)}

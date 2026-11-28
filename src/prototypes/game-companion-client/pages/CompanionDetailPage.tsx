@@ -1,7 +1,8 @@
+import profileGiftIcon from '../assets/profile-gift.webp'
 import { demoImageKind } from '../components/demoImage'
 import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, BatteryCharging, ChevronDown, ChevronLeft, ChevronRight, Gift, HandHeart, MessageCircle, Orbit, Sparkles, Star, UsersRound } from 'lucide-react'
+import { ArrowLeft, BatteryCharging, ChevronDown, ChevronLeft, ChevronRight, HandHeart, Heart, MessageCircle, Orbit, Sparkles, Star, UsersRound } from 'lucide-react'
 import type { Companion } from '../data/mockData'
 import { games, gifts, reviews, servicesByCompanion } from '../data/mockData'
 import { useCompanionDetailLogic } from '../hooks/useCompanionDetailLogic'
@@ -38,6 +39,7 @@ type DetailTab = 'services' | 'reviews' | 'gifts'
 type ReviewFilter = 'all' | 'images' | 'latest' | 'good' | 'middle' | 'poor'
 const tabNames: Record<DetailTab, string> = { services: '陪玩', reviews: '评价', gifts: '礼物' }
 const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
+const giftArtwork = ['🌟', '👏', '⚡', '🤝', '🎆', '🌌']
 const receivedGiftCount = gifts.reduce((total, gift) => total + gift.count, 0)
 
 function ServiceGameFilter({ gameId, onSelect }: { gameId: string; onSelect: (gameId: string) => void }) {
@@ -145,16 +147,16 @@ export function CompanionDetailPage({ companion, pageState, onBack, onRetry, onO
         {activeTab === 'gifts' && <section className="detail-list-section" aria-label="礼物墙">
           <div className="gift-wall">{gifts.map((gift, index) => {
             const GiftIcon = giftIcons[index % giftIcons.length]
-            return <article className="gift-wall__item" key={gift.id} aria-label={`${gift.name}，收到 ${gift.count} 个`}><span className="gift-wall__art" aria-hidden="true"><GiftIcon size={38} strokeWidth={1.5} /></span><h3>{gift.name}</h3><span className="gift-wall__count">×{gift.count}</span></article>
+            return <article className="gift-wall__item" key={gift.id} aria-label={`${gift.name}，收到 ${gift.count} 个`}><span className="gift-wall__art" aria-hidden="true"><GiftIcon size={38} strokeWidth={1.5} /><span className="gift-wall__color-art">{giftArtwork[index % giftArtwork.length]}</span></span><h3>{gift.name}</h3><span className="gift-wall__count">×{gift.count}</span></article>
           })}</div>
         </section>}
       </div>
     </section>
     {removalDialog}
     <footer className="companion-detail-page__actions" aria-label="陪玩操作">
-      <button type="button" className={`client-button client-button--secondary${followed ? ' is-followed' : ''}`} aria-pressed={Boolean(followed)} onClick={() => { if (followed && onToggleFollow) requestRemoval('取消关注', companion.name, onToggleFollow); else onToggleFollow?.() }}><Star size={15} />{followed ? '已关注' : '关注'}</button>
+      <button type="button" className={`client-button client-button--secondary${followed ? ' is-followed' : ''}`} aria-pressed={Boolean(followed)} onClick={() => { if (followed && onToggleFollow) requestRemoval('取消关注', companion.name, onToggleFollow); else onToggleFollow?.() }}><Heart className="follow-heart" size={15} fill={followed ? "currentColor" : "none"} />{followed ? '已关注' : '关注'}</button>
       <button type="button" className="client-button client-button--primary" onClick={onChat}><MessageCircle size={15} />找TA开黑</button>
-      <button type="button" className="client-button client-button--secondary" onClick={(event) => onGift?.(event.currentTarget)}><Gift size={15} />送礼</button>
+      <button type="button" className="client-button client-button--secondary companion-detail-page__gift" aria-label="送礼" title="送礼" onClick={(event) => onGift?.(event.currentTarget)}><img src={profileGiftIcon} alt="" /></button>
     </footer>
   </div>
 }

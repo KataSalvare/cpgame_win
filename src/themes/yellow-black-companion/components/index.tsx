@@ -5,6 +5,10 @@ import './components.css'
 type Children = { children: ReactNode; className?: string }
 export function CompanionTheme({ children, className = '' }: Children) { return <div className={`yb-kit ${className}`}>{children}</div> }
 export function Button({ variant = 'secondary', shape = 'standard', className = '', type = 'button', ...props }: ComponentPropsWithRef<'button'> & { variant?: 'primary' | 'secondary' | 'danger' | 'soft'; shape?: 'standard' | 'pill' }) { return <button type={type} className={`yb-button ${variant === 'secondary' ? '' : variant} ${shape === 'pill' ? 'pill' : ''} ${className}`} {...props} /> }
+/** Borderless glass action with the grayscale client button as its fallback. */
+export function GlassButton({ variant = 'secondary', className = '', type = 'button', ...props }: ComponentPropsWithRef<'button'> & { variant?: 'primary' | 'secondary' }) {
+  return <button type={type} className={`client-button client-button--${variant} yb-glass-button yb-glass-button--${variant} ${className}`} {...props} />
+}
 export function TextField({ label, error, id, className = '', ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
   const generatedId = useId(); const fieldId = id ?? generatedId; const errorId = `${fieldId}-error`
   return <div className={className}><label className="yb-label" htmlFor={fieldId}>{label}</label><input {...props} id={fieldId} className={`yb-field${error ? ' error' : ''}`} aria-invalid={error ? true : undefined} aria-describedby={[props['aria-describedby'], error ? errorId : undefined].filter(Boolean).join(' ') || undefined}/>{error && <span id={errorId} className="yb-error">{error}</span>}</div>

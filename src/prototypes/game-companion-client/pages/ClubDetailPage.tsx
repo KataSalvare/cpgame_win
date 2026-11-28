@@ -1,3 +1,4 @@
+import { GlassButton } from '@/themes/yellow-black-companion/components'
 import { useRemovalConfirmation } from '../components/RemovalConfirmation'
 import { useState, type ReactNode } from 'react'
 import { ArrowLeft, Bell, Headphones, MessageCircle, ShieldCheck, ShoppingCart, Star, UsersRound } from 'lucide-react'
@@ -84,5 +85,5 @@ export function ClubDetailPage({ club, pageState, onBack, onOpenCompanion, onCha
 }
 
 function DisplayAction({ icon, label, onClick, disabled = false, variant = 'secondary' }: { icon: ReactNode; label: string; onClick?: () => void; disabled?: boolean; variant?: 'primary' | 'secondary' }) {
-  return <button type="button" className={`client-button client-button--${variant} client-display-action`} onClick={onClick} disabled={disabled}>{icon}{label}</button>
+  return <GlassButton className="client-display-action" variant={variant} onClick={onClick} disabled={disabled}>{icon}{label}</GlassButton>
 }

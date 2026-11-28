@@ -53,3 +53,31 @@
 .yb-dialog-reminder { display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 0 0;color:#fff;font-size:14px;cursor:pointer; }
 .yb-dialog-reminder input { width:18px;height:18px;accent-color:#ffd60a; }
 .yb-kit .yb-dialog-reminder input:focus-visible { outline:2px solid #fff;outline-offset:3px; }
+
+/* Liquid glass actions: usable in theme samples and high-fidelity prototypes. */
+:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 48px; padding: 0 16px; border: 0; border-radius: 9999px;
+  color: #35322a; font-weight: 600; cursor: pointer;
+  background: var(--yb-glass-secondary, linear-gradient(155deg, rgb(255 255 255 / 85%), rgb(255 255 255 / 38%) 48%, rgb(220 216 205 / 32%)));
+  box-shadow: var(--yb-glass-secondary-shadow, inset 0 1px 2px rgb(255 255 255 / 95%), inset 0 -2px 5px rgb(112 105 86 / 10%), 0 3px 9px rgb(62 55 38 / 11%));
+  backdrop-filter: blur(12px); transition: filter 160ms ease, transform 160ms ease;
+}
+:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button--primary {
+  color: #332800;
+  background: var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78) 52%, rgb(243 190 0 / 72)));
+  box-shadow: var(--yb-glass-primary-shadow, inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%));
+}
+:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:hover:not(:disabled) { filter: brightness(1.05); }
+:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:active:not(:disabled) { transform: translateY(1px); }
+:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:focus-visible { outline: 2px solid #5b4a00; outline-offset: 2px; }
+:is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button:disabled { background: #e5e6eb; box-shadow: none; color: #69717e; cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) { :is(.yb-kit, [data-prototype-palette="high-fidelity"]) .yb-glass-button { transition: none; } }
+
+/* Shared glass surface tokens for existing compact action controls. */
+[data-prototype-palette="high-fidelity"] .game-companion-client {
+  --yb-glass-secondary: linear-gradient(155deg, rgb(255 255 255 / 85%), rgb(255 255 255 / 38%) 48%, rgb(220 216 205 / 32%));
+  --yb-glass-primary: linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78) 52%, rgb(243 190 0 / 72));
+  --yb-glass-secondary-shadow: inset 0 1px 2px rgb(255 255 255 / 95%), inset 0 -2px 5px rgb(112 105 86 / 10%), 0 3px 9px rgb(62 55 38 / 11%);
+  --yb-glass-primary-shadow: inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 5px rgb(157 112 0 / 12%), 0 3px 9px rgb(165 124 0 / 16%);
+}

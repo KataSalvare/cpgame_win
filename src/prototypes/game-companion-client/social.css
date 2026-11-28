@@ -46,7 +46,7 @@
 .social-friend-presence.is-online{color:var(--prototype-text-secondary, #4b5563)!important}
 .social-friend-presence.is-online::before{background:var(--prototype-text-secondary, #4b5563)}
 .social-avatar-wrap{position:relative;display:inline-flex}
-.social-avatar-wrap i{position:absolute;right:0;bottom:0;width:9px;height:9px;border:2px solid #fafafa;border-radius:50%;background:var(--prototype-text-subtle, #9ca3af)}
+.social-avatar-wrap i{position:absolute;right:0;bottom:0;width:14px;height:14px;border:2px solid #fafafa;border-radius:50%;background:var(--prototype-text-subtle, #9ca3af)}
 .social-avatar-wrap i.is-online{background:var(--prototype-text-secondary, #4b5563)}
 .chat-panel{display:flex;min-width:0;flex:1 1 auto;flex-direction:column;overflow:hidden;background:var(--prototype-surface, #fff)}
 .chat-panel__header{display:flex;min-height:66px;flex:0 0 auto;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--client-border);padding:0 20px}
@@ -127,7 +127,7 @@
 .support-queue-row.is-self{background:var(--prototype-canvas, #f3f4f6)}
 .club-support-selection-dialog .windows-dialog-panel__content{display:grid;gap:14px}
 .club-support-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:20px;padding:4px;background:var(--prototype-canvas,#f3f4f6)}
-.club-support-tabs button{min-height:36px;border:0;border-radius:18px;background:transparent;color:var(--prototype-text-secondary,#4b5563);font:inherit;font-size:14px;cursor:pointer}
+.club-support-tabs button{min-height:48px;border:0;border-radius:18px;background:transparent;color:var(--prototype-text-secondary,#4b5563);font:inherit;font-size:14px;cursor:pointer}
 .club-support-tabs button.is-active{background:var(--prototype-surface,#fff);color:var(--prototype-text,#1f2937);font-weight:600;box-shadow:0 1px 3px rgb(17 24 39 / 8%)}
 .club-support-tabs button:focus-visible,.club-support-staff button:focus-visible{outline:2px solid var(--prototype-text,#1f2937);outline-offset:2px}
 .club-support-list{display:grid;gap:10px;max-height:390px;overflow:auto}
@@ -693,140 +693,140 @@
 .voice-page--user-view .voice-member-context-menu { display: none !important; }
 
 /* 消息页高保真：保留现有结构与交互，使用黄黑主题。 */
-[data-prototype-palette="high-fidelity"] .messages-page {
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) {
   --client-text: #1d2129;
   --client-muted: #4e5969;
   --client-border: #e5e6eb;
 }
-[data-prototype-palette="high-fidelity"] .messages-page .messages-layout,
-[data-prototype-palette="high-fidelity"] .messages-page .messages-list-panel,
-[data-prototype-palette="high-fidelity"] .messages-page .chat-panel,
-[data-prototype-palette="high-fidelity"] .messages-page .chat-empty-state,
-[data-prototype-palette="high-fidelity"] .messages-page .friend-preview { background: #f6f7fd; }
-[data-prototype-palette="high-fidelity"] .messages-page .messages-layout { border-color: #e5e6eb; box-shadow: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-segmented { border-radius: 999px; background: #ebedf0; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-segmented button { border-radius: 999px; color: #4e5969; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-segmented button.is-active { background: #ffd60a; color: #1d2129; box-shadow: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-search { border-color: #e5e6eb; border-radius: 999px; background: #fff; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-search:focus-within { border-color: #4e5969; box-shadow: inset 0 0 0 1px #4e5969; }
-[data-prototype-palette="high-fidelity"] .messages-page .conversation-filter button { width: 52px; min-height: 30px; padding: 0; border-radius: 999px; color: #4e5969; font-size: 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .conversation-filter button.is-active,
-[data-prototype-palette="high-fidelity"] .messages-page .conversation-filter button:hover { background: #fff; color: #1d2129; border-color: #e5e6eb; }
-[data-prototype-palette="high-fidelity"] .messages-page .conversation-row:hover,
-[data-prototype-palette="high-fidelity"] .messages-page .social-friend-row:hover { background: #e9ebf1; }
-[data-prototype-palette="high-fidelity"] .messages-page .conversation-row.is-active,
-[data-prototype-palette="high-fidelity"] .messages-page .social-friend-row.is-active { background: #fff; box-shadow: inset 3px 0 #4e5969; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-unread-count { background: #c9362b; color: #fff; }
-[data-prototype-palette="high-fidelity"] .messages-page .fixed-notification-icon { border: 0; border-radius: 50%; background: #ffd60a; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .conversation-row:nth-child(2) .fixed-notification-icon { background: #675df5; color: #fff; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-avatar-wrap i.is-online,
-[data-prototype-palette="high-fidelity"] .messages-page .social-friend-presence.is-online::before { background: #287a4b; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-panel__header { border-color: #e5e6eb; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__text,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__gift,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message-card { border-color: #e5e6eb; border-radius: 8px; background: #fff; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-self .social-message__text,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-self .social-message__voice { border-color: #ffd60a; background: #ffd60a; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-recalled .social-message__text--recalled { border-color: transparent; background: transparent; color: #4e5969; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message { background: #ffeb85; border-color: #ffeb85; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message-card__stars button { color: #a9adb5; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message-card__stars button[aria-pressed="true"] { color: #d95812; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-composer { margin: 0 16px 16px; border: 1px solid #e5e6eb; border-radius: 16px; background: #fff; }
-[data-prototype-palette="high-fidelity"] .messages-page .message-reply-preview { border-color: #86909c; background: #f6f7fd; }
-[data-prototype-palette="high-fidelity"] .messages-page .client-button--primary { border-color: #ffd60a; border-radius: 999px; background: #ffd60a; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .client-button--primary:hover:not(:disabled) { border-color: #e6b800; background: #e6b800; }
-[data-prototype-palette="high-fidelity"] .messages-page .windows-icon-button:focus-visible,
-[data-prototype-palette="high-fidelity"] .messages-page button:focus-visible { outline: 2px solid #1d2129; outline-offset: 2px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .messages-layout,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .messages-list-panel,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-panel,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-empty-state,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .friend-preview { background: #f6f7fd; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .messages-layout { border-color: #e5e6eb; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-segmented { border-radius: 999px; background: #ebedf0; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-segmented button { border-radius: 999px; color: #4e5969; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-segmented button.is-active { background: #ffd60a; color: #1d2129; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-search { border-color: #e5e6eb; border-radius: 999px; background: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-search:focus-within { border-color: #4e5969; box-shadow: inset 0 0 0 1px #4e5969; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .conversation-filter button { width: 52px; min-height: 30px; padding: 0; border-radius: 999px; color: #4e5969; font-size: 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .conversation-filter button.is-active,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .conversation-filter button:hover { background: #fff; color: #1d2129; border-color: #e5e6eb; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .conversation-row:hover,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-friend-row:hover { background: #e9ebf1; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .conversation-row.is-active,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-friend-row.is-active { background: #fff; box-shadow: inset 3px 0 #4e5969; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-unread-count { background: #c9362b; color: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .fixed-notification-icon { border: 0; border-radius: 50%; background: #ffd60a; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .conversation-row:nth-child(2) .fixed-notification-icon { background: #675df5; color: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-avatar-wrap i.is-online,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-friend-presence.is-online::before { background: #287a4b; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-panel__header { border-color: #e5e6eb; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__text,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__gift,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message-card { border-color: #e5e6eb; border-radius: 8px; background: #fff; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-self .social-message__text,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-self .social-message__voice { border-color: #ffd60a; background: #ffd60a; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-recalled .social-message__text--recalled { border-color: transparent; background: transparent; color: #4e5969; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message { background: #ffeb85; border-color: #ffeb85; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message-card__stars button { color: #a9adb5; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message-card__stars button[aria-pressed="true"] { color: #d95812; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-composer { margin: 0 16px 16px; border: 1px solid #e5e6eb; border-radius: 16px; background: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .message-reply-preview { border-color: #86909c; background: #f6f7fd; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .client-button--primary { border-color: #ffd60a; border-radius: 999px; background: #ffd60a; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .client-button--primary:hover:not(:disabled) { border-color: #e6b800; background: #e6b800; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .windows-icon-button:focus-visible,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) button:focus-visible { outline: 2px solid #1d2129; outline-offset: 2px; }
 
 
 /* 消息页高保真头像、礼物与分享卡片。 */
 .social-message__gift-rose { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .client-avatar { border-radius: 50%; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__gift-default { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__gift-rose { display: inline-block; font-size: 32px; line-height: 1; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message { position: relative; overflow: hidden; border: 1px solid #fff; border-radius: 20px; background: linear-gradient(160deg, #fff9d9, #ffeb85); }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header { min-height: 76px; border: 0; padding: 14px 16px 4px; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > .client-avatar,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-avatar { width: 52px; height: 52px; border-radius: 50%; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > strong,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > strong { overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message__facts { border-radius: 999px; padding: 2px 7px; background: #ffe0b0; color: #8f3d4e; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message .social-message-card__content { padding: 4px 16px 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message::after { display: block; width: max-content; margin-left: auto; border-radius: 12px 0 0 0; padding: 3px 14px; background: #ffd60a; color: #1d2129; content: '个人名片'; font-size: 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message .voice-room-share-message__action-row { display: grid; gap: 8px; padding: 4px 16px 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message__action-row .client-button { width: 100%; border-color: #ffd60a; border-radius: 999px; background: #ffd60a; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message__action-row .client-button:hover:not(:disabled) { background: #e6b800; border-color: #e6b800; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .client-avatar { border-radius: 50%; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__gift-default { display: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__gift-rose { display: inline-block; font-size: 32px; line-height: 1; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message { position: relative; overflow: hidden; border: 1px solid #fff; border-radius: 20px; background: linear-gradient(160deg, #fff9d9, #ffeb85); }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header { min-height: 76px; border: 0; padding: 14px 16px 4px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > .client-avatar,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-avatar { width: 52px; height: 52px; border-radius: 50%; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > strong,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > strong { overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message__facts { border-radius: 999px; padding: 2px 7px; background: #ffe0b0; color: #8f3d4e; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message .social-message-card__content { padding: 4px 16px 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message::after { display: block; width: max-content; margin-left: auto; border-radius: 12px 0 0 0; padding: 3px 14px; background: #ffd60a; color: #1d2129; content: '个人名片'; font-size: 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message .voice-room-share-message__action-row { display: grid; gap: 8px; padding: 4px 16px 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message__action-row .client-button { width: 100%; border-color: #ffd60a; border-radius: 999px; background: #ffd60a; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message__action-row .client-button:hover:not(:disabled) { background: #e6b800; border-color: #e6b800; }
 
 .voice-room-share-message__identity { display: grid; min-width: 0; flex: 1; gap: 4px; }
 .voice-room-share-message__identity strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .voice-room-share-message__identity span { color: #4e5969; font-size: 12px; overflow-wrap: anywhere; }
 .voice-room-share-message header > .client-button { flex: 0 0 auto; margin-left: auto; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header { padding: 14px 16px; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-button { border-color: #ffd60a; border-radius: 999px; background: #ffd60a; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-button:hover:not(:disabled) { border-color: #e6b800; background: #e6b800; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header { padding: 14px 16px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-button { border-color: #ffd60a; border-radius: 999px; background: #ffd60a; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-button:hover:not(:disabled) { border-color: #e6b800; background: #e6b800; }
 
 /* 消息页高保真布局：会话列表独立，聊天区以底色区分。 */
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__main:has(.messages-page) { padding: 4px; background: #ececec; }
-[data-prototype-palette="high-fidelity"] .messages-page .messages-layout { gap: 4px; border: 0; border-radius: 0; background: transparent; }
-[data-prototype-palette="high-fidelity"] .messages-page .messages-list-panel { border: 1px solid #dfe1e6; border-radius: 8px; background: #f1f2f8; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-panel,
-[data-prototype-palette="high-fidelity"] .messages-page .chat-empty-state,
-[data-prototype-palette="high-fidelity"] .messages-page .friend-preview { border: 0; border-radius: 8px; background: #f6f7fd; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .messages-layout { gap: 4px; border: 0; border-radius: 0; background: transparent; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .messages-list-panel { border: 1px solid #dfe1e6; border-radius: 8px; background: #f1f2f8; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-panel,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-empty-state,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .friend-preview { border: 0; border-radius: 8px; background: #f6f7fd; }
 
 /* 消息页中的头像统一尺寸。 */
-.game-companion-client .messages-page .client-avatar,
-.game-companion-client .messages-page .social-profile-panel .companion-profile-card > .client-avatar,
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > .client-avatar,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-avatar { width: 40px; height: 40px; flex: 0 0 40px; font-size: 12px; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .messages-page .social-profile-panel .companion-profile-card--immersive > .client-avatar--xl { width: 100px; height: 100px; flex-basis: 100px; font-size: 28px; }
-.game-companion-client .messages-page .social-message__avatar { width: 40px; height: 40px; }
-.game-companion-client .messages-page .conversation-row .fixed-notification-icon { width: 40px; height: 40px; flex: 0 0 40px; }
+.game-companion-client :is(.messages-page, .club-support-chat) .client-avatar,
+.game-companion-client :is(.messages-page, .club-support-chat) .social-profile-panel .companion-profile-card > .client-avatar,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > .client-avatar,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-avatar { width: 40px; height: 40px; flex: 0 0 40px; font-size: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.messages-page, .club-support-chat) .social-profile-panel .companion-profile-card--immersive > .client-avatar--xl { width: 100px; height: 100px; flex-basis: 100px; font-size: 28px; }
+.game-companion-client :is(.messages-page, .club-support-chat) .social-message__avatar { width: 40px; height: 40px; }
+.game-companion-client :is(.messages-page, .club-support-chat) .conversation-row .fixed-notification-icon { width: 40px; height: 40px; flex: 0 0 40px; }
 
 /* 黄黑主题下，消息页主次操作使用统一的胶囊按钮。 */
-[data-prototype-palette="high-fidelity"] .messages-page .client-button--primary,
-[data-prototype-palette="high-fidelity"] .messages-page .client-button--secondary { min-height: 48px; padding-inline: 16px; border-radius: 9999px; }
-[data-prototype-palette="high-fidelity"] .messages-page .client-button--secondary { border-color: #86909c; background: #fff; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .client-button--secondary:hover:not(:disabled) { border-color: #4e5969; background: #f1f2f5; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-button { border-color: #ffd60a; background: #ffd60a; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .client-button--primary,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .client-button--secondary { min-height: 48px; padding-inline: 16px; border-radius: 9999px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .client-button--secondary { border-color: #86909c; background: #fff; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .client-button--secondary:hover:not(:disabled) { border-color: #4e5969; background: #f1f2f5; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-button { border-color: #ffd60a; background: #ffd60a; }
 
 
 .social-message__voice-symbol { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__text:not(.social-message__text--recalled),
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-self .social-message__text:not(.social-message__text--recalled),
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__image,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__gift { border: 0; background: #fff; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-self .social-message__voice { display: flex; min-width: 92px; min-height: 40px; justify-content: center; gap: 8px; border: 0; border-radius: 8px; background: #ffed9c; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice > span,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice i,
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice small { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice b { font-size: 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice-symbol { display: block; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice:focus-visible { outline: 2px solid #1d2129; outline-offset: 2px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__text:not(.social-message__text--recalled),
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-self .social-message__text:not(.social-message__text--recalled),
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__image,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__gift { border: 0; background: #fff; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-self .social-message__voice { display: flex; min-width: 92px; min-height: 40px; justify-content: center; gap: 8px; border: 0; border-radius: 8px; background: #ffed9c; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice > span,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice i,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice small { display: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice b { font-size: 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice-symbol { display: block; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice:focus-visible { outline: 2px solid #1d2129; outline-offset: 2px; }
 
 .chat-tool-icon--grayscale { display: inline-flex; }
 .chat-tool-icon--high-fidelity { display: none; width: 18px; height: 18px; object-fit: contain; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-tool-icon--grayscale { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-tool-icon--high-fidelity { display: block; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-tool-icon--grayscale { display: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-tool-icon--high-fidelity { display: block; }
 
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message { width: 220px; max-width: 100%; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header { gap: 6px; padding-inline: 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-button { padding-inline: 8px; font-size: 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message .social-message-card__content { padding-inline: 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message { width: 220px; max-width: 100%; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header { gap: 6px; padding-inline: 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-button { padding-inline: 8px; font-size: 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message .social-message-card__content { padding-inline: 12px; }
 
 /* 220px 分享卡按参考图组织头像、信息与底部操作。 */
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message {
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message {
   border-radius: 16px;
   background: linear-gradient(160deg, #fff9db 0%, #fff3ae 65%, #ffe873 100%);
 }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header {
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
   grid-template-rows: auto auto;
@@ -835,77 +835,77 @@
   min-height: 0;
   padding: 12px 12px 4px;
 }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > .client-avatar { grid-row: 1 / 3; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > strong { grid-column: 2; font-size: 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > .companion-share-message__facts { grid-column: 2; justify-self: start; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message .social-message-card__content { padding: 4px 12px 8px; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message::after { border-radius: 12px 0 0 0; padding: 4px 15px; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header {
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > .client-avatar { grid-row: 1 / 3; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > strong { grid-column: 2; font-size: 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > .companion-share-message__facts { grid-column: 2; justify-self: start; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message .social-message-card__content { padding: 4px 12px 8px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message::after { border-radius: 12px 0 0 0; padding: 4px 15px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
   gap: 10px;
   min-height: 0;
   padding: 12px;
 }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message__identity strong { font-size: 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-button {
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message__identity strong { font-size: 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-button {
   grid-column: 1 / -1;
   width: 100%;
   margin: 0;
   font-size: 14px;
 }
 
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message::before,
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message::before { position: absolute; right: 0; bottom: 0; width: 90px; height: 45px; background: radial-gradient(circle, rgb(255 200 0 / 18%) 1.3px, transparent 1.7px) 0 0 / 8px 8px; content: ''; pointer-events: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message::before,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message::before { position: absolute; right: 0; bottom: 0; width: 90px; height: 45px; background: radial-gradient(circle, rgb(255 200 0 / 18%) 1.3px, transparent 1.7px) 0 0 / 8px 8px; content: ''; pointer-events: none; }
 
-[data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-button { height: 26px; min-height: 26px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-room-share-message header > .client-button { height: 26px; min-height: 26px; }
 
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice { background: #fff; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-self .social-message__voice { background: #ffd60a; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice { background: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-self .social-message__voice { background: #ffd60a; }
 
-[data-prototype-palette="high-fidelity"] .messages-page .social-message__voice { justify-content: flex-end; flex-direction: row-reverse; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-self .social-message__voice { flex-direction: row; }
-[data-prototype-palette="high-fidelity"] .messages-page .social-message.is-self .social-message__voice-symbol { transform: scaleX(-1); }
-[data-prototype-palette="high-fidelity"] .messages-page .voice-recording-panel__actions .client-button { height: 36px; min-height: 36px; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-composer__toolbar > .client-button--primary { height: 32px; min-height: 32px; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-composer__tools { gap: 20px; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-composer__tools > .windows-icon-button { width: 18px; height: 18px; padding: 0; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message__voice { justify-content: flex-end; flex-direction: row-reverse; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-self .social-message__voice { flex-direction: row; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .social-message.is-self .social-message__voice-symbol { transform: scaleX(-1); }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .voice-recording-panel__actions .client-button { height: 36px; min-height: 36px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-composer__toolbar > .client-button--primary { height: 32px; min-height: 32px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-composer__tools { gap: 20px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-composer__tools > .windows-icon-button { width: 18px; height: 18px; padding: 0; }
 
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card { width: 240px; border: 0; border-radius: 10px; background: #fff; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card header { margin: 0 12px; padding: 12px 0 9px; border-color: #f0f1f5; font-size: 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card header > svg { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card header > strong,
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card .social-message-card__content > strong { font-weight: 400; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card .social-message-card__content { gap: 10px; padding: 10px 12px 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card .social-message-card__stars { gap: 6px; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card .social-message-card__stars button { padding: 0; color: #c9ccd2; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card .social-message-card__stars button svg { fill: currentColor; stroke: currentColor; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card .social-message-card__stars button[aria-pressed="true"] { color: #ff6725; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card:not(.is-submitted) .social-message-card__stars > span { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .support-review-card .social-message-card__content > .client-button { width: 100%; height: 26px; min-height: 26px; padding: 0 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-support-actions > .client-button { height: 32px; min-height: 32px; border-color: #ffd60a; }
-[data-prototype-palette="high-fidelity"] .messages-page .chat-support-actions > .client-button:hover:not(:disabled) { border-color: #e6b800; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card { width: 240px; border: 0; border-radius: 10px; background: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card header { margin: 0 12px; padding: 12px 0 9px; border-color: #f0f1f5; font-size: 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card header > svg { display: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card header > strong,
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card .social-message-card__content > strong { font-weight: 400; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card .social-message-card__content { gap: 10px; padding: 10px 12px 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card .social-message-card__stars { gap: 6px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card .social-message-card__stars button { padding: 0; color: #c9ccd2; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card .social-message-card__stars button svg { fill: currentColor; stroke: currentColor; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card .social-message-card__stars button[aria-pressed="true"] { color: #ff6725; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card:not(.is-submitted) .social-message-card__stars > span { display: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .support-review-card .social-message-card__content > .client-button { width: 100%; height: 26px; min-height: 26px; padding: 0 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-support-actions > .client-button { height: 32px; min-height: 32px; border-color: #ffd60a; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-support-actions > .client-button:hover:not(:disabled) { border-color: #e6b800; }
 
 .order-share-card__high-fidelity { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card { width: 300px; border: 0; border-radius: 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__grayscale { display: none; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__high-fidelity { display: block; padding: 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__header { display: flex; align-items: center; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid #f0f1f5; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__header > .client-avatar { width: 24px; height: 24px; flex: 0 0 24px; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__header > span:last-child { margin-left: auto; color: #ff4d4f; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__service { display: flex; align-items: center; gap: 10px; padding: 10px 0 14px; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__game { display: grid; width: 52px; height: 52px; flex: 0 0 52px; place-items: center; border-radius: 10px; background: #20222a; color: #ffd60a; font-size: 12px; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__service > div:last-child { display: grid; gap: 6px; min-width: 0; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__service strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__service small { color: #86909c; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 8px; align-items: center; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__facts > :nth-child(odd) { color: #86909c; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__facts > :nth-child(even) { text-align: right; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__facts .order-detail-status-card__copy-group { justify-content: flex-end; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__facts .order-detail-status-card__copy { display: inline-flex; align-items: center; gap: 3px; border: 0; padding: 0; background: none; color: #1d2129; cursor: pointer; font: inherit; }
-[data-prototype-palette="high-fidelity"] .messages-page .order-share-card__facts .order-detail-status-card__copy svg { color: #7865ff; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > .gender-age-badge--male { background: #eaf5ff; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > .gender-age-badge--female { background: #ffebf3; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card { width: 300px; border: 0; border-radius: 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__grayscale { display: none; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__high-fidelity { display: block; padding: 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__header { display: flex; align-items: center; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid #f0f1f5; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__header > .client-avatar { width: 24px; height: 24px; flex: 0 0 24px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__header > span:last-child { margin-left: auto; color: #ff4d4f; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__service { display: flex; align-items: center; gap: 10px; padding: 10px 0 14px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__game { display: grid; width: 52px; height: 52px; flex: 0 0 52px; place-items: center; border-radius: 10px; background: #20222a; color: #ffd60a; font-size: 12px; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__service > div:last-child { display: grid; gap: 6px; min-width: 0; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__service strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__service small { color: #86909c; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 8px; align-items: center; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__facts > :nth-child(odd) { color: #86909c; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__facts > :nth-child(even) { text-align: right; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__facts .order-detail-status-card__copy-group { justify-content: flex-end; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__facts .order-detail-status-card__copy { display: inline-flex; align-items: center; gap: 3px; border: 0; padding: 0; background: none; color: #1d2129; cursor: pointer; font: inherit; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .order-share-card__facts .order-detail-status-card__copy svg { color: #7865ff; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > .gender-age-badge--male { background: #eaf5ff; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .companion-share-message header > .gender-age-badge--female { background: #ffebf3; color: #1d2129; }
 [data-prototype-palette="high-fidelity"] .chat-companion-status[data-person-status="空闲中"] { border-color: transparent; background: #e8f6ee; color: #237749; }
 [data-prototype-palette="high-fidelity"] .chat-companion-status:is([data-person-status="接单中"], [data-person-status="服务中"]) { border-color: transparent; background: #fff0df; color: #a94b0a; }
 [data-prototype-palette="high-fidelity"] .chat-companion-status[data-person-status="休息中"] { border-color: transparent; background: #edf0f3; color: #5f6772; }
@@ -966,3 +966,10 @@
   min-width: 0;
   overflow: auto;
 }
+
+/* Floating conversations share the message page canvas and composer. */
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-support-chat { border: 0; border-radius: 8px; background: #f6f7fd; }
+
+/* Support staff cards float above the dialog surface without outlines. */
+[data-prototype-palette="high-fidelity"] .club-support-selection-dialog .club-support-list { padding: 4px; }
+[data-prototype-palette="high-fidelity"] .club-support-selection-dialog .club-support-staff { border: 0; border-radius: 12px; background: #fff; box-shadow: 0 3px 12px rgb(33 38 52 / 9%); }

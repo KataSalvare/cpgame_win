@@ -1,3 +1,4 @@
+import { GlassButton } from '@/themes/yellow-black-companion/components'
 import { Star, UsersRound } from 'lucide-react'
 import type { Club } from '../data/mockData'
 import { AvatarMark } from './AvatarMark'
@@ -36,8 +37,8 @@ export function ClubCard({ club, onOpen, onBrowse, onSelfOrder, showActions = tr
       </div>
       <p className="club-card__intro">{club.intro}</p>
       {showActions && <div className="club-card__actions">
-        <button type="button" className="client-button client-button--secondary club-card__browse" onClick={(event) => { event.stopPropagation(); onBrowse() }}>逛一逛</button>
-        <button type="button" className="client-button client-button--secondary club-card__self-order" onClick={(event) => { event.stopPropagation(); onSelfOrder() }}>自助下单</button>
+        <GlassButton className="club-card__browse" onClick={(event) => { event.stopPropagation(); onBrowse() }}>逛一逛</GlassButton>
+        <GlassButton variant="primary" className="club-card__self-order" onClick={(event) => { event.stopPropagation(); onSelfOrder() }}>自助下单</GlassButton>
       </div>}
     </div>
   </article>

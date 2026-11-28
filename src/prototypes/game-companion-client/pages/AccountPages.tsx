@@ -1,3 +1,4 @@
+import { GlassButton } from '@/themes/yellow-black-companion/components'
 import { NoticeDialog } from '@/themes/grayscale-prototype/components/NoticeDialog'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { GenderAgeBadge } from '../components/GenderAgeBadge'
@@ -89,7 +90,7 @@ function WalletBalanceCard({ title, description, amount, unit, icon, onToggle, o
     <div className="wallet-balance-card__heading"><span className="wallet-balance-card__icon">{icon}</span><div><h2>{title}</h2>{description && <p>{description}</p>}</div></div>
     <span className="client-eyebrow">{title === '优惠券' || title === '我的尊享卡' ? '当前数量' : '当前余额'}</span><div className="wallet-balance-card__amount-row"><strong className="wallet-balance-card__amount">{amount.toLocaleString()} <small>{unit}</small></strong>{title === '金豆钱包' || title === '糖豆钱包' ? <BalanceRefreshButton /> : null}</div>
     {balanceBreakdown && <div className="wallet-balance-card__breakdown"><span>可提现 <strong>{balanceBreakdown.available.toLocaleString()}</strong></span><span>待结算 <strong>{balanceBreakdown.pending.toLocaleString()}</strong></span></div>}
-    <div className="wallet-balance-card__actions">{onRecharge && <button type="button" className="client-button client-button--primary" onClick={onRecharge}><CreditCard size={15} />购买</button>}{onWithdraw && <button type="button" className="client-button client-button--primary" onClick={onWithdraw}><ArrowUpFromLine size={15} />提现</button>}{onExchange && <button type="button" className="client-button client-button--secondary" onClick={onExchange}><ArrowLeftRight size={15} />兑换</button>}<button type="button" className={`client-button ${onRecharge || onWithdraw || onExchange ? 'client-button--secondary' : 'client-button--primary'}`} onClick={onToggle}>{(onRecharge || onWithdraw || onExchange) && <History size={15} />}{actionLabel}</button></div>
+    <div className="wallet-balance-card__actions">{onRecharge && <GlassButton variant="primary" onClick={onRecharge}><CreditCard size={15} />购买</GlassButton>}{onWithdraw && <GlassButton variant="primary" onClick={onWithdraw}><ArrowUpFromLine size={15} />提现</GlassButton>}{onExchange && <GlassButton onClick={onExchange}><ArrowLeftRight size={15} />兑换</GlassButton>}<GlassButton variant={onRecharge || onWithdraw || onExchange ? 'secondary' : 'primary'} onClick={onToggle}>{(onRecharge || onWithdraw || onExchange) && <History size={15} />}{actionLabel}</GlassButton></div>
   </section>
 }
 
@@ -200,7 +201,7 @@ export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBa
         <div className="bean-exchange-converter__row bean-exchange-converter__output" aria-live="polite"><span>兑换金豆数</span><strong>{parsedAmount > 0 && Number.isFinite(parsedAmount) ? parsedAmount.toLocaleString() : '0'} <small>金豆</small></strong></div>
       </section>
       <section className="client-card bean-exchange-notes"><h3>兑换说明</h3><p>xxxx</p><p>xxxx</p><p>xxxx</p></section>
-      <footer><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!validAmount} onClick={() => { if (onExchange(parsedAmount)) setExchangedAmount(parsedAmount) }}>确认兑换</button></footer>
+      <footer><button type="button" className="client-button client-button--primary" disabled={!validAmount} onClick={() => { if (onExchange(parsedAmount)) setExchangedAmount(parsedAmount) }}>确认兑换</button></footer>
     </> : <>
       <div className="bean-exchange-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><strong>{exchangedAmount.toLocaleString()} <small>糖豆</small></strong><span>已兑换为 {exchangedAmount.toLocaleString()} 金豆</span></div>
       <footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
@@ -722,14 +723,14 @@ function OrderReviewDialog({ order, clubName, onClose, onSaveReview }: { order: 
         {reviewTargets.map(({ id, label, name, initials, identityId }) => {
           const draft = drafts[id]
           return <section className="order-review-section" key={id} aria-label={`${label}评价`}>
-            <div className="order-review-subject">{id === 'companion' ? <AvatarMark initials={initials} size="md" /> : <AvatarMark initials={initials} size="md" />}<div><strong>{id === 'companion' ? <UserNameWithLevel name={name} identityId={identityId} /> : name}</strong>{id === 'companion' && companion && <GenderAgeBadge gender={companion.gender} age={companion.age} />}</div></div>
+            <div className="order-review-subject" data-review-companion-id={id === 'companion' ? order.companionId : undefined} data-review-club-id={id === 'club' ? club?.id : undefined}><AvatarMark initials={initials} size="md" /><div><strong>{id === 'companion' ? <UserNameWithLevel name={name} identityId={identityId} /> : name}</strong>{id === 'companion' && companion && <GenderAgeBadge gender={companion.gender} age={companion.age} />}</div></div>
             <fieldset className="order-review-rating" aria-required="true"><legend>{label}评分</legend><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`${label}${score}分`} aria-pressed={draft.rating === score} className={draft.rating >= score ? 'is-selected' : ''} disabled={submitted} onClick={() => updateDraft(id, { rating: score })}><Star size={22} fill={draft.rating >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{draft.rating ? `${draft.rating} 分` : '请选择分数'}</span></fieldset>
             <label className="order-review-content"><span>{label}评价内容</span><span className="order-review-textarea-wrap"><textarea readOnly={submitted} maxLength={100} value={draft.content} onChange={(event) => updateDraft(id, { content: event.target.value })} placeholder={`分享你对${label}服务的感受`} rows={3} /><small aria-live="polite">{Array.from(draft.content).length}/100</small></span></label>
             {renderReviewImages(id)}
           </section>
         })}
       </div>
-      <footer>{submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" disabled={!canSubmit} onClick={() => { const review = { companion: { ...drafts.companion, submitted: true }, club: { ...drafts.club, submitted: true } }; onSaveReview(order.id, review); setDrafts(review) }}>提交</button></>}</footer>
+      <footer>{submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <button type="button" className="client-button client-button--primary" disabled={!canSubmit} onClick={() => { const review = { companion: { ...drafts.companion, submitted: true }, club: { ...drafts.club, submitted: true } }; onSaveReview(order.id, review); setDrafts(review) }}>提交</button>}</footer>
     </section>
   </div>
 }

@@ -41,7 +41,7 @@ export const initialMyWoodpeckerTickets: WoodpeckerTicket[] = [
   {
     id: 'WD-20261030-014', type: 'report', status: '已处理', submittedAt: '2026-10-30 14:14',
     reportedUser: '陪玩小禾', reportedUserId: '862014', reason: '违反平台规定',
-    description: '英雄联盟娱乐等级与报段位问题，请核实相关服务信息。', attachments: ['服务信息.png'], anonymous: true,
+    description: '英雄联盟娱乐等级与报段位问题，请核实相关服务信息。', attachments: ['服务信息.png', '对局截图.png', '补充图片.png'], anonymous: true,
     response: '经核实，相关服务信息符合平台当前展示规则，工单已处理完成。',
   },
   {
@@ -51,7 +51,7 @@ export const initialMyWoodpeckerTickets: WoodpeckerTicket[] = [
   {
     id: 'WD-20261029-021', type: 'report', status: '待处理', submittedAt: '2026-10-29 19:08',
     reportedUser: '陪玩阿远', reportedUserId: '731520', reason: '其他',
-    description: '试音结束后长时间未收到回复，请协助核实。', attachments: ['聊天记录.png'], anonymous: false,
+    description: '试音结束后长时间未收到回复，请协助核实。', attachments: ['聊天记录.png', '补充截图.png'], anonymous: false,
   },
 ]
 
@@ -65,7 +65,7 @@ export const publicWoodpeckerRecords: PublicWoodpeckerRecord[] = [
   {
     id: '公示-20261029-008', type: 'report', status: '已处理', submittedAt: '2026-10-29 13:23',
     reportedUser: '陪玩阿远', reportedUserId: '731520', reason: '其他',
-    description: '试音期间沟通体验反馈。', attachments: ['沟通记录.png'], anonymous: true,
+    description: '试音期间沟通体验反馈。', attachments: ['沟通记录.png', '补充截图.png'], anonymous: false,
     response: '已完成核实并与相关用户沟通，感谢反馈。', likes: 2, dislikes: 0, comments: 1,
   },
 ]

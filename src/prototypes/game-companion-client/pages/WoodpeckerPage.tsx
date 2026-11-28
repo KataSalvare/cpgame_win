@@ -1,12 +1,13 @@
+import { GlassButton } from '@/themes/yellow-black-companion/components'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useRef, useState } from 'react'
 import { CalendarDays, ImagePlus, Info, Search, ThumbsDown, ThumbsUp, TreeDeciduous, X } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import { ImageLightbox } from '../components/ImageLightbox'
-import lifePhotoCafe from '../assets/profile-life-photo-cafe.svg'
-import lifePhotoCity from '../assets/profile-life-photo-city.svg'
-import lifePhotoWindow from '../assets/profile-life-photo-window.svg'
+import lifePhotoCafe from '../assets/generated/review.webp'
+import lifePhotoCity from '../assets/generated/personal-life.webp'
+import lifePhotoWindow from '../assets/generated/user-life.webp'
 import { AvatarMark } from '../components/AvatarMark'
 import { initialMyWoodpeckerTickets, publicWoodpeckerRecords, woodpeckerMockUsers, woodpeckerReasons, type PublicWoodpeckerRecord, type WoodpeckerTicket, type WoodpeckerTicketType, type WoodpeckerUser } from '../data/woodpeckerMockData'
 
@@ -104,7 +105,7 @@ export function WoodpeckerPage({ pageState, onRetry, profile }: Props) {
     <div className="woodpecker-tabs-row"><CategoryTabs className="woodpecker-tabs" label="啄木鸟分类" items={[{ id: 'mine', label: '我的啄木鸟' }, { id: 'public', label: '啄木鸟公示' }]} value={activeTab} onChange={setActiveTab} /><div className="woodpecker-info">
       <button type="button" className="woodpecker-info__button" aria-label="啄木鸟平台说明" aria-describedby="woodpecker-info-tooltip"><Info size={16} aria-hidden="true" /></button>
       <div id="woodpecker-info-tooltip" className="woodpecker-info__tooltip" role="tooltip">这里是啄木鸟举报平台。像森林医生啄木鸟一样，发现超速电竞的问题，即刻提交，进度随时可查。您的每一次发声都会被认真对待，让我们一起守护超速电竞的清朗环境。</div>
-    </div>{activeTab === 'mine' && <button type="button" className="client-button client-button--primary woodpecker-submit-button" onClick={() => setFormOpen(true)}>我要建议/举报</button>}</div>
+    </div>{activeTab === 'mine' && <GlassButton variant="primary" className="woodpecker-submit-button" onClick={() => setFormOpen(true)}>我要建议/举报</GlassButton>}</div>
 
     {activeTab === 'mine' ? <section className="woodpecker-panel" role="tabpanel" aria-label="我的啄木鸟">
       <div className="woodpecker-filter-row" role="group" aria-label="工单类型">
@@ -142,28 +143,28 @@ export function WoodpeckerPage({ pageState, onRetry, profile }: Props) {
 
 function TicketCard({ ticket, profile, showResponse = true }: { ticket: WoodpeckerTicket; profile: Props['profile']; showResponse?: boolean }) {
   return <article className="woodpecker-ticket client-card">
-    <header className="woodpecker-ticket__header"><div className="woodpecker-submitter"><AvatarMark initials={ticket.anonymous ? '' : profile.initials} imageUrl={ticket.anonymous ? undefined : profile.avatarDataUrl} size="sm" /><strong>{ticket.anonymous ? '匿名提交' : profile.nickname}</strong></div><span className={`woodpecker-status woodpecker-status--${ticket.status === '已处理' ? 'done' : 'pending'}`}>{ticket.status}</span><time><CalendarDays size={14} />{ticket.submittedAt}</time></header>
+    <header className="woodpecker-ticket__header"><div className="woodpecker-submitter"><AvatarMark initials={ticket.anonymous ? '' : profile.initials} imageUrl={ticket.anonymous ? undefined : profile.avatarDataUrl} isDemoUser={!ticket.anonymous} size="sm" /><strong>{ticket.anonymous ? '匿名提交' : profile.nickname}</strong></div><span className={`woodpecker-status woodpecker-status--${ticket.status === '已处理' ? 'done' : 'pending'}`}>{ticket.status}</span><time><CalendarDays size={14} />{ticket.submittedAt}</time></header>
     <dl className="woodpecker-ticket__fields">
       <div><dt>类型</dt><dd>{ticket.type === 'suggestion' ? '意见建议' : '啄木鸟工单（举报）'}</dd></div>
       {ticket.reason && <div><dt>举报原因</dt><dd>{ticket.reason}</dd></div>}
       {ticket.reportedUser && <div><dt>被举报人</dt><dd className="woodpecker-user-identity"><AvatarMark initials={ticket.reportedUser.slice(0, 1)} size="sm" /><span>{ticket.reportedUser}</span></dd></div>}
       <div><dt>补充说明</dt><dd>{ticket.description}</dd></div>
     </dl>
-    {ticket.attachments.length > 0 && <ImageLightbox overlayId={`woodpecker-ticket-${ticket.id}`} images={ticket.attachments.map((_, index) => ticket.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length])} label="工单附件">{(openImage) => <div className="woodpecker-ticket__attachments" aria-label="附件">{ticket.attachments.map((attachment, index) => <button type="button" key={`${attachment}-${index}`} aria-label={`查看附件 ${attachment}`} onClick={() => openImage(index)}><img src={ticket.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length]} alt={attachment} /><span>{attachment}</span></button>)}</div>}</ImageLightbox>}
+    {ticket.attachments.length > 0 && <ImageLightbox overlayId={`woodpecker-ticket-${ticket.id}`} images={ticket.attachments.map((_, index) => ticket.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length])} label="工单附件">{(openImage) => <div className="woodpecker-ticket__attachments" aria-label="附件">{ticket.attachments.map((attachment, index) => <button type="button" key={`${attachment}-${index}`} aria-label={`查看附件 ${attachment}`} onClick={() => openImage(index)}><img src={ticket.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length]} alt={attachment} /></button>)}</div>}</ImageLightbox>}
     {showResponse && ticket.response && <section className="woodpecker-response"><h3>官方处理回复</h3><p>{ticket.response}</p></section>}
   </article>
 }
 
 function PublicRecordCard({ record, feedback, onFeedback }: { record: PublicWoodpeckerRecord; feedback: 'like' | 'dislike' | null; onFeedback: (value: 'like' | 'dislike') => void }) {
   return <article className="woodpecker-ticket woodpecker-ticket--public client-card">
-    <header className="woodpecker-ticket__header"><div className="woodpecker-submitter"><AvatarMark initials={record.anonymous ? '' : record.reportedUser.slice(0, 1)} size="sm" /><strong>{record.anonymous ? '匿名提交' : '用户提交'}</strong></div><span className="woodpecker-ticket__time"><CalendarDays size={14} />{record.submittedAt} 处理</span></header>
+    <header className="woodpecker-ticket__header"><div className="woodpecker-submitter"><AvatarMark initials={record.anonymous ? '' : '用'} isDemoUser={!record.anonymous} size="sm" /><strong>{record.anonymous ? '匿名提交' : '用户提交'}</strong></div><span className="woodpecker-ticket__time"><CalendarDays size={14} />{record.submittedAt} 处理</span></header>
     <dl className="woodpecker-ticket__fields">
       <div><dt>类型</dt><dd>啄木鸟工单</dd></div>
       <div><dt>被举报人</dt><dd className="woodpecker-user-identity"><AvatarMark initials={record.reportedUser.slice(0, 1)} size="sm" /><span>{record.reportedUser}</span></dd></div>
       {record.reason && <div><dt>举报原因</dt><dd>{record.reason}</dd></div>}
       <div><dt>补充说明</dt><dd>{record.description}</dd></div>
     </dl>
-    {record.attachments.length > 0 && <ImageLightbox overlayId={`woodpecker-public-${record.id}`} images={record.attachments.map((_, index) => record.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length])} label="工单附件">{(openImage) => <div className="woodpecker-ticket__attachments" aria-label="附件">{record.attachments.map((attachment, index) => <button type="button" key={`${attachment}-${index}`} aria-label={`查看附件 ${attachment}`} onClick={() => openImage(index)}><img src={record.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length]} alt={attachment} /><span>{attachment}</span></button>)}</div>}</ImageLightbox>}
+    {record.attachments.length > 0 && <ImageLightbox overlayId={`woodpecker-public-${record.id}`} images={record.attachments.map((_, index) => record.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length])} label="工单附件">{(openImage) => <div className="woodpecker-ticket__attachments" aria-label="附件">{record.attachments.map((attachment, index) => <button type="button" key={`${attachment}-${index}`} aria-label={`查看附件 ${attachment}`} onClick={() => openImage(index)}><img src={record.attachmentImages?.[index] ?? woodpeckerSampleImages[index % woodpeckerSampleImages.length]} alt={attachment} /></button>)}</div>}</ImageLightbox>}
     <section className="woodpecker-response"><h3>官方处理回复</h3><p>{record.response}</p><div className="woodpecker-response__feedback"><button type="button" aria-label="有帮助" aria-pressed={feedback === 'like'} onClick={() => onFeedback('like')}><ThumbsUp size={15} />{record.likes + (feedback === 'like' ? 1 : 0)}</button><button type="button" aria-label="没帮助" aria-pressed={feedback === 'dislike'} onClick={() => onFeedback('dislike')}><ThumbsDown size={15} />{record.dislikes + (feedback === 'dislike' ? 1 : 0)}</button></div></section>
   </article>
 }

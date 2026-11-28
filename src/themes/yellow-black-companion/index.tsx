@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { MessageSquare, Home, Users, Star } from 'lucide-react'
 import { DesignMdBatchShowcase, type BatchShowcaseConfig } from '../../common/DesignMdBatchShowcase'
-import { Avatar, Badge, Button, Card, CompanionTheme, Conversation, Dialog, Menu, Message, NoticeDialog, Navigation, SegmentedControl, Switch, Tag, TextField } from './components'
+import { Avatar, Badge, Button, GlassButton, Card, CompanionTheme, Conversation, Dialog, Menu, Message, NoticeDialog, Navigation, SegmentedControl, Switch, Tag, TextField } from './components'
 import theme from './theme.json'
 import preview from './assets/preview.svg?url'
 import WindowsSamples from './WindowsSamples'
@@ -18,6 +18,7 @@ function ComponentSamples() {
     <header className="yb-samples__header"><div><span>COMPONENTS / 100%</span><h2>标准组件</h2></div><span className="yb-size">实际尺寸</span></header>
     <div className="yb-grid">
       <article className="yb-block yb-wide"><h3>按钮</h3><div className="yb-row"><Button variant="primary" onClick={() => show('已触发确认下单')}>确认下单</Button><Button onClick={() => show('已取消')}>取消</Button><Button variant="danger" onClick={() => setDialog(true)}>删除聊天</Button><Button variant="primary" disabled>暂不可用</Button><Button variant="primary" shape="pill" onClick={() => show('已触发匹配')}>立即匹配</Button><Button variant="soft" shape="pill" onClick={() => show('已返回')}>返回</Button></div><p className="yb-demo-notice" role="status">{notice}</p></article>
+      <article className="yb-block yb-wide"><h3>液态玻璃按钮</h3><div className="yb-row"><GlassButton variant="primary">自助下单</GlassButton><GlassButton>逛一逛</GlassButton><GlassButton variant="primary" disabled>暂不可用</GlassButton></div></article>
       <article className="yb-block yb-wide"><h3>按钮状态</h3><div className="yb-state-grid"><div><span>默认</span><Button variant="primary">主要操作</Button></div><div><span>悬停</span><Button variant="primary" className="yb-state-hover">主要操作</Button></div><div><span>按下</span><Button variant="primary" className="yb-state-active">主要操作</Button></div><div><span>焦点</span><Button variant="primary" className="yb-state-focus">主要操作</Button></div><div><span>禁用</span><Button variant="primary" disabled>主要操作</Button></div></div></article>
       <article className="yb-block yb-wide"><h3>按钮类型</h3><div className="yb-state-grid"><div><span>主要</span><Button variant="primary">确认</Button></div><div><span>次要</span><Button>取消</Button></div><div><span>浅灰</span><Button variant="soft">返回</Button></div><div><span>危险</span><Button variant="danger">删除</Button></div></div></article>
       <article className="yb-block"><h3>输入框</h3><TextField label="搜索" placeholder="搜索用户或俱乐部"/><TextField label="昵称" error="请输入昵称" placeholder="请输入昵称"/><TextField label="禁用" disabled value="暂不可编辑" readOnly/></article>
