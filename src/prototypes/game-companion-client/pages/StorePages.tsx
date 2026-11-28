@@ -1,6 +1,7 @@
+import { DialogIllustration } from '../components/DialogIllustration'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useState } from 'react'
-import { ArrowLeft, Check, Coins, CreditCard, Gift, History, Ticket, TriangleAlert, X } from 'lucide-react'
+import { ArrowLeft, Coins, CreditCard, Gift, History, Ticket, TriangleAlert, X } from 'lucide-react'
 import type { Club } from '../data/mockData'
 import { clubs as allClubs } from '../data/mockData'
 import { premiumCards, rechargePackages, type PremiumCard, type PremiumCardTransaction, type RechargeCoupon } from '../data/storeMockData'
@@ -52,9 +53,9 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
 
   if (pageState !== 'normal') return <div className={`client-content account-page${presentation === 'modal' ? ' store-page' : ''}`}><StateView pageState={pageState} onRetry={onRetry} /></div>
   if (completed) {
-    const successCard = <section className="client-card checkout-success-card"><span className="checkout-success-card__icon"><Check size={30} /></span><h1>购买已完成</h1><p>{rechargeDiamonds.toLocaleString()} 金豆已加入钱包 · {payMethod}</p><div className="checkout-success-card__actions"><button type="button" className="client-button client-button--primary" onClick={onBack}>{backLabel}</button><button type="button" className="client-button client-button--secondary" onClick={() => setCompleted(false)}>继续购买</button></div></section>
+    const successCard = <section className="client-card checkout-success-card"><DialogIllustration kind="purchase" /><h1>购买已完成</h1><p>{rechargeDiamonds.toLocaleString()} 金豆已加入钱包 · {payMethod}</p><div className="checkout-success-card__actions"><button type="button" className="client-button client-button--secondary" onClick={() => setCompleted(false)}>继续购买</button><button type="button" className="client-button client-button--primary" onClick={onBack}>{backLabel}</button></div></section>
     const success = <div className={`client-content account-page store-page${presentation === 'modal' ? ' wallet-recharge-success-content' : ''}`}><div className="wallet-recharge-result">{successCard}</div></div>
-    return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className="store-benefit-dialog wallet-recharge-dialog is-completed" role="dialog" aria-modal="true" aria-label="购买结果"><header><div><h2>购买结果</h2></div><button type="button" className="client-icon-button" aria-label="关闭购买弹窗" onClick={onBack}><X size={17} /></button></header>{success}</section></div> : <div className="client-content account-page store-page"><div className="wallet-recharge-result">{successCard}</div></div>
+    return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className="store-benefit-dialog wallet-recharge-dialog is-completed transaction-result-dialog" role="dialog" aria-modal="true" aria-label="购买结果"><header><div><h2>购买结果</h2></div><button type="button" className="client-icon-button" aria-label="关闭购买弹窗" onClick={onBack}><X size={17} /></button></header>{success}</section></div> : <div className="client-content account-page store-page"><div className="wallet-recharge-result">{successCard}</div></div>
   }
 
   const content = paymentPending ? <div className="client-content account-page store-page">

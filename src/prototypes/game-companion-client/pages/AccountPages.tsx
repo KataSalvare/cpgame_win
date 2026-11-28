@@ -1,3 +1,4 @@
+import { DialogIllustration } from '../components/DialogIllustration'
 import { GlassButton } from '@/themes/yellow-black-companion/components'
 import { NoticeDialog } from '@/themes/grayscale-prototype/components/NoticeDialog'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
@@ -159,7 +160,7 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
   const activeView = view === 'withdraw' && manageAccounts ? 'accounts' : view
   const closeForm = () => { setEditingAccount(null); setView('accounts') }
 
-  return <div className="store-overlay bean-withdraw-overlay" data-overlay="bean-withdraw-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-withdraw-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-withdraw-title">
+  return <div className="store-overlay bean-withdraw-overlay" data-overlay="bean-withdraw-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className={`store-benefit-dialog bean-withdraw-dialog${activeView === 'result' ? ' transaction-result-dialog' : ''}`} role="dialog" aria-modal="true" aria-labelledby="bean-withdraw-title">
     <header><div><h2 id="bean-withdraw-title">{activeView === 'withdraw' ? '提现糖豆' : activeView === 'accounts' ? '提现账户管理' : activeView === 'account-form' ? (editingAccount ? '换绑提现账户' : '绑定提现账户') : '提现结果'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭提现弹窗" onClick={onClose}><X size={17} /></button></header>
     {activeView === 'accounts' ? <>
       <div className="client-section-heading bean-withdraw-panel__subheading"><div><h2>已绑定账户</h2></div><button type="button" className="client-button client-button--secondary" disabled={accounts.length >= 5} title={accounts.length >= 5 ? '最多只能绑定 5 个账户' : undefined} onClick={() => openAccountForm()}><Plus size={15} />绑定账户</button></div>
@@ -168,7 +169,7 @@ export function BeanWithdrawPanel({ balance, onWithdraw, onClose }: { balance: n
     </> : activeView === 'account-form' ? <>
       <div className="bean-account-type" role="group" aria-label="提现账户类型">{(['支付宝', '银行卡'] as const).map((type) => <button type="button" className={`orders-filter-chip${formType === type ? ' is-active' : ''}`} aria-pressed={formType === type} key={type} onClick={() => setFormType(type)}>{type}</button>)}</div><div className="bean-account-name-row"><label className="bean-account-field"><span>账户姓名</span><input value={holder} disabled aria-label={`账户姓名，实名：${mockVerifiedName}`} /></label><span className="bean-realname-status"><BadgeCheck size={14} />已实名</span></div>{formType === '银行卡' && <label className="bean-account-field"><span>开户银行</span><input value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="请输入银行名称" /></label>}<label className="bean-account-field"><span>{formType === '支付宝' ? '支付宝账号' : '银行卡号'}</span><input value={accountValue} onChange={(event) => setAccountValue(event.target.value)} placeholder={formType === '支付宝' ? `请输入${editingAccount ? '新的' : ''}手机号或支付宝账号` : `请输入${editingAccount ? '新的' : ''}银行卡号`} /></label><footer><button type="button" className="client-button client-button--secondary" onClick={closeForm}>取消</button><button type="button" className="client-button client-button--primary" disabled={!accountValue.trim() || (formType === '银行卡' && !bankName.trim())} onClick={saveAccount}>保存账户</button></footer>
     </> : activeView === 'result' && result ? <>
-      <div className="bean-withdraw-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><span className="client-eyebrow">本地演示结果</span><h3>提现申请已提交</h3><strong className="bean-withdraw-result__amount">{result.amount.toLocaleString()} <small>糖豆</small></strong><dl><div><dt>收款方式</dt><dd>{result.account.type}{result.account.bankName ? ` · ${result.account.bankName}` : ''}</dd></div><div><dt>收款账户</dt><dd>{maskedAccount(result.account)}</dd></div><div><dt>申请编号</dt><dd>{result.applicationNo}</dd></div></dl><p>申请结果仅用于原型演示，不代表真实提现状态。</p></div><footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
+      <div className="bean-withdraw-result"><DialogIllustration kind="withdrawal" /><h3>提现申请已提交</h3><strong className="bean-withdraw-result__amount">{result.amount.toLocaleString()} <small>糖豆</small></strong><dl><div><dt>收款方式</dt><dd>{result.account.type}{result.account.bankName ? ` · ${result.account.bankName}` : ''}</dd></div><div><dt>收款账户</dt><dd>{maskedAccount(result.account)}</dd></div><div><dt>申请编号</dt><dd>{result.applicationNo}</dd></div></dl><p>申请结果仅用于原型演示，不代表真实提现状态。</p></div><footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
     </> : <>
       <section className="client-card bean-withdraw-balance"><div className="bean-balance-heading"><span className="client-eyebrow">可提现糖豆</span><BalanceRefreshButton /></div><strong>{balance.toLocaleString()} <small>糖豆</small><em>= ¥ {(balance / 10).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</em></strong></section>
       <section className="client-card bean-withdraw-form">
@@ -190,7 +191,7 @@ export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBa
   const parsedAmount = Number(amount)
   const validAmount = Number.isInteger(parsedAmount) && parsedAmount > 0 && parsedAmount <= beanBalance
 
-  return <div className="store-overlay bean-exchange-overlay" data-overlay="bean-exchange-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="store-benefit-dialog bean-exchange-dialog" role="dialog" aria-modal="true" aria-labelledby="bean-exchange-title">
+  return <div className="store-overlay bean-exchange-overlay" data-overlay="bean-exchange-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}><section className={`store-benefit-dialog bean-exchange-dialog${exchangedAmount !== null ? ' transaction-result-dialog' : ''}`} role="dialog" aria-modal="true" aria-labelledby="bean-exchange-title">
     <header><div><h2 id="bean-exchange-title">{exchangedAmount === null ? '兑换金豆' : '兑换完成'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭兑换弹窗" onClick={onClose}><X size={17} /></button></header>
     {exchangedAmount === null ? <>
       <section className="client-card bean-exchange-balance"><div className="bean-balance-heading"><span className="client-eyebrow">可提现糖豆</span><BalanceRefreshButton /></div><strong>{beanBalance.toLocaleString()} <small>糖豆</small></strong></section>
@@ -203,7 +204,7 @@ export function BeanExchangePanel({ beanBalance, onExchange, onClose }: { beanBa
       <section className="client-card bean-exchange-notes"><h3>兑换说明</h3><p>xxxx</p><p>xxxx</p><p>xxxx</p></section>
       <footer><button type="button" className="client-button client-button--primary" disabled={!validAmount} onClick={() => { if (onExchange(parsedAmount)) setExchangedAmount(parsedAmount) }}>确认兑换</button></footer>
     </> : <>
-      <div className="bean-exchange-result"><span className="checkout-success-card__icon"><CheckCircle2 size={30} /></span><strong>{exchangedAmount.toLocaleString()} <small>糖豆</small></strong><span>已兑换为 {exchangedAmount.toLocaleString()} 金豆</span></div>
+      <div className="bean-exchange-result"><DialogIllustration kind="exchange" /><h3>兑换完成</h3><strong>{exchangedAmount.toLocaleString()} <small>糖豆</small></strong><span>已兑换为 {exchangedAmount.toLocaleString()} 金豆</span></div>
       <footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
     </>}
   </section></div>

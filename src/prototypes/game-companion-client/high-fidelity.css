@@ -229,9 +229,17 @@
 [data-prototype-palette="high-fidelity"] .home-clubs .club-filter-group[aria-label="俱乐部标签筛选"] .client-filter-pill.is-active { border-color: transparent; background: #fff6cc; }
 [data-prototype-palette="high-fidelity"] .home-clubs .club-filter-group[aria-label="俱乐部范围筛选"] .client-filter-pill.is-active { border-color: #ffd60a; background: #fff6cc; }
 
+@property --match-glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 /* 侧栏一键匹配：橙黄胶囊与柔和高光。 */
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary,
-[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary.is-active {
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary.is-active,
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover {
+  position: relative;
   border: 2px solid #ffd24b;
   border-radius: 999px;
   background:
@@ -242,18 +250,34 @@
   font-size: 18px;
   text-shadow: 0 1px 3px rgb(145 61 0 / 45%);
   box-shadow: inset 0 2px 3px rgb(255 255 255 / 75%), inset 0 -3px 4px rgb(255 226 63 / 70%), 0 3px 9px rgb(255 167 0 / 35%);
-  transition: filter 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
-[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover {
-  filter: brightness(1.06);
-  box-shadow: inset 0 2px 3px rgb(255 255 255 / 80%), inset 0 -3px 4px rgb(255 226 63 / 70%), 0 5px 12px rgb(255 167 0 / 45%);
-  transform: translateY(-2px);
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary::after,
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 3px solid transparent;
+  border-radius: inherit;
+  background: conic-gradient(from var(--match-glow-angle), transparent 0deg 270deg, #fff 315deg, #fff9ad 330deg, transparent 360deg) border-box;
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0) border-box;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
 }
-[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:active { transform: translateY(0); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover::after,
+[data-prototype-palette="high-fidelity"] .game-companion-client.is-matching .windows-sidebar__item--primary::after,
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card::after {
+  opacity: 1;
+  animation: match-border-glow 2s linear infinite;
+}
+@keyframes match-border-glow {
+  to { --match-glow-angle: 360deg; }
+}
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:focus-visible { outline: 2px solid #9a4700; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
-  [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary { transition: none; }
-  [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover { transform: none; }
+  [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item--primary:hover::after,
+  [data-prototype-palette="high-fidelity"] .game-companion-client.is-matching .windows-sidebar__item--primary::after,
+  [data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card::after { animation: none; }
 }
 
 [data-prototype-palette="high-fidelity"] .game-companion-client .windows-sidebar__item:not(.windows-sidebar__item--primary) { font-size: 18px; font-weight: 400; }
@@ -620,16 +644,19 @@
 [data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float > svg { color: #9a7400; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float__wave i { background: #b18a00; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card {
-  border: 0;
-  border-radius: 18px;
-  background: radial-gradient(ellipse at 10% 10%, rgb(255 255 255 / 78%), transparent 55%), linear-gradient(135deg, rgb(255 238 144 / 94%), rgb(255 211 46 / 90%));
-  box-shadow: 0 10px 26px rgb(115 84 0 / 20%), inset 0 1px 1px rgb(255 255 255 / 90%);
-  color: #292200;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 2px solid #ffd24b;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse at 18% 0%, rgb(255 255 255 / 85%), transparent 30%),
+    radial-gradient(ellipse at 78% 110%, #fff97b 0%, transparent 42%),
+    linear-gradient(105deg, #ff5414 5%, #ff7c08 42%, #ffbe08 78%, #ffa600 100%);
+  box-shadow: inset 0 2px 3px rgb(255 255 255 / 75%), inset 0 -3px 4px rgb(255 226 63 / 70%), 0 3px 9px rgb(255 167 0 / 35%);
+  color: #fff;
+  text-shadow: 0 1px 3px rgb(145 61 0 / 45%);
 }
-[data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card .match-mini-card__icon { border-radius: 12px; background: linear-gradient(145deg, rgb(255 255 255 / 92%), rgb(255 240 170 / 70%)); color: #805d00; box-shadow: inset 0 1px 1px #fff, 0 3px 8px rgb(140 102 0 / 12%); }
-[data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card :is(.match-mini-card__content small, .match-mini-card__restore) { color: #705c2d; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card .match-mini-card__icon { width: 48px; height: 48px; background: transparent; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card__icon .client-quick-match-icon { width: 48px; height: 48px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card :is(.match-mini-card__content small, .match-mini-card__restore) { color: #fff; }
 [data-prototype-palette="high-fidelity"] .game-companion-client :is(.screen-recording-float__button, .voice-minimized-float, .match-mini-card):hover { filter: brightness(1.04); }
 
 /* Identity flow: the supplied mascot and warm header carry across every step. */
@@ -1048,6 +1075,12 @@
 
 /* Compact the space below the withdrawal header. */
 [data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog { row-gap: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .store-benefit-dialog.transaction-result-dialog { border:0; border-radius:8px; background:#fff; box-shadow:0 8px 24px rgb(17 24 39 / 15%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .transaction-result-dialog > header { position:absolute; top:12px; right:12px; margin:0; border:0; padding:0; background:transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .transaction-result-dialog > header::after { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .transaction-result-dialog > header .client-icon-button { background:transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .transaction-result-dialog :is(footer,.checkout-success-card__actions) .client-button--primary { border:0; border-radius:999px; background:#ffd60a; color:#1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .transaction-result-dialog :is(footer,.checkout-success-card__actions) .client-button--secondary { border:0; border-radius:999px; background:#f1f2f8; color:#434c59; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog > .bean-withdraw-balance { margin-top: 4px; margin-bottom: 12px; }
 
 /* Premium top-up adopts the standard branded dialog surface. */
@@ -1172,3 +1205,82 @@
 [data-prototype-palette="high-fidelity"] .game-companion-client .workbench-page .workbench-services-games { background: #edeae4; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .workbench-page .workbench-services-games button.is-active { background: #fff; }
 [data-prototype-palette="high-fidelity"] .game-companion-client :is(.personal-center-page, .orders-list-card) :is(.account-settings-list button, .personal-order-stats button):hover { background: #edeae4; }
+
+/* 工作台和订单列表直接置于内容区，使用白色条目区分内容。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.orders-page > .orders-list-card, .workbench-page > .workbench-stats, .workbench-page > .workbench-section, .workbench-page > .orders-list-card) {
+  padding: 0;
+  background: transparent;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.orders-page .orders-list-card, .workbench-page) :is(.account-balance-mini, .workbench-request, .workbench-order, .order-item) { background: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.orders-page .orders-list-card, .workbench-page) :is(.workbench-request, .workbench-order, .order-item):hover { background: #fffdf8; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-page > .workbench-wallet {
+  border: 0;
+  border-radius: 18px;
+  padding: 24px;
+  background: #fff0f6;
+  box-shadow: inset 0 -7px 0 #fbdce9;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-wallet h2 { display: flex; align-items: center; gap: 10px; font-size: 18px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-wallet h2::before { width: 40px; height: 40px; flex: 0 0 40px; background: center / contain no-repeat url('./assets/wallet-candy-bean.webp'); content: ''; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-wallet > div:first-child > strong { font-size: 34px; }
+
+/* 结算操作与匹配面板采用一致的玻璃按钮。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-panel__title-icon { background: transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .checkout-companion__communicate {
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #fff, #e8eaf1);
+  color: #353d49;
+  box-shadow: 0 3px 8px rgb(30 38 55 / 10%);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .checkout-payment-option.is-active { border-color: #ffd60a; background: #fff6cc; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .checkout-pay-button:not(:disabled) {
+  border: 1px solid #e7bc00;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #fff3a5 0%, #ffe04b 42%, #ffd60a 70%, #f3bb00 100%);
+  color: #1d2129;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 -2px 4px rgb(180 127 0 / 15%), 0 3px 7px rgb(141 105 0 / 18%);
+}
+
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-invite-dialog .voice-invite-friends .social-select-friend:not(:has(input:checked)) { background: transparent; box-shadow: none; }
+
+/* 入驻入口使用柔和渐变和独立插画。 */
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card {
+  position: relative;
+  display: flex;
+  min-height: 210px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 20px;
+  padding: 28px;
+  background: linear-gradient(125deg, #d9e8ff, #e9f2ff 58%, #c3d9ff);
+  box-shadow: none;
+}
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card:nth-child(2) { background: linear-gradient(125deg, #ffe4ad, #fff3d7 58%, #ffdfad); }
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card__icon { display: none; }
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card__art { display: block; position: absolute; right: 10px; top: 50%; width: 42%; height: 90%; object-fit: contain; transform: translateY(-50%); pointer-events: none; }
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card > div { position: relative; z-index: 1; max-width: 56%; }
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card h3 { font-size: 22px; }
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card > div > p { margin: 6px 0 0; font-size: 14px; }
+[data-prototype-palette="high-fidelity"] .personal-center-page .onboarding-card > .client-button { position: relative; z-index: 1; min-height: 36px; border: 0; border-radius: 999px; padding: 0 16px; background: #fff; color: #303a4b; box-shadow: 0 3px 10px rgb(65 79 105 / 10%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-center-page .onboarding-card:first-child { background: linear-gradient(125deg, #d9e8ff, #e9f2ff 58%, #c3d9ff); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-center-page .onboarding-card > .client-button:not(:disabled) { background: #fff; color: #303a4b; box-shadow: 0 3px 10px rgb(65 79 105 / 10%); }
+
+/* 弹窗底部操作与页面液态玻璃按钮保持一致。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer, .order-renew-dialog > footer, .order-review-dialog > footer, .checkout-order-notice-dialog > footer, .match-dialog > footer, .system-path-dialog > footer, .gc-login-dialog > footer, .wallet-recharge-dialog .checkout-success-card__actions, .wallet-recharge-dialog .wallet-recharge-payment__actions, .transaction-result-dialog .checkout-success-card__actions) > .client-button:is(.client-button--primary, .client-button--secondary):not(:disabled) {
+  min-height: 48px; border: 0; border-radius: 9999px; color: #35322a;
+  background: var(--yb-glass-secondary, linear-gradient(155deg, rgb(255 255 255 / 85%), rgb(255 255 255 / 38%) 48%, rgb(220 216 205 / 32%)));
+  box-shadow: inset 0 1px 2px rgb(255 255 255 / 95%), inset 0 -2px 4px rgb(112 105 86 / 8%), 0 2px 6px rgb(62 55 38 / 9%);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: filter 160ms ease, transform 160ms ease;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer, .order-renew-dialog > footer, .order-review-dialog > footer, .checkout-order-notice-dialog > footer, .match-dialog > footer, .system-path-dialog > footer, .gc-login-dialog > footer, .wallet-recharge-dialog .checkout-success-card__actions, .wallet-recharge-dialog .wallet-recharge-payment__actions, .transaction-result-dialog .checkout-success-card__actions) > .client-button.client-button--primary:not(:disabled) {
+  color: #332800; background: var(--yb-glass-primary, linear-gradient(155deg, rgb(255 239 139 / 94%), rgb(255 214 10 / 78%) 52%, rgb(243 190 0 / 72%)));
+  box-shadow: inset 0 1px 2px rgb(255 255 255 / 85%), inset 0 -2px 4px rgb(157 112 0 / 10%), 0 2px 6px rgb(165 124 0 / 13%);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer, .order-renew-dialog > footer, .order-review-dialog > footer, .checkout-order-notice-dialog > footer, .match-dialog > footer, .system-path-dialog > footer, .gc-login-dialog > footer, .wallet-recharge-dialog .checkout-success-card__actions, .wallet-recharge-dialog .wallet-recharge-payment__actions, .transaction-result-dialog .checkout-success-card__actions) > .client-button:is(.client-button--primary, .client-button--secondary):not(:disabled):hover { filter: brightness(1.05); }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer, .order-renew-dialog > footer, .order-review-dialog > footer, .checkout-order-notice-dialog > footer, .match-dialog > footer, .system-path-dialog > footer, .gc-login-dialog > footer, .wallet-recharge-dialog .checkout-success-card__actions, .wallet-recharge-dialog .wallet-recharge-payment__actions, .transaction-result-dialog .checkout-success-card__actions) > .client-button:is(.client-button--primary, .client-button--secondary):not(:disabled):active { transform: translateY(1px); }
+@media (prefers-reduced-motion: reduce) { [data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer) > .client-button { transition: none; } }

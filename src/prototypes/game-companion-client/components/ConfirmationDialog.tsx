@@ -3,6 +3,7 @@ import { DialogPanel } from '@/components/WindowsClient'
 import type { ConfirmationDialogProps } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import '@/themes/yellow-black-companion/components/components.css'
 import '@/themes/grayscale-prototype/components/confirmation-dialog.css'
+import { DialogIllustration } from './DialogIllustration'
 
 type Props = Omit<ConfirmationDialogProps, 'message' | 'onCancel'> & {
   message?: ReactNode
@@ -16,6 +17,7 @@ export function ConfirmationDialog({
 }: Props) {
   const root = useRef<HTMLDivElement>(null)
   const dismiss = useRef(onDismiss ?? onConfirm)
+  const illustration = title === '金豆余额不足' ? 'insufficient' : title === '确认购买尊享卡' ? 'premium' : (title === '确认支付' || title === '支付订单') ? 'payment' : null
   useEffect(() => { dismiss.current = onDismiss ?? onConfirm }, [onDismiss, onConfirm])
 
   useEffect(() => {
@@ -54,7 +56,8 @@ export function ConfirmationDialog({
     if (event.target === event.currentTarget.firstElementChild) dismiss.current()
   }}>
     <DialogPanel overlayId={overlayId} title={title} width="var(--client-confirmation-width, 360px)"
-      className="grayscale-confirmation-dialog client-confirmation__panel"
+      className={`grayscale-confirmation-dialog client-confirmation__panel${illustration ? ' client-confirmation__panel--illustrated' : ''}`}
+      headerArtwork={illustration ? <DialogIllustration kind={illustration} /> : undefined}
       onClose={onDismiss ?? onConfirm}
       footer={<>
         {onCancel && <button type="button" className="client-button client-button--secondary" onClick={onCancel}>{cancelLabel}</button>}

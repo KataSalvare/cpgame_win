@@ -2,7 +2,7 @@ import { NoticeDialog } from '@/themes/grayscale-prototype/components/NoticeDial
 import { GenderAgeBadge } from '../components/GenderAgeBadge'
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import { Check, ChevronDown, ChevronRight, ClipboardList, Headphones, Maximize2, MessageCircle, Minimize2, Plus, Search, Star, Swords, UserRound, UsersRound, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, ClipboardList, Headphones, Maximize2, MessageCircle, Minimize2, Plus, Search, Star, UserRound, UsersRound, X } from 'lucide-react'
 import type { useMatchLogic } from '../hooks/useMatchLogic'
 import { registerOverlayReveal } from '@/lib/overlayReveal'
 import { companions, games, type Companion } from '../data/mockData'
@@ -10,6 +10,7 @@ import { quickMatchCompanions } from '../data/quickMatchMockData'
 import { AvatarMark } from '../components/AvatarMark'
 import { UserNameWithLevel } from '../components/UserNameWithLevel'
 import { GameFilter } from '../components/GameFilter'
+import quickMatchGamepad from '../assets/quick-match-gamepad.webp'
 import noticeImageOne from '../assets/profile-life-photo-city.svg'
 import noticeImageTwo from '../assets/profile-life-photo-cafe.svg'
 import noticeImageThree from '../assets/profile-life-photo-window.svg'
@@ -264,13 +265,13 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCan
       onClick={activateMiniCard}
       onKeyDown={handleMiniKeyDown}
     >
-      <span className="match-mini-card__icon"><Swords size={16} /></span>
+      <span className="match-mini-card__icon"><img className="client-quick-match-icon" src={quickMatchGamepad} alt="" /></span>
       <span className="match-mini-card__content"><strong>{hasCandidateList ? '等待选人' : '匹配中'}</strong>{hasCandidateList && <small>已匹配 {candidates.length} 位</small>}</span>
       <Maximize2 className="match-mini-card__restore" size={15} aria-hidden="true" />
     </div>}
     {open && <section className={`match-panel${matchPanelDragging ? ' is-dragging' : ''}`} style={matchPanelPosition ? { left: matchPanelPosition.left, top: matchPanelPosition.top, right: 'auto' } : undefined} aria-label={matching ? '匹配中' : '一键匹配'}>
       <header className="match-panel__header is-draggable" onPointerDown={startMatchPanelDrag} onPointerMove={moveMatchPanel} onPointerUp={finishMatchPanelDrag} onPointerCancel={finishMatchPanelDrag}>
-        <div className="match-panel__title-icon"><Swords size={18} /></div>
+        <div className="match-panel__title-icon"><img className="client-quick-match-icon" src={quickMatchGamepad} alt="" /></div>
         <div className="match-panel__heading"><h2>{matching ? '匹配中' : '一键匹配'}</h2></div>
         <button type="button" className="windows-icon-button" aria-label="最小化匹配面板" title="最小化" onClick={onMinimize}><Minimize2 size={16} /></button>
       </header>
@@ -292,7 +293,7 @@ export function MatchPanel({ open, matching, logic, onMinimize, onRestore, onCan
             {candidates.length === 0 && <div className="match-candidate-empty"><UserRound size={20} /><span>当前条件下没有可选陪玩</span></div>}
           </div>
         </section>}
-        <div className="match-panel__matching-actions"><button type="button" className="client-button client-button--secondary" onClick={() => setDialog('cancel')}>取消匹配</button><button type="button" className="client-button client-button--primary" disabled={!candidatesReady || selectedIds.length === 0} onClick={() => onChooseCompanions(selectedIds)}>确认下单</button></div>
+        <div className="match-panel__matching-actions"><button type="button" className="client-button client-button--secondary" onClick={() => setDialog('cancel')}>取消匹配</button><button type="button" className="client-button client-button--primary" disabled={!candidatesReady || selectedIds.length === 0} onClick={() => onChooseCompanions(selectedIds)}>{selectedIds.length === 0 ? '请先选择队友' : '确认下单'}</button></div>
       </div> : <div className="match-panel__form">
         <section className="match-field match-field--wide" aria-label="选择游戏">
           <GameFilter gameId={logic.gameId} includeAll={false} label="匹配游戏筛选" onSelect={(gameId) => { logic.chooseGame(gameId); setClubSearch(''); setClubPickerOpen(false); setServicePickerOpen(false) }} />

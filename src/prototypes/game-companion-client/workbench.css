@@ -173,6 +173,7 @@
 .workbench-service-cascade button { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:36px; padding:6px 8px; border:0; border-radius:5px; background:transparent; color:var(--client-text); font:inherit; font-size:14px; text-align:left; cursor:pointer; }
 .workbench-service-cascade button:hover,.workbench-service-cascade button.is-selected { background:var(--prototype-canvas,#f3f4f6); }
 .workbench-service-application-dialog > footer { display:flex; justify-content:flex-end; gap:8px; padding-top:16px; }
+.workbench-service-application-dialog > footer > .client-button { height:48px; min-height:48px; }
 @media (max-width:720px) { .workbench-service-cascade { grid-template-columns:repeat(2,minmax(0,1fr)); } .workbench-service-cascade > section:nth-child(3) { border-left:0; border-top:1px solid var(--client-border); } .workbench-service-cascade > section:nth-child(4) { border-top:1px solid var(--client-border); } }
 
 .workbench-auto-grab.client-button { min-height:40px; padding:0 16px; gap:8px; font-size:16px; font-weight:600; }

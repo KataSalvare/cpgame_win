@@ -704,6 +704,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-real-name-details dt { color: var(--client-muted); font-size: 14px; }
 .personal-real-name-details dd { margin: 0; color: var(--client-text); font-size: 14px; font-weight: 600; }
 .personal-security-form { display: grid; gap: 16px; }
+.game-companion-client .personal-security-back { height: 48px; min-height: 48px; }
 .personal-bound-phone { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--client-border); padding: 0 0 14px; color: var(--client-muted); font-size: 12px; }
 .personal-bound-phone strong { color: var(--client-text); font-size: 14px; }
 .personal-security-form .personal-setting-field input { box-sizing: border-box; }
@@ -754,6 +755,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-favorite-grid { display: grid; gap: 12px; }
 .personal-favorite-grid--clubs, .personal-favorite-grid--rooms { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .personal-favorite-grid--users { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.personal-favorite-grid--users .personal-favorite-card > .client-avatar { border-radius: 50%; }
 .personal-favorite-card { display: flex; min-width: 0; min-height: 108px; align-items: flex-start; gap: 11px; padding: 14px; }
 .personal-favorite-card__body { display: grid; min-width: 0; flex: 1; align-content: start; gap: 6px; }
 .personal-favorite-card__heading { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 8px; }
@@ -867,6 +869,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .personal-club-card__actions .client-button:disabled { cursor: not-allowed; opacity: .55; }
 .onboarding-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .onboarding-card { display: grid; min-height: 178px; grid-template-rows: auto 1fr auto; align-items: start; gap: 12px; padding: 20px; }
+.onboarding-card__art { display: none; }
 .onboarding-card__icon { display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--client-border); border-radius: 8px; background: var(--prototype-canvas, #f3f4f6); color: var(--prototype-text-secondary, #374151); }
 .onboarding-card h3 { margin: 0; font-size: 15px; }
 .onboarding-card > div > p { margin-top: 8px; white-space: normal; line-height: 1.6; }
@@ -1388,6 +1391,30 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .checkout-insufficient button { width: fit-content; margin-top: 3px; }
 .checkout-success-card { display: flex; min-height: 420px; flex-direction: column; align-items: center; justify-content: center; padding: 32px; text-align: center; }
 .checkout-success-card__icon { display: grid; width: 58px; height: 58px; place-items: center; border: 1px solid var(--prototype-text-subtle, #9ca3af); border-radius: 50%; color: var(--prototype-text-secondary, #374151); }
+.dialog-illustration { display:block; width:96px; height:96px; object-fit:contain; margin:0 auto 12px; filter:grayscale(1); }
+[data-prototype-palette="high-fidelity"] .dialog-illustration { filter:none; }
+.game-companion-client .client-confirmation__panel--illustrated > .windows-dialog-panel__header { position:relative; display:block; padding:24px 24px 0; text-align:center; }
+.game-companion-client .client-confirmation__panel--illustrated > .windows-dialog-panel__header > div { width:100%; }
+.game-companion-client .client-confirmation__panel--illustrated > .windows-dialog-panel__header > button { position:absolute; top:12px; right:12px; }
+.game-companion-client .client-confirmation__panel--illustrated .dialog-illustration { width:112px; height:96px; margin:0 auto 8px; }
+.game-companion-client .client-confirmation__panel--illustrated > .windows-dialog-panel__header h2 { font-size:20px; line-height:28px; font-weight:600; }
+.game-companion-client .client-confirmation__panel--illustrated > .windows-dialog-panel__content { padding:8px 24px 20px; text-align:center; }
+.game-companion-client .client-confirmation__panel--illustrated .grayscale-confirmation-dialog__message { font-size:14px; line-height:22px; }
+.game-companion-client .client-confirmation__panel--illustrated > .windows-dialog-panel__footer { padding:0 24px 24px; }
+.game-companion-client .store-benefit-dialog.transaction-result-dialog { position:relative; display:flex; flex-direction:column; box-sizing:border-box; width:min(360px,calc(100% - 48px)); height:auto; max-height:calc(100% - 48px); gap:0; padding:24px; overflow-y:auto; border-radius:8px; }
+.game-companion-client .transaction-result-dialog > header { position:absolute; z-index:1; top:12px; right:12px; display:block; margin:0; padding:0; border:0; background:transparent; }
+.game-companion-client .transaction-result-dialog > header h2 { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.game-companion-client .transaction-result-dialog .dialog-illustration { width:112px; height:96px; margin:0 auto 8px; }
+.game-companion-client .transaction-result-dialog :is(.bean-withdraw-result,.bean-exchange-result) { gap:8px; padding:0; }
+.game-companion-client .transaction-result-dialog :is(.bean-withdraw-result h3,.bean-exchange-result h3,.checkout-success-card h1) { margin:0; font-size:20px; line-height:28px; font-weight:600; }
+.game-companion-client .transaction-result-dialog :is(.bean-withdraw-result__amount,.bean-exchange-result > strong) { font-size:20px; }
+.game-companion-client .transaction-result-dialog > footer { display:flex; width:100%; border:0; padding:20px 0 0; }
+.game-companion-client .transaction-result-dialog > footer .client-button { flex:1; height:48px; min-height:48px; }
+.game-companion-client .transaction-result-dialog > .wallet-recharge-success-content { padding:0; overflow:visible; }
+.game-companion-client .transaction-result-dialog .checkout-success-card { min-height:0; padding:0; }
+.game-companion-client .transaction-result-dialog .checkout-success-card p { margin:8px 0 0; font-size:14px; line-height:22px; }
+.game-companion-client .transaction-result-dialog .checkout-success-card__actions { display:flex; width:100%; gap:8px; margin-top:20px; }
+.game-companion-client .transaction-result-dialog .checkout-success-card__actions .client-button { flex:1; min-width:0; height:48px; min-height:48px; }
 .checkout-success-card h1 { margin: 16px 0 0; font-size: 20px; }
 .checkout-success-card p { color: var(--client-muted); font-size: 12px; }
 .checkout-success-card__actions { display: flex; gap: 8px; margin-top: 9px; }
@@ -1505,6 +1532,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .bean-exchange-notes p { color: var(--client-muted); font-size: 12px; }
 .bean-exchange-dialog > footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--client-border); padding-top: 14px; }
 .bean-exchange-result { display: grid; justify-items: center; gap: 10px; padding: 12px; text-align: center; }
+.bean-exchange-result h3 { margin:0; font-size:19px; }
+.store-benefit-dialog:is(.wallet-recharge-dialog.is-completed, .bean-withdraw-dialog:has(.bean-withdraw-result), .bean-exchange-dialog:has(.bean-exchange-result)) > header h2 { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .bean-exchange-result > strong { font-size: 26px; }
 .bean-exchange-result > span:last-child { color: var(--client-muted); font-size: 14px; }
 .store-benefit-dialog.bean-withdraw-dialog { width: min(620px, calc(100% - 48px)); }
@@ -1648,6 +1677,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .match-mini-card:focus-visible { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; }
 .match-mini-card.is-dragging { cursor: grabbing; }
 .match-mini-card__icon { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border-radius: 7px; background: var(--prototype-primary, #374151); color: var(--prototype-on-primary, var(--prototype-surface, #fff)); }
+.match-mini-card__icon .client-quick-match-icon { width: 34px; height: 34px; }
 .match-mini-card.is-ready .match-mini-card__icon { background: var(--prototype-border, #e5e7eb); color: var(--prototype-text, #1f2937); }
 .match-mini-card__content { display: grid; min-width: 0; flex: 1; gap: 4px; }
 .match-mini-card__content strong { font-size: 14px; font-weight: 600; }
@@ -2536,3 +2566,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .companion-directory-filters--talents .talent-category-filter .theme-category-tabs__tab.is-active { background: #e9ebef; }
 [data-prototype-palette="high-fidelity"] .companion-directory-filters--talents { background: transparent; }
 [data-prototype-palette="high-fidelity"] .companion-directory-filters--talents .talent-category-filter .theme-category-tabs__tab.is-active { background: #fff8d6; box-shadow: inset 0 0 0 1px #e6b800; }
+
+/* 匹配与结算中的陪玩头像保持圆形。 */
+:is(.match-candidate__select, .checkout-companion__avatars) .client-avatar { border-radius: 50%; }
+.match-panel__title-icon .client-quick-match-icon { width: 36px; height: 36px; }

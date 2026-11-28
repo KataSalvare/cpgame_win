@@ -143,9 +143,10 @@ export interface DialogPanelProps {
   width?: number | string
   className?: string
   draggable?: boolean
+  headerArtwork?: ReactNode
 }
 
-export function DialogPanel({ overlayId, children, title, description, footer, onClose, width = 560, className = '', draggable = false }: DialogPanelProps) {
+export function DialogPanel({ overlayId, children, title, description, footer, onClose, width = 560, className = '', draggable = false, headerArtwork }: DialogPanelProps) {
   const panelRef = useRef<HTMLElement>(null)
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const dragStartRef = useRef<{ pointerId: number; pointerX: number; pointerY: number; rect: DOMRect; bounds: DOMRect; scaleX: number; scaleY: number; x: number; y: number } | null>(null)
@@ -178,7 +179,7 @@ export function DialogPanel({ overlayId, children, title, description, footer, o
   return <div className="windows-dialog-overlay" data-overlay={overlayId}>
     <section ref={panelRef} className={`windows-dialog-panel ${className}`.trim()} style={{ width, ...(draggable ? { transform: `translate3d(${dragPosition.x}px, ${dragPosition.y}px, 0)` } : {}) }} role="dialog" aria-modal="true" aria-labelledby={title ? `${overlayId}-title` : undefined}>
       {(title || onClose) && <header className={`windows-dialog-panel__header${draggable ? ' is-draggable' : ''}`} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp}>
-        <div>{title && <h2 id={`${overlayId}-title`}>{title}</h2>}{description && <p>{description}</p>}</div>
+        <div>{headerArtwork}{title && <h2 id={`${overlayId}-title`}>{title}</h2>}{description && <p>{description}</p>}</div>
         {onClose && <button type="button" className="windows-icon-button" aria-label="关闭弹窗" onClick={onClose}><X size={16} /></button>}
       </header>}
       {children != null && <div className="windows-dialog-panel__content">{children}</div>}

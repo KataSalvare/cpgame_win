@@ -20,6 +20,8 @@ import { type BlockedProfile } from '../data/personalSettingsMockData'
 import { currentWealthLevel, currentWealthValue, wealthLevels } from '../data/personalWealthLevelMockData'
 import { navigateToProfileSection, type ProfileSection } from '../profileNavigation'
 import { ImageLightbox } from '../components/ImageLightbox'
+import companionOnboardingArt from '../assets/onboarding-companion.webp'
+import clubOnboardingArt from '../assets/onboarding-club.webp'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
 type CenterSection = ProfileSection | 'gifts'
@@ -205,8 +207,8 @@ export function PersonalCenterPage({ pageState, initialSection, initialRecruitme
         </section>}
         {section === 'onboarding' && (recruitmentOpen ? <CompanionOnboarding balance={diamondBalance} onBack={() => setRecruitmentOpen(false)} onChat={onAssessmentChat} onRecharge={onAssessmentRecharge} onPay={onAssessmentPay} onSubmitted={(submission) => { onSubmitOnboarding(submission); setRecruitmentOpen(false); setFeedback('支付成功，入驻申请已提交') }} /> : <section className="personal-module">
           <div className="onboarding-card-grid">
-            <OnboardingCard icon={<UserRound size={20} />} title="陪玩入驻" description="选择俱乐部与游戏，报名入驻考核。" submitted={false} onApply={() => { navigateToProfileSection('onboarding', 'companion'); setRecruitmentOpen(true) }} />
-            <OnboardingCard icon={<Building2 size={20} />} title="俱乐部入驻" description="提交俱乐部资料，申请在平台展示和招募成员。" submitted={applicationSubmitted.club} onApply={() => { navigateToProfileSection('onboarding', 'club'); setApplicationKind('club'); setClubApplication(emptyClubApplication) }} />
+            <OnboardingCard art={companionOnboardingArt} icon={<UserRound size={20} />} title="陪玩入驻" description="选择俱乐部与游戏，报名入驻考核。" submitted={false} onApply={() => { navigateToProfileSection('onboarding', 'companion'); setRecruitmentOpen(true) }} />
+            <OnboardingCard art={clubOnboardingArt} icon={<Building2 size={20} />} title="俱乐部入驻" description="提交俱乐部资料，申请在平台展示和招募成员。" submitted={applicationSubmitted.club} onApply={() => { navigateToProfileSection('onboarding', 'club'); setApplicationKind('club'); setClubApplication(emptyClubApplication) }} />
           </div>
           <OnboardingApplicationRecords records={onboardingApplications} />
           {feedback && <FeedbackMessage>{feedback}</FeedbackMessage>}
@@ -457,7 +459,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
   const footer = view === 'overview' ? null : view === 'closure-complete'
       ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button>
       : view === 'devices' || view === 'real-name'
-      ? <button type="button" className="client-button client-button--secondary" onClick={() => { backToOverview(); if (view === 'real-name') onBackFromRealName() }}>返回</button>
+      ? <button type="button" className="client-button client-button--primary personal-security-back" onClick={() => { backToOverview(); if (view === 'real-name') onBackFromRealName() }}>返回</button>
       : view === 'phone'
         ? <><button type="button" className="client-button client-button--secondary" onClick={backToOverview}>返回</button><button type="submit" form="personal-phone-form" className="client-button client-button--primary">确认更换</button></>
         : view === 'closure-terms'
@@ -487,7 +489,7 @@ function BlacklistDialog({ profiles, onRemove, onClose }: { profiles: BlockedPro
   const [removedId, setRemovedId] = useState<string | null>(null)
   const [profileToRemove, setProfileToRemove] = useState<BlockedProfile | null>(null)
   const visibleProfiles = profiles.filter((profile) => profile.id !== removedId)
-  return <DialogPanel overlayId="profile-blacklist-dialog" title="黑名单" onClose={onClose} width={560} footer={<button type="button" className="client-button client-button--secondary" onClick={onClose}>完成</button>}>
+  return <DialogPanel overlayId="profile-blacklist-dialog" title="黑名单" onClose={onClose} width={560}>
     {visibleProfiles.length ? <div className="personal-blacklist-list">{visibleProfiles.map((profile) => <article key={profile.id}><AvatarMark initials={profile.initials} size="sm" /><div><strong><UserNameWithLevel name={profile.name} identityId={profile.profileId} /></strong><small>{profile.profileId}</small></div><button type="button" className="client-button client-button--secondary" onClick={() => setProfileToRemove(profile)}>移除</button></article>)}</div> : <div className="personal-blacklist-empty"><Shield size={24} /><strong>黑名单为空</strong><span>被拉黑的玩家和陪玩会显示在这里</span></div>}
     {profileToRemove && <ConfirmationDialog overlayId="profile-blacklist-remove-confirm" title="移除黑名单" message={`确定将「${profileToRemove.name}」移出黑名单吗？`} confirmLabel="确认移除" onCancel={() => setProfileToRemove(null)} onConfirm={() => { onRemove(profileToRemove.id); setRemovedId(profileToRemove.id); setProfileToRemove(null) }} />}
   </DialogPanel>
@@ -525,8 +527,8 @@ function BalanceMini({ icon, label, value }: { icon: ReactNode; label: string; v
   return <div className="account-balance-mini"><span>{icon}{label}</span><strong>{value.toLocaleString()}</strong></div>
 }
 
-function OnboardingCard({ icon, title, description, submitted, onApply }: { icon: ReactNode; title: string; description: string; submitted: boolean; onApply: () => void }) {
-  return <article className="client-card onboarding-card"><span className="onboarding-card__icon">{icon}</span><div><div className="personal-card-title"><h3>{title}</h3>{submitted && <span className="personal-status"><BadgeCheck size={13} />已提交</span>}</div><p>{description}</p></div><button type="button" className="client-button client-button--primary" onClick={onApply}>{submitted ? '再次申请' : '开始申请'}<ChevronRight size={15} /></button></article>
+function OnboardingCard({ art, icon, title, description, submitted, onApply }: { art: string; icon: ReactNode; title: string; description: string; submitted: boolean; onApply: () => void }) {
+  return <article className="client-card onboarding-card"><img className="onboarding-card__art" src={art} alt="" /><span className="onboarding-card__icon">{icon}</span><div><div className="personal-card-title"><h3>{title}</h3>{submitted && <span className="personal-status"><BadgeCheck size={13} />已提交</span>}</div><p>{description}</p></div><button type="button" className="client-button client-button--primary" onClick={onApply}>{submitted ? '再次申请' : '开始申请'}<ChevronRight size={15} /></button></article>
 }
 
 function ApplicationSection({ title, children }: { title: string; children: ReactNode }) {

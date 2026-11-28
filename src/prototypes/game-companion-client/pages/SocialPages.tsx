@@ -33,6 +33,12 @@ import chatEmojiIcon from '../assets/chat-emoji.webp'
 import chatQuickReplyIcon from '../assets/chat-quick-reply.webp'
 import '../social.css'
 
+const emojiAssets = Object.entries(import.meta.glob<string>('../assets/emoji/*.png', { eager: true, query: '?url', import: 'default' }))
+  .map(([path, url]) => ({ id: path.split('/').pop()!.replace(/\.png$/, ''), url }))
+  .sort((a, b) => a.id.localeCompare(b.id, 'zh-CN'))
+const emojiAssetById = new Map(emojiAssets.map((emoji) => [emoji.id, emoji.url]))
+const emojiLabel = (id: string) => id.replace(/@3x(?:-\d+)?$/, '')
+
 type SocialLogic = ReturnType<typeof useSocialLogic>
 type VoiceRoomOption = SocialLogic['voiceRooms'][number]
 type VoiceMemberAction = 'mute' | 'remove' | 'block' | 'role'
@@ -364,7 +370,7 @@ export function MessagesPage({ logic, orders, pageState, onRetry, onOrder, onOpe
           {replyTarget && <ReplyPreview message={replyTarget} onCancel={() => setReplyTarget(null)} />}
           {quickRepliesOpen && <QuickReplyMenu className="chat-quick-replies" onSelect={sendQuickReply} />}
           {voiceRecordingOpen && <VoiceRecordingPanel onCancel={() => setVoiceRecordingOpen(false)} onSendVoice={(duration) => { logic.sendChatMessage('voice', '语音消息', duration, replyTarget ? replySnapshot(replyTarget) : undefined); setReplyTarget(null); setVoiceRecordingOpen(false) }} onTranscribe={() => { setDraft((value) => `${value}${value ? '\n' : ''}这是一段语音转文字示例。`); setVoiceRecordingOpen(false) }} />}
-          {emojiOpen && <div className="emoji-picker" role="group" aria-label="选择表情">{['😀', '😊', '😂', '👍', '🎮', '🎉', '❤️', '🙌'].map((emoji) => <button type="button" key={emoji} onClick={() => logic.sendChatMessage('emoji', emoji)} aria-label={`发送${emoji}`}>{emoji}</button>)}</div>}
+          {emojiOpen && <div className="emoji-picker emoji-picker--library" role="group" aria-label="选择表情">{emojiAssets.map((emoji) => <button type="button" key={emoji.id} onClick={() => { logic.sendChatMessage('emoji', emoji.id); setEmojiOpen(false) }} aria-label={`发送${emojiLabel(emoji.id)}`} title={emojiLabel(emoji.id)}><img src={emoji.url} alt="" /></button>)}</div>}
           <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleEnter} placeholder={`发送消息给 ${conversation.title}…`} aria-label="消息内容" />
           <div className="chat-composer__toolbar">
             <div className="chat-composer__tools">
@@ -1287,7 +1293,7 @@ export function VoiceRoomsPage({ logic, pageState, onRetry, onOrder, onExitVoice
       </ConfirmationDialog>}
       {leaveDialogOpen && <ConfirmationDialog overlayId="voice-leave-options" title="退出语音房" message="退出房间后将断开语音连接，确定退出吗？" confirmLabel="退出房间" onCancel={() => setLeaveDialogOpen(false)} onConfirm={() => { logic.leaveVoice(); setLeaveDialogOpen(false); onExitVoice() }} />}
 
-      <RoomChatPanel hidden={Boolean(selectedProfile)} collapsed={roomChatCollapsed} userPerspective={userPerspective} onToggleCollapsed={() => setRoomChatCollapsed((value) => !value)} messages={logic.roomMessages} onRecallMessage={logic.recallRoomMessage} onSend={(kind, text, duration, replyTo) => logic.sendRoomMessage(kind, text, duration, replyTo)} onOpenProfile={openMemberProfile} onAvatarContextMenu={openMemberContextMenu} onOpenGift={(anchor) => onOpenGift(activeStageMembers.filter((member) => member.id !== currentSocialUser.id).map((member) => ({ id: member.id, name: member.name, initials: member.initials, profileId: socialFriends.find((friend) => friend.id === member.id)?.profileId })), undefined, anchor)} members={room?.channels.flatMap((subchannel) => subchannel.members) ?? []} />
+      <RoomChatPanel collapsed={roomChatCollapsed} userPerspective={userPerspective} onToggleCollapsed={() => setRoomChatCollapsed((value) => !value)} messages={logic.roomMessages} onRecallMessage={logic.recallRoomMessage} onSend={(kind, text, duration, replyTo) => logic.sendRoomMessage(kind, text, duration, replyTo)} onOpenProfile={openMemberProfile} onAvatarContextMenu={openMemberContextMenu} onOpenGift={(anchor) => onOpenGift(activeStageMembers.filter((member) => member.id !== currentSocialUser.id).map((member) => ({ id: member.id, name: member.name, initials: member.initials, profileId: socialFriends.find((friend) => friend.id === member.id)?.profileId })), undefined, anchor)} members={room?.channels.flatMap((subchannel) => subchannel.members) ?? []} />
       {selectedProfile && <aside className="social-profile-panel voice-profile-panel theme-side-surface" aria-label={`${selectedProfile.name}陪玩详情`}>
         {!selectedProfileCard && <header><h2><UserNameWithLevel name={selectedProfile.name} identityId={selectedProfile.id} /></h2><button type="button" className="windows-icon-button" aria-label="关闭陪玩详情" onClick={() => setVoiceProfileId(null)}><X size={17} /></button></header>}
         {linkedCompanion && selectedProfileCard ? <CompanionDetailPage
@@ -1447,7 +1453,7 @@ export function ClubSupportSelectionDialog({ onClose, onConsult }: { onClose: ()
         <AvatarMark initials={staff.initials} size="md" />
         <div className="club-support-staff__info"><strong>{staff.name}</strong><span>工作时间：{staff.hours}</span></div>
         {staff.available
-          ? <GlassButton onClick={onConsult}>咨询</GlassButton>
+          ? <GlassButton variant="primary" onClick={onConsult}>咨询</GlassButton>
           : <GlassButton disabled={messageSentTo === staff.id} onClick={() => setMessageSentTo(staff.id)}>{messageSentTo === staff.id ? '已留言' : '留言'}</GlassButton>}
       </article>)}
       {messageSentTo && <p className="club-support-message-status" role="status">已留言（仅演示）</p>}
@@ -1533,7 +1539,7 @@ export function ClubSupportChatPanel({ conversation, orders, onClose, onExpand, 
   </section>
 }
 
-function RoomChatPanel({ messages, onSend, onRecallMessage, hidden = false, collapsed = false, onToggleCollapsed, onOpenProfile, onAvatarContextMenu, onOpenGift, members = [], userPerspective = false }: { messages: SocialMessage[]; onRecallMessage: (messageId: string) => boolean; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => boolean; hidden?: boolean; collapsed?: boolean; onToggleCollapsed?: () => void; onOpenProfile?: (memberId: string) => void; onAvatarContextMenu?: (event: ReactMouseEvent, member: VoiceMember) => void; onOpenGift: (anchor: HTMLButtonElement) => void; members?: VoiceMember[]; userPerspective?: boolean }) {
+function RoomChatPanel({ messages, onSend, onRecallMessage, collapsed = false, onToggleCollapsed, onOpenProfile, onAvatarContextMenu, onOpenGift, members = [], userPerspective = false }: { messages: SocialMessage[]; onRecallMessage: (messageId: string) => boolean; onSend: (kind: ChatMessageKind, content: string, duration?: number, replyTo?: SocialMessage['replyTo']) => boolean; collapsed?: boolean; onToggleCollapsed?: () => void; onOpenProfile?: (memberId: string) => void; onAvatarContextMenu?: (event: ReactMouseEvent, member: VoiceMember) => void; onOpenGift: (anchor: HTMLButtonElement) => void; members?: VoiceMember[]; userPerspective?: boolean }) {
   const [draft, setDraft] = useState('')
   const [playingMessage, setPlayingMessage] = useState<string | null>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
@@ -1551,7 +1557,7 @@ function RoomChatPanel({ messages, onSend, onRecallMessage, hidden = false, coll
   const send = () => { if (draft.trim() && submitMessage('text', draft.trim(), undefined, replyTarget ? replySnapshot(replyTarget) : undefined)) { setDraft(''); setReplyTarget(null) } }
   const sendQuickReply = (text: string) => { if (submitMessage('text', text, undefined, replyTarget ? replySnapshot(replyTarget) : undefined)) { setReplyTarget(null); setQuickRepliesOpen(false) } }
   const enter = (event: KeyboardEvent<HTMLTextAreaElement>) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); send() } }
-  return <section className={`room-chat-panel${collapsed ? ' is-collapsed' : ''}`} aria-label="房间聊天" hidden={hidden}>
+  return <section className={`room-chat-panel${collapsed ? ' is-collapsed' : ''}`} aria-label="房间聊天">
     <header><div><h2><MessageCircle size={16} />房间聊天</h2></div><button type="button" className="windows-icon-button" onClick={onToggleCollapsed} aria-label={collapsed ? "展开聊天面板" : "折叠聊天面板"} title={collapsed ? "展开聊天面板" : "折叠聊天面板"}>{collapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}</button></header>
     <div className="room-chat-panel__announcement" role="note">官方倡导绿色互动，请勿发布违法、低俗、暴力、广告等内容，禁止违规交易，违规者将被封禁帐号。</div>
     <div className="room-chat-panel__messages">{messages.map((message) => {
@@ -1585,7 +1591,7 @@ export function ChatMessage({ message, selfId = currentSocialUser.id, identityMo
       {message.kind === 'support-review' && message.review && <div className={`social-message-card support-review-card${message.review.submitted ? " is-submitted" : ""}`} aria-label="客服评价消息"><header><Star size={17} /><strong>客服评价</strong>{message.review.submitted && <span>已评价</span>}</header><div className="social-message-card__content"><strong>{message.review.support}</strong><div className="social-message-card__stars" role="group" aria-label="客服评分">{Array.from({ length: 5 }, (_, index) => <button type="button" key={index} disabled={message.review!.submitted || !onReviewChange} aria-label={`${index + 1} 星`} aria-pressed={index < message.review!.rating} onClick={() => onReviewChange?.(index + 1, false)}><Star size={22} fill={index < message.review!.rating ? 'currentColor' : 'none'} /></button>)}{message.review.rating > 0 && <span>{message.review.rating} 分</span>}</div>{message.review.submitted ? <p role="status">评价完成，感谢您的反馈</p> : message.review.rating > 0 && <button type="button" className="client-button client-button--primary" onClick={() => onReviewChange?.(message.review!.rating, true)}>确认评价</button>}</div></div>}
       {message.recalled ? <p className="social-message__text social-message__text--recalled" role="status">消息已撤回</p> : message.kind === 'text'  && <p className="social-message__text">{message.content}</p>}
       {!message.recalled && message.kind === 'gift' && message.gift && <div className="social-message__gift" aria-label={`${message.gift.name}，${message.gift.quantity} 个`}><span className="social-message__gift-default"><GiftIcon size={38} strokeWidth={1.5} aria-hidden="true" /></span><span className="social-message__gift-rose" aria-hidden="true">🌹</span><span>×{message.gift.quantity}</span></div>}
-      {message.kind === 'emoji' && <p className="social-message__emoji" aria-label="表情消息">{message.content}</p>}
+      {message.kind === 'emoji' && <p className="social-message__emoji" aria-label="表情消息">{emojiAssetById.has(message.content) ? <img src={emojiAssetById.get(message.content)} alt={emojiLabel(message.content)} /> : message.content}</p>}
       {message.kind === 'image' && <div className="social-message__image"><ImagePlus size={20} /><span>{message.content}</span></div>}
       {message.kind === 'voice' && <button type="button" className="social-message__voice" onClick={onTogglePlay} aria-pressed={playing} aria-label={`${playing ? '暂停' : '播放'}语音消息`}><span>{playing ? <VolumeX size={16} /> : <Play size={15} />}</span><i className={playing ? 'is-playing' : ''} /><b>{message.duration ?? 5}″</b>{playing ? <Pause className="social-message__voice-symbol" size={17} aria-hidden="true" /> : <Volume2 className="social-message__voice-symbol" size={17} aria-hidden="true" />}<small>{playing ? '播放中' : '语音消息'}</small></button>}
     </div>
@@ -1682,7 +1688,7 @@ async function copyMessage(message: SocialMessage, setFeedback: (value: string) 
 }
 
 function ReplyPreview({ message, onCancel }: { message: SocialMessage; onCancel: () => void }) {
-  const preview = message.kind === 'image' ? '[图片]' : message.kind === 'voice' ? '[语音消息]' : message.content
+  const preview = messagePreview(message)
   return <div className="message-reply-preview"><div><span>回复：{preview}</span></div><button type="button" aria-label="取消回复" onClick={onCancel}><X size={15} /></button></div>
 }
 
@@ -1708,6 +1714,7 @@ function ConversationContextMenu({ conversation, point, onClose, onAction }: { c
 function messagePreview(message: SocialMessage) {
   if (message.kind === 'image') return '[图片]'
   if (message.kind === 'voice') return '[语音消息]'
+  if (message.kind === 'emoji' && emojiAssetById.has(message.content)) return `[表情] ${emojiLabel(message.content)}`
   return message.content
 }
 
