@@ -1531,6 +1531,9 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .premium-topup-dialog > footer { gap: 8px; }
 .premium-topup-dialog > footer .client-button:disabled { border-color: var(--prototype-border, #e5e7eb); background: var(--prototype-canvas, #f3f4f6); color: var(--prototype-text-subtle, #9ca3af); cursor: not-allowed; }
 .game-companion-client .windows-titlebar__actions { margin-right: 8px; }
+.game-companion-client .windows-titlebar { padding-left: 24px; }
+.game-companion-client .windows-titlebar__identity { gap: 10px; font-size: 18px; font-weight: 700; }
+.game-companion-client .windows-titlebar__identity > svg { width: 22px; height: 22px; flex: 0 0 auto; }
 .game-companion-client .windows-titlebar__actions + .windows-control-buttons { margin-left: 0; }
 .companion-detail-page--panel { box-sizing: border-box; width: 100%; min-height: 100%; flex: 0 0 auto; gap: 14px; margin: 0; padding: 0 20px 16px; }
 .companion-detail-page--panel { min-height: 100%; }
