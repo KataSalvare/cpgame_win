@@ -17,8 +17,10 @@
 .conversation-filter button{min-height:28px;border:1px solid transparent;border-radius:5px;padding:0 9px;background:transparent;color:var(--prototype-text-muted, #6b7280);font:inherit;font-size:14px;cursor:pointer}
 .conversation-filter button:hover,.conversation-filter button.is-active{border-color:var(--prototype-border, #e5e7eb);background:var(--prototype-surface, #fff);color:var(--client-text)}
 .conversation-filter button.is-active{font-weight:600}
-.conversation-create-group{display:flex;width:calc(100% - 24px);min-height:32px;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--prototype-border-strong, #d1d5db);border-radius:6px;margin:0 12px 9px;background:var(--prototype-surface, #fff);color:var(--prototype-text-secondary, #4b5563);font:inherit;font-size:12px;cursor:pointer}
-.conversation-create-group:hover{border-color:var(--prototype-text-subtle, #9ca3af);background:var(--prototype-surface-muted, #f9fafb);color:var(--client-text)}
+.conversation-create-group{display:flex;width:calc(100% - 24px);min-height:44px;align-items:center;justify-content:center;gap:6px;border:0;border-radius:999px;margin:0 12px 9px;background:var(--prototype-surface, #fff);color:var(--client-text);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.conversation-create-group:hover{background:var(--prototype-surface-muted, #f9fafb)}
+[data-prototype-palette="high-fidelity"] .conversation-create-group{background:linear-gradient(160deg,#ffe764,#ffd60a 68%,#f9bd24);color:#292200;box-shadow:0 3px 8px rgb(153 111 0 / 15%)}
+[data-prototype-palette="high-fidelity"] .conversation-create-group:hover{background:#ffca00}
 .social-unread-count{display:inline-grid;min-width:18px;height:18px;place-items:center;border-radius:9px;padding:0 5px;background:var(--prototype-primary, #374151);color:var(--prototype-on-primary, var(--prototype-surface, #fff));font-size:12px;font-weight:600}
 .conversation-list,.social-friend-list{min-height:0;flex:1 1 auto;overflow:auto;padding:0 8px 12px}
 .conversation-row{display:flex;width:100%;min-height:68px;align-items:center;gap:10px;border:0;border-radius:7px;padding:8px;background:transparent;color:var(--client-text);text-align:left;cursor:pointer}
@@ -778,9 +780,9 @@
 /* 消息页中的头像统一尺寸。 */
 .game-companion-client .messages-page .client-avatar,
 .game-companion-client .messages-page .social-profile-panel .companion-profile-card > .client-avatar,
-.game-companion-client .messages-page .social-profile-panel .companion-profile-card--immersive > .client-avatar--xl,
 [data-prototype-palette="high-fidelity"] .messages-page .companion-share-message header > .client-avatar,
 [data-prototype-palette="high-fidelity"] .messages-page .voice-room-share-message header > .client-avatar { width: 40px; height: 40px; flex: 0 0 40px; font-size: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .messages-page .social-profile-panel .companion-profile-card--immersive > .client-avatar--xl { width: 100px; height: 100px; flex-basis: 100px; font-size: 28px; }
 .game-companion-client .messages-page .social-message__avatar { width: 40px; height: 40px; }
 .game-companion-client .messages-page .conversation-row .fixed-notification-icon { width: 40px; height: 40px; flex: 0 0 40px; }
 
@@ -926,7 +928,7 @@
 [data-prototype-palette="high-fidelity"] .voice-page .voice-seat.is-speaking { box-shadow: inset 0 0 0 2px #ffd60a; }
 [data-prototype-palette="high-fidelity"] .voice-page .voice-seat__empty { border: 0; background: #dfe2eb; }
 [data-prototype-palette="high-fidelity"] .voice-page :is(.voice-members-entry, .voice-mode-trigger, .voice-more-trigger, .voice-create-group-entry, .voice-owner-card__support) { border: 0; background: #fff; }
-[data-prototype-palette="high-fidelity"] .voice-page .room-chat-panel__announcement { margin: 0 12px; border-radius: 8px; background: #e9ebf3; }
+[data-prototype-palette="high-fidelity"] .voice-page .room-chat-panel__announcement { margin: 0 12px; border-radius: 8px; background: #d9363e; color: #fff; }
 [data-prototype-palette="high-fidelity"] .voice-page .room-chat-panel__messages :is(.social-message__text:not(.social-message__text--recalled), .social-message__image, .social-message__gift, .social-message__voice) { border: 0; border-radius: 8px; background: #fff; color: #1d2129; }
 [data-prototype-palette="high-fidelity"] .voice-page .room-chat-panel__messages .social-message.is-self .social-message__voice { background: #ffd60a; }
 [data-prototype-palette="high-fidelity"] .voice-page .room-chat-system-notice { background: #e9ebf3; }

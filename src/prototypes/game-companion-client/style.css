@@ -89,6 +89,7 @@
 .gc-login-agreement input:focus-visible + .gc-login-checkbox { outline: 2px solid var(--prototype-text-muted, #6b7280); outline-offset: 2px; }
 .gc-login-agreement button { border: 0; padding: 0; background: transparent; color: var(--prototype-text-secondary, #374151); font: inherit; font-size: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .gc-login-dialog-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; background: rgba(31, 41, 55, .32); padding: 24px; }
+.gc-login-agreement-overlay > .windows-dialog-overlay { position: fixed; z-index: 1000; inset: 0; }
 .gc-login-dialog { width: min(480px, 100%); border: 1px solid var(--prototype-border, #e5e7eb); border-radius: 8px; background: var(--prototype-surface, #fff); padding: 24px; box-shadow: 0 8px 24px rgba(17, 24, 39, .12); }
 .gc-login-dialog header { display: flex; align-items: center; justify-content: space-between; }
 .gc-login-dialog h2 { margin: 0; font-size: 18px; font-weight: 600; }
@@ -1687,10 +1688,12 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .match-club-option > strong { display: -webkit-box; overflow: hidden; font-size: 12px; font-weight: 600; line-height: 1.35; text-overflow: ellipsis; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .match-club-empty { grid-column: 1 / -1; margin: 0; border: 1px dashed var(--client-border); border-radius: 6px; padding: 12px; color: var(--client-muted); font-size: 12px; font-weight: 400; text-align: center; }
 .match-field > span:first-child, .match-field--fieldset legend { padding: 0; color: var(--prototype-text-secondary, #4b5563); font-size: 12px; font-weight: 600; }
+.match-field__required { color: #d9363e; }
 .match-field textarea { width: 100%; min-width: 0; min-height: 36px; border: 1px solid var(--client-border); border-radius: 6px; padding: 7px 10px; background: var(--prototype-surface, #fff); color: var(--client-text); font: inherit; font-size: 12px; outline: none; }
 .match-service-field { position: relative; }
 .match-service-trigger { display: flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--client-border); border-radius: 6px; padding: 7px 10px; background: var(--prototype-surface, #fff); color: var(--client-text); font: inherit; font-size: 12px; font-weight: 400; text-align: left; cursor: pointer; }
 .match-service-trigger:hover, .match-service-trigger[aria-expanded="true"] { border-color: var(--prototype-text-subtle, #9ca3af); }
+.match-service-trigger[aria-invalid="true"] { border: 1px solid #d9363e; }
 .match-service-trigger > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .match-service-trigger svg { flex: 0 0 auto; color: var(--client-muted); transition: transform .18s ease; }
 .match-service-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
@@ -1777,6 +1780,8 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .match-dialog--notice > header { align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--client-border); }
 .match-notice-tabs { display: flex; gap: 8px; padding: 12px 18px 0; background: var(--prototype-surface-muted, #f9fafb); }
 .match-notice-tabs button { min-width: 136px; min-height: 36px; border: 1px solid var(--prototype-border-strong, #d1d5db); border-radius: 999px; padding: 0 14px; background: transparent; color: var(--client-muted); font: inherit; font-size: 14px; cursor: pointer; }
+.theme-notice-dialog :is(.match-notice-tabs, .checkout-notice__tabs, .club-info-tabs) { overflow-x: auto; }
+.theme-notice-dialog :is(.match-notice-tabs, .checkout-notice__tabs, .club-info-tabs) button { min-width: 0; flex: 1 0 auto; padding-inline: 10px; white-space: nowrap; }
 .match-notice-tabs button[aria-selected="true"] { border-color: var(--prototype-primary, #374151); background: var(--prototype-primary, #374151); color: var(--prototype-on-primary, #fff); }
 .match-notice-tabs button:focus-visible, .match-notice-remember input:focus-visible { outline: 2px solid var(--prototype-focus, #6b7280); outline-offset: 2px; }
 .match-notice-panel { min-height: 250px; overflow: auto; padding: 18px; }

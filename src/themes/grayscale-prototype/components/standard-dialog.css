@@ -1,0 +1,33 @@
+/* Standard dialogs in high-fidelity mode; confirmation and branded identity flows retain their own designs. */
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) {
+  overflow: hidden;
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(33 27 14 / 22%);
+}
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__header {
+  position: relative;
+  min-height: 92px;
+  align-items: center;
+  border: 0;
+  padding: 22px 26px;
+  background: radial-gradient(ellipse at 90% 8%, #fff4ad, transparent 55%), linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5);
+}
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__header h2 { color: #1d2129; font-size: 20px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__header p { color: #596678; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__header > .windows-icon-button { flex: 0 0 auto; border-radius: 50%; background: rgb(255 255 255 / 65%); color: #353a43; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__content { position: relative; min-height: 0; overflow-y: auto; border-radius: 18px 18px 0 0; margin-top: -10px; padding: 24px 26px 16px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer { gap: 10px; border: 0; padding: 10px 26px 24px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"]), textarea, select) { border: 0; border-radius: 10px; background-color: #f2f3f9; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) :is(input, textarea, select):focus-visible { outline: 2px solid #a78500; outline-offset: 2px; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer .client-button { min-height: 40px; border: 0; border-radius: 999px; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer .client-button--primary { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer .client-button--secondary { background: #f1f2f7; color: #434c59; }
+/* Immersive previews and chat windows have their own content sizing. */
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:is(.club-info-dialog, .club-admin-preview-dialog, .client-support-dialog-panel) > .windows-dialog-panel__content { padding: 0; }
+/* The primary action fills the remaining width, as in the reference form. */
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer { justify-content: stretch; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer .client-button { min-width: 0; padding-inline: 18px; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer .client-button--primary { flex: 1 1 0; }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel:not(.grayscale-confirmation-dialog, .identity-flow-dialog) > .windows-dialog-panel__footer .client-button:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }

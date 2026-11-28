@@ -1,3 +1,4 @@
+import { NoticeDialog } from '@/themes/grayscale-prototype/components/NoticeDialog'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { GenderAgeBadge } from '../components/GenderAgeBadge'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -482,10 +483,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
     </div>
     {checkoutDialog === 'recharge' && !hideRechargePrompt && <ConfirmationDialog overlayId="checkout-recharge-confirmation" title="金豆余额不足" message={<>当前金豆余额不足，还差 <strong>{(amount - diamondBalance).toLocaleString()}</strong> 金豆，是否前去购买？</>} cancelLabel="稍后再说" confirmLabel="去购买" onCancel={() => setCheckoutDialog(null)} onConfirm={() => { setCheckoutDialog(null); onOpenWallet() }} />}
     {checkoutDialog === 'payment' && <ConfirmationDialog overlayId="checkout-payment-confirmation" title="确认支付" message={<>本单将使用<strong>{selectedPaymentCard?.name ?? '金豆钱包'}</strong>支付，支付金额<strong>{amount.toLocaleString()}</strong>金豆</>} cancelLabel="再想想" confirmLabel="确认支付" onCancel={() => setCheckoutDialog(null)} onConfirm={() => { setCompletedOrderId(onComplete(quantity, amount, remark, checkoutCompanions, tipAmount, selectedPaymentCard ? 'premium-card' : 'wallet', selectedPaymentCard?.id)); setCheckoutDialog(null) }} />}
-    {checkoutDialog === 'notice' && <div className="order-action-overlay checkout-confirm-overlay" data-overlay="checkout-order-notice" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setCheckoutDialog(null) }}>
-      <section className="order-action-dialog checkout-order-notice-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-confirm-title">
-        <header><h2 id="checkout-confirm-title">点单须知</h2><button type="button" className="order-action-dialog__close" aria-label="关闭确认弹窗" onClick={() => setCheckoutDialog(null)}><X size={17} /></button></header>
-        <div className="checkout-notice">
+    {checkoutDialog === 'notice' && <NoticeDialog overlayId="checkout-order-notice" title="下单须知" onClose={() => setCheckoutDialog(null)} confirmLabel="同意并继续" reminder={{ checked: skipNoticeForSession, onChange: setSkipNoticeForSession }} onConfirm={() => { if (skipNoticeForSession) { sessionStorage.setItem('checkout-order-notice-skipped', 'true'); setNoticeSkipped(true) } setCheckoutDialog('payment') }}>
           <div className="checkout-notice__tabs" role="tablist" aria-label="点单须知分类">
             <button type="button" role="tab" aria-selected={noticeTab === 'club'} className={noticeTab === 'club' ? 'is-active' : ''} onClick={() => setNoticeTab('club')}>俱乐部介绍</button>
             <button type="button" role="tab" aria-selected={noticeTab === 'service'} className={noticeTab === 'service' ? 'is-active' : ''} onClick={() => setNoticeTab('service')}>服务说明</button>
@@ -494,10 +492,7 @@ export function CheckoutPage({ pageState, onRetry, orderService, orderSelectionM
             <p>{noticeTab === 'club' ? '俱乐部介绍内容待补充。' : '服务项目与实际价格请以陪玩资料为准。'}</p>
             <div className="checkout-notice__placeholder" role="img" aria-label="内容图片占位"><span /><i /><b /></div>
           </div>
-          <footer><label className="checkout-notice__skip"><input type="checkbox" checked={skipNoticeForSession} onChange={(event) => setSkipNoticeForSession(event.target.checked)} />不再提醒</label><button type="button" className="client-button client-button--primary" onClick={() => { if (skipNoticeForSession) { sessionStorage.setItem('checkout-order-notice-skipped', 'true'); setNoticeSkipped(true) } setCheckoutDialog('payment') }}>同意并继续</button></footer>
-        </div>
-      </section>
-    </div>}
+    </NoticeDialog>}
   </div>
 }
 
@@ -645,7 +640,6 @@ function OrderActionConfirmationDialog({ order, action, onClose, onUpdateStatus,
 }
 
 function OrderRenewDialog({ order, diamondBalance, onClose, onOpenRecharge, onRenewOrder }: { order: ClientOrder; diamondBalance: number; onClose: () => void; onOpenRecharge: () => void; onRenewOrder: (orderId: string, quantity: number) => boolean }) {
-  const dialogRef = useOrderDialogFocus(onClose)
   const [quantity, setQuantity] = useState(1)
   const [result, setResult] = useState<'form' | 'insufficient' | 'success'>('form')
   const [successSummary, setSuccessSummary] = useState<{ duration: number; amount: number } | null>(null)
@@ -653,37 +647,25 @@ function OrderRenewDialog({ order, diamondBalance, onClose, onOpenRecharge, onRe
   const updatedDuration = order.duration + quantity
   const updatedAmount = order.amount + amount
 
-  useEffect(() => {
-    dialogRef.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus()
-  }, [dialogRef, result])
-
   if (result === 'insufficient') return <ConfirmationDialog overlayId="order-renew-recharge-confirmation"
     title="金豆余额不足" message={<>当前金豆余额 {diamondBalance.toLocaleString()}，续单需要 {amount.toLocaleString()}，还差 <strong>{Math.max(0, amount - diamondBalance).toLocaleString()} 金豆</strong>。打开购买弹窗补充余额吗？</>} cancelLabel="稍后再说" confirmLabel="去购买"
     onCancel={() => setResult('form')} onConfirm={onOpenRecharge} />
 
-  if (result === 'success') return <div className="order-action-overlay" data-overlay="order-renew-success" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
-    <section ref={dialogRef} className="order-action-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-renew-success-title">
-      <header><h2 id="order-renew-success-title">续单成功</h2><button type="button" className="order-action-dialog__close" aria-label="关闭续单结果" onClick={onClose}><X size={17} /></button></header>
-      <p>已续 {quantity} {order.durationUnit}，支付 {amount.toLocaleString()} 金豆。订单总时长更新为 {successSummary?.duration ?? updatedDuration} {order.durationUnit}，订单总价为 {(successSummary?.amount ?? updatedAmount).toLocaleString()} 金豆。</p>
-      <footer><button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button></footer>
-    </section>
-  </div>
+  if (result === 'success') return <ConfirmationDialog overlayId="order-renew-success" title="续单成功"
+    message={<>已续 {quantity} {order.durationUnit}，支付 {amount.toLocaleString()} 金豆。订单总时长更新为 {successSummary?.duration ?? updatedDuration} {order.durationUnit}，订单总价为 {(successSummary?.amount ?? updatedAmount).toLocaleString()} 金豆。</>}
+    confirmLabel="完成" onConfirm={onClose} />
 
-  return <div className="order-action-overlay" data-overlay="order-renew" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
-    <section ref={dialogRef} className="order-action-dialog order-renew-dialog" tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="order-renew-title">
-      <header><h2 id="order-renew-title">续单</h2><button type="button" className="order-action-dialog__close" aria-label="关闭续单" onClick={onClose}><X size={17} /></button></header>
+  return <ConfirmationDialog overlayId="order-renew" title="续单" cancelLabel="取消" confirmLabel="支付并续单" onCancel={onClose} onConfirm={() => {
+    if (onRenewOrder(order.id, quantity)) {
+      setSuccessSummary({ duration: updatedDuration, amount: updatedAmount })
+      setResult('success')
+    } else {
+      setResult('insufficient')
+    }
+  }}>
       <label className="order-renew-quantity"><span>续单数量</span><div className="order-renew-quantity__control"><button type="button" className="client-button client-button--secondary" aria-label="减少续单数量" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button><input type="number" min="1" step="1" value={quantity} aria-label={`续单数量，单位${order.durationUnit}`} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} /><span>{order.durationUnit}</span><button type="button" className="client-button client-button--secondary" aria-label="增加续单数量" onClick={() => setQuantity((value) => value + 1)}>＋</button></div></label>
       <div className="order-renew-summary"><div><span>服务单价</span><strong>{order.unitPrice.toLocaleString()} 金豆 / {order.durationUnit}</strong></div><div><span>续单金额</span><strong>{amount.toLocaleString()} 金豆</strong></div><div><span>金豆钱包余额</span><strong>{diamondBalance.toLocaleString()} 金豆</strong></div></div>
-      <footer><button type="button" className="client-button client-button--secondary" onClick={onClose}>取消</button><button type="button" className="client-button client-button--primary" onClick={() => {
-        if (onRenewOrder(order.id, quantity)) {
-          setSuccessSummary({ duration: updatedDuration, amount: updatedAmount })
-          setResult('success')
-        } else {
-          setResult('insufficient')
-        }
-      }}>支付并续单</button></footer>
-    </section>
-  </div>
+  </ConfirmationDialog>
 }
 
 type ReviewTarget = 'companion' | 'club'

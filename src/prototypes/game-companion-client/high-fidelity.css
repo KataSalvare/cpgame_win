@@ -38,6 +38,18 @@
   box-shadow: none;
 }
 
+/* Composite search fields show focus on the whole control, not on the inner input. */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.match-club-search, .global-search-input, .voice-room-search, .social-search, .voice-members-drawer__search, .chat-order-search, .companion-directory-search, .gift-recipient-search, .personal-search, .orders-search, .checkout-cascader-search, .help-center-search, .personal-club-search):focus-within {
+  outline: 0;
+  border-color: #4e5969;
+  box-shadow: inset 0 0 0 2px #4e5969;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.match-club-search, .global-search-input, .voice-room-search, .social-search, .voice-members-drawer__search, .chat-order-search, .companion-directory-search, .gift-recipient-search, .personal-search, .orders-search, .checkout-cascader-search, .help-center-search, .personal-club-search) > input:focus-visible {
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
 [data-prototype-palette="high-fidelity"] .game-companion-client
   .client-button:not(.messages-page *, .client-titlebar *, .client-confirmation *) {
   min-height: 48px;
@@ -583,3 +595,280 @@
 }
 [data-prototype-palette="high-fidelity"] .premium-card__actions .client-button:hover { filter: brightness(1.04); }
 [data-prototype-palette="high-fidelity"] .premium-card__actions .client-button:active { transform: translateY(1px); }
+
+/* Personal quick panel: soft glass surface with the existing account actions. */
+[data-prototype-palette="high-fidelity"] .client-profile-popover {
+  width: 340px;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 24px;
+  background: radial-gradient(ellipse at 18% 100%, rgb(225 213 255 / 65%), transparent 48%), radial-gradient(ellipse at 95% 86%, rgb(255 224 131 / 65%), transparent 44%), linear-gradient(145deg, rgb(255 255 255 / 94%), rgb(247 248 252 / 88%));
+  box-shadow: 0 16px 40px rgb(40 43 61 / 16%), inset 0 1px 1px rgb(255 255 255 / 95%);
+  backdrop-filter: blur(20px);
+}
+[data-prototype-palette="high-fidelity"] .client-profile-popover__identity { gap: 13px; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__avatar-button :is(.client-avatar, img) { width: 64px; height: 64px; border: 0; border-radius: 50%; box-shadow: 0 4px 12px rgb(64 54 42 / 12%); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__identity strong { color: #1d2129; font-size: 18px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__user-id { color: #687383; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__stats { border: 0; border-radius: 16px; padding: 10px 0; background: rgb(255 255 255 / 48%); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__stats > button { border-color: rgb(134 144 156 / 18%); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__stats > button:first-child { border-left: 0; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__stats strong { font-size: 16px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__stats small { color: #738092; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__wealth { gap: 8px; border: 0; border-radius: 16px; padding: 12px 14px; background: rgb(255 255 255 / 55%); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__wealth:hover { background: rgb(255 255 255 / 76%); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__wealth-heading > span { color: #4e5969; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__wealth-heading svg { color: #c09100; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__wealth-progress { height: 7px; background: rgb(158 164 181 / 18%); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__wealth-progress > span { background: linear-gradient(90deg, #ffd60a, #ffb832); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__wealth-caption { color: #667282; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__balances { gap: 8px; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset { border: 0; border-radius: 16px; padding: 10px 12px; background: rgb(255 255 255 / 60%); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset > span { color: #596476; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset > span::before { content: ''; width: 20px; height: 20px; background: center / contain no-repeat url('./assets/wallet-gold-bean.webp'); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset:nth-child(2) > span::before { background-image: url('./assets/wallet-candy-bean.webp'); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset > span svg { display: none; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset > strong { color: #1d2129; font-size: 18px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset button { border: 0; border-radius: 999px; padding: 0 12px; background: linear-gradient(155deg, rgb(255 255 255 / 92%), rgb(242 243 248 / 72%)); box-shadow: inset 0 1px 2px #fff, 0 3px 8px rgb(54 60 77 / 10%); font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset:first-child button { background: linear-gradient(155deg, #fff0a0, #ffdc32 55%, #f5c21b); }
+[data-prototype-palette="high-fidelity"] .client-profile-popover__asset button:hover { filter: brightness(1.04); }
+
+/* Identity flow: the supplied mascot and warm header carry across every step. */
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog {
+  overflow: hidden;
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(33 27 14 / 24%);
+}
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__header {
+  position: relative;
+  min-height: 148px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  align-items: flex-start;
+  border: 0;
+  padding: 28px 26px;
+  background: url('./assets/identity-mascot.webp') right 24px bottom / auto 132px no-repeat, radial-gradient(ellipse at 85% 12%, rgb(255 246 161 / 95%), transparent 55%), linear-gradient(120deg, #ffc4b9 0%, #ffe7ae 49%, #fff2ac 100%);
+}
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__header > div { position: relative; z-index: 1; max-width: 60%; padding-top: 32px; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__header h2 { color: #1d2129; font-size: 23px; font-weight: 700; line-height: 1.25; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__header p { color: #596678; font-size: 13px; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__header .windows-icon-button { position: relative; z-index: 2; border-radius: 50%; background: rgb(255 255 255 / 55%); color: #353a43; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__content { position: relative; margin-top: -10px; border-radius: 20px 20px 0 0; padding: 24px 26px 16px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__footer { gap: 10px; border: 0; padding: 10px 26px 24px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__body { gap: 15px; padding: 0; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog :is(.identity-flow__icon, .identity-flow__success > span) { border: 0; background: #fff5c8; color: #b18300; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__form { gap: 18px; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__field { gap: 8px; color: #1d2129; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog :is(.identity-flow__field > input, .identity-flow__code > input) { min-height: 48px; border: 0; border-radius: 12px; padding: 0 14px; background: #f2f3f9; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog :is(.identity-flow__field > input, .identity-flow__code > input):focus-visible { outline: 2px solid #b99200; outline-offset: 2px; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__error { color: #c9362b; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .client-button { min-height: 42px; border: 0; border-radius: 999px; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .client-button--primary { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; box-shadow: inset 0 1px 1px rgb(255 255 255 / 75%), 0 3px 8px rgb(180 131 0 / 16%); }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .client-button--secondary { background: #f1f2f7; color: #434c59; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__primary { width: 100%; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog > .windows-dialog-panel__footer .client-button--primary { flex: 1; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .identity-flow__qr { border: 0; border-radius: 14px; background: #f2f3f9; padding: 12px; }
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog .personal-real-name-details { border: 0; border-radius: 14px; background: #f2f3f9; }
+
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog :is(.identity-flow__icon, .identity-flow__success > span) {
+  width: 78px;
+  height: 78px;
+  border: 0;
+  border-radius: 0;
+  background: center / contain no-repeat url('./assets/identity-verified-shield.webp');
+}
+[data-prototype-palette="high-fidelity"] .identity-flow-dialog :is(.identity-flow__icon, .identity-flow__success > span) svg { visibility: hidden; }
+
+/* Login artwork and controls follow the high-fidelity client palette. */
+[data-prototype-palette="high-fidelity"] .gc-login-page { background: #f3f4fa; }
+[data-prototype-palette="high-fidelity"] .gc-login-layout { border: 0; border-radius: 24px; background: #fff; box-shadow: 0 18px 56px rgb(36 38 50 / 12%); }
+[data-prototype-palette="high-fidelity"] .gc-login-brand {
+  position: relative;
+  justify-content: flex-end;
+  padding: 48px;
+  background: linear-gradient(180deg, transparent 52%, rgb(17 16 20 / 84%) 100%), url('./assets/login-mascot-hero.webp') center 42% / cover no-repeat;
+  color: #fff;
+}
+[data-prototype-palette="high-fidelity"] .gc-login-brand-mark { display: none; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy { position: relative; margin: 0; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy h1 { color: #fff; font-size: 34px; font-weight: 700; text-shadow: 0 2px 12px rgb(0 0 0 / 38%); }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy > p:last-child { margin-top: 10px; color: rgb(255 255 255 / 88%); font-size: 14px; line-height: 1.65; text-shadow: 0 1px 8px rgb(0 0 0 / 55%); }
+[data-prototype-palette="high-fidelity"] .gc-login-card { padding: 48px 56px; }
+[data-prototype-palette="high-fidelity"] .gc-login-card-heading h2 { color: #1d2129; font-size: 28px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .gc-login-tabs { gap: 4px; border: 0; border-radius: 14px; padding: 5px; background: #f0f1f6; }
+[data-prototype-palette="high-fidelity"] .gc-login-tabs button { min-height: 42px; border-radius: 10px; color: #687383; }
+[data-prototype-palette="high-fidelity"] .gc-login-tabs button[aria-selected="true"] { background: #fff; color: #1d2129; box-shadow: 0 2px 7px rgb(32 37 48 / 7%); }
+[data-prototype-palette="high-fidelity"] .gc-login-tabs button[aria-selected="true"]::after { display: none; }
+[data-prototype-palette="high-fidelity"] .gc-login-form :is(.gc-login-field > input, .gc-login-code-row input),
+[data-prototype-palette="high-fidelity"] .gc-onboarding-field input { height: 48px; border: 0; border-radius: 12px; background: #f2f3f9; }
+[data-prototype-palette="high-fidelity"] .gc-login-code-button, [data-prototype-palette="high-fidelity"] .gc-login-refresh { border: 0; border-radius: 999px; background: #f0f1f6; color: #434c59; }
+[data-prototype-palette="high-fidelity"] :is(.gc-login-submit, .gc-onboarding-submit) { border: 0; border-radius: 999px; background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; box-shadow: inset 0 1px 1px rgb(255 255 255 / 75%), 0 3px 8px rgb(180 131 0 / 16%); }
+[data-prototype-palette="high-fidelity"] .gc-login-checkbox { border-color: #aeb5c0; border-radius: 5px; }
+[data-prototype-palette="high-fidelity"] .gc-login-agreement input:checked + .gc-login-checkbox { border-color: #ffd60a; background: #ffd60a; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .gc-login-qr-frame { border: 0; border-radius: 16px; background: #f2f3f9; }
+[data-prototype-palette="high-fidelity"] .gc-login-dialog { border: 0; border-radius: 20px; box-shadow: 0 16px 45px rgb(30 34 45 / 18%); }
+
+/* Keep the login form compact and legible on the fixed desktop canvas. */
+[data-prototype-palette="high-fidelity"] .gc-login-card { max-width: 600px; padding: 42px 52px; }
+[data-prototype-palette="high-fidelity"] .gc-login-card-heading h2 { font-size: 32px; letter-spacing: -.02em; }
+[data-prototype-palette="high-fidelity"] .gc-login-card-heading h2::after { display: block; width: 38px; height: 5px; margin-top: 10px; border-radius: 99px; background: #ffd60a; content: ''; }
+[data-prototype-palette="high-fidelity"] .gc-login-tabs { margin-top: 22px; }
+[data-prototype-palette="high-fidelity"] .gc-login-tabs button { min-height: 48px; font-size: 17px; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .gc-login-form { min-height: 0; gap: 16px; padding-top: 22px; }
+[data-prototype-palette="high-fidelity"] .gc-login-field { gap: 7px; color: #343c49; font-size: 16px; }
+[data-prototype-palette="high-fidelity"] .gc-login-form :is(.gc-login-field > input, .gc-login-code-row input) { height: 54px; padding-inline: 16px; font-size: 16px; }
+[data-prototype-palette="high-fidelity"] .gc-login-code-button { min-height: 54px; font-size: 15px; }
+[data-prototype-palette="high-fidelity"] .gc-login-submit { min-height: 54px; margin-top: 6px; font-size: 17px; }
+[data-prototype-palette="high-fidelity"] .gc-login-agreement { margin-top: 16px; color: #596475; font-size: 14px; line-height: 1.5; }
+[data-prototype-palette="high-fidelity"] .gc-login-checkbox { width: 18px; height: 18px; }
+[data-prototype-palette="high-fidelity"] .gc-login-qr-panel { min-height: 0; padding-top: 20px; }
+[data-prototype-palette="high-fidelity"] .gc-login-qr-title { font-size: 16px; }
+[data-prototype-palette="high-fidelity"] .gc-login-qr-locked, [data-prototype-palette="high-fidelity"] .gc-login-notice, [data-prototype-palette="high-fidelity"] .gc-login-error { font-size: 14px; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy { max-width: 480px; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy h1 { font-size: 40px; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy > p:last-child { margin-top: 12px; font-size: 17px; line-height: 1.6; }
+
+/* Give the login experience more presence on the 1920×1080 client canvas. */
+[data-prototype-palette="high-fidelity"] .gc-login-page { padding: 64px 96px; }
+[data-prototype-palette="high-fidelity"] .gc-login-layout { width: min(1600px, 100%); min-height: 840px; grid-template-columns: 1fr 1fr; }
+[data-prototype-palette="high-fidelity"] .gc-login-card { max-width: 680px; padding: 52px 60px; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand { padding: 56px; }
+[data-prototype-palette="high-fidelity"] .gc-login-page { padding: 48px; }
+[data-prototype-palette="high-fidelity"] .gc-login-layout { width: min(1280px, 100%); height: 680px; min-height: 680px; border-radius: 24px; }
+[data-prototype-palette="high-fidelity"] .gc-login-card { max-width: 600px; padding: 42px 52px; }
+
+/* Non-confirmation dialogs with custom markup share the standard dialog treatment. */
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .gc-login-dialog, .system-path-dialog) {
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(33 27 14 / 22%);
+}
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .gc-login-dialog, .system-path-dialog) > header {
+  border: 0;
+  border-radius: 14px;
+  padding: 16px;
+  background: radial-gradient(ellipse at 90% 0%, #fff4ad, transparent 55%), linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5);
+}
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .gc-login-dialog, .system-path-dialog) > header :is(h2, h3) { color: #1d2129; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog) > footer { border: 0; }
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .system-path-dialog, .gc-login-dialog) :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"]), textarea, select) { border: 0; border-radius: 10px; background-color: #f2f3f9; }
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .system-path-dialog, .gc-login-dialog) :is(input, textarea, select):focus-visible { outline: 2px solid #a78500; outline-offset: 2px; }
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .system-path-dialog, .gc-login-dialog) :is(footer, .workbench-dialog__actions) .client-button { border: 0; border-radius: 999px; }
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .system-path-dialog, .gc-login-dialog) :is(footer, .workbench-dialog__actions) .client-button--primary { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; }
+[data-prototype-palette="high-fidelity"] :is(.store-benefit-dialog, .order-renew-dialog, .order-review-dialog, .checkout-order-notice-dialog, .match-dialog, .workbench-service-application-dialog, .system-path-dialog, .gc-login-dialog) :is(footer, .workbench-dialog__actions) .client-button--secondary { background: #f1f2f7; color: #434c59; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog > header { border-radius: 0; }
+
+/* Result dialogs and specialized panels keep their layout while adopting the same visual language. */
+[data-prototype-palette="high-fidelity"] .order-action-dialog:has(#order-renew-success-title) { border: 0; border-radius: 22px; background: #fff; box-shadow: 0 20px 60px rgb(33 27 14 / 22%); }
+[data-prototype-palette="high-fidelity"] .order-action-dialog:has(#order-renew-success-title) > header { border: 0; border-radius: 14px; padding: 16px; background: radial-gradient(ellipse at 90% 0%, #fff4ad, transparent 55%), linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5); }
+[data-prototype-palette="high-fidelity"] .order-action-dialog:has(#order-renew-success-title) footer .client-button { border: 0; border-radius: 999px; background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; }
+[data-prototype-palette="high-fidelity"] .global-search-panel { border: 0; border-radius: 22px; box-shadow: 0 20px 60px rgb(33 27 14 / 22%); }
+[data-prototype-palette="high-fidelity"] .global-search-input { border: 0; background: linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5); }
+[data-prototype-palette="high-fidelity"] .gift-panel:not(.gift-panel--confirming) { border: 0; }
+[data-prototype-palette="high-fidelity"] .gift-panel__header { background: linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5); }
+[data-prototype-palette="high-fidelity"] .image-lightbox { border-radius: 22px; box-shadow: 0 20px 60px rgb(33 27 14 / 22%); }
+
+/* Custom order and wallet dialogs use the same edge-to-edge header and actions. */
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog) > header {
+  box-sizing: border-box;
+  min-height: 92px;
+  flex-shrink: 0;
+  align-items: center;
+  border-radius: 0;
+  margin: -22px -22px 0;
+  padding: 22px 26px 30px;
+}
+[data-prototype-palette="high-fidelity"] .workbench-service-application-dialog > header { margin: -24px -24px 0; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog) > header + * { position: relative; border-radius: 18px 18px 0 0; }
+[data-prototype-palette="high-fidelity"] .workbench-service-application-dialog > header + p { margin-top: -10px; padding: 18px 0 0; background: #fff; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog > header { min-height: 92px; padding: 22px 26px 30px; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog > .client-content { position: relative; border-radius: 18px 18px 0 0; margin-top: -10px; background: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.checkout-order-notice-dialog, .match-dialog--notice) > header { min-height: 92px; align-items: center; border-radius: 0; padding: 22px 26px 30px; }
+[data-prototype-palette="high-fidelity"] :is(.checkout-order-notice-dialog .checkout-notice, .match-dialog--notice > .match-notice-tabs) { position: relative; border-radius: 18px 18px 0 0; margin-top: -10px; overflow: hidden; background: #fff; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog) :is(footer, .checkout-notice > footer) { gap: 10px; border: 0; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog) :is(footer, .checkout-notice > footer) .client-button { min-height: 40px; border: 0; border-radius: 999px; padding-inline: 18px; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog) footer .client-button--primary { flex: 1 1 0; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog, .wallet-recharge-dialog) .client-button--primary:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog, .wallet-recharge-dialog) > header :is(.client-icon-button, .windows-icon-button, .workbench-dialog-close, .order-action-dialog__close) { border: 0; border-radius: 50%; background: rgb(255 255 255 / 65%); }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog) > header { position: relative; border-radius: 22px 22px 0 0; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog) > header::after { position: absolute; right: 0; bottom: 0; left: 0; height: 10px; border-radius: 18px 18px 0 0; background: #fff; content: ''; pointer-events: none; }
+/* Matching retains its compact draggable panel and adopts the standard dialog surfaces. */
+[data-prototype-palette="high-fidelity"] .match-panel { border: 0; border-radius: 22px; }
+[data-prototype-palette="high-fidelity"] .match-panel__header { min-height: 92px; border: 0; padding: 22px 26px 30px; background: radial-gradient(ellipse at 90% 8%, #fff4ad, transparent 55%), linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5); }
+[data-prototype-palette="high-fidelity"] :is(.match-panel__matching, .match-panel__form) { position: relative; border-radius: 18px 18px 0 0; margin-top: -10px; padding: 24px 26px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .match-panel__matching-actions { grid-template-columns: auto 1fr; gap: 10px; }
+[data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button { min-height: 40px; border: 0; border-radius: 999px; padding-inline: 18px; }
+[data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button--secondary { background: #f1f2f7; color: #434c59; }
+[data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button--primary:not(:disabled) { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; }
+[data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
+
+/* Quick match: game and club choices share the same icon-and-name layout. */
+[data-prototype-palette="high-fidelity"] .match-panel { width: 560px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .match-panel__header { min-height: 72px; padding: 16px 24px 20px; background: linear-gradient(115deg, #161820, #262932); }
+[data-prototype-palette="high-fidelity"] .match-panel__heading h2 { color: #fff; font-size: 20px; }
+[data-prototype-palette="high-fidelity"] .match-panel__header > .windows-icon-button { color: #fff; }
+[data-prototype-palette="high-fidelity"] .match-panel__form { gap: 16px 14px; padding: 22px 24px 24px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .match-panel__form > .match-field[aria-label="选择游戏"],
+[data-prototype-palette="high-fidelity"] .match-panel__form > .match-field[aria-label="选择俱乐部"] { border-radius: 14px; padding: 12px; background: #f2f3f8; }
+[data-prototype-palette="high-fidelity"] .match-panel__form > .match-field[aria-label="选择俱乐部"] > span { color: #4e5969; font-size: 13px; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-list, .match-club-strip) { gap: 8px; padding: 2px 2px 5px; }
+[data-prototype-palette="high-fidelity"] .match-panel .home-game-list .game-choice,
+[data-prototype-palette="high-fidelity"] .match-panel .match-club-strip__option { display: flex; width: 138px; min-height: 64px; flex: 0 0 138px; align-items: center; gap: 8px; border: 0; border-radius: 10px; padding: 8px; background: #fff; color: #1d2129; text-align: left; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-list .game-choice.is-active, .match-club-strip__option.is-selected) { background: #fff2b4; box-shadow: inset 0 0 0 2px #e9b900; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-list .game-choice, .match-club-strip__option) > span:last-child { display: -webkit-box; overflow: hidden; font-size: 13px; font-weight: 600; line-height: 1.3; white-space: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-list .home-game-choice__mark, .match-club-strip__option > .client-avatar) { width: 40px; height: 40px; flex: 0 0 40px; border: 0; border-radius: 50%; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-expand, .match-club-expand) { width: 36px; min-height: 64px; flex: 0 0 36px; border: 0; border-radius: 10px; background: #e5e7ef; color: #4e5969; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.match-club-strip__option, .match-club-option)[data-club-id="club-001"] > .client-avatar { background: #101137 url('./assets/generated/club-avatar.webp') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.match-club-strip__option, .match-club-option)[data-club-id="club-001"] > .client-avatar > * { visibility: hidden; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-popover, .match-club-popover) { border: 0; border-radius: 12px; padding: 12px; background: #fff; box-shadow: 0 8px 24px rgb(17 24 39 / 15%); }
+[data-prototype-palette="high-fidelity"] .match-panel .match-club-list { gap: 8px; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-popover__option, .match-club-option) { min-height: 64px; gap: 8px; border: 0; border-radius: 8px; padding: 8px; background: #f4f5f9; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.home-game-popover__option:is(:hover, .is-active), .match-club-option:is(:hover, .is-selected)) { border: 0; background: #fff4bd; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .match-panel .match-club-option > .client-avatar { width: 40px; height: 40px; flex: 0 0 40px; border: 0; border-radius: 50%; }
+[data-prototype-palette="high-fidelity"] .match-panel .match-club-option > strong { font-size: 13px; }
+[data-prototype-palette="high-fidelity"] .match-panel .match-club-search { border: 0; background: #f2f3f8; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.match-field > span:first-child, .match-field--fieldset legend) { color: #1d2129; font-size: 14px; }
+[data-prototype-palette="high-fidelity"] .match-panel .match-choice { min-height: 38px; border: 0; border-radius: 999px; background: #f2f3f8; color: #4e5969; }
+[data-prototype-palette="high-fidelity"] .match-panel .match-choice.is-active { background: #fff4c9; color: #1d2129; box-shadow: inset 0 0 0 1px #e9b900; }
+[data-prototype-palette="high-fidelity"] .match-panel :is(.match-service-trigger, .match-field textarea, .match-quantity-control) { border: 0; border-radius: 10px; background: #f2f3f8; }
+[data-prototype-palette="high-fidelity"] .match-panel .match-service-trigger[aria-invalid="true"] { border: 1px solid #d9363e; }
+[data-prototype-palette="high-fidelity"] .match-panel__price { grid-column: 1; grid-template-columns: 1fr; gap: 4px; border: 0; padding: 8px 0; background: transparent; }
+[data-prototype-palette="high-fidelity"] .match-panel__price > strong { color: #e3483e; text-align: left; }
+[data-prototype-palette="high-fidelity"] .match-panel__submit { grid-column: 2; align-self: center; }
+[data-prototype-palette="high-fidelity"] .match-dialog:not(.match-dialog--notice) > header { position: relative; min-height: 92px; align-items: center; border-radius: 22px 22px 0 0; margin: -16px -16px 0; padding: 22px 26px 30px; }
+[data-prototype-palette="high-fidelity"] .match-dialog:not(.match-dialog--notice) > header::after { position: absolute; right: 0; bottom: 0; left: 0; height: 10px; border-radius: 18px 18px 0 0; background: #fff; content: ''; pointer-events: none; }
+/* Notice controls keep their existing choices while matching standard actions. */
+[data-prototype-palette="high-fidelity"] .checkout-order-notice-dialog .checkout-notice > footer .client-button--primary { flex: 1 1 0; }
+[data-prototype-palette="high-fidelity"] .checkout-order-notice-dialog .checkout-notice__skip { flex: 0 0 auto; }
+[data-prototype-palette="high-fidelity"] .match-dialog--notice .match-notice-footer .client-button--primary { flex: 1 1 0; }
+[data-prototype-palette="high-fidelity"] .match-dialog--notice .match-notice-remember { flex: 0 0 auto; }
+
+/* The login card floats over a single continuous background. */
+[data-prototype-palette="high-fidelity"] .gc-login-layout {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) 480px;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 48px;
+  background: #28211f url('./assets/login-background-v2.webp') center / cover no-repeat;
+}
+[data-prototype-palette="high-fidelity"] .gc-login-brand { align-self: stretch; justify-content: flex-end; padding: 16px 0; background: none; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy { max-width: 410px; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy h1 { font-size: 36px; }
+[data-prototype-palette="high-fidelity"] .gc-login-brand-copy > p:last-child { font-size: 15px; }
+[data-prototype-palette="high-fidelity"] .gc-login-card {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  max-height: 100%;
+  overflow-y: auto;
+  justify-self: stretch;
+  border-radius: 20px;
+  padding: 34px 40px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 22%);
+}

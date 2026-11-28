@@ -1,3 +1,4 @@
+import '@/themes/grayscale-prototype/components/standard-dialog.css'
 import { SideDrawer as RightDrawer } from '@/themes/grayscale-prototype/components/SideDrawer'
 /**
  * @name 游戏陪玩平台客户端

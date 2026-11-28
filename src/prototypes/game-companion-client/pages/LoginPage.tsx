@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, Camera, Check, CircleAlert, LoaderCircle, QrCode, RefreshCw, ShieldCheck, UserRound, X } from 'lucide-react'
+import { CalendarDays, Camera, Check, CircleAlert, LoaderCircle, QrCode, RefreshCw, ShieldCheck, UserRound } from 'lucide-react'
+import { DialogPanel } from '@/components/WindowsClient'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
 
 type LoginPageState = 'normal' | 'loading' | 'empty' | 'error'
@@ -50,17 +51,10 @@ function DemoQrCode({ revision }: { revision: number }) {
 
 function AgreementDialog({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
   return (
-    <div className="gc-login-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
-      <section className="gc-login-dialog" role="dialog" aria-modal="true" aria-labelledby="gc-login-dialog-title">
-        <header>
-          <h2 id="gc-login-dialog-title">《{agreement}》</h2>
-          <button type="button" className="gc-login-icon-button" onClick={onClose} aria-label="关闭协议">
-            <X size={18} />
-          </button>
-        </header>
+    <div className="gc-login-agreement-overlay" onMouseDown={(event) => { if ((event.target as HTMLElement).classList.contains('windows-dialog-overlay')) onClose() }}>
+      <DialogPanel overlayId="login-agreement" title={`《${agreement}》`} onClose={onClose} width={480} footer={<button type="button" className="client-button client-button--primary" onClick={onClose}>关闭</button>}>
         <p>协议内容待补充。</p>
-        <button type="button" className="gc-login-secondary-button" onClick={onClose}>关闭</button>
-      </section>
+      </DialogPanel>
     </div>
   )
 }
@@ -164,7 +158,7 @@ function LoginContent({ onOpenAgreement }: { onOpenAgreement: (agreement: Agreem
       </section>
 
       <section className="gc-login-card" aria-label={completingProfile ? '完善信息' : undefined} aria-labelledby={completingProfile ? undefined : 'gc-login-title'}>
-        {!completingProfile && <header className="gc-login-card-heading"><h2 id="gc-login-title">登录</h2></header>}
+        {!completingProfile && <header className="gc-login-card-heading"><h2 id="gc-login-title">登录超速电竞</h2></header>}
 
         {!completingProfile && <div className="gc-login-tabs" role="tablist" aria-label="登录方式">
           <button type="button" role="tab" id="gc-login-phone-tab" aria-selected={activeMethod === 'phone'} aria-controls="gc-login-phone-panel" onClick={() => { setActiveMethod('phone'); setError(''); setNotice('') }}>手机号登录</button>

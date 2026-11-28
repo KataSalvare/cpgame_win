@@ -1,0 +1,11 @@
+.theme-notice-dialog { max-height: min(800px, calc(100% - 48px)); }
+.theme-notice-dialog > .windows-dialog-panel__header { position: relative; justify-content: center; align-items: center; }
+.theme-notice-dialog > .windows-dialog-panel__header > .windows-icon-button { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); }
+.theme-notice-dialog > .windows-dialog-panel__content { overflow-y: auto; }
+.theme-notice-dialog__webview { display: grid; min-height: 320px; place-items: center; background: #d9d9d9; color: #d92d20; font-size: 30px; text-align: center; overflow-wrap: anywhere; }
+.theme-notice-dialog > .windows-dialog-panel__footer { display: flex; flex-direction: column; align-items: stretch; }
+.theme-notice-dialog__reminder { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px; color: var(--prototype-text-secondary, #4b5563); font-size: 14px; cursor: pointer; }
+.theme-notice-dialog__reminder input { width: 16px; height: 16px; accent-color: var(--prototype-primary, #374151); }
+[data-prototype-palette="high-fidelity"] .windows-dialog-panel.theme-notice-dialog > .windows-dialog-panel__header { min-height: 72px; justify-content: center; padding: 20px 64px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .theme-notice-dialog > .windows-dialog-panel__footer { gap: 8px; }
+[data-prototype-palette="high-fidelity"] .theme-notice-dialog > .windows-dialog-panel__footer .client-button--primary { flex: none; width: 100%; min-height: 48px; }

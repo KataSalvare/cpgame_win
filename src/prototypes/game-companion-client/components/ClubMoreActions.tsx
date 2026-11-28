@@ -1,3 +1,4 @@
+import { NoticeDialog } from '@/themes/grayscale-prototype/components/NoticeDialog'
 import { useEffect, useRef, useState } from 'react'
 import { FileCheck2, FileText, MoreHorizontal, Star } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
@@ -50,7 +51,7 @@ export function ClubInfoDialog({ club, initialTab, onClose }: { club: Club; init
     ? { description: club.intro, label: '俱乐部活动展示图' }
     : { description: '俱乐部价目内容待补充。服务项目与实际价格请以陪玩资料为准。', label: '价目表展示图' }
 
-  return <DialogPanel overlayId={`club-info-${club.id}`} title={club.name} onClose={onClose} width={720} className="club-info-dialog">
+  return <NoticeDialog overlayId={`club-info-${club.id}`} title={activeTab === 'pricing' ? '俱乐部价目表' : '俱乐部简介'} onClose={onClose} onConfirm={onClose}>
     <div className="club-info-tabs" role="tablist" aria-label="俱乐部资料">
       <button type="button" role="tab" id="club-info-tab-intro" aria-selected={activeTab === 'intro'} aria-controls="club-info-panel" onClick={() => setActiveTab('intro')}>后台配置TAB1</button>
       <button type="button" role="tab" id="club-info-tab-pricing" aria-selected={activeTab === 'pricing'} aria-controls="club-info-panel" onClick={() => setActiveTab('pricing')}>后台配置TAB2</button>
@@ -66,5 +67,5 @@ export function ClubInfoDialog({ club, initialTab, onClose }: { club: Club; init
         </svg>
       </div>
     </section>
-  </DialogPanel>
+  </NoticeDialog>
 }

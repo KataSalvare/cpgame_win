@@ -2,7 +2,7 @@
 [data-prototype-palette="high-fidelity"] .windows-client-frame__workspace:has(> .windows-client-frame__right-panel .theme-side-drawer) { position: relative; }
 [data-prototype-palette="high-fidelity"] .windows-client-frame__right-panel:has(.theme-side-drawer) {
   position: absolute;
-  z-index: 10;
+  z-index: 19;
   inset: 16px 16px 16px auto;
   max-width: calc(100% - 32px);
   overflow: visible;

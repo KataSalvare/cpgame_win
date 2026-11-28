@@ -462,7 +462,7 @@ function AccountSecurityDialog({ initialView = 'overview', phone, onSavePhone, e
           : view === 'closure-warning'
             ? <><button type="button" className="client-button client-button--secondary" onClick={() => setView('closure-terms')}>返回</button><button type="button" className="client-button client-button--primary" disabled={!warningAccepted} onClick={() => { setView('closure-phone'); setError('') }}>下一步</button></>
             : <><button type="button" className="client-button client-button--secondary" onClick={() => setView('closure-warning')}>返回</button><button type="submit" form="account-closure-phone-form" className="client-button client-button--primary">确认注销</button></>
-  return <DialogPanel overlayId="account-security-dialog" title={activeTitle} description={activeDescription} onClose={onClose} width={600} footer={footer}>
+  return <DialogPanel overlayId="account-security-dialog" className={view === 'real-name' ? 'identity-flow-dialog identity-flow-dialog--verified' : undefined} title={activeTitle} description={activeDescription} onClose={onClose} width={600} footer={footer}>
     {view === 'overview' ? <div className="personal-security-menu">
         <button type="button" className="personal-security-menu__row" onClick={() => { if (onRealNameEntryClick()) setView('real-name') }}><span><strong>实名认证</strong><small>{realNameEntryClicks === 0 ? '已实名' : '未实名'}</small></span><ChevronRight size={17} /></button>
         <button type="button" className="personal-security-menu__row" onClick={() => { setView('phone'); setError(''); setFeedback(''); setCodeSent(false); setNewPhone(''); setCode('') }}><span><strong>手机号</strong><small>{maskPhone(phone)}</small></span><ChevronRight size={17} /></button>
