@@ -941,7 +941,8 @@
 [data-prototype-palette="high-fidelity"] .voice-page .room-chat-system-notice { background: #e9ebf3; }
 [data-prototype-palette="high-fidelity"] .voice-page .room-chat-composer { margin: 0 12px 12px; border: 0; border-radius: 16px; padding: 10px; background: #fff; }
 [data-prototype-palette="high-fidelity"] .voice-page .room-chat-send { border-radius: 999px; background: #ffd60a; color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .voice-page .room-chat-send:disabled { opacity: .45; }
+[data-prototype-palette="high-fidelity"] .voice-page .room-chat-send:disabled { color: #69717e; opacity: 1; }
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .club-support-chat) .chat-send-button:disabled { border-color: #ffd60a; background: #ffd60a; color: #69717e; opacity: 1; }
 [data-prototype-palette="high-fidelity"] .voice-page button:focus-visible { outline: 2px solid #1d2129; outline-offset: 2px; }
 
 [data-prototype-palette="high-fidelity"] .voice-page .voice-owner-card > .client-avatar { overflow: hidden; border: 0; border-radius: 50%; background: transparent; }

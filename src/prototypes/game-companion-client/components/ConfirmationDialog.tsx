@@ -1,23 +1,25 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { Children, useEffect, useRef, type ReactNode } from 'react'
 import { DialogPanel } from '@/components/WindowsClient'
 import type { ConfirmationDialogProps } from '@/themes/grayscale-prototype/components/ConfirmationDialog'
 import '@/themes/yellow-black-companion/components/components.css'
 import '@/themes/grayscale-prototype/components/confirmation-dialog.css'
-import { DialogIllustration } from './DialogIllustration'
+import { DialogIllustration, type DialogIllustrationKind } from './DialogIllustration'
 
 type Props = Omit<ConfirmationDialogProps, 'message' | 'onCancel'> & {
   message?: ReactNode
   onCancel?: () => void
   onDismiss?: () => void
+  illustrationKind?: DialogIllustrationKind
 }
 
 export function ConfirmationDialog({
   overlayId, title, message, cancelLabel = '取消', confirmLabel, alternativeAction,
-  confirmDisabled, confirmButtonRef, children, onCancel, onDismiss = onCancel, onConfirm,
+  confirmDisabled, confirmButtonRef, children, onCancel, onDismiss = onCancel, onConfirm, illustrationKind,
 }: Props) {
   const root = useRef<HTMLDivElement>(null)
+  const extraContent = Children.toArray(children)
   const dismiss = useRef(onDismiss ?? onConfirm)
-  const illustration = title === '金豆余额不足' ? 'insufficient' : title === '确认购买尊享卡' ? 'premium' : (title === '确认支付' || title === '支付订单') ? 'payment' : null
+  const illustration = illustrationKind ?? (title === '金豆余额不足' ? 'insufficient' : title === '确认购买尊享卡' ? 'premium' : (title === '确认支付' || title === '支付订单') ? 'payment' : null)
   useEffect(() => { dismiss.current = onDismiss ?? onConfirm }, [onDismiss, onConfirm])
 
   useEffect(() => {
@@ -65,7 +67,7 @@ export function ConfirmationDialog({
         <button ref={confirmButtonRef} type="button" className="client-button client-button--primary" onClick={onConfirm} disabled={confirmDisabled}>{confirmLabel}</button>
       </>}>
       {message != null && <p className="grayscale-confirmation-dialog__message">{message}</p>}
-      {children && <div className="grayscale-confirmation-dialog__extra">{children}</div>}
+      {extraContent.length > 0 && <div className="grayscale-confirmation-dialog__extra">{extraContent}</div>}
     </DialogPanel>
   </div>
 }

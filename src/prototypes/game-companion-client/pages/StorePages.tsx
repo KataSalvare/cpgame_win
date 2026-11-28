@@ -1,7 +1,10 @@
 import { DialogIllustration } from '../components/DialogIllustration'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
-import { useState } from 'react'
-import { ArrowLeft, Coins, CreditCard, Gift, History, Ticket, TriangleAlert, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, ChevronDown, Coins, Gift, History, Ticket, TriangleAlert, X } from 'lucide-react'
+import wechatIcon from '../assets/payment/wechat.svg'
+import alipayIcon from '../assets/payment/alipay.svg'
+import applePayIcon from '../assets/payment/applepay.svg'
 import type { Club } from '../data/mockData'
 import { clubs as allClubs } from '../data/mockData'
 import { premiumCards, rechargePackages, type PremiumCard, type PremiumCardTransaction, type RechargeCoupon } from '../data/storeMockData'
@@ -36,7 +39,7 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
   const [couponId, setCouponId] = useState<string | null>(null)
   const [payMethod, setPayMethod] = useState('微信支付')
   const [paymentPending, setPaymentPending] = useState(false)
-  const [agreementAccepted, setAgreementAccepted] = useState(false)
+  const [agreementAccepted, setAgreementAccepted] = useState(true)
   const [completed, setCompleted] = useState(false)
   const selectedPackage = rechargePackages.find((item) => item.id === selectedPackageId)
   const parsedRechargeAmount = selectedPackage?.price ?? Number(customAmount)
@@ -58,6 +61,11 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
     return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className="store-benefit-dialog wallet-recharge-dialog is-completed transaction-result-dialog" role="dialog" aria-modal="true" aria-label="购买结果"><header><div><h2>购买结果</h2></div><button type="button" className="client-icon-button" aria-label="关闭购买弹窗" onClick={onBack}><X size={17} /></button></header>{success}</section></div> : <div className="client-content account-page store-page"><div className="wallet-recharge-result">{successCard}</div></div>
   }
 
+  const paymentMethods = <div className="recharge-payment-methods">
+        <div className="client-section-heading store-subheading"><div><h2>支付方式</h2></div></div>
+        <div className="payment-method-list" role="group" aria-label="支付方式">{[{ name: '微信支付', icon: wechatIcon }, { name: '支付宝', icon: alipayIcon }, { name: '苹果支付', icon: applePayIcon }].map(({ name, icon }) => <button type="button" key={name} className={`payment-method${payMethod === name ? ' is-active' : ''}`} aria-pressed={payMethod === name} onClick={() => setPayMethod(name)}><span className="payment-method__mark"><img src={icon} alt="" /></span><strong>{name}</strong><span className="payment-method__radio" /></button>)}</div>
+  </div>
+
   const content = paymentPending ? <div className="client-content account-page store-page">
     {presentation === 'page' && <button type="button" className="client-back-link" onClick={() => setPaymentPending(false)}><ArrowLeft size={15} />返回修改</button>}
     <section className="client-card wallet-recharge-payment">
@@ -75,20 +83,48 @@ export function RechargePage({ pageState, onRetry, diamondBalance, coupons, onBa
     {presentation === 'page' && <Heading eyebrow="账户资产" title="购买金豆"><span className="store-balance-chip"><Coins size={15} /><span>金豆钱包</span><strong>{diamondBalance.toLocaleString()} 金豆</strong><BalanceRefreshButton /></span></Heading>}
     <div className="store-checkout-grid">
       <section className="client-card store-main-card">
-        <div className="client-section-heading recharge-package-heading"><div><h2>快捷金额</h2></div></div>
+        <div className="client-section-heading recharge-package-heading"><div><h2>购买数量</h2></div></div>
         <div className="recharge-package-grid">{rechargePackages.map((item) => <button type="button" key={item.id} className={`recharge-package${selectedPackage?.id === item.id ? ' is-active' : ''}`} aria-pressed={selectedPackage?.id === item.id} onClick={() => { setSelectedPackageId(item.id); setCustomAmount('') }}><strong>{item.diamonds.toLocaleString()} <small>金豆</small></strong><b>¥{item.price}</b></button>)}</div>
         <label className="recharge-amount-field"><span>自定义金额</span><div><span aria-hidden="true">¥</span><input aria-label="自定义金额，人民币元" inputMode="numeric" type="number" min="1" step="1" value={customAmount} onChange={(event) => updateCustomAmount(event.target.value)} placeholder="请输入自定义购买金额" /></div></label>
         <div className="store-section-divider" />
         <div className="client-section-heading store-subheading"><div><h2>优惠券</h2></div></div>
-        <div className="recharge-coupon-picker"><select className="recharge-coupon-select" aria-label="选择优惠券" value={selectedCoupon?.id ?? ''} disabled={!availableCoupons.length} onChange={(event) => setCouponId(event.target.value || null)}><option value="">{availableCoupons.length ? '不使用优惠券' : '暂无可用优惠券'}</option>{availableCoupons.map((coupon) => <option key={coupon.id} value={coupon.id} disabled={parsedRechargeAmount < coupon.threshold}>{coupon.title} · 有效期至 {coupon.expiresAt}{parsedRechargeAmount < coupon.threshold ? '　不可用：未达到使用门槛' : ''}</option>)}</select>{selectedCoupon && <strong>-¥{couponDiscount}</strong>}</div>
-        <div className="store-section-divider" />
-        <div className="client-section-heading store-subheading"><div><h2>支付方式</h2></div></div>
-        <div className="payment-method-list" role="group" aria-label="支付方式">{['微信支付', '支付宝', '苹果支付'].map((method) => <button type="button" key={method} className={`payment-method${payMethod === method ? ' is-active' : ''}`} aria-pressed={payMethod === method} onClick={() => setPayMethod(method)}><span className="payment-method__mark"><CreditCard size={17} /></span><strong>{method}</strong><span className="payment-method__radio" /></button>)}</div>
+        <RechargeCouponSelect coupons={availableCoupons} amount={parsedRechargeAmount} selectedCoupon={selectedCoupon} discount={couponDiscount} onChange={setCouponId} />
+        {presentation === 'page' && paymentMethods}
       </section>
-      <aside className="client-card store-summary-card"><h2>订单摘要</h2><div className="checkout-summary-line"><span>购买金豆</span><strong>{rechargeDiamonds.toLocaleString()} 金豆</strong></div><div className="checkout-summary-line"><span>购买金额</span><strong>¥{validRechargeAmount ? parsedRechargeAmount : 0}</strong></div><div className="checkout-summary-line"><span>优惠券</span><strong>{selectedCoupon ? `-¥${couponDiscount}` : '未使用'}</strong></div><div className="checkout-total"><span>实付金额</span><strong>¥{amount}</strong></div><label className="transaction-agreement"><input type="checkbox" checked={agreementAccepted} onChange={(event) => setAgreementAccepted(event.target.checked)} /><span>我已阅读并同意《金豆购买协议》《金豆退款协议》</span></label><button type="button" className="client-button client-button--primary store-submit-button" disabled={!validRechargeAmount || !agreementAccepted} onClick={() => setPaymentPending(true)}>确认购买</button></aside>
+      <aside className="client-card store-summary-card"><h2>订单摘要</h2><div className="checkout-summary-line"><span>购买金豆</span><strong>{rechargeDiamonds.toLocaleString()} 金豆</strong></div><div className="checkout-summary-line"><span>购买金额</span><strong>¥{validRechargeAmount ? parsedRechargeAmount : 0}</strong></div><div className="checkout-summary-line"><span>优惠券</span><strong>{selectedCoupon ? `-¥${couponDiscount}` : '未使用'}</strong></div>{presentation === 'modal' && paymentMethods}<div className="checkout-total"><span>实付金额</span><strong>¥{amount}</strong></div><label className="transaction-agreement"><input type="checkbox" checked={agreementAccepted} onChange={(event) => setAgreementAccepted(event.target.checked)} /><span>我已阅读并同意《金豆购买协议》《金豆退款协议》</span></label><button type="button" className="client-button client-button--primary store-submit-button" disabled={!validRechargeAmount || !agreementAccepted} onClick={() => setPaymentPending(true)}>确认购买</button></aside>
     </div>
   </div>
   return presentation === 'modal' ? <div className="store-overlay wallet-recharge-overlay" data-overlay="wallet-recharge-modal" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onBack() }}><section className={`store-benefit-dialog wallet-recharge-dialog${completed ? ' is-completed' : paymentPending ? ' is-payment' : ''}`} role="dialog" aria-modal="true" aria-label={completed ? '购买结果' : paymentPending ? '扫码支付' : '购买金豆'}><header><div><h2>{completed ? '购买结果' : paymentPending ? '扫码支付' : '购买金豆'}</h2></div><button type="button" className="client-icon-button" aria-label="关闭购买弹窗" onClick={onBack}><X size={17} /></button></header>{content}</section></div> : content
+}
+
+function RechargeCouponSelect({ coupons, amount, selectedCoupon, discount, onChange }: { coupons: RechargeCoupon[]; amount: number; selectedCoupon: RechargeCoupon | null; discount: number; onChange: (id: string | null) => void }) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const closeOutside = (event: PointerEvent) => { if (!rootRef.current?.contains(event.target as Node)) setOpen(false) }
+    document.addEventListener('pointerdown', closeOutside)
+    return () => document.removeEventListener('pointerdown', closeOutside)
+  }, [open])
+
+  const choose = (id: string | null) => { onChange(id); setOpen(false); triggerRef.current?.focus() }
+  return <div className="recharge-coupon-select-wrap directory-select" ref={rootRef} onKeyDown={event => {
+    if (event.key === 'Escape' && open) { event.stopPropagation(); setOpen(false); triggerRef.current?.focus() }
+    if (open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      event.preventDefault()
+      const options = Array.from(rootRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]:not(:disabled)') ?? [])
+      const index = options.indexOf(document.activeElement as HTMLButtonElement)
+      options[index < 0 ? (event.key === 'ArrowDown' ? 0 : options.length - 1) : (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length]?.focus()
+    }
+  }}>
+    <button ref={triggerRef} type="button" className="directory-select__trigger recharge-coupon-trigger" aria-label="选择优惠券" aria-haspopup="listbox" aria-expanded={open} disabled={!coupons.length} onClick={() => setOpen(current => !current)}><span>{selectedCoupon ? `${selectedCoupon.title} · 有效期至 ${selectedCoupon.expiresAt}` : coupons.length ? '不使用优惠券' : '暂无可用优惠券'}</span>{selectedCoupon && <strong>-¥{discount}</strong>}<ChevronDown size={16} aria-hidden="true" /></button>
+    {open && <div className="directory-select__menu recharge-coupon-menu" role="listbox" aria-label="优惠券选项">
+      <button type="button" role="option" aria-selected={!selectedCoupon} className={`directory-select__option${!selectedCoupon ? ' is-selected' : ''}`} onClick={() => choose(null)}>不使用优惠券</button>
+      {coupons.map(coupon => <button type="button" role="option" aria-selected={selectedCoupon?.id === coupon.id} className={`directory-select__option${selectedCoupon?.id === coupon.id ? ' is-selected' : ''}`} disabled={amount < coupon.threshold} key={coupon.id} onClick={() => choose(coupon.id)}>{coupon.title} · 有效期至 {coupon.expiresAt}{amount < coupon.threshold ? '　不可用：未达到使用门槛' : ''}</button>)}
+    </div>}
+  </div>
 }
 
 function DemoPaymentQr() {

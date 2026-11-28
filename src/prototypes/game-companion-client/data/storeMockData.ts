@@ -17,6 +17,10 @@ export const rechargePackages = [
   { id: 'recharge-300', diamonds: 300, price: 30 },
   { id: 'recharge-980', diamonds: 980, price: 98 },
   { id: 'recharge-1980', diamonds: 1980, price: 198 },
+  { id: 'recharge-2980', diamonds: 2980, price: 298 },
+  { id: 'recharge-5180', diamonds: 5180, price: 518 },
+  { id: 'recharge-9980', diamonds: 9980, price: 998 },
+  { id: 'recharge-14980', diamonds: 14980, price: 1498 },
 ]
 
 export const initialCoupons: RechargeCoupon[] = [

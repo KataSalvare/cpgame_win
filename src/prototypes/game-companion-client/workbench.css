@@ -225,7 +225,6 @@
 .exam-candidate-info__facts dt { color:var(--client-muted); }
 .exam-candidate-info__facts dd { margin:0; }
 .exam-submission-form { display:grid; gap:18px; max-height:62vh; overflow:auto; padding:2px; }
-.exam-submission-form__order { margin:0; color:var(--client-muted); font-size:12px; }
 .exam-submission-field { display:grid; gap:8px; font-size:14px; font-weight:600; }
 .exam-submission-field > span small,.exam-submission-field > small { color:var(--client-muted); font-weight:400; }
 .exam-submission-images figure { position:relative; overflow:hidden; }

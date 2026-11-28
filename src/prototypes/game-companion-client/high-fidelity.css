@@ -129,9 +129,9 @@
 
 [data-prototype-palette="high-fidelity"] .game-companion-client
   :is(.client-button--primary, .client-confirmation__panel .client-button--primary):disabled {
-  border-color: var(--prototype-border);
-  background: var(--prototype-border);
-  color: var(--prototype-text-secondary);
+  border-color: #ffd60a;
+  background: #ffd60a;
+  color: #69717e;
   opacity: 1;
   cursor: not-allowed;
 }
@@ -421,26 +421,25 @@
 
 /* Wallet assets use the supplied illustrations and the reference's soft color blocks. */
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card {
+  position: relative;
   min-height: 246px;
-  padding: 24px;
-  border: 1px solid #eeeae0;
+  padding: 28px;
+  overflow: hidden;
+  border: 0;
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 5px 16px rgb(29 33 41 / 4%);
+  background: linear-gradient(110deg, rgb(240 248 255 / 95%), rgb(205 226 255 / 93%)), url('./assets/wallet-card-soft.webp') center / cover;
+  box-shadow: none;
 }
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card:nth-child(1) {
-  border-color: #ffedaa;
-  background: #fff6d7;
-  box-shadow: inset 0 -7px 0 #ffedb8;
+  background: url('./assets/wallet-card-soft.webp') center / cover;
 }
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card:nth-child(2) {
-  border-color: #f9deea;
-  background: #fff0f6;
-  box-shadow: inset 0 -7px 0 #fbdce9;
+  background: linear-gradient(110deg, rgb(255 241 248 / 96%), rgb(255 207 230 / 95%)), url('./assets/wallet-card-soft.webp') center / cover;
 }
+[data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card:nth-child(4) { background: linear-gradient(110deg, rgb(248 243 255 / 96%), rgb(222 208 255 / 95%)), url('./assets/wallet-card-soft.webp') center / cover; }
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card__heading { gap: 10px; margin-bottom: 14px; }
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card__heading h2 { color: #1d2129; font-size: 18px; font-weight: 700; }
-[data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card__icon { border: 0; background: transparent; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card__icon { position: absolute; top: 36px; right: 38px; width: 92px; height: 92px; border: 0; background: transparent; color: #1d2129; filter: drop-shadow(0 12px 12px rgb(78 76 103 / 14%)); pointer-events: none; }
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card:nth-child(-n+2) .wallet-balance-card__icon { background: center / contain no-repeat url('./assets/wallet-gold-bean.webp'); }
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card:nth-child(2) .wallet-balance-card__icon { background-image: url('./assets/wallet-candy-bean.webp'); }
 [data-prototype-palette="high-fidelity"] .wallet-page .wallet-balance-card:nth-child(-n+2) .wallet-balance-card__icon svg { visibility: hidden; }
@@ -828,20 +827,40 @@
   flex-shrink: 0;
   align-items: center;
   border-radius: 0;
-  margin: -22px -22px 0;
-  padding: 22px 26px 30px;
+  margin: -24px -24px 0;
+  padding: 24px 24px 30px;
 }
 [data-prototype-palette="high-fidelity"] .workbench-service-application-dialog > header { margin: -24px -24px 0; }
 [data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog) > header + * { position: relative; border-radius: 18px 18px 0 0; }
 [data-prototype-palette="high-fidelity"] .workbench-service-application-dialog > header + p { margin-top: -10px; padding: 18px 0 0; background: #fff; }
-[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog > header { min-height: 92px; padding: 22px 26px 30px; }
-[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog > .client-content { position: relative; border-radius: 18px 18px 0 0; margin-top: -10px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog > header { box-sizing: border-box; min-height: 92px; border: 0; padding: 22px 26px; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog:not(.is-payment, .is-completed) > header h2 { margin: 0; color: #1d2129; font-size: 20px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog > .client-content { position: relative; z-index: 2; border-radius: 18px 18px 0 0; margin-top: -10px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .wallet-recharge-dialog:not(.is-payment, .is-completed) > .client-content { background: #f7f7fa; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .wallet-recharge-dialog :is(.store-main-card, .store-summary-card) { border: 0; background: #fff; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .recharge-package,
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .payment-method,
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .recharge-amount-field > div,
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .recharge-coupon-picker { border-color: transparent; background: #f3f4f9; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .recharge-amount-field input { background: transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .wallet-recharge-dialog .recharge-amount-field input:focus-visible { outline: 0; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .recharge-coupon-trigger { border-color: transparent; border-radius: 10px; background: #f3f4f9; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .recharge-coupon-menu .directory-select__option.is-selected { background: #fff3b8; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .payment-method__mark { border: 0; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .payment-method:nth-child(1) .payment-method__mark img { filter: invert(48%) sepia(86%) saturate(1481%) hue-rotate(87deg) brightness(96%); }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .payment-method:nth-child(2) .payment-method__mark img { filter: invert(42%) sepia(98%) saturate(2777%) hue-rotate(184deg) brightness(99%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .wallet-recharge-dialog .store-submit-button:not(:disabled) { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .recharge-package > b { color: #8d98a8; font-weight: 400; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog :is(.recharge-package, .payment-method):hover { background: #fff9e4; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog :is(.recharge-package, .payment-method).is-active { border-color: transparent; background: #fff3b8; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog .payment-method.is-active .payment-method__radio { border-color: #ffc800; background: #ffc800; box-shadow: inset 0 0 0 3px #fff8db; }
+[data-prototype-palette="high-fidelity"] .wallet-recharge-dialog :is(.recharge-amount-field > div, .recharge-coupon-picker):focus-within { border-color: #ffc800; box-shadow: 0 0 0 2px rgb(255 200 0 / 18%); }
 [data-prototype-palette="high-fidelity"] :is(.checkout-order-notice-dialog, .match-dialog--notice) > header { min-height: 92px; align-items: center; border-radius: 0; padding: 22px 26px 30px; }
 [data-prototype-palette="high-fidelity"] :is(.checkout-order-notice-dialog .checkout-notice, .match-dialog--notice > .match-notice-tabs) { position: relative; border-radius: 18px 18px 0 0; margin-top: -10px; overflow: hidden; background: #fff; }
 [data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog) :is(footer, .checkout-notice > footer) { gap: 10px; border: 0; }
 [data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog) :is(footer, .checkout-notice > footer) .client-button { min-height: 40px; border: 0; border-radius: 999px; padding-inline: 18px; }
 [data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog) footer .client-button--primary { flex: 1 1 0; }
-[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog, .wallet-recharge-dialog) .client-button--primary:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
+[data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog, .wallet-recharge-dialog) .client-button--primary:disabled { color: #69717e; opacity: 1; }
 [data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog, .match-dialog, .checkout-order-notice-dialog, .wallet-recharge-dialog) > header :is(.client-icon-button, .windows-icon-button, .workbench-dialog-close, .order-action-dialog__close) { border: 0; border-radius: 50%; background: rgb(255 255 255 / 65%); }
 [data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog) > header { position: relative; border-radius: 22px 22px 0 0; }
 [data-prototype-palette="high-fidelity"] :is(.bean-exchange-dialog, .bean-withdraw-dialog, .workbench-service-application-dialog) > header::after { position: absolute; right: 0; bottom: 0; left: 0; height: 10px; border-radius: 18px 18px 0 0; background: #fff; content: ''; pointer-events: none; }
@@ -853,7 +872,7 @@
 [data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button { min-height: 40px; border: 0; border-radius: 999px; padding-inline: 18px; }
 [data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button--secondary { background: #f1f2f7; color: #434c59; }
 [data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button--primary:not(:disabled) { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; }
-[data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
+[data-prototype-palette="high-fidelity"] .match-panel__matching-actions .client-button--secondary:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
 [data-prototype-palette="high-fidelity"] .match-panel__matching { gap: 16px; padding: 24px; background: #f2f3f8; }
 [data-prototype-palette="high-fidelity"] .match-progress { gap: 10px; border-radius: 16px; padding: 24px 16px; background: #fff; }
 [data-prototype-palette="high-fidelity"] .match-progress > strong { color: #1d2129; font-size: 18px; }
@@ -1105,11 +1124,11 @@
 [data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > header h2 { color: #1d2129; font-size: 20px; font-weight: 700; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > header .client-icon-button { border: 0; border-radius: 50%; background: rgb(255 255 255 / 65%); }
 [data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog .premium-topup-field input { border: 0; border-radius: 10px; background: #f2f3f9; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > footer { display: flex; gap: 11px; border: 0; padding-top: 16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > footer { display: flex; gap: 11px; border: 0; padding-top: 20px; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > footer .client-button { flex: 1 1 0; min-width: 0; height: 48px; min-height: 48px; border: 0; border-radius: 9999px; padding-inline: 16px; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > footer .client-button--secondary { background: #f1f2f7; color: #434c59; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > footer .client-button--primary:not(:disabled) { background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #292200; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > footer .client-button:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .premium-topup-dialog > footer .client-button--secondary:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .wallet-recharge-dialog:is(.is-payment, .is-completed) > header { min-height: 68px; padding: 16px 24px 20px; }
 
 [data-prototype-palette="high-fidelity"] .woodpecker-page .woodpecker-ticket { border: 0; border-radius: 14px; background: #fff; box-shadow: none; }
@@ -1158,13 +1177,13 @@
 
 /* Service review uses the standard branded header and a single full-width action. */
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog { overflow: hidden; border: 0; border-radius: 22px; padding: 0; background: #fff; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > header { position: relative; box-sizing: border-box; flex: 0 0 auto; min-height: 92px; align-items: center; border: 0; border-radius: 0; padding: 22px 26px 30px; background: radial-gradient(ellipse at 90% 8%, #fff4ad, transparent 55%), linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > header { position: relative; box-sizing: border-box; flex: 0 0 auto; min-height: 92px; align-items: center; border: 0; border-radius: 0; padding: 22px 24px 30px; background: radial-gradient(ellipse at 90% 8%, #fff4ad, transparent 55%), linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5); }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > header h2 { font-size: 20px; font-weight: 700; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > header .order-action-dialog__close { border: 0; border-radius: 50%; background: rgb(255 255 255 / 65%); }
-[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-form { position: relative; border-radius: 18px 18px 0 0; margin-top: -10px; padding: 20px 26px 12px; background: #fff; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > footer { margin: 0; border: 0; padding: 10px 26px 24px; background: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-form { position: relative; border-radius: 18px 18px 0 0; margin-top: -10px; padding: 20px 24px 0; background: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > footer { margin: 0; border: 0; padding: 20px 24px 24px; background: #fff; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > footer .client-button { flex: 1 1 100%; height: 48px; min-height: 48px; border: 0; border-radius: 9999px; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > footer .client-button:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-dialog > footer .client-button--secondary:disabled { background: #e8eaf0; color: #87909e; opacity: 1; }
 
 /* Review ratings use the same orange as the homepage rating stars. */
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-rating button.is-selected { color: #ff7821; }
@@ -1284,3 +1303,58 @@
 [data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer, .order-renew-dialog > footer, .order-review-dialog > footer, .checkout-order-notice-dialog > footer, .match-dialog > footer, .system-path-dialog > footer, .gc-login-dialog > footer, .wallet-recharge-dialog .checkout-success-card__actions, .wallet-recharge-dialog .wallet-recharge-payment__actions, .transaction-result-dialog .checkout-success-card__actions) > .client-button:is(.client-button--primary, .client-button--secondary):not(:disabled):hover { filter: brightness(1.05); }
 [data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer, .order-renew-dialog > footer, .order-review-dialog > footer, .checkout-order-notice-dialog > footer, .match-dialog > footer, .system-path-dialog > footer, .gc-login-dialog > footer, .wallet-recharge-dialog .checkout-success-card__actions, .wallet-recharge-dialog .wallet-recharge-payment__actions, .transaction-result-dialog .checkout-success-card__actions) > .client-button:is(.client-button--primary, .client-button--secondary):not(:disabled):active { transform: translateY(1px); }
 @media (prefers-reduced-motion: reduce) { [data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer) > .client-button { transition: none; } }
+
+/* Withdrawal uses the yellow-black platform dialog and control styles. */
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog:not(.transaction-result-dialog) { gap: 0; border-radius: 22px; padding: 24px; background: #fff; box-shadow: 0 20px 60px rgb(33 27 14 / 22%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog:not(.transaction-result-dialog) > header { position: relative; top: auto; min-height: 92px; align-items: center; justify-content: space-between; margin: -24px -24px 16px; border-radius: 22px 22px 0 0; padding: 22px 26px 30px; background: radial-gradient(ellipse at 90% 8%, #fff4ad, transparent 55%), linear-gradient(115deg, #ffd0c0, #ffeab6 55%, #fff1a5); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog:not(.transaction-result-dialog) > header::after { display: block; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog:not(.transaction-result-dialog) > header h2 { margin: 0; color: #1d2129; font-size: 20px; font-weight: 700; line-height: 28px; text-align: left; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog:not(.transaction-result-dialog) > header .client-icon-button { position: static; background: rgb(255 255 255 / 65%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog > .bean-withdraw-balance { margin: 0 0 16px; border: 0; border-radius: 12px; background: #fff0f6; box-shadow: inset 0 -7px 0 #fbdce9; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog > :is(.bean-payout-list, .bean-account-name-row, .bean-account-field) { margin-top: 16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog > footer { gap: 11px; margin-top: 20px; padding-top: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog > footer .client-button { flex: 1 1 0; height: 48px; min-height: 48px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog :is(.bean-payout-choice, .bean-payout-card) { border: 1px solid #e5e6eb; border-radius: 8px; background: #fff; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-payout-choice.is-active { border-color: #e2e5eb; background: #f6f7f9; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-payout-card.is-selected { border-color: #ffe59a; background: #fff9e4; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-payout-card__delete { color: #e5484d; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-withdraw-amount > div:not(.bean-withdraw-amount__heading) { border: 1px solid transparent; border-radius: 10px; background: #f2f3f9; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-withdraw-amount input { height: 100%; border: 0; padding: 0; outline: 0; background: transparent; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-account-field input { height: 44px; border: 1px solid transparent; border-radius: 10px; padding: 0 12px; background: #f2f3f9; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-account-field input:disabled { border-color: #e5e6eb; background: #f6f7fd; color: #4e5969; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog :is(.bean-withdraw-amount > div:not(.bean-withdraw-amount__heading):focus-within, .bean-account-field input:focus-visible) { border-color: #4e5969; outline: 0; box-shadow: inset 0 0 0 1px #4e5969; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog :is(.bean-withdraw-amount__heading button.is-active, .bean-account-type .orders-filter-chip.is-active) { background: #fff4bd; color: #1d2129; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .transaction-agreement input { accent-color: #e6b800; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-withdraw-submit { height: 48px; min-height: 48px; border: 0; border-radius: 9999px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-withdraw-submit:not(:disabled) { color: #332800; background: var(--yb-glass-primary); box-shadow: var(--yb-glass-primary-shadow); }
+
+/* 禁用主操作保留对应的正常底色，只降低文字对比度。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.match-panel__submit, .match-panel__matching-actions .client-button--primary, .premium-topup-dialog > footer .client-button--primary, .wallet-recharge-dialog .store-submit-button, .identity-flow-dialog .client-button--primary):disabled {
+  border-color: #ffd60a; background: linear-gradient(160deg, #ffe764, #ffd60a 68%, #f9bd24); color: #69717e; opacity: 1;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .checkout-pay-button:disabled {
+  border-color: #e7bc00; background: linear-gradient(160deg, #fff3a5 0%, #ffe04b 42%, #ffd60a 70%, #f3bb00 100%); color: #69717e; opacity: 1;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.windows-dialog-panel__footer, .store-benefit-dialog > footer, .workbench-dialog > footer, .order-renew-dialog > footer, .order-review-dialog > footer, .checkout-order-notice-dialog > footer, .match-dialog > footer, .system-path-dialog > footer, .gc-login-dialog > footer) > .client-button.client-button--primary:disabled,
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-withdraw-dialog .bean-withdraw-submit:disabled {
+  border-color: transparent; background: var(--yb-glass-primary); box-shadow: var(--yb-glass-primary-shadow); color: #69717e; opacity: 1;
+}
+
+/* Bean exchange uses the wallet's candy and gold colors for the converter. */
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-dialog:not(.transaction-result-dialog) > header h2 { margin: 0; color: #1d2129; font-size: 20px; font-weight: 700; line-height: 28px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-dialog > .bean-exchange-balance { gap: 10px; border-radius: 12px; padding: 18px 20px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-dialog > .bean-exchange-balance > strong { font-size: 28px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__heading { margin-bottom: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__row { min-height: 88px; border: 0; border-radius: 14px; padding: 16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__row::before { width: 32px; height: 32px; flex: 0 0 32px; background: center / contain no-repeat; content: ''; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__input { background: linear-gradient(180deg, #ffd7e9, #fff0f6); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__input::before { background-image: url('./assets/wallet-candy-bean.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__output { background: linear-gradient(180deg, #fff1c4, #fff9df); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__output::before { background-image: url('./assets/wallet-gold-bean.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__output > span { flex: 1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__input input { height: auto; border: 0; padding: 0; background: transparent; box-shadow: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__input:focus-within { outline: 2px solid #6b5962; outline-offset: -2px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__input input:focus-visible { outline: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__icon { width: 36px; height: 36px; border: 0; margin: -12px 0; background: #fff; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-converter__icon svg { transform: rotate(90deg); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .bean-exchange-notes { border: 0; background: #f2f3f9; box-shadow: none; }
