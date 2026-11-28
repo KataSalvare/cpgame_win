@@ -4,7 +4,7 @@ import { useCompanionDirectoryLogic } from '../hooks/useClubDetailLogic'
 import { CompanionCard } from './CompanionCard'
 import { PageStatePanel } from './PageStatePanel'
 import { GameFilter } from './GameFilter'
-import { ChevronDown, RotateCcw, Search, X } from 'lucide-react'
+import { ChevronDown, Flame, RotateCcw, Search, Sparkles, Star, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 type PageState = 'normal' | 'loading' | 'empty' | 'error'
@@ -32,9 +32,9 @@ const sortLabels: Record<string, string> = {
 }
 
 const talentCategories = [
-  { id: 'all', label: '全部' },
-  { id: 'popular', label: '人气陪玩' },
-  { id: 'star', label: '明星大神' },
+  { id: 'all', label: '推荐', tabIcon: <Sparkles size={16} aria-hidden="true" /> },
+  { id: 'popular', label: '人气陪玩', tabIcon: <Flame size={16} aria-hidden="true" /> },
+  { id: 'star', label: '明星大神', tabIcon: <Star size={16} aria-hidden="true" /> },
 ] as const
 
 export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion, onChatWithCompanion, searchable = false, showTalentCategoryFilter = false, companionSource = companions }: Props) {
@@ -57,7 +57,7 @@ export function CompanionDirectory({ clubId, pageState, onRetry, onOpenCompanion
 
   return <section className="club-members-section" aria-label="陪玩列表">
     <div className={`companion-directory-filters${showTalentCategoryFilter ? ' companion-directory-filters--talents' : ''}`}>
-    {showTalentCategoryFilter && <CategoryTabs label="陪玩分类筛选" items={talentCategories} value={talentCategory} onChange={setTalentCategory} className="talent-category-filter" />}
+    {showTalentCategoryFilter && <CategoryTabs variant="filter" label="陪玩分类筛选" items={talentCategories} value={talentCategory} onChange={setTalentCategory} className="talent-category-filter" />}
     <div className="club-game-filter"><GameFilter gameId={logic.gameId} onSelect={logic.setGameId} /></div>
     <div className={`club-filter-panel${searchable ? ' club-filter-panel--with-search' : ''}`}>
       {searchable && <label className="companion-directory-search"><Search size={15} aria-hidden="true" /><input type="search" value={logic.searchQuery} onChange={(event) => logic.setSearchQuery(event.target.value)} placeholder="搜索陪玩名称或 ID" aria-label="搜索陪玩名称或 ID" />{logic.searchQuery && <button type="button" className="windows-icon-button" aria-label="清空陪玩搜索" onClick={() => logic.setSearchQuery('')}><X size={14} /></button>}</label>}

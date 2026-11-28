@@ -14,11 +14,17 @@ const FILE_API = '/api/menu-tree'
 // Keep required entries independent of the editable menu tree persisted by the API.
 const withRequiredDefaults = (tree: MenuTree): MenuTree => {
   const contains = (nodes: MenuNode[]): boolean => nodes.some(node => node.id === '/game-companion-update' || contains(node.children))
-  if (contains(tree.frontend ?? [])) return tree
+  const adminIds = ['/admin/companion-ui-panels', '/admin/companion-ui-framework']
+  const admin = [...(tree.admin ?? [])]
+  for (const id of adminIds) {
+    const hasId = (nodes: MenuNode[]): boolean => nodes.some(node => node.id === id || hasId(node.children))
+    if (!hasId(admin)) admin.push({ id, children: [] })
+  }
+  if (contains(tree.frontend ?? [])) return { ...tree, admin }
   const insert = (nodes: MenuNode[]): MenuNode[] => nodes.map(node => node.id === '/game-companion-system-settings'
     ? { ...node, children: [...node.children, { id: '/game-companion-update', children: [] }] }
     : { ...node, children: insert(node.children) })
-  return { ...tree, frontend: insert(tree.frontend ?? []) }
+  return { ...tree, admin, frontend: insert(tree.frontend ?? []) }
 }
 
 const makeFlatTree = (ids: string[]): MenuNode[] => ids.map(id => ({ id, children: [] }))

@@ -112,7 +112,7 @@ export function CouponsPage({ pageState, onRetry, coupons, onBack }: StateProps 
   const [tab, setTab] = useState<RechargeCoupon['status']>('可用')
   if (pageState !== 'normal') return <div className="client-content account-page"><StateView pageState={pageState} onRetry={onRetry} /></div>
   const visibleCoupons = coupons.filter((coupon) => coupon.status === tab)
-  return <div className="client-content account-page store-page"><button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={15} />返回钱包</button><section className="client-card coupon-page-card"><CategoryTabs className="wallet-ledger-category-tabs wallet-ledger-filter-tabs" label="优惠券状态" items={(['可用', '已过期', '已使用'] as const).map(item => ({ id: item, label: `${item} ${coupons.filter(coupon => coupon.status === item).length}` }))} value={tab} onChange={setTab} />{visibleCoupons.length ? <div className="wallet-coupon-list">{visibleCoupons.map((coupon) => <CouponTile coupon={coupon} key={coupon.id} />)}</div> : <div className="account-empty-inline"><Ticket size={22} /><strong>暂无{tab}优惠券</strong></div>}</section></div>
+  return <div className="client-content account-page store-page"><button type="button" className="client-back-link" onClick={onBack}><ArrowLeft size={15} />返回钱包</button><section className="client-card coupon-page-card"><CategoryTabs variant="filter" className="wallet-ledger-category-tabs wallet-ledger-filter-tabs" label="优惠券状态" items={(['可用', '已过期', '已使用'] as const).map(item => ({ id: item, label: `${item} ${coupons.filter(coupon => coupon.status === item).length}` }))} value={tab} onChange={setTab} />{visibleCoupons.length ? <div className="wallet-coupon-list">{visibleCoupons.map((coupon) => <CouponTile coupon={coupon} key={coupon.id} />)}</div> : <div className="account-empty-inline"><Ticket size={22} /><strong>暂无{tab}优惠券</strong></div>}</section></div>
 }
 
 function CouponTile({ coupon }: { coupon: RechargeCoupon }) {
@@ -168,7 +168,7 @@ export function PremiumCardDetailPage({ transactions }: { transactions: PremiumC
   const filteredTransactions = transactions.filter((entry) => filter === '全部' || (filter === '收入' ? entry.amount > 0 : entry.amount < 0))
   return <div className="client-content account-page store-page premium-card-detail-page">
     <section className="client-card premium-card-detail-transactions">
-      <CategoryTabs className="wallet-ledger-category-tabs wallet-ledger-filter-tabs" label="收支类型筛选" items={(['全部', '收入', '支出'] as const).map(item => ({ id: item, label: item }))} value={filter} onChange={setFilter} />
+      <CategoryTabs variant="filter" className="wallet-ledger-category-tabs wallet-ledger-filter-tabs" label="收支类型筛选" items={(['全部', '收入', '支出'] as const).map(item => ({ id: item, label: item }))} value={filter} onChange={setFilter} />
       {filteredTransactions.length ? <div className="premium-card-transaction-list">{filteredTransactions.map((entry) => <article className="premium-card-transaction" key={entry.id}><span className="premium-card-transaction__icon"><History size={15} /></span><div><strong>{entry.title}</strong><small>{entry.date}</small></div><strong className={entry.amount > 0 ? 'is-income' : ''}>{entry.amount > 0 ? '+' : ''}{entry.amount.toLocaleString()} 金豆</strong></article>)}</div> : <div className="account-empty-inline"><History size={20} /><strong>{transactions.length ? `暂无${filter}记录` : '暂无交易明细'}</strong></div>}
     </section>
   </div>

@@ -367,6 +367,7 @@
 [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .service-offer__price { color: #d83a32; font-size: 18px; }
 [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .service-offer > .client-voice-button { position: absolute; top: 66px; left: 12px; z-index: 1; margin: 0; }
 [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .companion-detail-page__actions { border: 0; border-radius: 16px 16px 0 0; background: rgb(244 245 251 / 94%); }
+[data-prototype-palette="high-fidelity"] .game-companion-drawer .companion-detail-page--panel .companion-detail-page__actions { background: #f4f5fb; }
 [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .companion-profile-card__more > .client-icon-button { border: 0; background: transparent; box-shadow: none; }
 [data-prototype-palette="high-fidelity"] .companion-profile-card__club[data-club-id="club-001"] .client-avatar { background: #101137 url('./assets/generated/club-avatar.webp') center / cover no-repeat; }
 [data-prototype-palette="high-fidelity"] .companion-profile-card__club[data-club-id="club-001"] .client-avatar > * { visibility: hidden; }
@@ -385,7 +386,7 @@
 [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .companion-detail-page__actions .client-button { transition: transform 160ms ease, box-shadow 160ms ease; }
 [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .companion-detail-page__actions .client-button:hover { transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) { [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .companion-detail-page__actions .client-button { transition: none; } [data-prototype-palette="high-fidelity"] .companion-detail-page--panel .companion-detail-page__actions .client-button:hover { transform: none; } }
-[data-prototype-palette="high-fidelity"] .companion-directory-filters--talents { background: #e9ebef; }
+[data-prototype-palette="high-fidelity"] .companion-directory-filters--talents { background: transparent; }
 [data-prototype-palette="high-fidelity"] .companion-directory-filters--talents .talent-category-filter__option { min-height: 44px; font-size: 20px; }
 
 /* Wallet assets use the supplied illustrations and the reference's soft color blocks. */
@@ -506,11 +507,11 @@
 }
 [data-prototype-palette="high-fidelity"] :is(.wallet-ledger-panel, .premium-card-detail-transactions, .coupon-page-card) .wallet-ledger-filter-tabs .theme-category-tabs__tab {
   border-radius: 999px;
-  background: #e6e8ef;
+  background: transparent;
   color: #4e5969;
 }
 [data-prototype-palette="high-fidelity"] :is(.wallet-ledger-panel, .premium-card-detail-transactions, .coupon-page-card) .wallet-ledger-filter-tabs .theme-category-tabs__tab.is-active {
-  background: #ffd60a;
+  background: #fff8d6;
   color: #1d2129;
 }
 
@@ -1130,3 +1131,34 @@
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-subject[data-review-club-id="club-001"] > .client-avatar { background: #101137 url('./assets/generated/club-avatar.webp') center / cover no-repeat; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-subject[data-review-club-id="club-003"] > .client-avatar { background: #28213b url('./assets/generated/club-cover-03.webp') center / cover no-repeat; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-subject:is([data-review-companion-id="companion-001"], [data-review-companion-id="companion-006"], [data-review-club-id="club-001"], [data-review-club-id="club-003"]) > .client-avatar > * { visibility: hidden; }
+
+/* 内容画布：消息页和语音房保留各自配色。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__main:not(:has(.messages-page, .voice-page)) { background: #f7f5f1; }
+
+/* 个人中心、订单和工作台以表面颜色区分模块。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.personal-center-page, .orders-list-card) .client-card,
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.personal-center-page .client-card, .orders-list-card) {
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: none;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.personal-center-page, .orders-list-card) :is(.account-settings-list button, .personal-order-stats button, .account-balance-mini, .personal-gift-tile, .personal-empty-state) {
+  border: 0;
+  border-radius: 10px;
+  background: #f7f5f1;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-summary-values .account-balance-mini:first-child { background: #fff6d7; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-summary-values .account-balance-mini:nth-child(2) { background: #fff0f6; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.personal-center-page, .orders-list-card) :is(.workbench-request, .workbench-order, .order-item) {
+  border: 0;
+  border-radius: 10px;
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: #f7f5f1;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.personal-center-page, .orders-list-card) :is(.workbench-request, .workbench-order, .order-item):hover { background: #edeae4; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-page :is(.workbench-services-heading, .workbench-services-games, .workbench-service-play h3, .workbench-service-level + .workbench-service-level) { border: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-page .workbench-services-games { background: #edeae4; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-page .workbench-services-games button.is-active { background: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.personal-center-page, .orders-list-card) :is(.account-settings-list button, .personal-order-stats button):hover { background: #edeae4; }

@@ -973,3 +973,37 @@
 /* Support staff cards float above the dialog surface without outlines. */
 [data-prototype-palette="high-fidelity"] .club-support-selection-dialog .club-support-list { padding: 4px; }
 [data-prototype-palette="high-fidelity"] .club-support-selection-dialog .club-support-staff { border: 0; border-radius: 12px; background: #fff; box-shadow: 0 3px 12px rgb(33 38 52 / 9%); }
+
+/* 消息与语音房直接融入客户端内容区。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__main:has(:is(.messages-page, .voice-page)) { padding: 0; background: #f5f6f8; }
+[data-prototype-palette="high-fidelity"] .messages-page .messages-layout,
+[data-prototype-palette="high-fidelity"] .voice-page .voice-workspace { gap: 8px; background: #e9eaed; }
+[data-prototype-palette="high-fidelity"] .messages-page :is(.messages-list-panel, .chat-panel, .chat-empty-state, .friend-preview),
+[data-prototype-palette="high-fidelity"] .voice-page :is(.voice-room-tree, .voice-stage, .room-chat-panel) { border: 0; border-radius: 12px; background: #f5f6f8; }
+[data-prototype-palette="high-fidelity"] .messages-page .messages-list-panel,
+[data-prototype-palette="high-fidelity"] .voice-page .voice-room-tree,
+[data-prototype-palette="high-fidelity"] .voice-page .room-chat-panel { box-shadow: none; }
+
+[data-prototype-palette="high-fidelity"] .messages-page :is(.conversation-row.is-active, .social-friend-row.is-active),
+[data-prototype-palette="high-fidelity"] .voice-page .voice-subchannel.is-active > .voice-subchannel__heading-row { background: #e4e6ea; }
+[data-prototype-palette="high-fidelity"] .messages-page .social-search,
+[data-prototype-palette="high-fidelity"] .voice-page .voice-room-search { background: #fff; }
+[data-prototype-palette="high-fidelity"] .messages-page .social-message:not(.is-self) :is(.social-message__text, .social-message__voice, .social-message__gift),
+[data-prototype-palette="high-fidelity"] .voice-page .room-chat-panel__messages .social-message:not(.is-self) :is(.social-message__text:not(.social-message__text--recalled), .social-message__image, .social-message__gift, .social-message__voice) { background: #fff; }
+[data-prototype-palette="high-fidelity"] .voice-page .voice-seat.is-occupied { background: #fff; }
+
+[data-prototype-palette="high-fidelity"] .messages-page :is(.conversation-row:hover, .social-friend-row:hover),
+[data-prototype-palette="high-fidelity"] .voice-page :is(.voice-room-heading-row:hover, .voice-subchannel > .voice-subchannel__heading-row:hover, .voice-channel-member:hover) { background: #e4e6ea; }
+
+/* 给独立控件保留可见边界，不增加内容区外框。 */
+[data-prototype-palette="high-fidelity"] .messages-page :is(.social-search, .chat-composer),
+[data-prototype-palette="high-fidelity"] .voice-page :is(.voice-room-search, .room-chat-composer, .voice-seat.is-occupied, .voice-members-entry, .voice-mode-trigger, .voice-more-trigger, .voice-create-group-entry, .voice-owner-card__support) { border: 1px solid #cbd0d8; }
+[data-prototype-palette="high-fidelity"] .messages-page .conversation-filter button.is-active { border-color: #cbd0d8; }
+[data-prototype-palette="high-fidelity"] .messages-page .social-message :is(.social-message__text, .social-message__voice, .social-message__gift),
+[data-prototype-palette="high-fidelity"] .voice-page .room-chat-panel__messages .social-message :is(.social-message__text:not(.social-message__text--recalled), .social-message__image, .social-message__gift, .social-message__voice) { box-shadow: 0 0 0 1px #d9dde3; }
+
+/* 栏目间距透出客户端框架背景。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__workspace:has(:is(.messages-page, .voice-page)),
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-client-frame__main:has(:is(.messages-page, .voice-page)),
+[data-prototype-palette="high-fidelity"] .messages-page .messages-layout,
+[data-prototype-palette="high-fidelity"] .voice-page .voice-workspace { background: transparent; }

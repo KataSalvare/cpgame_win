@@ -6,7 +6,8 @@ import { SideDrawer as RightDrawer } from '@/themes/grayscale-prototype/componen
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, CircleHelp, Gamepad2, Headphones, History, LayoutDashboard, MessageCircle, Search, Settings, Sparkles, TreeDeciduous, UserRound, WalletCards } from 'lucide-react'
+import { Gamepad2, Headphones, Search } from 'lucide-react'
+import { MenuIcon } from './components/MenuIcon'
 import { DialogPanel, NotificationToast, WindowsClientFrame, WindowsSidebar, WindowsTitleBar } from '@/components/WindowsClient'
 import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 import { usePrototypeState, type PrototypePreviewProps } from '@/prototypes/previewState'
@@ -61,6 +62,7 @@ import { WorkbenchPage } from './pages/WorkbenchPage'
 import { useWorkbenchLogic } from './hooks/useWorkbenchLogic'
 import clubAdminDashboardReference from './assets/club-admin-dashboard-reference.png'
 import quickMatchGamepad from './assets/quick-match-gamepad.webp'
+import platformLogo from './assets/platform-logo.webp'
 
 const clientNoticeCycleStorageKey = 'game-companion-client-notice-cycle'
 
@@ -508,21 +510,21 @@ export default function GameCompanionClient(props: PrototypePreviewProps<ClientP
 
   return <WindowsClientFrame
     className="game-companion-client"
-    titleBar={<WindowsTitleBar title="超速电竞" leading={<Gamepad2 size={16} />} onClose={requestWindowClose} actions={<><button type="button" className="client-titlebar-search" onClick={() => { setGlobalSearchOpen(true); navigateToClientOverlay('global-search') }} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><UpdateEntry onOpen={() => { setUpdateReminderClosed(false); navigateToClientOverlay('update-reminder') }} /><ScreenRecordingFeature autoOpen={props.entryView === 'screen-recording'} onOpen={() => navigateToClientOverlay('screen-recording')} onClose={() => closeClientOverlay('screen-recording')} /><button type="button" className="client-titlebar-support" onClick={() => { setHelpCenterOpen(true); navigateToClientOverlay('help-center') }} aria-label="帮助中心" data-tooltip="帮助中心"><CircleHelp size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => { if (navigation.page !== 'system-settings') { setSelectedSearchUser(null); navigateToSystemSettings() } }} aria-label="系统设置" data-tooltip="系统设置"><Settings size={16} /></button><button type="button" className="client-titlebar-support" onClick={() => { setPlatformSupportOpen(true); navigateToClientOverlay('platform-support') }} aria-label="平台客服" data-tooltip="平台客服"><Headphones size={16} /></button><button type="button" className="workbench-notice-button" aria-label="客户端通知" data-tooltip="客户端通知" aria-expanded={noticeMode !== 'closed'} aria-controls="workbench-notifications" onClick={toggleClientNotifications}><Bell size={16} /><span className="workbench-notice-count">{pendingNotificationCount}</span></button></>} />}
+    titleBar={<WindowsTitleBar title="超速电竞" leading={<img className="client-platform-logo" src={platformLogo} alt="" />} onClose={requestWindowClose} actions={<><button type="button" className="client-titlebar-search" onClick={() => { setGlobalSearchOpen(true); navigateToClientOverlay('global-search') }} aria-label="全局搜索" title="搜索语音房、俱乐部和用户"><Search size={15} /><span>搜索语音房、俱乐部或用户</span></button><UpdateEntry onOpen={() => { setUpdateReminderClosed(false); navigateToClientOverlay('update-reminder') }} /><ScreenRecordingFeature autoOpen={props.entryView === 'screen-recording'} onOpen={() => navigateToClientOverlay('screen-recording')} onClose={() => closeClientOverlay('screen-recording')} /><button type="button" className="client-titlebar-support" onClick={() => { setHelpCenterOpen(true); navigateToClientOverlay('help-center') }} aria-label="帮助中心" data-tooltip="帮助中心"><MenuIcon name="help" size={19} /></button><button type="button" className="client-titlebar-support" onClick={() => { if (navigation.page !== 'system-settings') { setSelectedSearchUser(null); navigateToSystemSettings() } }} aria-label="系统设置" data-tooltip="系统设置"><MenuIcon name="settings" size={19} /></button><button type="button" className="client-titlebar-support" onClick={() => { setPlatformSupportOpen(true); navigateToClientOverlay('platform-support') }} aria-label="平台客服" data-tooltip="平台客服"><MenuIcon name="support" size={19} /></button><button type="button" className="workbench-notice-button" aria-label="客户端通知" data-tooltip="客户端通知" aria-expanded={noticeMode !== 'closed'} aria-controls="workbench-notifications" onClick={toggleClientNotifications}><MenuIcon name="notification" size={19} /><span className="workbench-notice-count">{pendingNotificationCount}</span></button></>} />}
     sidebar={<WindowsSidebar
       items={[
         { id: 'quick-match', label: isMatching ? (matchCandidatesAvailable ? '等待选人' : '匹配中') : '一键匹配', icon: <img className="client-quick-match-icon" src={quickMatchGamepad} alt="" />, group: 'quick-match', groupTitle: '', variant: 'primary' },
-        { id: 'home', label: '首页', icon: <Building2 size={16} />, group: 'main', groupTitle: '' },
-        { id: 'talents', label: '大神', icon: <Sparkles size={16} />, group: 'main' },
-        { id: 'announcements', label: '公告', icon: <Bell size={16} />, group: 'main', badge: unreadPlatformAnnouncementCount },
-        { id: 'woodpecker', label: '啄木鸟', icon: <TreeDeciduous size={16} />, group: 'main' },
-        { id: 'messages', label: '消息', icon: <MessageCircle size={16} />, group: 'main', badge: social.totalUnread },
-        { id: 'voice-room', label: '我的房间', icon: <Headphones size={16} />, group: 'main' },
-        { id: 'profile', label: '个人中心', icon: <UserRound size={16} />, group: 'account', groupTitle: '' },
-        { id: 'wallet', label: '我的钱包', icon: <WalletCards size={16} />, group: 'account' },
-        { id: 'orders', label: '我的订单', icon: <History size={16} />, group: 'account' },
-        { id: 'workbench', label: '陪玩工作台', icon: <Gamepad2 size={16} />, group: 'workbench', groupTitle: '', badge: workbench.pending },
-        { id: 'club-admin', label: '俱乐部后台', icon: <LayoutDashboard size={16} />, group: 'workbench' },
+        { id: 'home', label: '首页', icon: <MenuIcon name="home" />, group: 'main', groupTitle: '' },
+        { id: 'talents', label: '大神', icon: <MenuIcon name="talents" />, group: 'main' },
+        { id: 'announcements', label: '公告', icon: <MenuIcon name="announcements" />, group: 'main', badge: unreadPlatformAnnouncementCount },
+        { id: 'woodpecker', label: '啄木鸟', icon: <MenuIcon name="woodpecker" />, group: 'main' },
+        { id: 'messages', label: '消息', icon: <MenuIcon name="messages" />, group: 'main', badge: social.totalUnread },
+        { id: 'voice-room', label: '我的房间', icon: <MenuIcon name="voice-room" />, group: 'main' },
+        { id: 'profile', label: '个人中心', icon: <MenuIcon name="profile" />, group: 'account', groupTitle: '' },
+        { id: 'wallet', label: '我的钱包', icon: <MenuIcon name="wallet" />, group: 'account' },
+        { id: 'orders', label: '我的订单', icon: <MenuIcon name="orders" />, group: 'account' },
+        { id: 'workbench', label: '陪玩工作台', icon: <MenuIcon name="workbench" />, group: 'workbench', groupTitle: '', badge: workbench.pending },
+        { id: 'club-admin', label: '俱乐部后台', icon: <MenuIcon name="club-admin" />, group: 'workbench' },
       ]}
       activeId={matchPanelOpen || isMatching ? 'quick-match' : activeNavId}
       onSelect={(id) => id === 'club-admin' ? setClubAdminPreviewOpen(true) : id === 'quick-match' ? openMatchPanel() : id === 'home' ? navigation.goHome() : id === 'voice-room' ? requestVoiceRoomEntry('personal') : navigation.goToPage(id as 'workbench' | 'talents' | 'profile' | 'wallet' | 'orders' | 'messages' | 'announcements' | 'woodpecker')}

@@ -268,6 +268,30 @@
     {
       "id": "/demo/admin/windows-client-components",
       "children": []
+    },
+    {
+      "id": "/admin/companion-ui-foundations",
+      "children": []
+    },
+    {
+      "id": "/admin/companion-ui-forms",
+      "children": []
+    },
+    {
+      "id": "/admin/companion-ui-overlays",
+      "children": []
+    },
+    {
+      "id": "/admin/companion-ui-messages",
+      "children": []
+    },
+    {
+      "id": "/admin/companion-ui-panels",
+      "children": []
+    },
+    {
+      "id": "/admin/companion-ui-framework",
+      "children": []
     }
   ]
 }

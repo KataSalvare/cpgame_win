@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ArrowUpCircle, Download, X } from 'lucide-react'
+import { Download, X } from 'lucide-react'
+import { MenuIcon } from './MenuIcon'
 
 const dismissedKey = 'game-companion-update-popover-dismissed'
 const downloadKey = 'game-companion-update-download-start'
@@ -49,7 +50,7 @@ export function UpdateEntry({ onOpen }: { onOpen: () => void }) {
     {started && !ready ? <div className="client-update-entry__progress" role="progressbar" aria-label="下载更新" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
       <span className="client-update-entry__progress-label">下载更新中</span><div className="client-update-entry__track"><span style={{ width: `${progress}%` }} /></div><span>{progress}%</span>
     </div> : <button type="button" className="client-update-entry__trigger" aria-label="版本更新" aria-expanded={open} aria-controls="client-update-popover" onClick={() => { if (open) close(); else setOpen(true) }}>
-      <ArrowUpCircle size={18} aria-hidden="true" /><span>新版</span>
+      <MenuIcon name="update" size={19} /><span>新版</span>
     </button>}
     {open && <div id="client-update-popover" className="client-update-entry__popover" role={ready ? 'status' : undefined}>
       <button type="button" className="client-update-entry__content" onClick={() => { if (ready) resetUpdate(); else { close(); onOpen() } }}>

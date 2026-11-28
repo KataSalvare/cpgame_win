@@ -1569,7 +1569,7 @@ function RoomChatPanel({ messages, onSend, onRecallMessage, hidden = false, coll
   </section>
 }
 
-function ChatMessage({ message, selfId = currentSocialUser.id, identityMode = 'all', showInlineTime = true, onReviewChange, playing, onTogglePlay, onAvatarClick, onAvatarContextMenu, onOpenVoiceRoom, onContextMenu }: { message: SocialMessage; selfId?: string; identityMode?: 'all' | 'direct' | 'group'; showInlineTime?: boolean; onReviewChange?: (rating: number, submitted: boolean) => void; playing: boolean; onTogglePlay: () => void; onAvatarClick?: () => void; onAvatarContextMenu?: (event: ReactMouseEvent<HTMLButtonElement>) => void; onOpenVoiceRoom?: (roomId: string, channelId: string) => void; onContextMenu?: (event: ReactMouseEvent<HTMLElement>) => void }) {
+export function ChatMessage({ message, selfId = currentSocialUser.id, identityMode = 'all', showInlineTime = true, onReviewChange, playing, onTogglePlay, onAvatarClick, onAvatarContextMenu, onOpenVoiceRoom, onContextMenu }: { message: SocialMessage; selfId?: string; identityMode?: 'all' | 'direct' | 'group'; showInlineTime?: boolean; onReviewChange?: (rating: number, submitted: boolean) => void; playing: boolean; onTogglePlay: () => void; onAvatarClick?: () => void; onAvatarContextMenu?: (event: ReactMouseEvent<HTMLButtonElement>) => void; onOpenVoiceRoom?: (roomId: string, channelId: string) => void; onContextMenu?: (event: ReactMouseEvent<HTMLElement>) => void }) {
   const isSelf = message.senderId === selfId
   const giftIcons = [Star, HandHeart, BatteryCharging, UsersRound, Sparkles, Orbit]
   const giftIndex = gifts.findIndex((gift) => gift.id === message.gift?.id)

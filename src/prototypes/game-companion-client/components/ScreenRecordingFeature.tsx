@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { Circle, CircleStop, Pause, Play, Video } from 'lucide-react'
+import { Circle, CircleStop, Pause, Play } from 'lucide-react'
+import { MenuIcon } from './MenuIcon'
 import { NotificationToast } from '@/components/WindowsClient'
 import { ConfirmationDialog } from '@/prototypes/game-companion-client/components/ConfirmationDialog'
 
@@ -172,7 +173,7 @@ export function ScreenRecordingFeature({ autoOpen = false, onOpen, onClose }: { 
       data-tooltip={recordingState === 'recording' ? `录制中 ${formatDuration(elapsedSeconds)}` : recordingState === 'paused' ? `已暂停 ${formatDuration(elapsedSeconds)}` : '屏幕录制'}
       aria-label={recordingState === 'recording' ? `屏幕录制中，${formatDuration(elapsedSeconds)}` : recordingState === 'paused' ? `屏幕录制已暂停，${formatDuration(elapsedSeconds)}` : '屏幕录制'}
     >
-      {recordingState === 'recording' ? <Circle size={13} fill="currentColor" aria-hidden="true" /> : <Video size={15} aria-hidden="true" />}
+      {recordingState === 'recording' ? <Circle size={13} fill="currentColor" aria-hidden="true" /> : <MenuIcon name="record" size={19} />}
     </button>
 
     {promptOpen && <ConfirmationDialog

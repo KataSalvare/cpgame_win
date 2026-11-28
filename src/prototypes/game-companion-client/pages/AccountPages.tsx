@@ -216,7 +216,7 @@ export function WalletLedgerPanel({ entries, pendingEntries }: { entries: readon
   const hasPendingTab = pendingEntries !== undefined
   return <div className="client-content account-page wallet-ledger-panel">
     {hasPendingTab && <CategoryTabs className="wallet-ledger-category-tabs" label="糖豆明细类型" items={[{ id: 'available', label: '可提现糖豆' }, { id: 'pending', label: '待结算糖豆' }, { id: 'withdrawals', label: '提现记录' }]} value={activeTab} onChange={setActiveTab} />}
-    {activeTab === 'available' ? <><CategoryTabs className="wallet-ledger-category-tabs wallet-ledger-filter-tabs" label="收支类型筛选" items={(['全部', '收入', '支出'] as const).map(item => ({ id: item, label: item }))} value={filter} onChange={setFilter} />{filteredEntries.length ? <TransactionList entries={filteredEntries} /> : <div className="account-empty-inline"><History size={22} /><strong>{entries.length ? `暂无${filter}记录` : '暂无收支记录'}</strong></div>}</> : activeTab === 'pending' ? <PendingBeanSettlementList entries={pendingEntries ?? []} /> : <BeanWithdrawalList />}
+    {activeTab === 'available' ? <><CategoryTabs variant="filter" className="wallet-ledger-category-tabs wallet-ledger-filter-tabs" label="收支类型筛选" items={(['全部', '收入', '支出'] as const).map(item => ({ id: item, label: item }))} value={filter} onChange={setFilter} />{filteredEntries.length ? <TransactionList entries={filteredEntries} /> : <div className="account-empty-inline"><History size={22} /><strong>{entries.length ? `暂无${filter}记录` : '暂无收支记录'}</strong></div>}</> : activeTab === 'pending' ? <PendingBeanSettlementList entries={pendingEntries ?? []} /> : <BeanWithdrawalList />}
   </div>
 }
 
@@ -285,16 +285,20 @@ export function OrdersPage({ pageState, onRetry, initialTab: tab = '我的下单
   </div> : <div className="account-empty-inline"><History size={22} /><strong>没有符合条件的订单</strong></div>
 
   return <>
-  <div className="client-content account-page">
+  <div className="client-content account-page orders-page">
     <CategoryTabs className="orders-role-tabs" label="订单类型" items={(['我的下单', '我的接单', '考生订单', '考官订单'] as const).map(item => ({ id: item, label: item }))} value={tab} onChange={(item) => { onTabChange(item); onSelectOrder(null); workbench.setSelectedOrderId(null); onSelectExamOrder(null, null) }} />
     {tab === '我的接单' ? <WorkbenchOrdersPanel logic={workbench} onSelectOrder={orderId => { workbench.setSelectedOrderId(orderId); window.location.hash = `page=orders&detail=receiving&order=${encodeURIComponent(orderId)}` }} filter={workbenchFilter} onFilterChange={value => { setWorkbenchFilter(value); workbench.setSelectedOrderId(null) }} query={workbenchSearch} onQueryChange={setWorkbenchSearch} label="接单" /> : tab === '考生订单' || tab === '考官订单' ? <section className="client-card orders-list-card exam-orders-card">
-      {renderOrderSearch(tab)}
+      <div className="orders-filter-toolbar">
       <div className="orders-filter-bar" role="group" aria-label={`按${tab}状态筛选`}>{(['全部', ...examStatuses] as Array<'全部' | ExamOrderStatus>).map(status => <button type="button" key={status} className={`orders-filter-chip${currentExamFilter === status ? ' is-active' : ''}`} aria-pressed={currentExamFilter === status} onClick={() => setExamFilters(current => ({ ...current, [tab]: status }))}>{status}</button>)}</div>
+      {renderOrderSearch(tab)}
+      </div>
       {renderExamOrders(filteredExamOrders)}
     </section> : <section className="client-card orders-list-card">
-      {renderOrderSearch('我的下单')}
+      <div className="orders-filter-toolbar">
       <div className="orders-filter-bar" role="group" aria-label="按订单状态筛选">
         {(['全部', ...orderStatuses] as Array<'全部' | OrderStatus>).map((status) => <button type="button" key={status} className={`orders-filter-chip${filter === status ? ' is-active' : ''}`} aria-pressed={filter === status} onClick={() => { setFilter(status); onSelectOrder(null) }}>{status === '待用户确认' ? '待确认' : status}</button>)}
+      </div>
+      {renderOrderSearch('我的下单')}
       </div>
       {filteredOrders.length === 0 ? <div className="account-empty-inline"><History size={22} /><strong>没有符合条件的订单</strong><button type="button" className="client-button client-button--secondary" onClick={() => { setFilter('全部'); onSelectOrder(null) }}>查看全部订单</button></div> : <div className="orders-list" role="group" aria-label="订单列表">
         <div className="order-list-header"><span>订单号</span><span>陪玩信息</span><span>服务信息</span><span>时长</span><span className="order-price-columns"><span>成单价</span><span>实付</span></span><span>状态 / 快捷操作</span></div>

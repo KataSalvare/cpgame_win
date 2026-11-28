@@ -23,8 +23,10 @@ export function WorkbenchOrdersPanel({ logic: w, filter, onFilterChange, query, 
     return matchesStatus && matchesQuery
   })
   return <section className="client-card orders-list-card workbench-orders-table">
-    <label className="orders-search"><Search size={16} aria-hidden="true" /><span className="sr-only">搜索订单号、用户名称或 ID</span><input type="search" value={query} onChange={event => onQueryChange(event.target.value)} placeholder="搜索订单号、用户名称或 ID" /></label>
+    <div className="orders-filter-toolbar">
     <div className="orders-filter-bar" role="group" aria-label={`按${label}状态筛选`}>{filters.map(status => <button type="button" key={status} className={`orders-filter-chip${filter === status ? ' is-active' : ''}`} aria-pressed={filter === status} onClick={() => onFilterChange(status)}>{status}</button>)}</div>
+    <label className="orders-search"><Search size={16} aria-hidden="true" /><span className="sr-only">搜索订单号、用户名称或 ID</span><input type="search" value={query} onChange={event => onQueryChange(event.target.value)} placeholder="搜索订单号、用户名称或 ID" /></label>
+    </div>
     {filteredOrders.length ? <div className="orders-list" role="group" aria-label={`${label}列表`}>
       <div className="order-list-header"><span>订单号</span><span>玩家信息</span><span>服务信息</span><span>时长</span><span className="order-price-columns"><span>成单价</span><span>实付</span></span><span>状态</span><span>操作</span></div>
       {filteredOrders.map(o => {

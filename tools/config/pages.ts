@@ -127,7 +127,15 @@ const frontendPageConfig: Record<string, PageConfig | PageConfig[]> = {
   ],
 }
 
-const adminPageConfig: Record<string, { path: string; label: string; states: readonly PageStateOption[] }> = {
+const adminPageConfig: Record<string, PageConfig | PageConfig[]> = {
+  'admin-companion-ui-guide': [
+    { path: '/admin/companion-ui-foundations', label: 'UI说明 · 色彩与按钮', entryView: 'foundations', states: identityVerificationPageStates },
+    { path: '/admin/companion-ui-forms', label: 'UI说明 · 输入与选择', entryView: 'forms', states: identityVerificationPageStates },
+    { path: '/admin/companion-ui-framework', label: 'UI说明 · 核心框架', entryView: 'framework', states: identityVerificationPageStates },
+    { path: '/admin/companion-ui-panels', label: 'UI说明 · 浮层面板', entryView: 'panels', states: identityVerificationPageStates },
+    { path: '/admin/companion-ui-messages', label: 'UI说明 · 消息样式', entryView: 'messages', states: identityVerificationPageStates },
+    { path: '/admin/companion-ui-overlays', label: 'UI说明 · 弹窗与标签', entryView: 'overlays', states: identityVerificationPageStates },
+  ],
   'DEMO-admin-windows-client-components': { path: '/demo/admin/windows-client-components', label: 'DEMO Windows 客户端组件', states: demoPageStates },
 }
 
@@ -169,17 +177,13 @@ export const generatePages = (): PageItem[] => {
     if (match) {
       const dirName = match[1]
       const config = adminPageConfig[dirName]
-      if (config) {
-        pages.push({
-          path: config.path,
-          label: config.label,
-          prdPath: `../../src/docs/page-prds/${config.path.replace(/^\//, '').replace(/\//g, '-')}.md`,
-          component: getLazyComponent(loader),
-          category: 'admin',
-          dirName,
-          states: config.states,
-        })
-      }
+      const configs = config ? Array.isArray(config) ? config : [config] : []
+      configs.forEach((item) => pages.push({
+        path: item.path, label: item.label,
+        prdPath: `../../src/docs/page-prds/${item.path.replace(/^\//, '').replace(/\//g, '-')}.md`,
+        entryView: item.entryView, component: getLazyComponent(loader),
+        category: 'admin', dirName, states: item.states,
+      }))
     }
   })
 

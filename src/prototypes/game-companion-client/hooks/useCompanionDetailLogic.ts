@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { servicesByCompanion } from '../data/mockData'
 
-export const SERVICES_PER_PAGE = 20
+export const SERVICES_PER_PAGE = 10
 
 export function useCompanionDetailLogic(companionId: string) {
   const [gameId, setGameId] = useState('all')
