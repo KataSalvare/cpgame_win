@@ -3,7 +3,7 @@ import clubMockCover from '../assets/generated/club-banner.webp'
 import { CategoryTabs } from '@/themes/grayscale-prototype/components/CategoryTabs'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, CalendarDays, CheckCheck } from 'lucide-react'
+import { Bell, BrushCleaning, CalendarDays, CheckCheck } from 'lucide-react'
 import { DialogPanel } from '@/components/WindowsClient'
 import { PageStatePanel } from '../components/PageStatePanel'
 import type { Announcement, AnnouncementCategory } from '../data/announcementMockData'
@@ -37,7 +37,7 @@ export function AnnouncementsPage({ kind, clubName, announcements, categories, p
   return <div className={`client-content announcement-page${presentation === 'panel' ? ' announcement-page--panel' : ''}`}>
     {presentation === 'page' && onBack && <button type="button" className="client-back-link" onClick={onBack}>返回俱乐部</button>}
     {presentation === 'page' && kind === 'club' && <header className="client-page-heading"><div><span className="client-eyebrow">{clubName}</span><h1>{title}</h1></div></header>}
-    <div className="announcement-tabs-row workbench-tab-row"><CategoryTabs variant="filter" className="announcement-filters" label="公告分类" items={(['全部', ...categories] as const).map((category) => ({ id: category, label: category }))} value={activeCategory} onChange={setActiveCategory} />{presentation === 'page' && kind === 'platform' && <button type="button" className="client-button client-button--secondary announcement-read-all" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck size={15} />一键已读</button>}</div>
+    <div className="announcement-tabs-row workbench-tab-row"><CategoryTabs variant="filter" className="announcement-filters" label="公告分类" items={(['全部', ...categories] as const).map((category) => ({ id: category, label: category }))} value={activeCategory} onChange={setActiveCategory} />{presentation === 'page' && kind === 'platform' && <button type="button" className="client-button client-button--secondary announcement-read-all" onClick={onReadAll} disabled={announcements.every((item) => readIds.includes(item.id))}><CheckCheck className="announcement-read-all__grayscale-icon" size={15} /><BrushCleaning className="announcement-read-all__color-icon" size={15} />一键已读</button>}</div>
     <section className="announcement-card client-card" aria-label={`${title}列表`}>
       {visibleAnnouncements.length ? <ul className="announcement-list">
         {visibleAnnouncements.map((announcement) => {

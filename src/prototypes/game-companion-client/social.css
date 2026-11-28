@@ -385,6 +385,7 @@
 .voice-leave-button{position:relative;width:26px;height:24px;color:#c9362b}
 .voice-minimized-float{position:relative;display:grid;width:100%;grid-template-columns:20px minmax(0,1fr);align-items:center;column-gap:8px;border:1px solid var(--client-border);border-radius:6px;margin-bottom:8px;padding:9px 8px;background:var(--prototype-surface, #fff);color:var(--client-text);text-align:left;cursor:pointer}
 .voice-minimized-float>svg{grid-row:span 2}
+.voice-minimized-float__icon{display:none}
 .voice-minimized-float>span:not(.voice-minimized-float__wave){min-width:0;font-size:14px;font-weight:600}
 .voice-minimized-float>small{margin-top:2px;color:var(--client-muted);font-size:12px}
 .voice-minimized-float__wave{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:2px;height:14px}
@@ -1026,3 +1027,59 @@
   max-width: min(var(--client-profile-drawer-width), 100%);
   border-radius: 12px;
 }
+
+.voice-mic-mode__glass{display:none}
+
+/* 消息侧栏覆盖会话，与语音房用户主页保持一致。 */
+[data-prototype-palette="high-fidelity"] .messages-layout > :is(.social-profile-panel, .group-settings-panel) {
+  inset: 0 0 0 auto;
+  width: var(--client-profile-drawer-width);
+  max-width: min(var(--client-profile-drawer-width), 100%);
+  border: 0;
+  border-radius: 12px;
+}
+
+/* 底部操作区贴齐滚动区域，避免内容从下方透出。 */
+[data-prototype-palette="high-fidelity"] :is(.messages-page, .voice-page) .social-profile-panel .companion-detail-page--panel .companion-detail-page__actions {
+  bottom: 0;
+  margin-bottom: -16px;
+  background: #f4f5fb;
+}
+
+/* 高保真群聊设置：精简信息并统一危险操作。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-panel > header small,
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-id__prefix,
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .social-friend-presence { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile > strong,
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .client-user-name { display:contents; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .group-settings-member-avatar { order:0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .client-user-level-badge { order:1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .client-user-name__text { order:2; width:100%; overflow:hidden; font-size:12px; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile > small { order:3; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-actions .group-settings-member-avatar { border:0; background:#fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-danger-zone > .client-button.client-button--secondary:not(:disabled) { border:0; border-radius:9999px; background:var(--yb-glass-secondary); box-shadow:var(--yb-glass-secondary-shadow); color:#c9362b; backdrop-filter:blur(12px); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-danger-zone > .client-button:hover:not(:disabled) { filter:brightness(1.05); }
+
+/* 高保真群资料编辑入口贴近对应内容。 */
+.group-settings-identity--high-fidelity { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-identity--grayscale { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-identity--high-fidelity { display:flex; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-avatar-editor { position:relative; display:block; flex:0 0 auto; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-avatar-editor .group-settings-avatar-upload { position:absolute; right:-4px; bottom:-4px; display:grid; width:22px; height:22px; place-items:center; border:1px solid #fff; border-radius:50%; background:#fff; color:#4e5969; box-shadow:0 2px 6px rgb(31 41 55 / 18%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-identity__info { min-width:0; flex:1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-name-row { display:flex; min-width:0; align-items:center; gap:8px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-name-row h3 { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-name-row .group-settings-edit-name { flex:0 0 auto; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-identity .group-settings-name-form { display:flex; flex-wrap:nowrap; align-items:center; gap:6px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-name-form input { box-sizing:border-box; width:0; min-width:0; height:34px; flex:1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-name-form .client-button { box-sizing:border-box; height:34px; min-height:34px; flex:0 0 auto; padding:0 12px; }
+
+/* 群成员头像与等级徽章。 */
+.group-settings-members-more--high-fidelity-only { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-members-more--high-fidelity-only { display:flex; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-grid[data-expanded="false"] > .group-settings-member-tile:nth-child(n+16) { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .group-settings-member-avatar { width:56px; height:56px; border:0; border-radius:50%; background:transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .group-settings-member-avatar .client-avatar { box-sizing:border-box; width:56px; height:56px; flex:0 0 56px; border:1px solid #efbd37; border-radius:50%; font-size:16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .client-user-level-badge { position:relative; z-index:1; min-width:32px; min-height:18px; margin-top:-13px; border:1px solid #ffc044; border-radius:999px; padding:0 5px; background:linear-gradient(180deg,#ffedaa,#ffba30); color:#6e3900; box-shadow:0 1px 3px rgb(128 75 0 / 20%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-settings-member-profile .client-user-level-badge::before { margin-right:2px; color:#d67c00; content:'◆'; font-size:9px; }
+.group-admin-label--high-fidelity { display:none; }

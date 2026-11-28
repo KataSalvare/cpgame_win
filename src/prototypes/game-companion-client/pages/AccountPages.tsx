@@ -680,7 +680,7 @@ function OrderRenewDialog({ order, diamondBalance, onClose, onOpenRecharge, onRe
 type ReviewTarget = 'companion' | 'club'
 type ReviewImage = { id: string; url: string }
 type ReviewDraft = { rating: number; content: string; images: ReviewImage[]; submitted: boolean }
-const emptyReviewDraft = (): ReviewDraft => ({ rating: 0, content: '', images: [], submitted: false })
+const emptyReviewDraft = (): ReviewDraft => ({ rating: 5, content: '', images: [], submitted: false })
 
 function formatServedClock(minutes = 0) {
   const hours = Math.floor(minutes / 60)
@@ -690,7 +690,9 @@ function formatServedClock(minutes = 0) {
 
 function OrderReviewDialog({ order, clubName, onClose, onSaveReview }: { order: ClientOrder; clubName: string; onClose: () => void; onSaveReview: (orderId: string, review: NonNullable<ClientOrder['review']>) => void }) {
   const dialogRef = useOrderDialogFocus(onClose)
-  const [drafts, setDrafts] = useState<Record<ReviewTarget, ReviewDraft>>(order.review ?? { companion: emptyReviewDraft(), club: emptyReviewDraft() })
+  const [drafts, setDrafts] = useState<Record<ReviewTarget, ReviewDraft>>(order.review ? { companion: order.review.companion, club: order.review.club } : { companion: emptyReviewDraft(), club: emptyReviewDraft() })
+  const [clubRatings, setClubRatings] = useState(order.review?.clubRatings ?? { attitude: order.review?.club.rating ?? 5, experience: order.review?.club.rating ?? 5, efficiency: order.review?.club.rating ?? 5 })
+  const [anonymous, setAnonymous] = useState(order.review?.anonymous ?? false)
   const companion = companions.find((item) => item.id === order.companionId)
   const club = clubs.find((item) => item.id === companion?.clubId)
 
@@ -716,7 +718,7 @@ function OrderReviewDialog({ order, clubName, onClose, onSaveReview }: { order: 
   }
   const removeImage = (target: ReviewTarget, image: ReviewImage) => updateDraft(target, { images: drafts[target].images.filter(item => item.id !== image.id) })
   const submitted = drafts.companion.submitted && drafts.club.submitted
-  const canSubmit = (['companion', 'club'] as const).every((target) => drafts[target].rating > 0 && drafts[target].content.trim().length > 0)
+  const canSubmit = (['companion', 'club'] as const).every((target) => drafts[target].rating > 0 && drafts[target].content.trim().length > 0) && Object.values(clubRatings).every((score) => score > 0)
   const reviewTargets: { id: ReviewTarget; label: string; name: string; initials: string; identityId: string }[] = [
     { id: 'companion', label: '陪玩', name: order.companionName, initials: companion?.initials ?? order.companionInitials, identityId: order.companionId },
     { id: 'club', label: '俱乐部', name: club?.name ?? clubName, initials: club?.initials ?? clubName.slice(0, 2), identityId: '' },
@@ -732,13 +734,14 @@ function OrderReviewDialog({ order, clubName, onClose, onSaveReview }: { order: 
           const draft = drafts[id]
           return <section className="order-review-section" key={id} aria-label={`${label}评价`}>
             <div className="order-review-subject" data-review-companion-id={id === 'companion' ? order.companionId : undefined} data-review-club-id={id === 'club' ? club?.id : undefined}><AvatarMark initials={initials} size="md" /><div><strong>{id === 'companion' ? <UserNameWithLevel name={name} identityId={identityId} /> : name}</strong>{id === 'companion' && companion && <GenderAgeBadge gender={companion.gender} age={companion.age} />}</div></div>
-            <fieldset className="order-review-rating" aria-required="true"><legend>{label}评分</legend><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`${label}${score}分`} aria-pressed={draft.rating === score} className={draft.rating >= score ? 'is-selected' : ''} disabled={submitted} onClick={() => updateDraft(id, { rating: score })}><Star size={22} fill={draft.rating >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{draft.rating ? `${draft.rating} 分` : '请选择分数'}</span></fieldset>
+            {id === 'companion' ? <fieldset className="order-review-rating" aria-required="true"><legend>陪玩评分</legend><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`陪玩${score}分`} aria-pressed={draft.rating === score} className={draft.rating >= score ? 'is-selected' : ''} disabled={submitted} onClick={() => updateDraft(id, { rating: score })}><Star size={22} fill={draft.rating >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{draft.rating} 分</span></fieldset> : (Object.entries({ attitude: '服务态度', experience: '游戏体验', efficiency: '接单效率' }) as [keyof typeof clubRatings, string][]).map(([key, dimension]) => <fieldset className="order-review-rating order-review-rating--dimension" aria-required="true" key={key}><legend>{dimension}</legend><span className="order-review-rating__label" aria-hidden="true">{dimension}</span><div>{[1, 2, 3, 4, 5].map((score) => <button type="button" key={score} aria-label={`${dimension}${score}分`} aria-pressed={clubRatings[key] === score} className={clubRatings[key] >= score ? 'is-selected' : ''} disabled={submitted} onClick={() => setClubRatings(current => ({ ...current, [key]: score }))}><Star size={22} fill={clubRatings[key] >= score ? 'currentColor' : 'none'} /></button>)}</div><span>{clubRatings[key]} 分</span></fieldset>)}
             <label className="order-review-content"><span>{label}评价内容</span><span className="order-review-textarea-wrap"><textarea readOnly={submitted} maxLength={100} value={draft.content} onChange={(event) => updateDraft(id, { content: event.target.value })} placeholder={`分享你对${label}服务的感受`} rows={3} /><small aria-live="polite">{Array.from(draft.content).length}/100</small></span></label>
             {renderReviewImages(id)}
           </section>
         })}
+        <label className="order-review-anonymous"><span><strong>匿名评价</strong><small>开启后将隐藏你的昵称和头像</small></span><input type="checkbox" role="switch" checked={anonymous} disabled={submitted} onChange={event => setAnonymous(event.target.checked)} /></label>
       </div>
-      <footer>{submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <button type="button" className="client-button client-button--primary" disabled={!canSubmit} onClick={() => { const review = { companion: { ...drafts.companion, submitted: true }, club: { ...drafts.club, submitted: true } }; onSaveReview(order.id, review); setDrafts(review) }}>提交</button>}</footer>
+      <footer>{submitted ? <button type="button" className="client-button client-button--primary" onClick={onClose}>完成</button> : <button type="button" className="client-button client-button--primary" disabled={!canSubmit} onClick={() => { const review = { companion: { ...drafts.companion, submitted: true }, club: { ...drafts.club, rating: (clubRatings.attitude + clubRatings.experience + clubRatings.efficiency) / 3, submitted: true }, clubRatings, anonymous }; onSaveReview(order.id, review); setDrafts({ companion: review.companion, club: review.club }) }}>提交</button>}</footer>
     </section>
   </div>
 }

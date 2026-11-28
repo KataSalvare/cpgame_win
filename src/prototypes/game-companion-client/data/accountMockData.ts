@@ -46,7 +46,10 @@ export type OrderTimeSegment = {
   amount?: number | null
 }
 
-export type OrderReview = Record<'companion' | 'club', { rating: number; content: string; images: { id: string; url: string }[]; submitted: boolean }>
+export type OrderReview = Record<'companion' | 'club', { rating: number; content: string; images: { id: string; url: string }[]; submitted: boolean }> & {
+  clubRatings?: { attitude: number; experience: number; efficiency: number }
+  anonymous?: boolean
+}
 
 export type ClientOrder = {
   id: string

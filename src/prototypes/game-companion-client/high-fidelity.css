@@ -642,6 +642,20 @@
 [data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float { padding: 10px; color: #1d2129; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float > svg { color: #9a7400; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float__wave i { background: #b18a00; }
+
+@property --voice-glow-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes voice-border-flow { to { --voice-glow-angle: 360deg; } }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float {
+  isolation: isolate;
+  border: 2px solid transparent;
+  background: linear-gradient(145deg, #fffdf4, #fff5de) padding-box, conic-gradient(from var(--voice-glow-angle), #ffb800, #fff3a3, #f98257, #b98aff, #ffe563, #ffb800) border-box;
+  box-shadow: 0 0 12px rgb(255 185 22 / 40%), 0 0 20px rgb(197 128 255 / 20%), inset 0 1px 1px rgb(255 255 255 / 95%);
+  animation: voice-border-flow 2.8s linear infinite;
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float > svg { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float__icon { display:block; grid-row:span 2; width:28px; height:28px; object-fit:contain; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float { grid-template-columns:28px minmax(0,1fr); }
+@media (prefers-reduced-motion: reduce) { [data-prototype-palette="high-fidelity"] .game-companion-client .voice-minimized-float { animation:none; } }
 [data-prototype-palette="high-fidelity"] .game-companion-client .match-mini-card {
   border: 2px solid #ffd24b;
   border-radius: 999px;
@@ -1168,11 +1182,11 @@
 [data-prototype-palette="high-fidelity"] .game-companion-client .companion-onboarding .assessment-examiners article.is-selected > .client-button[aria-pressed="true"]:not(:disabled) { border: 1px solid #ffd60a; background: #fff9db; box-shadow: none; color: #1d2129; }
 
 /* Update notification uses the yellow and black palette. */
-[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__popover { border: 0; border-radius: 12px; background: #fff9df; box-shadow: 0 6px 18px rgb(81 62 0 / 18%); }
-[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__popover::before { border: 0; background: #fff9df; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__icon { border-radius: 10px; background: linear-gradient(145deg, #ffe96d, #ffd60a); color: #493800; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__popover { border: 1px solid rgb(225 226 230 / 90%); border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgb(35 38 47 / 16%), 0 2px 6px rgb(35 38 47 / 6%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__popover::before { border-color: #e1e2e6; background: #fff; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__icon { border-radius: 10px; background: linear-gradient(145deg, #fff3b7, #ffe06a); color: #705300; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__content strong { color: #1d2129; }
-[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__content small { color: #75652c; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__content small { color: #667080; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .client-update-entry__track span { background: #d6a600; }
 
 /* Service review uses the standard branded header and a single full-width action. */
@@ -1187,6 +1201,7 @@
 
 /* Review ratings use the same orange as the homepage rating stars. */
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-rating button.is-selected { color: #ff7821; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .order-review-anonymous input:checked { background: #ffd60a; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-subject > .client-avatar { overflow: hidden; border: 0; border-radius: 50%; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-subject[data-review-companion-id="companion-001"] > .client-avatar { background: #e9e5f6 url('./assets/generated/user-avatar.webp') center / cover no-repeat; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .order-review-subject[data-review-companion-id="companion-006"] > .client-avatar { background: #e9e5f6 url('./assets/generated/companion-portrait-03.webp') center / cover no-repeat; }
@@ -1436,3 +1451,262 @@
 /* 个人中心俱乐部空态及入驻次操作。 */
 [data-prototype-palette="high-fidelity"] .game-companion-client .personal-center-page .personal-club-module .personal-empty-state { background: #fff; }
 [data-prototype-palette="high-fidelity"] .game-companion-client .personal-center-page .onboarding-card > .client-button.client-button--secondary:not(:disabled) { background: var(--yb-glass-secondary, linear-gradient(155deg, rgb(255 255 255 / 85%), rgb(255 255 255 / 38%) 48%, rgb(220 216 205 / 32%))); color: #35322a; box-shadow: var(--yb-glass-secondary-shadow, inset 0 1px 2px rgb(255 255 255 / 95%), inset 0 -2px 5px rgb(112 105 86 / 10%), 0 3px 9px rgb(62 55 38 / 11%)); backdrop-filter: blur(12px); }
+
+/* 首页、大神和俱乐部的筛选选中态使用轻量黄色玻璃表面。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.home-page, .companion-directory-filters) .home-game-browser :is(.game-choice, .home-game-popover__option).is-active,
+[data-prototype-palette="high-fidelity"] .game-companion-client .home-page .club-filter-group .client-filter-pill.is-active,
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-directory-filters--talents .talent-category-filter .theme-category-tabs__tab.is-active {
+  border-color: #e6b800;
+  background: linear-gradient(155deg, rgb(255 250 219 / 96%) 0%, rgb(255 231 135 / 88%) 52%, rgb(255 214 65 / 76%) 100%);
+  color: #332800;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 90%), inset 0 -2px 4px rgb(166 122 0 / 10%), 0 2px 5px rgb(124 91 0 / 10%);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.home-page, .companion-directory-filters) .home-game-browser :is(.game-choice, .home-game-popover__option).is-active:hover,
+[data-prototype-palette="high-fidelity"] .game-companion-client .home-page .club-filter-group .client-filter-pill.is-active:hover,
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-directory-filters--talents .talent-category-filter .theme-category-tabs__tab.is-active:hover { filter: brightness(.97); }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.home-page, .companion-directory-filters) :is(.game-choice, .home-game-popover__option, .client-filter-pill, .talent-category-filter .theme-category-tabs__tab):focus-visible { outline: 2px solid #795c00; outline-offset: 2px; }
+
+/* 一键匹配中的游戏和俱乐部选中态与页面筛选保持一致。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-panel :is(.home-game-list .game-choice.is-active, .home-game-popover__option.is-active, .match-club-strip__option.is-selected, .match-club-option.is-selected, .match-choice.is-active, .match-service-cascade__option.is-selected) {
+  background: linear-gradient(155deg, rgb(255 250 219 / 96%) 0%, rgb(255 231 135 / 88%) 52%, rgb(255 214 65 / 76%) 100%);
+  color: #332800;
+  box-shadow: inset 0 0 0 1px #e6b800, inset 0 2px 2px rgb(255 255 255 / 90%), inset 0 -2px 4px rgb(166 122 0 / 10%), 0 2px 5px rgb(124 91 0 / 10%);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .match-panel :is(.game-choice, .home-game-popover__option, .match-club-strip__option, .match-club-option, .match-choice, .match-service-cascade__option):focus-visible { outline: 2px solid #795c00; outline-offset: 2px; }
+
+/* 黑名单使用主题危险操作样式，房间弹窗由右上角关闭。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="voice-room-blacklist"] .windows-dialog-panel__footer { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.voice-room-blacklist-row, .personal-blacklist-list article) > .client-button.client-button--secondary:not(:disabled) {
+  border: 0;
+  border-radius: 9999px;
+  color: #c9362b;
+  background: var(--yb-glass-secondary);
+  box-shadow: var(--yb-glass-secondary-shadow);
+  backdrop-filter: blur(12px);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.voice-room-blacklist-row, .personal-blacklist-list article) > .client-button:hover { filter: brightness(1.05); }
+
+/* 邀请弹窗内容与操作区对齐，房间聊天标题保持简洁。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-invite-dialog > .windows-dialog-panel__header p { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-invite-dialog > .windows-dialog-panel__content { gap: 12px; padding: 20px 24px 16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-invite-dialog .voice-invite-search { margin: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-invite-dialog > .windows-dialog-panel__footer { padding: 0 24px 24px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .room-chat-panel > header h2 svg { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .room-chat-panel > header h2 { font-weight: 700; }
+
+/* 公告操作沿用次级玻璃表面，访问记录操作与标签等高。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .announcement-tabs-row > .announcement-read-all:not(:disabled) {
+  border: 0;
+  border-radius: 9999px;
+  color: #35322a;
+  background: var(--yb-glass-secondary);
+  box-shadow: var(--yb-glass-secondary-shadow);
+  backdrop-filter: blur(12px);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .announcement-tabs-row > .announcement-read-all:not(:disabled):hover { filter: brightness(1.05); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .announcement-read-all__grayscale-icon { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .announcement-read-all__color-icon { display: block; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-record-tabs-row > .client-button { box-sizing: border-box; height: 38px; min-height: 38px; }
+
+/* 个人中心危险入口与生活照主操作。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-security-menu__row.is-danger strong { color: #c9362b; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-life-photos > header .personal-life-photo-upload.client-button.client-button--secondary:not(:disabled) {
+  border: 0;
+  border-radius: 9999px;
+  color: #332800;
+  background: var(--yb-glass-primary);
+  box-shadow: var(--yb-glass-primary-shadow);
+  backdrop-filter: blur(12px);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .personal-life-photos > header .personal-life-photo-upload.client-button:hover { filter: brightness(1.05); }
+
+/* 客户端各类通知卡片：轻色玻璃表面与紧凑操作。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice {
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid rgb(181 173 213 / 35%);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgb(250 248 255 / 96%), rgb(238 233 250 / 90%));
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 90%), 0 5px 16px rgb(58 47 82 / 12%);
+  backdrop-filter: blur(16px);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice[aria-label^="匹配请求"] { border-color: rgb(225 189 87 / 45%); background: linear-gradient(145deg, rgb(255 251 231 / 97%), rgb(255 237 175 / 90%)); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice[aria-label^="订单通知"] { border-color: rgb(133 174 223 / 40%); background: linear-gradient(145deg, rgb(247 251 255 / 97%), rgb(221 236 255 / 90%)); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice[aria-label^="呼叫通知"] { border-color: rgb(135 191 176 / 40%); background: linear-gradient(145deg, rgb(246 255 252 / 97%), rgb(220 244 236 / 90%)); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice[aria-label^="邀请进房"] { border-color: rgb(234 166 190 / 40%); background: linear-gradient(145deg, rgb(255 249 251 / 97%), rgb(255 230 239 / 90%)); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice :is(.workbench-notice-service, .workbench-global-notice__message) { margin: 4px 0; line-height: 18px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notice-footer { flex-direction: row; align-items: end; justify-content: space-between; gap: 8px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notice-prices { min-width: 0; gap: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notice-prices dd { font-size: 13px; line-height: 18px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notice-prices .workbench-notice-calculation dd { font-size: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice .workbench-notice-actions { gap: 6px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice .workbench-notice-actions .client-button:not(:disabled) { min-height: 28px; height: 28px; padding: 0 12px; border: 0; border-radius: 9999px; font-size: 12px; color: #35322a; background: var(--yb-glass-secondary); box-shadow: var(--yb-glass-secondary-shadow); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice .workbench-notice-actions .client-button--primary:not(:disabled) { color: #332800; background: var(--yb-glass-primary); box-shadow: var(--yb-glass-primary-shadow); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice .workbench-notice-actions .client-button:disabled { min-height: 28px; height: 28px; padding: 0 12px; font-size: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-global-notice .workbench-notice-actions .client-button svg { display: none; }
+
+/* 通知中心固定标题和分页，卡片区域独立滚动。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center { border: 1px solid rgb(223 219 207 / 85%); border-radius: 14px; background: rgb(255 253 249 / 96%); box-shadow: 0 12px 32px rgb(61 48 20 / 16%); backdrop-filter: blur(18px); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center :is(.workbench-notification-center__header, .workbench-notification-center__tabs, .workbench-notification-center__pagination) { background: rgb(255 253 249 / 96%); border-color: #f0ebe1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__tabs button[aria-selected=true]::after { background: #e6b800; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__pagination button:not(:disabled) { border-radius: 9999px; background: var(--yb-glass-secondary); box-shadow: var(--yb-glass-secondary-shadow); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__header { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__toolbar { align-items: center; border-color: #f0ebe1; background: rgb(255 253 249 / 96%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__toolbar-actions { display:flex; align-items:center; gap:4px; padding-right:10px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__toolbar-actions button { display:grid; width:30px; height:30px; place-items:center; border:0; border-radius:50%; background:transparent; color:#4e5969; cursor:pointer; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__toolbar-actions button:hover { background:#f1eee7; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .workbench-notification-center__toolbar-actions button:focus-visible { outline:2px solid #4e5969; outline-offset:2px; }
+
+/* 系统设置：分组卡片、表单与通知表沿用黄黑主题。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page { max-width: 1120px; gap: 20px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page__heading { min-height: 48px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page__heading h1 { color: #1d2129; font-size: 22px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page__heading .client-back-link { border: 0; border-radius: 50%; background: var(--yb-glass-secondary); box-shadow: var(--yb-glass-secondary-shadow); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-card { margin-bottom: 16px; border: 1px solid #edeae4; border-radius: 12px; padding: 24px; background: #fff; box-shadow: 0 2px 8px rgb(57 49 32 / 4%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-card h2 { gap: 10px; margin-bottom: 20px; color: #1d2129; font-size: 16px; font-weight: 700; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-card h2 > svg { color: #9a7200; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-row { grid-template-columns: 180px minmax(0, 1fr); gap: 24px; margin-top: 16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-row > :is(label, span) { color: #4e5969; font-size: 14px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page :is(.system-settings-row input:not([type="range"]), .system-settings-row select, .personal-notification-sound select) { box-sizing: border-box; min-height: 38px; border: 1px solid #c9ced6; border-radius: 6px; background: #fff; color: #1d2129; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page :is(.system-settings-row input:not([type="range"]), .system-settings-row select, .personal-notification-sound select):focus-visible { outline: 0; border-color: #4e5969; box-shadow: inset 0 0 0 2px #4e5969; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .client-button.client-button--secondary:not(:disabled) { border: 0; border-radius: 9999px; color: #35322a; background: var(--yb-glass-secondary); box-shadow: var(--yb-glass-secondary-shadow); backdrop-filter: blur(12px); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .client-button.client-button--primary:not(:disabled) { border: 0; border-radius: 9999px; color: #332800; background: var(--yb-glass-primary); box-shadow: var(--yb-glass-primary-shadow); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .client-button:not(:disabled):hover { filter: brightness(1.05); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .system-path-action { height: 40px; min-height: 40px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page :is(input[type="range"], input[type="checkbox"]) { accent-color: #d6a800; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .system-mic-meter > span.is-active { background: #e5b900; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table { border-collapse: separate; border-spacing: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table thead th { height: 42px; background: #f5f6f8; color: #596273; font-weight: 600; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table thead th:first-child { border-radius: 8px 0 0 8px; padding-left: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table thead th:last-child { border-radius: 0 8px 8px 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table tbody th { padding-left: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table tbody :is(th, td) { border-bottom: 1px solid #edeef1; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table tbody tr:last-child > * { border-bottom: 0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-page .personal-notification-table .client-button { height: 32px; min-height: 32px; padding: 0 12px; font-size: 12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .system-settings-footer { margin: 20px 0 24px; }
+
+/* 加入俱乐部选择弹窗。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .windows-dialog-panel__footer { display: none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-search { box-sizing:border-box; min-height:44px; border:1px solid #e3e5eb; border-radius:10px; background:#f2f3f9; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-search input { flex:1; min-width:0; border:0; background:transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-card > .client-avatar { width:72px; height:72px; overflow:hidden; border:0; border-radius:10px; background:#25263b url('./assets/generated/club-cover-default.webp') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-card[data-club-id="club-001"] > .client-avatar { background-image:url('./assets/generated/club-avatar.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-card[data-club-id="club-002"] > .client-avatar { background-image:url('./assets/generated/club-cover-02.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-card[data-club-id="club-003"] > .client-avatar { background-image:url('./assets/generated/club-cover-03.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-card[data-club-id="club-004"] > .client-avatar { background-image:url('./assets/generated/club-cover-04.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-club-card > .client-avatar > * { visibility:hidden; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-card-meta { color:#d96316; font-weight:600; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="choose-club-dialog"] .personal-card-meta svg { fill:#ffb224; stroke:#ffb224; }
+
+/* 页面返回、抽屉返回与回到顶部统一为次级玻璃控件。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.client-back-link, .client-back-to-top, .onboarding-back, .windows-right-drawer__heading > .windows-icon-button[aria-label="返回列表"]) {
+  box-sizing: border-box;
+  justify-content: center;
+  min-height: 36px;
+  border: 0;
+  border-radius: 9999px;
+  padding: 0 14px;
+  color: #35322a;
+  background: var(--yb-glass-secondary);
+  box-shadow: var(--yb-glass-secondary-shadow);
+  backdrop-filter: blur(12px);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.system-settings-page__heading, .club-detail-page__heading) .client-back-link,
+[data-prototype-palette="high-fidelity"] .game-companion-client .windows-right-drawer__heading > .windows-icon-button[aria-label="返回列表"] { width:36px; height:36px; padding:0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .onboarding-back > span { width:auto; height:auto; border:0; background:transparent; color:inherit; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.client-back-link, .client-back-to-top, .onboarding-back, .windows-right-drawer__heading > .windows-icon-button[aria-label="返回列表"]):hover { filter:brightness(1.05); }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.client-back-link, .client-back-to-top, .onboarding-back, .windows-right-drawer__heading > .windows-icon-button[aria-label="返回列表"]):focus-visible { outline:2px solid #4e5969; outline-offset:2px; }
+
+/* 首页和陪玩列表铺满客户端内容区，宽屏每行六张。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.home-page, .club-detail-page, .talents-page) { width:100%; max-width:none; container-type:inline-size; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.home-page .client-card-grid--clubs, .club-detail-page .client-card-grid--companions, .talents-page .client-card-grid--companions) { grid-template-columns:repeat(6, minmax(0, 1fr)); gap:16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .home-page .club-card--gallery { height:360px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.club-detail-page, .talents-page) .companion-card--hero { height:390px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .global-search-club-list { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:12px; }
+@container (max-width: 1200px) {
+  [data-prototype-palette="high-fidelity"] .game-companion-client :is(.home-page .client-card-grid--clubs, .club-detail-page .client-card-grid--companions, .talents-page .client-card-grid--companions) { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+}
+@container (max-width: 800px) {
+  [data-prototype-palette="high-fidelity"] .game-companion-client :is(.home-page .client-card-grid--clubs, .club-detail-page .client-card-grid--companions, .talents-page .client-card-grid--companions) { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+}
+
+/* 消息、语音及资料更多操作菜单使用一致的液态玻璃浮层。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.message-context-menu, .voice-channel-context-menu, .voice-more-menu, .companion-profile-card__menu) {
+  border:1px solid rgb(255 255 255 / 85%);
+  border-radius:12px;
+  padding:6px;
+  background:linear-gradient(150deg, rgb(255 255 255 / 96%), rgb(249 247 242 / 92%) 55%, rgb(239 236 228 / 94%));
+  box-shadow:inset 0 1px 2px rgb(255 255 255 / 95%), inset 0 -1px 3px rgb(115 104 81 / 8%), 0 10px 28px rgb(35 37 46 / 16%), 0 2px 6px rgb(35 37 46 / 7%);
+  backdrop-filter:blur(20px) saturate(135%);
+  -webkit-backdrop-filter:blur(20px) saturate(135%);
+}
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.message-context-menu, .voice-channel-context-menu, .voice-more-menu, .companion-profile-card__menu) button { border-radius:8px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.message-context-menu, .voice-channel-context-menu, .voice-more-menu, .companion-profile-card__menu) button:hover:not(:disabled) { background:rgb(255 222 93 / 25%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.message-context-menu, .voice-channel-context-menu, .voice-more-menu, .companion-profile-card__menu) button:focus-visible { outline:2px solid #695a35; outline-offset:-2px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client :is(.message-context-menu, .voice-channel-context-menu, .companion-profile-card__menu) button.is-danger:not(:disabled) { color:#bd3930; }
+
+/* 语音房归属与设备控件。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-owner-card[data-club-id] > .client-avatar { overflow:hidden; border:0; background:#25263b url('./assets/generated/club-cover-default.webp') center / cover no-repeat; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-owner-card[data-club-id="club-001"] > .client-avatar { background-image:url('./assets/generated/club-avatar.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-owner-card[data-club-id="club-002"] > .client-avatar { background-image:url('./assets/generated/club-cover-02.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-owner-card[data-club-id="club-003"] > .client-avatar { background-image:url('./assets/generated/club-cover-03.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-owner-card[data-club-id="club-004"] > .client-avatar { background-image:url('./assets/generated/club-cover-04.webp'); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-owner-card[data-club-id] > .client-avatar > * { visibility:hidden; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-device-panel__join button[aria-label="下麦"] { border:0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode > select { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode__glass { position:relative; display:block; flex:1; min-width:0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode__glass summary { display:flex; align-items:center; justify-content:space-between; gap:4px; min-height:28px; padding:0 8px; overflow:hidden; border:1px solid rgba(255,255,255,.8); border-radius:8px; background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(238,240,245,.72)); box-shadow:0 2px 6px rgba(42,35,26,.1), inset 0 1px rgba(255,255,255,.9); color:#303744; font-size:12px; white-space:nowrap; cursor:pointer; list-style:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode__glass summary::-webkit-details-marker { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode__options { position:absolute; z-index:10; bottom:calc(100% + 6px); left:0; min-width:164px; padding:5px; border:1px solid rgba(255,255,255,.9); border-radius:10px; background:rgba(255,255,255,.88); box-shadow:0 8px 24px rgba(42,35,26,.16), inset 0 1px rgba(255,255,255,.9); backdrop-filter:blur(16px); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode__options button { display:flex; width:100%; min-height:34px; align-items:center; justify-content:space-between; gap:8px; padding:0 9px; border:0; border-radius:7px; background:transparent; color:#303744; font:inherit; font-size:12px; text-align:left; cursor:pointer; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode__options button:hover { background:rgba(255,220,87,.25); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .voice-mic-mode__options button.is-selected { background:rgba(255,213,54,.34); color:#29220b; font-weight:600; }
+
+/* 群成员选择与语音房邀请使用一致的搜索、列表和选中样式。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog > .windows-dialog-panel__content { display:grid; grid-template-rows:auto minmax(0,1fr); gap:12px; padding:20px 24px 16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-dialog-section-title { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-search { box-sizing:border-box; width:100%; min-height:44px; margin:0; border:0; border-radius:10px; padding:0 14px; background:#f2f3f9; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-search input { background:transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friends { display:grid; align-content:start; gap:8px; margin-top:0; padding:2px 3px 4px; background:transparent; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friend { display:flex; min-height:56px; align-items:center; gap:8px; border:0; border-radius:12px; padding:10px; background:transparent; box-shadow:none; cursor:pointer; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friend:has(input:checked) { background:#fff4bd; box-shadow:0 3px 12px rgb(30 38 55 / 8%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friend input { appearance:none; display:grid; width:20px; height:20px; flex:0 0 20px; place-content:center; margin:0; border:0; border-radius:50%; background:#e0e3eb; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friend input:checked { background:#ffd60a; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friend input:checked::after { width:9px; height:5px; transform:translateY(-1px) rotate(-45deg); border-bottom:2px solid #292200; border-left:2px solid #292200; content:''; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friend input:focus-visible { outline:2px solid #4e5969; outline-offset:2px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog > .windows-dialog-panel__footer { padding:0 24px 24px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .group-member-select-dialog .social-select-friend > span:not(.client-avatar) { display:grid; gap:3px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog > .windows-dialog-panel__content { display:grid; grid-template-rows:auto minmax(0,1fr); gap:12px; padding:20px 24px 16px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog .social-search { margin:0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog .companion-share-friends label:not(:has(input:checked)) { background:transparent; box-shadow:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog .companion-share-friend-info { display:grid; gap:3px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog .companion-share-presence { display:inline-flex; align-items:center; gap:5px; color:#9ca3af; font-size:12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog .companion-share-presence::before { width:6px; height:6px; border-radius:50%; background:currentColor; content:''; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog .companion-share-presence.is-online { color:#4b5563; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .companion-share-dialog > .windows-dialog-panel__footer { padding:0 24px 24px; }
+
+/* 俱乐部群聊列表。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-groups-panel { padding:8px 4px 20px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-list { gap:12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card { min-height:92px; gap:12px; border:1px solid #eff0f4; border-radius:14px; padding:14px; background:#fff; box-shadow:0 3px 12px rgb(30 38 55 / 5%); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__identity { grid-template-columns:52px minmax(0,1fr); gap:12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__identity > .client-avatar { box-sizing:border-box; width:52px; height:52px; border:1px solid #f4df94; border-radius:14px; background:linear-gradient(145deg,#fff9de,#ffe7a1); color:#70520b; font-size:19px; font-weight:700; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__body { gap:7px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__title { gap:7px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__title h3 { overflow:hidden; color:#1d2129; font-size:15px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__status { display:inline-flex; align-items:center; gap:5px; border:1px solid #d9dfe7; border-radius:6px; padding:3px 7px; background:#f4f5f7; color:#667085; font-size:12px; line-height:1.2; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__status::before { width:6px; height:6px; border-radius:50%; background:currentColor; content:''; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__status--joined { border-color:#c8e7d1; background:#eff9f2; color:#287a4b; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__status--pending { border-color:#f1d8b4; background:#fff8ed; color:#ad650c; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card__meta { color:#657184; font-size:12px; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card .club-group-card__action { box-sizing:border-box; min-width:98px; min-height:40px; border:0; border-radius:9999px; padding:0 14px; color:#35322a; font-size:13px; font-weight:600; backdrop-filter:blur(12px); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card .client-button--secondary:not(:disabled) { background:var(--yb-glass-secondary); box-shadow:var(--yb-glass-secondary-shadow); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card .club-group-card__action:disabled { background:#f0f1f4; color:#8b93a1; box-shadow:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card .club-group-card__action:not(:disabled):hover { filter:brightness(1.05); }
+[data-prototype-palette="high-fidelity"] .game-companion-client .club-group-card .club-group-card__action:focus-visible { outline:2px solid #4e5969; outline-offset:2px; }
+
+/* 管理员设置的两个操作并排展示。 */
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="group-member-admin-select"] .windows-dialog-panel__footer > button:first-child { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="group-member-admin-select"] .windows-dialog-panel__footer > button { flex:1 1 0; min-width:0; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="group-member-admin-select"] .group-admin-label--grayscale { display:none; }
+[data-prototype-palette="high-fidelity"] .game-companion-client [data-overlay="group-member-admin-select"] .group-admin-label--high-fidelity { display:inline; }

@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { Headphones, PhoneCall, X } from 'lucide-react'
+import { BrushCleaning, Headphones, PhoneCall, X } from 'lucide-react'
 import type { WorkbenchLogic } from '../hooks/useWorkbenchLogic'
 import type { VoiceCallNotification, VoiceInvitation } from '../data/socialMockData'
 import { AvatarMark } from './AvatarMark'
@@ -8,11 +8,11 @@ import { companions } from '../data/mockData'
 import { UserNameWithLevel } from './UserNameWithLevel'
 import { clientNotificationMock } from '../data/clientNotificationMockData'
 
-function NotificationCard({ label, children, showClose = true }: { label: string; children: ReactNode; showClose?: boolean }) {
+function NotificationCard({ label, children, showClose = true, onDismiss }: { label: string; children: ReactNode; showClose?: boolean; onDismiss?: () => void }) {
   const [visible, setVisible] = useState(true)
   if (!visible) return null
   return <aside className="workbench-global-notice" aria-label={label} aria-live="polite">
-    {showClose && <button type="button" className="workbench-notice-close" aria-label={`关闭${label}`} onClick={() => setVisible(false)}><X size={16} /></button>}
+    {showClose && <button type="button" className="workbench-notice-close" aria-label={`关闭${label}`} onClick={() => { if (onDismiss) onDismiss(); else setVisible(false) }}><X size={16} /></button>}
     {children}
   </aside>
 }
@@ -23,6 +23,9 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
   const [handled, setHandled] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<'important' | 'system'>('important')
   const [systemNotificationVisible, setSystemNotificationVisible] = useState(true)
+  const [dismissed, setDismissed] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const dismiss = (key: string) => setDismissed(items => [...items, key])
   const matches = w.requests.filter(r => r.status === '待响应').map(r => ({ ...r, kind: 'match' as const }))
   const orders = w.orders.filter(o => o.status === '待接单').map(o => ({ ...o, kind: 'order' as const }))
   const matchTypes = [...new Set(matches.map(message => message.audition))]
@@ -47,7 +50,7 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
 
   const renderWorkbenchCard = (message: WorkbenchMessage, compact = false) => {
     const service = w.services.find(s => s.id === message.serviceId)
-    return <NotificationCard key={`${message.kind}-${message.id}`} label={`${message.kind === 'match' ? '匹配请求' : '订单通知'}：${message.player}`}>
+    return <NotificationCard key={`${message.kind}-${message.id}`} label={`${message.kind === 'match' ? '匹配请求' : '订单通知'}：${message.player}`} onDismiss={compact ? () => dismiss(`${message.kind}-${message.id}`) : undefined}>
       <header className="workbench-notice-heading">
         {!compact && <AvatarMark initials={message.playerInitials} size="sm" />}
         <strong><UserNameWithLevel name={message.player} identityId={message.player} /></strong>
@@ -61,13 +64,13 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
     </NotificationCard>
   }
 
-  const renderCallCard = (notification: VoiceCallNotification, compact = false) => <NotificationCard key={notification.id} label={`呼叫通知：${notification.callerName}`}>
+  const renderCallCard = (notification: VoiceCallNotification, compact = false) => <NotificationCard key={notification.id} label={`呼叫通知：${notification.callerName}`} onDismiss={compact ? () => dismiss(`call-${notification.id}`) : undefined}>
     <header className="workbench-notice-heading">{!compact && <AvatarMark initials={notification.callerInitials} size="sm" />}<strong><UserNameWithLevel name={notification.callerName} identityId={notification.callerName} /></strong><span className="workbench-notice-type">呼叫通知</span></header>
     <p className="workbench-global-notice__message">正在呼叫客服</p>
     <footer className={`workbench-notice-actions${compact ? ' workbench-notice-actions--compact' : ''}`}><button type="button" className="client-button client-button--primary" onClick={onOpenVoiceCall}>查看</button></footer>
   </NotificationCard>
 
-  const renderInvitationCard = (invitation: VoiceInvitation, compact = false) => <NotificationCard key={invitation.id} label={`邀请进房：${invitation.inviter}`}>
+  const renderInvitationCard = (invitation: VoiceInvitation, compact = false) => <NotificationCard key={invitation.id} label={`邀请进房：${invitation.inviter}`} onDismiss={compact ? () => dismiss(`invite-${invitation.id}`) : undefined}>
     <header className="workbench-notice-heading">
       {!compact && <AvatarMark initials={invitation.inviterInitials ?? invitation.inviter.slice(0, 1)} size="sm" />}
       <strong><UserNameWithLevel name={invitation.inviter} identityId={socialFriends.find(friend => friend.name === invitation.inviter)?.profileId ?? companions.find(companion => companion.name === invitation.inviter)?.id ?? invitation.inviter} /></strong>
@@ -78,19 +81,21 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
   </NotificationCard>
   const renderInvitationCardCompact = (invitation: VoiceInvitation) => renderInvitationCard(invitation, true)
 
-  const systemCard = systemNotificationVisible ? <NotificationCard label={clientNotificationMock.title}>
+  const systemCard = systemNotificationVisible ? <NotificationCard label={clientNotificationMock.title} onDismiss={mode === 'panel' ? () => setSystemNotificationVisible(false) : undefined}>
       <header className="workbench-notice-heading"><strong>{clientNotificationMock.title}</strong><span className="workbench-notice-type">{clientNotificationMock.type}</span></header>
       <p className="workbench-global-notice__message">{clientNotificationMock.summary}</p>
       <footer className={`workbench-notice-actions${mode === 'panel' ? ' workbench-notice-actions--compact' : ''}`}><button type="button" className="client-button client-button--secondary">{clientNotificationMock.actionLabel}</button></footer>
     </NotificationCard> : null
 
-  const allImportantCards = <>
-    {matches.filter(message => !handled.includes(`match-${message.id}`)).map(message => renderWorkbenchCard(message, true))}
-    {orders.filter(() => !handled.includes('order')).map(message => renderWorkbenchCard(message, true))}
-    {voiceCallNotifications.map(notification => renderCallCard(notification, true))}
-    {voiceInvitations.map(renderInvitationCardCompact)}
-    {matches.filter(message => !handled.includes(`match-${message.id}`)).length === 0 && orders.filter(() => !handled.includes('order')).length === 0 && voiceCallNotifications.length === 0 && voiceInvitations.length === 0 && <p className="workbench-notification-center__empty">暂无重要通知</p>}
-  </>
+  const importantCards = [
+    ...matches.filter(message => !handled.includes(`match-${message.id}`) && !dismissed.includes(`match-${message.id}`)).map(message => renderWorkbenchCard(message, true)),
+    ...orders.filter(message => !handled.includes('order') && !dismissed.includes(`order-${message.id}`)).map(message => renderWorkbenchCard(message, true)),
+    ...voiceCallNotifications.filter(notification => !dismissed.includes(`call-${notification.id}`)).map(notification => renderCallCard(notification, true)),
+    ...voiceInvitations.filter(invitation => !dismissed.includes(`invite-${invitation.id}`)).map(renderInvitationCardCompact),
+  ]
+  const cards = activeTab === 'important' ? importantCards : systemCard ? [systemCard] : []
+  const pageCount = Math.max(1, Math.ceil(cards.length / 5))
+  const currentPage = Math.min(page, pageCount)
 
   if (mode === 'closed') return null
   if (mode === 'panel') return <div id="workbench-notifications" className="workbench-notification-stack workbench-notification-center" aria-label="客户端通知面板">
@@ -99,13 +104,14 @@ export function WorkbenchNotifications({ logic: w, mode, voiceCallNotifications,
       <button type="button" className="client-text-button" onClick={clearAllNotifications}>一键忽略</button>
       <button type="button" className="workbench-notification-center__close" aria-label="关闭客户端通知面板" onClick={onClose}><X size={16} /></button>
     </header>
-    <div className="workbench-notification-center__tabs" role="tablist" aria-label="通知类型">
-      <button id="workbench-important-tab" type="button" role="tab" aria-selected={activeTab === 'important'} aria-controls="workbench-important-panel" onClick={() => setActiveTab('important')}>重要</button>
-      <button id="workbench-system-tab" type="button" role="tab" aria-selected={activeTab === 'system'} aria-controls="workbench-system-panel" onClick={() => setActiveTab('system')}>系统通知</button>
-    </div>
+    <div className="workbench-notification-center__toolbar"><div className="workbench-notification-center__tabs" role="tablist" aria-label="通知类型">
+      <button id="workbench-important-tab" type="button" role="tab" aria-selected={activeTab === 'important'} aria-controls="workbench-important-panel" onClick={() => { setActiveTab('important'); setPage(1) }}>重要</button>
+      <button id="workbench-system-tab" type="button" role="tab" aria-selected={activeTab === 'system'} aria-controls="workbench-system-panel" onClick={() => { setActiveTab('system'); setPage(1) }}>系统通知</button>
+    </div><div className="workbench-notification-center__toolbar-actions"><button type="button" aria-label="一键忽略" title="一键忽略" onClick={clearAllNotifications}><BrushCleaning size={16} /></button><button type="button" aria-label="关闭客户端通知面板" title="关闭" onClick={onClose}><X size={16} /></button></div></div>
     <section id={activeTab === 'important' ? 'workbench-important-panel' : 'workbench-system-panel'} className="workbench-notification-center__content" role="tabpanel" aria-labelledby={activeTab === 'important' ? 'workbench-important-tab' : 'workbench-system-tab'}>
-      {activeTab === 'important' ? allImportantCards : systemCard}
+      {cards.length ? cards.slice((currentPage - 1) * 5, currentPage * 5) : <p className="workbench-notification-center__empty">{activeTab === 'important' ? '暂无重要通知' : '暂无系统通知'}</p>}
     </section>
+    <nav className="workbench-notification-center__pagination" aria-label="通知分页"><button type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>上一页</button><span>{currentPage} / {pageCount}</span><button type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>下一页</button></nav>
   </div>
 
   return <div id="workbench-notifications" className="workbench-notification-stack" aria-label="客户端通知列表">

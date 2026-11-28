@@ -113,6 +113,20 @@ const homeClubMockData: Club[] = [
   { id: 'home-club-010', name: '周末冒险团', initials: '冒险', selfOperated: false, rating: 4.6, tags: ['周末组队', '轻松娱乐'], intro: '一起组队探索地图与新玩法，享受随时开局的周末时光。', gameIds: ['pubg', 'honor', 'yanyun'], companionCount: 15, featured: true, followed: false },
   { id: 'home-club-011', name: '破风战术社', initials: '破风', selfOperated: true, rating: 4.8, tags: ['竞技强队', '赛事陪练'], intro: '重视信息沟通和临场协作，和队友一起复盘细节、持续提升。', gameIds: ['valorant', 'tft', 'delta-force'], companionCount: 30, featured: true, followed: false },
   { id: 'home-club-012', name: '星河游乐场', initials: '星河', selfOperated: false, rating: 4.7, tags: ['语音开黑', '新手友好'], intro: '轻松认识新队友，分享游戏乐趣，按自己的节奏开始每一局。', gameIds: ['lol', 'peacekeeper', 'valorant-mobile'], companionCount: 20, featured: true, followed: false },
+  { id: 'home-club-013', name: '逐光竞技社', initials: '逐光', selfOperated: false, rating: 4.8, tags: ['竞技强队', '新手友好'], intro: '从配合练习到轻松开黑，一起找到适合自己的游戏节奏。', gameIds: ['valorant', 'lol'], companionCount: 28, featured: true, followed: false },
+  { id: 'home-club-014', name: '云端开黑队', initials: '云端', selfOperated: true, rating: 4.7, tags: ['语音开黑', '轻松娱乐'], intro: '随时约上新朋友，边聊天边享受轻松的组队时光。', gameIds: ['honor', 'peacekeeper'], companionCount: 25, featured: true, followed: false },
+  { id: 'home-club-015', name: '晴空训练室', initials: '晴空', selfOperated: false, rating: 4.9, tags: ['赛事陪练', '竞技强队'], intro: '用清晰的沟通和耐心复盘，陪你熟悉每一次对局。', gameIds: ['valorant', 'cs2'], companionCount: 19, featured: true, followed: false },
+  { id: 'home-club-016', name: '星屿游戏社', initials: '星屿', selfOperated: false, rating: 4.7, tags: ['周末组队', '新手友好'], intro: '一起探索新地图，找到合拍的队友和有趣的玩法。', gameIds: ['pubg', 'yanyun'], companionCount: 21, featured: true, followed: false },
+  { id: 'home-club-017', name: '晨风战术队', initials: '晨风', selfOperated: true, rating: 4.8, tags: ['竞技强队', '语音开黑'], intro: '分享战术思路，和队友一起练习沟通与团队配合。', gameIds: ['valorant', 'delta-force'], companionCount: 32, featured: true, followed: false },
+  { id: 'home-club-018', name: '甜橙游乐社', initials: '甜橙', selfOperated: false, rating: 4.6, tags: ['轻松娱乐', '新手友好'], intro: '欢迎新手加入，在轻松友好的氛围中一起开局。', gameIds: ['lol', 'honor'], companionCount: 17, featured: true, followed: false },
+  { id: 'home-club-019', name: '极光行动组', initials: '极光', selfOperated: false, rating: 4.8, tags: ['赛事陪练', '周末组队'], intro: '周末集合练习配合，也分享每局对战的有趣瞬间。', gameIds: ['pubg', 'delta-force'], companionCount: 23, featured: true, followed: false },
+  { id: 'home-club-020', name: '月影同游会', initials: '月影', selfOperated: false, rating: 4.7, tags: ['语音开黑', '轻松娱乐'], intro: '找个舒服的节奏聊天游戏，认识更多志同道合的朋友。', gameIds: ['naraka', 'yanyun'], companionCount: 20, featured: true, followed: false },
+  { id: 'home-club-021', name: '流星集结社', initials: '流星', selfOperated: true, rating: 4.9, tags: ['竞技强队', '赛事陪练'], intro: '围绕团队配合和实战复盘，一起积累每场对局经验。', gameIds: ['valorant', 'lol'], companionCount: 29, featured: true, followed: false },
+  { id: 'home-club-022', name: '海盐冒险队', initials: '海盐', selfOperated: false, rating: 4.6, tags: ['周末组队', '轻松娱乐'], intro: '下班后一起组队，轻松探索游戏里的新鲜内容。', gameIds: ['peacekeeper', 'honor'], companionCount: 16, featured: true, followed: false },
+  { id: 'home-club-023', name: '山岚训练营', initials: '山岚', selfOperated: false, rating: 4.8, tags: ['新手友好', '赛事陪练'], intro: '从基础操作开始，逐步熟悉地图和团队战术。', gameIds: ['cs2', 'overwatch'], companionCount: 24, featured: true, followed: false },
+  { id: 'home-club-024', name: '银河小队', initials: '银河', selfOperated: true, rating: 4.7, tags: ['语音开黑', '周末组队'], intro: '无论日常组队还是周末约战，都欢迎一起开黑。', gameIds: ['delta-mobile', 'valorant-mobile'], companionCount: 27, featured: true, followed: false },
+  { id: 'home-club-025', name: '拾光游戏坊', initials: '拾光', selfOperated: false, rating: 4.7, tags: ['轻松娱乐', '新手友好'], intro: '在友好交流中熟悉游戏，记录每次组队的快乐。', gameIds: ['lol', 'tft'], companionCount: 18, featured: true, followed: false },
+  { id: 'home-club-026', name: '启航竞技团', initials: '启航', selfOperated: false, rating: 4.8, tags: ['竞技强队', '周末组队'], intro: '一起交流打法、练习配合，朝着新的目标出发。', gameIds: ['pubg', 'valorant'], companionCount: 22, featured: true, followed: false },
 ]
 export const homepageClubs: Club[] = [...clubs, ...homeClubMockData]
 

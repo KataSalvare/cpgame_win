@@ -78,7 +78,7 @@ export function GlobalSearchPanel({ clubs, rooms, users, onClose, onOpenClub, on
   }, [clubs, normalizedQuery, rooms, users])
   const counts = { rooms: results.rooms.length, clubs: results.clubs.length, users: results.users.length }
   const totalResults = counts.rooms + counts.clubs + counts.users
-  const recommendedClubs = clubs.filter((club) => club.featured).slice(0, 3)
+  const recommendedClubs = clubs.filter((club) => club.featured).slice(0, 4)
 
   const selectFirstMatchingTab = (value: string) => {
     const term = value.trim().toLocaleLowerCase()

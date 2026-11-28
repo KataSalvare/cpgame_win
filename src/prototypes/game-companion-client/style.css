@@ -1256,6 +1256,17 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .order-review-rating button { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid transparent; border-radius: 5px; padding: 0; background: transparent; color: var(--prototype-text-secondary, #4b5563); cursor: pointer; }
 .order-review-rating button:hover, .order-review-rating button:focus-visible { border-color: var(--prototype-border-strong, #d1d5db); background: var(--prototype-surface-muted, #f9fafb); outline: 2px solid var(--prototype-border, #e5e7eb); }
 .order-review-rating > span { color: var(--client-muted); font-size: 12px; }
+.order-review-rating > .order-review-rating__label { width: 70px; flex: 0 0 70px; color: var(--client-text); font-size: 13px; }
+.order-review-anonymous { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 0; cursor:pointer; }
+.order-review-anonymous > span { display:grid; gap:4px; }
+.order-review-anonymous strong { color:var(--client-text); font-size:14px; }
+.order-review-anonymous small { color:var(--client-muted); font-size:12px; }
+.order-review-anonymous input { appearance:none; position:relative; width:40px; height:22px; flex:0 0 40px; margin:0; border:0; border-radius:999px; background:#cbd0d8; cursor:pointer; }
+.order-review-anonymous input::before { position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgb(0 0 0 / 20%); content:''; transition:transform 160ms ease; }
+.order-review-anonymous input:checked { background:#4e5969; }
+.order-review-anonymous input:checked::before { transform:translateX(18px); }
+.order-review-anonymous input:focus-visible { outline:2px solid #4e5969; outline-offset:2px; }
+.order-review-anonymous input:disabled { cursor:default; }
 .order-review-content { display: grid; gap: 7px; color: var(--client-text); font-size: 12px; font-weight: 600; }
 .order-review-textarea-wrap { position: relative; display: block; }
 .order-review-content textarea { box-sizing: border-box; width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--client-border); border-radius: 6px; padding: 9px 10px 25px; color: var(--client-text); font: inherit; font-size: 12px; line-height: 1.5; }
@@ -2040,6 +2051,7 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 .announcement-tabs-row { min-width: 0; }
 .announcement-filters { flex: 1; min-width: 0; }
 .announcement-read-all { flex: 0 0 auto; min-height: 40px; gap: 8px; padding-inline: 16px; font-size: 14px; }
+.announcement-read-all__color-icon { display: none; }
 .announcement-page--panel .announcement-row { min-height: 84px; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 12px; }
 .announcement-page--panel .announcement-row.has-cover { min-height: 84px; grid-template-columns: minmax(0, 1fr) 72px; }
 .announcement-page--panel .announcement-row__cover { width: 72px; height: 48px; grid-column: 2; grid-row: 1; }
@@ -2671,3 +2683,4 @@ button.account-metric:focus-visible { outline: 2px solid var(--client-primary); 
 
 /* 入驻卡片与记录只使用模块的 16px 间距。 */
 .onboarding-card-grid + .onboarding-records { margin-top: 0; }
+.companion-share-presence { display:none; }
